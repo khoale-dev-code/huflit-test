@@ -2,7 +2,8 @@
 
 # 🎧 HUFLIT Test Practice
 
-### *Nền tảng luyện thi HUFLIT thông minh với AI & Firebase*
+### *Nền tảng luyện thi HUFLIT 
+& Firebase*
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-orange?style=for-the-badge)](https://huflit-test.vercel.app)
 [![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
