@@ -1,33 +1,36 @@
 <div align="center">
 
-# 🎓 HUFLIT Test Practice
+# 🎧 HUFLIT Test Practice
 
-<img src="https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React"/>
-<img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
-<img src="https://img.shields.io/badge/Firebase-9.x-FFCA28?style=for-the-badge&logo=firebase&logoColor=white" alt="Firebase"/>
-<img src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=for-the-badge&logo=clerk&logoColor=white" alt="Clerk"/>
-<img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind"/>
+### *Nền tảng luyện thi HUFLIT thông minh với AI & Firebase*
 
-### 🚀 Ứng dụng luyện thi HUFLIT hiện đại với AI Voice & Real-time Progress Tracking
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-orange?style=for-the-badge)](https://huflit-test.vercel.app)
+[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-[Demo Live](#) • [Báo lỗi](https://github.com/khoale-dev-code/huflit-test/issues) • [Đề xuất tính năng](https://github.com/khoale-dev-code/huflit-test/issues)
+[🚀 Truy cập ngay](https://huflit-test.vercel.app) • [📖 Tài liệu](https://github.com/khoale-dev-code/huflit-test#readme) • [🐛 Báo lỗi](https://github.com/khoale-dev-code/huflit-test/issues) • [✨ Đề xuất](https://github.com/khoale-dev-code/huflit-test/issues/new)
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+![HUFLIT Test Practice Banner](https://via.placeholder.com/1200x400/FF6B35/FFFFFF?text=HUFLIT+Test+Practice)
 
 </div>
 
-## 📖 Mục lục
+---
+
+## 📋 Mục lục
 
 - [✨ Tính năng nổi bật](#-tính-năng-nổi-bật)
-- [🎯 Demo & Screenshots](#-demo--screenshots)
+- [🎬 Demo & Screenshots](#-demo--screenshots)
 - [🚀 Bắt đầu nhanh](#-bắt-đầu-nhanh)
-- [⚙️ Cấu hình](#️-cấu-hình)
-- [🏗️ Kiến trúc](#️-kiến-trúc)
+- [🛠️ Công nghệ](#️-công-nghệ)
+- [📁 Cấu trúc dự án](#-cấu-trúc-dự-án)
 - [🎮 Hướng dẫn sử dụng](#-hướng-dẫn-sử-dụng)
+- [🔒 Bảo mật](#-bảo-mật)
 - [🤝 Đóng góp](#-đóng-góp)
-- [📝 License](#-license)
+- [📞 Liên hệ](#-liên-hệ)
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
 ## ✨ Tính năng nổi bật
 
@@ -35,411 +38,289 @@
 <tr>
 <td width="50%">
 
-### 🎧 Listening Practice
-- 🗣️ **Text-to-Speech AI** với giọng nam/nữ tự nhiên
-- ⚡ **Điều chỉnh tốc độ** 0.5x - 2.0x
-- 🔄 **Phát audio 2 lần** như thi thật
-- 📊 **Progress bar** theo dõi tiến độ phát
+### 🎧 Listening Test
+- 🗣️ **Đa giọng nói**: Nam/Nữ tự nhiên
+- ⚡ **Tốc độ linh hoạt**: 0.5x - 2.0x
+- 🔁 **Nghe lại**: Không giới hạn
+- 🎯 **4 Parts**: Part 1-4 đầy đủ
 
 </td>
 <td width="50%">
 
-### 📚 Reading Practice
-- 📖 **Part 5-7** đầy đủ format HUFLIT
-- 🎯 **Instant feedback** khi nộp bài
-- 📈 **Chi tiết đáp án** và giải thích
-- 💡 **Gợi ý học tập** thông minh
-
-</td>
-</tr>
-
-<tr>
-<td width="50%">
-
-### 🔐 Authentication & Security
-- 👤 **Clerk Auth** - Đăng nhập nhanh chóng
-- 🔑 **Google Sign-in** - One-click login
-- 🛡️ **Secure** - Không lưu password
-- 🔄 **Auto-sync** Clerk ↔ Firebase
-
-</td>
-<td width="50%">
-
-### 💾 Progress Tracking
-- 💿 **Firebase Firestore** - Real-time sync
-- 📊 **Detailed Statistics** - Theo dõi từng part
-- 📈 **History** - Xem lại mọi bài đã làm
-- ⚡ **Auto-save** - Không mất dữ liệu
+### 📖 Reading Test
+- 📝 **Đọc hiểu**: Part 5-7
+- 🧠 **Ngữ pháp**: Bài tập tương tác
+- 📚 **Từ vựng**: Học theo chủ đề
+- ✅ **Chấm tự động**: Kết quả tức thì
 
 </td>
 </tr>
-
 <tr>
 <td width="50%">
 
-### 📖 Grammar & Vocabulary
-- 📝 **Interactive exercises** - Bài tập tương tác
-- 🎯 **Topic-based learning** - Học theo chủ đề
-- 💡 **Smart hints** - Gợi ý thông minh
-- ✅ **Instant validation** - Kiểm tra ngay lập tức
+### 👤 Xác thực & Profile
+- 🔐 **Clerk Auth**: Google, Email
+- 💾 **Lưu tiến độ**: Tự động
+- 📊 **Thống kê**: Chi tiết từng part
+- 🏆 **Lịch sử**: Xem lại mọi lúc
 
 </td>
 <td width="50%">
 
-### 🎨 Modern UI/UX
-- 📱 **Fully Responsive** - Mọi thiết bị
-- 🌈 **Beautiful Gradients** - Thiết kế hiện đại
-- ⚡ **Smooth Animations** - Trải nghiệm mượt mà
-- 🎯 **Intuitive Navigation** - Dễ sử dụng
+### 🎨 Giao diện & UX
+- 📱 **Responsive**: Mọi thiết bị
+- 🌈 **Theme đẹp**: Gradient cam/vàng
+- ⚡ **Hiệu ứng**: Animation mượt
+- 🚀 **Tốc độ**: Tối ưu performance
 
 </td>
 </tr>
 </table>
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
-## 🎯 Demo & Screenshots
+## 🎬 Demo & Screenshots
+
+### 🌐 **Live Demo**
+👉 **[https://huflit-test.vercel.app](https://huflit-test.vercel.app)**
 
 <div align="center">
 
-### 🏠 Trang chủ
-![Homepage](https://via.placeholder.com/800x400/FF6B35/FFFFFF?text=HUFLIT+Test+Practice+Homepage)
+### 📸 Screenshots
 
-### 🎧 Listening Test
-![Listening](https://via.placeholder.com/800x400/F7931E/FFFFFF?text=Listening+Test+Interface)
+| Trang chủ | Listening Test |
+|-----------|----------------|
+| ![Home](https://via.placeholder.com/400x250/FF6B35/FFFFFF?text=Home+Page) | ![Listening](https://via.placeholder.com/400x250/FFA500/FFFFFF?text=Listening+Test) |
 
-### 📚 Reading Test
-![Reading](https://via.placeholder.com/800x400/FDC830/000000?text=Reading+Test+Interface)
-
-### 📊 User Dashboard
-![Dashboard](https://via.placeholder.com/800x400/37CDBE/FFFFFF?text=Progress+Dashboard)
+| Reading Test | User Profile |
+|--------------|--------------|
+| ![Reading](https://via.placeholder.com/400x250/FFD700/FFFFFF?text=Reading+Test) | ![Profile](https://via.placeholder.com/400x250/FF8C00/FFFFFF?text=User+Profile) |
 
 </div>
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
 ## 🚀 Bắt đầu nhanh
 
-### 📋 Yêu cầu hệ thống
+### 📋 Yêu cầu
 
 ```bash
-Node.js  ≥ 16.x
-npm      ≥ 8.x
-Git      ≥ 2.x
+Node.js >= 16.x
+npm >= 8.x hoặc yarn >= 1.22.x
 ```
 
-### 🔧 Cài đặt
-
-<details open>
-<summary><b>Bước 1: Clone Repository</b></summary>
+### ⚡ Cài đặt trong 3 bước
 
 ```bash
-# Clone với HTTPS
+# 1️⃣ Clone repository
 git clone https://github.com/khoale-dev-code/huflit-test.git
-
-# Hoặc với SSH
-git clone git@github.com:khoale-dev-code/huflit-test.git
-
-# Di chuyển vào thư mục
 cd huflit-test
-```
 
-</details>
-
-<details open>
-<summary><b>Bước 2: Cài đặt Dependencies</b></summary>
-
-```bash
-# Sử dụng npm
+# 2️⃣ Cài đặt dependencies
 npm install
 
-# Hoặc yarn
-yarn install
-
-# Hoặc pnpm
-pnpm install
+# 3️⃣ Chạy development server
+npm run dev
 ```
 
-</details>
-
-<details open>
-<summary><b>Bước 3: Cấu hình Environment Variables</b></summary>
+### 🔧 Cấu hình Environment Variables
 
 Tạo file `.env` trong thư mục gốc:
 
 ```env
 # 🔥 Firebase Configuration
-VITE_FIREBASE_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+VITE_FIREBASE_API_KEY=AIzaSy...
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
-VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abc123
 
 # 🔐 Clerk Configuration
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 ```
 
-> 💡 **Lấy credentials ở đâu?**
-> - Firebase: [console.firebase.google.com](https://console.firebase.google.com)
-> - Clerk: [dashboard.clerk.com](https://dashboard.clerk.com)
-
-</details>
-
-<details open>
-<summary><b>Bước 4: Chạy Development Server</b></summary>
+### 📦 Build & Deploy
 
 ```bash
-# Start dev server
-npm run dev
-
-# Server sẽ chạy tại
-# ➜ Local:   http://localhost:5173/
-```
-
-</details>
-
-### 🏗️ Build Production
-
-```bash
-# Build
+# Build cho production
 npm run build
 
-# Preview production build
+# Preview build locally
 npm run preview
 
-# Output directory: dist/
+# Deploy lên Vercel (tự động với Git push)
+git push origin main
 ```
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
-## ⚙️ Cấu hình
+## 🛠️ Công nghệ
 
-### 🔥 Firebase Setup
+<div align="center">
 
-<details>
-<summary><b>1. Tạo Firebase Project</b></summary>
+### Frontend Stack
 
-1. Truy cập [Firebase Console](https://console.firebase.google.com)
-2. Click "Add project"
-3. Điền tên project và follow wizard
-4. Trong Project Settings → Chọn Web app (</>) 
-5. Copy config và paste vào `.env`
+![React](https://img.shields.io/badge/React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
-</details>
+### Backend & Services
 
-<details>
-<summary><b>2. Enable Firestore Database</b></summary>
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-```bash
-Firestore Database → Create database → Start in production mode
-```
+### Tools & Libraries
 
-Cấu hình security rules:
+![Lucide](https://img.shields.io/badge/Lucide_Icons-F56565?style=for-the-badge)
+![Web_Speech_API](https://img.shields.io/badge/Web_Speech_API-4285F4?style=for-the-badge&logo=google&logoColor=white)
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
+</div>
+
+### 📦 Dependencies chính
+
+```json
+{
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "firebase": "^10.x.x",
+  "@clerk/clerk-react": "^4.x.x",
+  "lucide-react": "^0.x.x",
+  "tailwindcss": "^3.x.x"
 }
 ```
 
-</details>
+---
 
-### 🔐 Clerk Setup
-
-<details>
-<summary><b>1. Tạo Clerk Application</b></summary>
-
-1. Truy cập [Clerk Dashboard](https://dashboard.clerk.com)
-2. Create application
-3. Chọn authentication methods (Google, Email)
-4. Copy Publishable Key vào `.env`
-
-</details>
-
-<details>
-<summary><b>2. Configure OAuth Providers</b></summary>
-
-```bash
-Configure → SSO Connections → Add Google
-```
-
-</details>
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
-
-## 🏗️ Kiến trúc
-
-### 📁 Cấu trúc thư mục
+## 📁 Cấu trúc dự án
 
 ```
 huflit-test/
-├── 📂 public/                    # Static assets
-│   └── 🖼️ favicon.ico
+│
+├── 📂 public/                 # Static assets
+│   └── favicon.ico
+│
 ├── 📂 src/
-│   ├── 📂 components/            # React components
+│   ├── 📂 components/         # React components
 │   │   ├── 🧩 Navbar.jsx
 │   │   ├── 🧩 PartSelector.jsx
 │   │   ├── 🧩 QuestionDisplay.jsx
 │   │   ├── 🧩 ResultsDisplay.jsx
 │   │   ├── 🧩 UserProfile.jsx
-│   │   ├── 📂 footer/
-│   │   │   ├── Footer.jsx
-│   │   │   └── ScrollToTopButton.jsx
-│   │   └── ...
-│   ├── 📂 data/                  # Data files
-│   │   └── 📊 examData.js
-│   ├── 📂 hooks/                 # Custom React hooks
+│   │   ├── 🧩 AuthModal.jsx
+│   │   ├── 🧩 VoiceControls.jsx
+│   │   ├── 🧩 AudioControls.jsx
+│   │   └── 📂 footer/
+│   │
+│   ├── 📂 hooks/              # Custom React hooks
 │   │   ├── 🪝 useVoices.js
 │   │   ├── 🪝 useAudio.js
 │   │   ├── 🪝 useUserProgress.js
 │   │   ├── 🪝 useClerkAuth.js
 │   │   ├── 🪝 useClerkFirebaseSync.js
 │   │   └── 🪝 useAutoSaveProgress.js
-│   ├── 📂 config/                # Configuration
+│   │
+│   ├── 📂 data/               # Exam data & content
+│   │   └── 📄 examData.js
+│   │
+│   ├── 📂 config/             # Configuration
 │   │   └── ⚙️ firebase.js
-│   ├── 📄 App.jsx                # Main component
-│   ├── 📄 main.jsx               # Entry point
-│   └── 🎨 index.css              # Global styles
-├── 📝 .env                       # Environment variables (git-ignored)
-├── 📝 .gitignore
-├── 📦 package.json
-├── ⚙️ vite.config.js
-└── 📖 README.md
+│   │
+│   ├── 📄 App.jsx             # Main app component
+│   ├── 📄 main.jsx            # Entry point
+│   └── 📄 index.css           # Global styles
+│
+├── 📄 .env                    # Environment variables (⚠️ KHÔNG commit)
+├── 📄 .gitignore
+├── 📄 package.json
+├── 📄 vite.config.js
+├── 📄 tailwind.config.js
+└── 📄 README.md
 ```
 
-### 🔄 Data Flow
+---
 
-```mermaid
-graph TB
-    A[User] -->|Interaction| B[React Components]
-    B -->|Auth Request| C[Clerk Auth]
-    C -->|User Data| D[Firebase Sync]
-    D -->|Store| E[Firestore]
-    B -->|Save Progress| E
-    E -->|Load Data| B
-    B -->|TTS Request| F[Web Speech API]
-    F -->|Audio| A
+## 🎮 Hướng dẫn sử dụng
+
+### 1️⃣ Đăng nhập
+
+```
+🔐 Click "Đăng nhập" → Chọn Google/Email → Xác thực
 ```
 
-### 🛠️ Tech Stack Details
+### 2️⃣ Chọn bài thi
 
 <table>
 <tr>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=react" width="48" height="48" alt="React" />
-<br>React
+<td width="50%">
+
+**Listening Test** 🎧
+- Part 1: Photographs
+- Part 2: Question-Response
+- Part 3: Conversations
+- Part 4: Short Talks
+
 </td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=vite" width="48" height="48" alt="Vite" />
-<br>Vite
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=tailwind" width="48" height="48" alt="Tailwind" />
-<br>Tailwind
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=firebase" width="48" height="48" alt="Firebase" />
-<br>Firebase
-</td>
-<td align="center" width="96">
-<img src="https://skillicons.dev/icons?i=js" width="48" height="48" alt="JavaScript" />
-<br>JavaScript
+<td width="50%">
+
+**Reading Test** 📖
+- Part 5: Incomplete Sentences
+- Part 6: Text Completion
+- Part 7: Reading Comprehension
+
 </td>
 </tr>
 </table>
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+### 3️⃣ Làm bài
 
-## 🎮 Hướng dẫn sử dụng
-
-### 🔐 Bước 1: Đăng nhập
+#### 🎧 Listening Mode
 
 ```
-1. Click "Đăng nhập" trên navbar
-2. Chọn phương thức:
-   • 🔵 Google Sign-in (khuyến nghị)
-   • ✉️ Email + Password
-3. Hoàn tất xác thực
+1. Chọn giọng nam/nữ cho từng vai
+2. Điều chỉnh tốc độ phát (0.5x - 2.0x)
+3. Click "▶️ Play Audio" để nghe
+4. Chọn đáp án trong khi nghe
+5. Nghe lại không giới hạn
 ```
 
-### 🎧 Bước 2: Listening Test
+#### 📖 Reading Mode
 
 ```
-1. Chọn "Listening" từ navbar
-2. Chọn Exam và Part
-3. Cấu hình:
-   • 🎤 Chọn giọng nam (Male Voice)
-   • 🎤 Chọn giọng nữ (Female Voice)
-   • ⚡ Điều chỉnh tốc độ (0.5x - 2.0x)
-4. 🔊 Click "Play Audio"
-5. ✅ Chọn đáp án trong khi nghe
-6. 📝 Click "Nộp bài"
+1. Đọc kỹ đoạn văn/câu hỏi
+2. Chọn đáp án phù hợp
+3. Review lại câu trả lời
+4. Submit khi hoàn thành
 ```
 
-### 📚 Bước 3: Reading Test
+### 4️⃣ Xem kết quả
 
 ```
-1. Chọn "Reading" từ navbar
-2. Chọn Part (5, 6, hoặc 7)
-3. 📖 Đọc đoạn văn/câu hỏi
-4. ✅ Chọn đáp án phù hợp
-5. 📝 Click "Nộp bài"
+📊 Điểm số: Tự động tính
+✅ Đáp án đúng: Highlight xanh
+❌ Đáp án sai: Highlight đỏ
+💾 Lưu Firebase: Tự động (nếu đã login)
 ```
 
-### 📊 Bước 4: Xem kết quả
+### 5️⃣ Theo dõi tiến độ
 
 ```
-• 🎯 Điểm số tổng thể
-• 📈 Phân tích chi tiết từng câu
-• ✅ Đáp án đúng
-• ❌ Đáp án sai của bạn
-• 💡 Giải thích (nếu có)
+👤 User Profile → 📈 Xem thống kê → 🏆 Lịch sử bài làm
 ```
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
-
-## 📊 Hệ thống chấm điểm
-
-<div align="center">
-
-| Part | Loại câu hỏi | Điểm/câu | Tổng câu | Tổng điểm |
-|:----:|:-------------|:--------:|:--------:|:---------:|
-| 1-4  | Listening    | **5.0**  | 10       | 50        |
-| 5-7  | Reading      | **2.5**  | 20       | 50        |
-| | | | **Tổng** | **100** |
-
-</div>
-
-### 🏆 Thang điểm đánh giá
-
-```
-90-100: 🌟 Xuất sắc
-80-89:  ⭐ Giỏi
-70-79:  ✨ Khá
-60-69:  📚 Trung bình
-<60:    💪 Cần cố gắng
-```
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
 ## 🔒 Bảo mật
 
-### ⚠️ QUAN TRỌNG - Files cần bảo vệ
+### ⚠️ Files KHÔNG được commit
 
 ```gitignore
-# 🔒 Environment Variables
+# 🔐 Sensitive files
 .env
 .env.local
 .env.production
-.env.*.local
-
-# 🔑 Firebase Credentials
 serviceAccountKey.json
 scripts/serviceAccountKey.json
 **/*serviceAccountKey*.json
@@ -447,268 +328,103 @@ scripts/serviceAccountKey.json
 # 📦 Dependencies
 node_modules/
 dist/
-build/
 
-# 🗂️ IDE
+# 🔧 IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 ```
 
-### 🛡️ Security Best Practices
+### 🛡️ Best Practices
 
-<table>
-<tr>
-<td>
+| ✅ DO | ❌ DON'T |
+|-------|----------|
+| Dùng environment variables | Hard-code API keys |
+| Gitignore sensitive files | Commit .env file |
+| Rotate keys nếu bị lộ | Reuse compromised keys |
+| Sử dụng Firebase Security Rules | Public database |
 
-**✅ DO**
-- Sử dụng environment variables
-- Enable Firestore security rules
-- Giữ API keys private
-- Regular dependency updates
-- Use HTTPS cho production
+---
 
-</td>
-<td>
+## 📊 Chấm điểm
 
-**❌ DON'T**
-- Commit `.env` file
-- Share API keys publicly
-- Expose Firebase config
-- Use default security rules
-- Store passwords in code
+<div align="center">
 
-</td>
-</tr>
-</table>
+| Phần thi | Điểm/câu | Số câu | Tổng điểm |
+|----------|----------|--------|-----------|
+| 🎧 Listening (Part 1-4) | 5 điểm | Varies | ≤ 50 điểm |
+| 📖 Reading (Part 5-7) | 2.5 điểm | Varies | ≤ 50 điểm |
+| **TỔNG** | - | - | **100 điểm** |
 
-### 🚨 Nếu API Key bị lộ
+</div>
 
-```bash
-1. 🔄 Rotate keys immediately trên Firebase/Clerk console
-2. 🗑️ Remove từ Git history:
-   git filter-branch --force --index-filter \
-   "git rm --cached --ignore-unmatch .env" \
-   --prune-empty --tag-name-filter cat -- --all
-3. 🔐 Update .env với keys mới
-4. ⚡ Force push: git push origin main --force
-```
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
 ## 🌐 Trình duyệt được hỗ trợ
 
-<table>
-<tr>
-<td align="center" width="150">
-<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="48px" height="48px" />
-<br><b>Chrome</b>
-<br>✅ Tốt nhất
-</td>
-<td align="center" width="150">
-<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="Edge" width="48px" height="48px" />
-<br><b>Edge</b>
-<br>✅ Hỗ trợ đầy đủ
-</td>
-<td align="center" width="150">
-<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="48px" height="48px" />
-<br><b>Firefox</b>
-<br>⚠️ Giới hạn giọng
-</td>
-<td align="center" width="150">
-<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="48px" height="48px" />
-<br><b>Safari</b>
-<br>⚠️ Giới hạn giọng
-</td>
-</tr>
-</table>
+<div align="center">
 
-> 💡 **Khuyến nghị**: Sử dụng Chrome hoặc Edge để có trải nghiệm Text-to-Speech tốt nhất với đa giọng nam/nữ tự nhiên.
+| Browser | Listening | Reading | Voice Quality |
+|---------|-----------|---------|---------------|
+| ![Chrome](https://img.shields.io/badge/Chrome-4285F4?style=flat-square&logo=google-chrome&logoColor=white) | ✅ | ✅ | ⭐⭐⭐⭐⭐ |
+| ![Edge](https://img.shields.io/badge/Edge-0078D7?style=flat-square&logo=microsoft-edge&logoColor=white) | ✅ | ✅ | ⭐⭐⭐⭐⭐ |
+| ![Firefox](https://img.shields.io/badge/Firefox-FF7139?style=flat-square&logo=firefox&logoColor=white) | ✅ | ✅ | ⭐⭐⭐ |
+| ![Safari](https://img.shields.io/badge/Safari-000000?style=flat-square&logo=safari&logoColor=white) | ⚠️ | ✅ | ⭐⭐ |
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+</div>
+
+> 💡 **Khuyến nghị**: Sử dụng Chrome hoặc Edge để có trải nghiệm giọng nói tốt nhất
+
+---
 
 ## 🤝 Đóng góp
 
-Mọi đóng góp đều được chào đón! 🎉
+Chúng tôi rất hoan nghênh mọi đóng góp! 🎉
 
-### 📝 Quy trình đóng góp
+### 🔄 Quy trình đóng góp
 
 ```bash
-# 1. Fork repository
-# 2. Clone fork của bạn
+# 1️⃣ Fork repository
+# 2️⃣ Clone fork của bạn
 git clone https://github.com/YOUR_USERNAME/huflit-test.git
 
-# 3. Tạo branch mới
+# 3️⃣ Tạo branch mới
 git checkout -b feature/AmazingFeature
 
-# 4. Commit changes
+# 4️⃣ Commit changes
 git commit -m '✨ Add some AmazingFeature'
 
-# 5. Push to branch
+# 5️⃣ Push to branch
 git push origin feature/AmazingFeature
 
-# 6. Mở Pull Request
+# 6️⃣ Mở Pull Request
 ```
 
-### 💡 Gợi ý đóng góp
+### 📝 Commit Convention
 
-<table>
-<tr>
-<td>
+```
+✨ feat: Thêm tính năng mới
+🐛 fix: Sửa lỗi
+📚 docs: Cập nhật tài liệu
+💄 style: Thay đổi UI/styling
+♻️ refactor: Tái cấu trúc code
+⚡ perf: Cải thiện performance
+✅ test: Thêm/sửa tests
+🔧 chore: Cập nhật công cụ/config
+```
 
-**🐛 Bug Fixes**
-- Fix lỗi hiển thị
-- Sửa lỗi audio
-- Cải thiện performance
+---
 
-</td>
-<td>
-
-**✨ Features**
-- Thêm exam mới
-- Cải thiện UI/UX
-- Tính năng mới
-
-</td>
-<td>
-
-**📚 Documentation**
-- Cập nhật README
-- Thêm comments
-- Viết hướng dẫn
-
-</td>
-</tr>
-</table>
-
-### 🏆 Contributors
-
-<a href="https://github.com/khoale-dev-code/huflit-test/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=khoale-dev-code/huflit-test" />
-</a>
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
-
-## 🐛 Báo lỗi & Hỗ trợ
-
-### 📞 Kênh hỗ trợ
-
-<table>
-<tr>
-<td align="center" width="33%">
-
-**🐛 Bug Report**
-
-[Tạo Issue](https://github.com/khoale-dev-code/huflit-test/issues/new?template=bug_report.md)
-
-Báo cáo lỗi chi tiết
-
-</td>
-<td align="center" width="33%">
-
-**💡 Feature Request**
-
-[Đề xuất tính năng](https://github.com/khoale-dev-code/huflit-test/issues/new?template=feature_request.md)
-
-Gợi ý cải tiến
-
-</td>
-<td align="center" width="33%">
-
-**❓ Questions**
-
-[Discussions](https://github.com/khoale-dev-code/huflit-test/discussions)
-
-Hỏi đáp & thảo luận
-
-</td>
-</tr>
-</table>
-
-### 📊 Project Status
-
-![GitHub issues](https://img.shields.io/github/issues/khoale-dev-code/huflit-test?style=flat-square)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/khoale-dev-code/huflit-test?style=flat-square)
-![GitHub last commit](https://img.shields.io/github/last-commit/khoale-dev-code/huflit-test?style=flat-square)
-![GitHub stars](https://img.shields.io/github/stars/khoale-dev-code/huflit-test?style=social)
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
-
-## 📝 License
+## 📄 License
 
 Dự án này được phát hành dưới giấy phép **MIT License**.
 
-<details>
-<summary><b>Xem chi tiết License</b></summary>
-
 ```
-MIT License
-
-Copyright (c) 2025 Khoa Le
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+MIT License - Copyright (c) 2024 Khoa Le
 ```
 
-</details>
+Xem chi tiết tại [LICENSE](LICENSE)
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
-
-## 🙏 Ghi nhận
-
-### 🛠️ Built With
-
-<table>
-<tr>
-<td align="center">
-<img src="https://skillicons.dev/icons?i=react" width="50"/>
-<br><b>React</b>
-</td>
-<td align="center">
-<img src="https://skillicons.dev/icons?i=vite" width="50"/>
-<br><b>Vite</b>
-</td>
-<td align="center">
-<img src="https://skillicons.dev/icons?i=tailwind" width="50"/>
-<br><b>Tailwind CSS</b>
-</td>
-<td align="center">
-<img src="https://skillicons.dev/icons?i=firebase" width="50"/>
-<br><b>Firebase</b>
-</td>
-</tr>
-</table>
-
-### 🎨 Design Resources
-
-- [Lucide Icons](https://lucide.dev/) - Beautiful icon library
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [Google Fonts](https://fonts.google.com/) - Web fonts
-
-### 📚 Learning Resources
-
-- [React Documentation](https://react.dev/)
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [Clerk Documentation](https://clerk.com/docs)
-- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
 ## 👨‍💻 Tác giả
 
@@ -717,41 +433,59 @@ SOFTWARE.
 ### Khoa Le
 
 [![GitHub](https://img.shields.io/badge/GitHub-khoale--dev--code-181717?style=for-the-badge&logo=github)](https://github.com/khoale-dev-code)
-[![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:your.email@example.com)
+[![Email](https://img.shields.io/badge/Email-Contact_Me-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:your.email@example.com)
 
-**"Building tools to help students succeed in their English learning journey"**
+*Full-stack Developer | React Enthusiast | EdTech Builder*
 
 </div>
 
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+---
 
-## 📈 Roadmap
+## 🙏 Ghi nhận
 
-- [ ] 🎯 **Q1 2025**
-  - [ ] Thêm 5 exam mới
-  - [ ] Mobile app (React Native)
-  - [ ] Offline mode
-  
-- [ ] 🚀 **Q2 2025**
-  - [ ] AI-powered grammar checker
-  - [ ] Speaking practice với voice recording
-  - [ ] Leaderboard & achievements
-  
-- [ ] 💎 **Q3 2025**
-  - [ ] Premium features
-  - [ ] Teacher dashboard
-  - [ ] Advanced analytics
-
-<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%"/>
+Dự án này được xây dựng với sự hỗ trợ của:
 
 <div align="center">
 
-### ⭐ Nếu dự án này hữu ích, hãy cho 1 star nhé! ⭐
+| Service | Purpose |
+|---------|---------|
+| [Clerk](https://clerk.com/) | Authentication & User Management |
+| [Firebase](https://firebase.google.com/) | Realtime Database & Hosting |
+| [Vercel](https://vercel.com/) | Deployment & CDN |
+| [Tailwind CSS](https://tailwindcss.com/) | Utility-first CSS Framework |
+| [Lucide Icons](https://lucide.dev/) | Beautiful Icon Library |
+| [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) | Text-to-Speech |
 
-![Star History Chart](https://api.star-history.com/svg?repos=khoale-dev-code/huflit-test&type=Date)
+</div>
+
+---
+
+## 📞 Liên hệ & Hỗ trợ
+
+<div align="center">
+
+### Cần giúp đỡ? 🤔
+
+[![Report Bug](https://img.shields.io/badge/🐛_Report-Bug-red?style=for-the-badge)](https://github.com/khoale-dev-code/huflit-test/issues)
+[![Request Feature](https://img.shields.io/badge/✨_Request-Feature-blue?style=for-the-badge)](https://github.com/khoale-dev-code/huflit-test/issues/new)
+[![Ask Question](https://img.shields.io/badge/❓_Ask-Question-yellow?style=for-the-badge)](https://github.com/khoale-dev-code/huflit-test/discussions)
+
+</div>
+
+---
+
+<div align="center">
+
+### 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=khoale-dev-code/huflit-test&type=Date)](https://star-history.com/#khoale-dev-code/huflit-test&Date)
 
 ---
 
 **Made with ❤️ by [Khoa Le](https://github.com/khoale-dev-code)**
+
+⭐ *Nếu thấy dự án hữu ích, hãy star repo này nhé!* ⭐
+
+[⬆ Back to top](#-huflit-test-practice)
 
 </div>
