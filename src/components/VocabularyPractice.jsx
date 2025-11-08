@@ -1,3 +1,4 @@
+// VocabularyPractice.jsx
 import React, { useState, useEffect } from 'react';
 import { 
     getVocabularyByLevel, 
@@ -14,21 +15,17 @@ import { QuizView } from '../components/features/QuizView';
 import { StatsView } from '../components/features/StatsView';
 import { calculateProgress, handleFlashcardNav } from '../utils/helpers';
 
-
 export default function VocabularyPractice() {
-    // ===== STATE MANAGEMENT =====
     const [selectedLevel, setSelectedLevel] = useState('beginner');
     const [activeTab, setActiveTab] = useState('categories');
     const [expandedCategory, setExpandedCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [completedWords, setCompletedWords] = useState([]);
     
-    // Flashcards State
     const [currentFlashcard, setCurrentFlashcard] = useState(null);
     const [flashcardIndex, setFlashcardIndex] = useState(0);
     const [showCardBack, setShowCardBack] = useState(false);
     
-    // Quiz State
     const [currentQuiz, setCurrentQuiz] = useState(null);
     const [quizList, setQuizList] = useState([]);
     const [quizIndex, setQuizIndex] = useState(0);
@@ -36,11 +33,9 @@ export default function VocabularyPractice() {
     const [showQuizFeedback, setShowQuizFeedback] = useState(false);
     const [quizScore, setQuizScore] = useState(0);
 
-    // ===== HOOKS & DATA =====
     const { speak, playingId } = useSpeech();
     const vocabularyData = getVocabularyByLevel(selectedLevel);
 
-    // ===== EFFECTS =====
     useEffect(() => {
         const flashcards = createFlashcards(selectedLevel);
         setCurrentFlashcard(flashcards[0] || null);
@@ -48,7 +43,6 @@ export default function VocabularyPractice() {
         setShowCardBack(false);
     }, [selectedLevel]);
 
-    // ===== HELPER FUNCTIONS =====
     const getProgress = () => calculateProgress(completedWords, vocabularyData);
 
     const toggleWord = (wordId) => {
@@ -62,7 +56,6 @@ export default function VocabularyPractice() {
     const navigateFlashcard = (direction) => {
         const flashcards = createFlashcards(selectedLevel);
         const nextIndex = handleFlashcardNav(direction, flashcardIndex, flashcards);
-        
         setFlashcardIndex(nextIndex);
         setCurrentFlashcard(flashcards[nextIndex]);
         setShowCardBack(false);
@@ -99,15 +92,12 @@ export default function VocabularyPractice() {
         }
     };
 
-    // ===== GET DATA FOR VIEWS =====
     const flashcards = createFlashcards(selectedLevel);
     const stats = getWordsByDifficulty(selectedLevel);
 
-    // ===== RENDER =====
     return (
-        <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Header
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
@@ -117,10 +107,8 @@ export default function VocabularyPractice() {
                     setExpandedCategory={setExpandedCategory}
                 />
 
-                {/* Tab Navigation */}
                 <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                {/* Main Content */}
                 <div className="mt-8">
                     {activeTab === 'categories' && (
                         <CategoriesView

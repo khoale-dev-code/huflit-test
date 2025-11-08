@@ -1,41 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ===== SCROLLBAR STYLING ===== */
+/* ======================================================= */
+/* 🚀 SCROLLBAR STYLING - Tinh chỉnh màu sắc và độ dày */
+/* ======================================================= */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px; 
+  height: 12px;
 }
-
 ::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, rgba(255, 237, 213, 0.5), rgba(254, 215, 170, 0.3));
-  border-radius: 10px;
+  /* Nền nhẹ nhàng hơn */
+  background: rgba(255, 255, 255, 0.5); 
+  border-radius: 12px;
+  border: 1px solid rgba(249, 115, 22, 0.1); 
 }
-
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #f97316 0%, #eab308 100%);
-  border-radius: 10px;
-  transition: all 0.3s ease;
+  /* Gradient đậm và rõ ràng hơn */
+  background: linear-gradient(180deg, #fb923c 0%, #f59e0b 100%); 
+  border-radius: 12px;
+  border: 3px solid transparent; 
+  background-clip: padding-box;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ea580c 0%, #facc15 100%);
-  box-shadow: 0 0 8px rgba(249, 115, 22, 0.3);
+  background: linear-gradient(180deg, #ea580c 0%, #d97706 100%);
+  box-shadow: 0 0 10px rgba(234, 88, 12, 0.5); 
 }
-
-/* ===== SMOOTH SCROLLING ===== */
+/* ======================================================= */
+/* 🌐 GLOBAL BASE STYLES - Nâng cấp nền và hiệu ứng mờ ảo */
+/* ======================================================= */
 html {
   scroll-behavior: smooth;
+  @apply font-sans;
 }
-
-/* ===== GLOBAL BASE STYLES ===== */
 body {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fecaca 100%);
-  @apply font-sans antialiased overflow-x-hidden;
+  /* Nền sống động hơn với các tông màu vàng/cam */
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+  @apply antialiased overflow-x-hidden text-gray-800;
   min-height: 100vh;
+  position: relative; 
 }
-
 body::before {
   content: '';
   position: fixed;
@@ -43,99 +46,110 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(254, 215, 170, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 40% 10%, rgba(249, 115, 22, 0.05) 0%, transparent 50%);
+  /* Tăng cường hiệu ứng hạt/bokeh */
+  background:
+    radial-gradient(circle at 10% 80%, rgba(254, 215, 170, 0.3) 0%, transparent 60%),
+    radial-gradient(circle at 90% 20%, rgba(255, 243, 220, 0.4) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.03) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  opacity: 0.8;
 }
-
 * {
   @apply box-border;
 }
-
-/* ===== TEXT SELECTION ===== */
+/* ======================================================= */
+/* ✍️ TEXT SELECTION */
+/* ======================================================= */
 ::selection {
-  @apply bg-amber-400/30 text-orange-900;
+  @apply bg-orange-300/60 text-orange-900;
 }
-
 ::-moz-selection {
-  @apply bg-amber-400/30 text-orange-900;
+  @apply bg-orange-300/60 text-orange-900;
 }
-
-/* ===== HEADINGS ===== */
+/* ======================================================= */
+/* 📝 HEADINGS - Thêm hiệu ứng Gradient Text */
+/* ======================================================= */
+.gradient-text {
+  background: linear-gradient(90deg, #f97316 0%, #ea580c 50%, #facc15 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 h1 {
-  @apply text-5xl font-black text-gray-900 text-center mb-3 tracking-tight;
+  /* Áp dụng gradient text cho h1 */
+  @apply text-6xl md:text-5xl sm:text-4xl font-extrabold text-center mb-4 tracking-tighter gradient-text;
+  line-height: 1.1;
 }
-
 h2 {
-  @apply text-4xl font-black text-gray-900 tracking-tight;
+  @apply text-4xl md:text-3xl font-extrabold text-gray-900 tracking-tight;
 }
-
 h3 {
-  @apply text-2xl font-bold text-gray-900 tracking-tight;
+  @apply text-2xl md:text-xl font-bold text-gray-900 tracking-tight;
 }
-
 h4 {
-  @apply text-lg font-bold text-gray-900;
+  @apply text-lg font-semibold text-gray-900;
 }
-
-/* ===== CUSTOM COMPONENTS ===== */
+/* ======================================================= */
+/* 🖼️ CUSTOM COMPONENTS - Nâng cấp chi tiết */
+/* ======================================================= */
 @layer components {
-  /* Main Container */
+  /* Main Container - Thêm hiệu ứng Neumorphism nhẹ và Responsive Padding */
   .app {
-    @apply min-h-screen relative z-10;
+    @apply min-h-screen relative z-10 p-4 md:p-6 lg:p-8; 
   }
-
   .container {
-    @apply max-w-6xl mx-auto bg-white/95 rounded-3xl shadow-2xl p-12 relative overflow-hidden;
-    backdrop-filter: blur(20px);
-    box-shadow: 
-      0 20px 60px rgba(249, 115, 22, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.8),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 193, 7, 0.2);
+    @apply max-w-6xl w-full mx-auto bg-white/90 rounded-3xl shadow-2xl p-14 xl:p-12 lg:p-10 md:p-8 sm:p-5 relative overflow-hidden;
+    backdrop-filter: blur(25px) saturate(150%);
+    box-shadow:
+      0 30px 80px rgba(249, 115, 22, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.9),
+      inset 0 2px 4px rgba(0, 0, 0, 0.05); 
+    border: 1px solid rgba(254, 215, 170, 0.5);
+    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
   }
-
+  .container:hover {
+    box-shadow:
+      0 40px 100px rgba(249, 115, 22, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.9);
+  }
   .container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #f97316 0%, #eab308 50%, #f97316 100%);
-    background-size: 200% 100%;
-    animation: gradientShift 4s ease infinite;
+    height: 4px; 
+    background: linear-gradient(90deg, #f97316 0%, #facc15 50%, #f97316 100%);
+    background-size: 300% 100%;
+    animation: gradientShift 6s ease-in-out infinite; 
+    border-radius: 30px 30px 0 0;
   }
-
   /* Subtitle */
   .subtitle {
-    @apply text-center text-gray-700 mb-9 text-lg font-semibold leading-relaxed;
+    @apply text-center text-gray-600 mb-12 text-xl md:text-lg font-medium leading-relaxed;
   }
-
   /* Section Title */
   .section-title {
-    @apply text-2xl text-gray-900 mb-5 pb-3 font-bold tracking-tight;
-    border-bottom: 3px solid;
-    border-image: linear-gradient(90deg, #f97316, #eab308) 1;
+    @apply text-3xl md:text-2xl text-gray-900 mb-6 pb-3 font-extrabold tracking-tight;
+    border-bottom: 4px solid;
+    border-image: linear-gradient(90deg, #ea580c, #f97316, #facc15) 1;
+    transition: all 0.3s ease;
   }
-
-  /* Buttons */
+  /* Buttons - Hiệu ứng 3D nhấn */
   .btn-primary {
-    @apply px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-bold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 active:-translate-y-0.5 border border-orange-400;
+    @apply px-7 py-3.5 bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-xl font-extrabold uppercase tracking-wider cursor-pointer transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1.5 active:-translate-y-0.5 border-b-4 border-orange-800 hover:border-b-2;
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.4);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-
   .btn-secondary {
-    @apply px-6 py-3 bg-slate-600 text-white rounded-2xl font-bold cursor-pointer transition-all duration-300 hover:bg-slate-700 shadow-md;
+    @apply px-7 py-3.5 bg-gray-700 text-white rounded-xl font-bold cursor-pointer transition-all duration-300 hover:bg-gray-800 shadow-lg hover:shadow-xl hover:-translate-y-0.5 border-b-4 border-gray-900 hover:border-b-2;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-
   .btn-play {
-    @apply bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 rounded-2xl font-bold cursor-pointer transition-all duration-300 relative overflow-hidden;
-    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
+    @apply bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-4 rounded-full font-bold cursor-pointer transition-all duration-300 relative overflow-hidden;
+    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.3);
   }
-
   .btn-play::before {
     content: '';
     position: absolute;
@@ -144,160 +158,129 @@ h4 {
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.4);
     transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition: width 0.7s ease-out, height 0.7s ease-out;
   }
-
   .btn-play:hover::before {
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
   }
-
   .btn-play:hover {
     @apply -translate-y-1;
-    box-shadow: 0 8px 32px rgba(249, 115, 22, 0.35);
+    box-shadow: 0 12px 36px rgba(249, 115, 22, 0.45);
   }
-
   /* Premium Card */
   .premium-card {
-    @apply bg-white rounded-2xl p-6 shadow-lg border-2 border-orange-200 hover:border-orange-400 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    @apply bg-white rounded-3xl p-8 shadow-xl border border-orange-200 transition-all duration-500 ease-out hover:border-orange-400 hover:shadow-2xl hover:-translate-y-2;
   }
-
   .premium-card:hover {
-    background: linear-gradient(135deg, rgba(255, 245, 238, 0.8), rgba(255, 250, 235, 0.8));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 250, 235, 0.85));
   }
-
   /* Gradient Badge */
   .badge-orange {
     @apply inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-900 rounded-full text-sm font-bold border border-orange-300;
   }
-
   .badge-success {
     @apply inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-900 rounded-full text-sm font-bold border border-green-300;
   }
-
   /* Status */
   .status {
     @apply text-center p-6 rounded-2xl mb-6 font-bold text-lg border-2 backdrop-blur-xl tracking-tight;
   }
-
   .status.playing {
     @apply bg-gradient-to-r from-green-100 to-emerald-100 text-green-900 border-emerald-400;
     box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
-
   .status.paused {
     @apply bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-900 border-amber-400;
     box-shadow: 0 4px 20px rgba(217, 119, 6, 0.15);
   }
-
   .status.stopped {
     @apply bg-gradient-to-r from-red-100 to-rose-100 text-red-900 border-rose-400;
     box-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
   }
-
   /* Progress Bar */
   .progress-bar {
     @apply w-full h-4 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full overflow-hidden mb-6 shadow-inner border border-orange-200;
   }
-
   .progress {
     @apply h-full transition-all duration-500;
     background: linear-gradient(90deg, #f97316 0%, #eab308 50%, #f97316 100%);
     background-size: 200% 100%;
-    animation: progressShine 2.5s linear infinite;
+    animation: progressShine 4s linear infinite;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-
-  /* Info Box */
+  /* Info Box - SỬA LỖI border-l-6 thành border-l-[6px] */
   .info-box {
-    @apply rounded-2xl p-7 mb-7 relative overflow-hidden border-l-5 border-orange-400;
+    @apply rounded-3xl p-8 mb-8 relative overflow-hidden border-l-[6px] border-orange-500; 
     background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
-    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1);
+    box-shadow: 0 8px 30px rgba(249, 115, 22, 0.15);
   }
-
   .info-box h3 {
     @apply text-orange-900 mb-3 relative z-10 font-bold;
   }
-
   .info-box.warning {
     @apply bg-gradient-to-r from-amber-50 to-yellow-50 border-l-amber-500;
     box-shadow: 0 4px 20px rgba(245, 158, 11, 0.12);
   }
-
   .info-box.warning h3 {
     @apply text-amber-900;
   }
-
   .info-box ul {
     @apply ml-6 text-gray-800 leading-8 relative z-10 font-medium;
   }
-
   .info-box li {
     @apply mb-2;
   }
-
   .info-box::after {
     content: '';
     position: absolute;
-    top: -40%;
-    right: -5%;
-    width: 180px;
-    height: 180px;
-    background: radial-gradient(circle, rgba(249, 115, 22, 0.08), transparent);
+    top: -50%;
+    right: -10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.1), transparent);
     border-radius: 50%;
   }
-
   /* Questions Container */
   .questions-container {
     @apply bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-2xl mb-6 border-2 border-orange-200 shadow-md;
   }
-
   .question-item {
     @apply bg-white p-7 rounded-2xl mb-6 shadow-lg border-2 border-orange-100 transition-all hover:shadow-xl hover:border-orange-400 hover:-translate-y-1 cursor-pointer;
   }
-
   .question-item h4 {
     @apply text-gray-900 mb-5 text-lg leading-relaxed font-bold;
   }
-
   /* Options */
   .options {
-    @apply flex flex-col gap-3;
+    @apply flex flex-col gap-3 sm:gap-2;
   }
-
   .option {
     @apply flex items-start p-4 border-2 border-orange-200 rounded-2xl cursor-pointer transition-all bg-gradient-to-r from-white to-orange-50 hover:from-orange-50 hover:to-yellow-50 hover:border-orange-400 hover:translate-x-1 hover:shadow-md;
   }
-
   .option input[type="radio"] {
     @apply mr-3 mt-1 cursor-pointer w-5 h-5 flex-shrink-0;
     accent-color: #f97316;
   }
-
   .option span {
-    @apply flex-1 leading-7 text-gray-800 font-semibold;
+    @apply flex-1 leading-7 text-gray-800 font-semibold sm:text-sm sm:leading-6;
   }
-
   .option input[type="radio"]:checked + span {
     @apply text-orange-700 font-bold;
   }
-
   /* Part Info */
   .part-info {
-    @apply bg-gradient-to-r from-orange-50 to-amber-50 p-7 rounded-2xl mt-5 border-l-5 border-orange-500 relative overflow-hidden shadow-md;
+    @apply bg-gradient-to-r from-orange-50 to-amber-50 p-7 rounded-2xl mt-5 border-l-[5px] border-orange-500 relative overflow-hidden shadow-md;
   }
-
   .part-info h3 {
     @apply text-orange-800 mb-3 relative z-10 font-bold;
   }
-
   .part-info p {
     @apply text-gray-800 text-sm leading-7 relative z-10 font-medium;
   }
-
   .part-info::before {
     content: '';
     position: absolute;
@@ -309,52 +292,42 @@ h4 {
     border-radius: 50%;
     opacity: 0.06;
   }
-
   /* Question Navigation */
   .question-nav {
     @apply flex gap-3 flex-wrap justify-center;
   }
-
   .question-nav-btn {
     @apply px-6 py-3 border-2 border-orange-300 bg-white text-gray-800 rounded-2xl cursor-pointer font-bold transition-all text-sm shadow-sm hover:bg-gradient-to-r hover:from-orange-400 hover:to-amber-400 hover:text-white hover:border-transparent hover:-translate-y-0.5 hover:shadow-lg min-w-12;
   }
-
   .question-nav-btn.active {
     @apply bg-gradient-to-r from-orange-500 to-amber-500 text-white border-transparent -translate-y-0.5;
     box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4);
-    animation: glow 2s ease-in-out infinite;
+    animation: glow 3s ease-in-out infinite;
   }
-
   /* Script Content */
   .script-content {
-    @apply bg-gradient-to-br from-orange-50 to-amber-50 p-7 rounded-2xl border-2 border-orange-200 max-h-96 overflow-y-auto leading-8 text-base text-gray-900 shadow-inner font-medium;
+    @apply bg-gradient-to-br from-orange-50 to-amber-50 p-7 rounded-2xl border-2 border-orange-200 max-h-96 md:max-h-80 overflow-y-auto leading-8 text-base text-gray-900 shadow-inner font-medium;
   }
-
   /* Results */
   .results {
-    @apply bg-gradient-to-br from-orange-50 to-amber-50 p-9 rounded-3xl shadow-2xl border border-orange-200;
+    @apply bg-gradient-to-br from-orange-50 to-amber-50 p-9 rounded-3xl shadow-2xl border border-orange-200 sm:p-5;
   }
-
   .score-summary {
-    @apply bg-gradient-to-br from-white to-orange-50 p-8 rounded-3xl text-center mb-8 shadow-lg border-2 border-orange-200;
+    @apply bg-white/95 p-10 rounded-3xl text-center mb-10 shadow-2xl border-2 border-orange-300 sm:p-5;
   }
-
   .score-summary h3 {
-    @apply text-6xl mb-3 font-black;
+    @apply text-7xl sm:text-5xl font-extrabold mb-4;
     background: linear-gradient(135deg, #f97316 0%, #eab308 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
   .score-summary p {
-    @apply text-gray-700 text-2xl mb-6 font-bold;
+    @apply text-gray-700 text-2xl sm:text-lg mb-6 font-bold;
   }
-
   .score-bar {
     @apply w-full h-10 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full overflow-hidden shadow-inner border border-orange-200;
   }
-
   .score-fill {
     @apply h-full transition-all flex items-center justify-center text-white font-black text-base tracking-tight;
     animation: scoreShine 2s ease infinite;
@@ -362,253 +335,199 @@ h4 {
     background-size: 200% 100%;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-
   .answers-review {
-    @apply bg-white p-8 rounded-3xl mb-6 shadow-md border border-orange-200;
+    @apply bg-white p-8 rounded-3xl mb-6 shadow-md border border-orange-200 sm:p-5;
   }
-
   .answers-review h4 {
     @apply text-gray-900 mb-6 text-2xl pb-3 font-bold;
     border-bottom: 3px solid;
     border-image: linear-gradient(90deg, #f97316, #eab308) 1;
   }
-
+  /* Answer Item - SỬA LỖI border-l-5 thành border-l-[5px] */
   .answer-item {
-    @apply p-5 rounded-2xl mb-4 border-l-5 transition-all hover:translate-x-1 hover:shadow-lg;
+    @apply p-6 rounded-2xl mb-4 border-l-[5px] transition-all hover:translate-x-1.5 hover:shadow-xl cursor-pointer;
   }
-
   .answer-item.correct {
     @apply bg-gradient-to-r from-green-100 to-emerald-50 border-l-green-500;
   }
-
   .answer-item.incorrect {
     @apply bg-gradient-to-r from-red-100 to-rose-50 border-l-red-500;
   }
-
   .answer-item p {
     @apply mb-2 leading-8 font-medium text-gray-900;
   }
-
   .answer-item strong {
     @apply text-gray-900 font-bold;
   }
-
   .correct-answer {
     @apply text-green-700 font-bold text-sm;
   }
-
   /* Control Groups */
   .controls {
-    @apply grid grid-cols-2 gap-6;
+    @apply grid grid-cols-2 gap-6 md:grid-cols-1;
   }
-
   .control-group {
     @apply flex flex-col gap-2;
   }
-
   label {
     @apply text-sm text-gray-800 font-bold tracking-tight;
   }
-
   /* Form Inputs */
   select,
   input[type="range"],
   .part-select {
     @apply p-3 border-2 border-orange-300 rounded-2xl text-base bg-white transition-all font-semibold text-gray-800 shadow-sm;
   }
-
   select:hover,
   input[type="range"]:hover,
   .part-select:hover {
     @apply border-orange-500 shadow-md -translate-y-0.5;
   }
-
   select:focus,
   .part-select:focus {
     @apply outline-none border-orange-600;
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+    box-shadow: 0 0 0 5px rgba(249, 115, 22, 0.25);
   }
-
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     @apply w-6 h-6 bg-white rounded-full border-4 border-orange-500 cursor-pointer transition-all;
     box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
   }
-
   input[type="range"]::-webkit-slider-thumb:hover {
     @apply scale-125;
     box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
   }
-
   input[type="range"]::-moz-range-thumb {
     @apply w-6 h-6 bg-white rounded-full border-4 border-orange-500 cursor-pointer;
     box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
   }
-
-  /* Button Group */
+  /* Button Group - Cập nhật Responsive */
   .button-group {
-    @apply grid grid-cols-4 gap-4 mb-6;
+    @apply grid grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-5 mb-6;
   }
-
   button {
-    @apply p-4 border-none rounded-2xl text-base font-bold cursor-pointer transition-all shadow-lg tracking-tight;
+    @apply p-4 border-none rounded-xl text-base font-extrabold cursor-pointer transition-all shadow-lg tracking-tight;
+    transition: all 0.1s ease;
   }
-
   button:active {
-    @apply -translate-y-0.5;
+    @apply translate-y-0 shadow-md;
+    transform: scale(0.98);
   }
-
   /* Responsive */
+  @screen xl {
+    .container {
+      @apply max-w-7xl; 
+    }
+  }
+  @screen lg {
+    .container {
+      @apply max-w-5xl;
+    }
+  }
   @screen md {
     .controls {
       @apply grid-cols-1;
     }
-
     .button-group {
       @apply grid-cols-2;
     }
-
     .container {
       @apply p-8;
     }
-
     h1 {
       @apply text-4xl;
+    }
+    .subtitle {
+      @apply text-lg mb-8;
     }
   }
-
   @screen sm {
     .container {
-      @apply p-5;
+      @apply p-5 rounded-2xl;
     }
-
     h1 {
-      @apply text-3xl;
+      @apply text-3xl mb-3;
     }
-
     .button-group {
-      @apply grid-cols-1 gap-2;
+      @apply grid-cols-1 gap-3;
     }
-
-    .info-box {
+    .info-box, .questions-container, .results {
       @apply p-5;
-    }
-
-    .info-box h3 {
-      @apply text-lg;
-    }
-
-    .info-box ul {
-      @apply text-sm;
-    }
-
-    .score-summary h3 {
-      @apply text-4xl;
-    }
-
-    .score-summary p {
-      @apply text-base;
     }
   }
 }
-
-/* ===== KEYFRAME ANIMATIONS ===== */
+/* ======================================================= */
+/* ✨ KEYFRAME ANIMATIONS - Tăng độ mượt */
+/* ======================================================= */
 @layer utilities {
   @keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; } 
   }
-
   @keyframes progressShine {
     0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
+    100% { background-position: 300% 50%; } 
   }
-
   @keyframes scoreShine {
     0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    50% { background-position: 150% 50%; } 
   }
-
   @keyframes glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+      box-shadow: 0 0 15px rgba(255, 165, 0, 0.6), 0 0 30px rgba(249, 115, 22, 0.4);
     }
     50% {
-      box-shadow: 0 0 40px rgba(249, 115, 22, 0.7);
+      box-shadow: 0 0 25px rgba(255, 165, 0, 0.8), 0 0 50px rgba(249, 115, 22, 0.6);
     }
   }
-
   @keyframes pulse {
     0%, 100% {
       opacity: 1;
       transform: scale(1);
     }
     50% {
-      opacity: 0.8;
-      transform: scale(1.02);
+      opacity: 0.9; 
+      transform: scale(1.01); 
     }
   }
-
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-5px); }
+    0%, 100% { transform: translateY(0px) rotate(0.1deg); } 
+    50% { transform: translateY(-7px) rotate(-0.1deg); } 
   }
-
   @keyframes slideInUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-
   @keyframes fadeInScale {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: scale(0.9); 
     }
     to {
       opacity: 1;
       transform: scale(1);
     }
   }
-
-  .tracking-tight {
-    letter-spacing: -0.3px;
+  
+  .tracking-tighter {
+    letter-spacing: -0.8px;
   }
-
   .container {
-    animation: float 6s ease-in-out infinite;
+    animation: float 8s ease-in-out infinite; 
   }
-
   .slide-in-up {
-    animation: slideInUp 0.6s ease-out;
+    animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; 
   }
-
   .fade-in-scale {
-    animation: fadeInScale 0.5s ease-out;
+    animation: fadeInScale 0.7s ease-out both;
   }
-}   
-
-/* Footer Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
 }
 
-::-webkit-scrollbar-track {
-  background: #fef3c7;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #f97316, #f59e0b);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #ea580c, #d97706);
-}
+ 
