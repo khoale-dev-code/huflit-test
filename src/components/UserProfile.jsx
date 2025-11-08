@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { User, Trophy, TrendingUp, BookOpen, Clock } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 export default function UserProfile() {
@@ -43,13 +43,14 @@ export default function UserProfile() {
             };
           });
           
-          // Sort by completedAt in memory (no need for Firestore index)
+          // Sort by completedAt in memory (newest first)
           const sortedData = data.sort((a, b) => {
             const dateA = a.completedAt instanceof Date ? a.completedAt : new Date(0);
             const dateB = b.completedAt instanceof Date ? b.completedAt : new Date(0);
-            return dateB - dateA; // Descending order (newest first)
+            return dateB - dateA;
           });
           
+          console.log('📊 Progress data:', sortedData);
           setProgress(sortedData);
           setLoading(false);
         },
@@ -69,6 +70,7 @@ export default function UserProfile() {
   // Calculate stats when progress changes
   useEffect(() => {
     if (!progress || progress.length === 0) {
+      console.log('📊 No progress data, resetting stats');
       setStats({
         totalAttempts: 0,
         bestScore: 0,
@@ -77,18 +79,37 @@ export default function UserProfile() {
       return;
     }
 
+    console.log('📊 Calculating stats from progress:', progress);
+
+    // Get all valid scores (must be a number and >= 0)
+    const validScores = progress
+      .map(p => {
+        const score = parseFloat(p.score);
+        console.log('Score check:', { 
+          rawScore: p.score, 
+          parsedScore: score, 
+          isValid: !isNaN(score) && score >= 0 
+        });
+        return score;
+      })
+      .filter(score => !isNaN(score) && score >= 0);
+
+    console.log('Valid scores:', validScores);
+
     const totalAttempts = progress.length;
-    const scores = progress.map(p => p.score || 0);
-    const bestScore = Math.max(...scores);
-    const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+    const bestScore = validScores.length > 0 ? Math.max(...validScores) : 0;
+    const averageScore = validScores.length > 0 
+      ? validScores.reduce((sum, score) => sum + score, 0) / validScores.length 
+      : 0;
 
-    setStats({
+    const newStats = {
       totalAttempts,
-      bestScore,
-      averageScore,
-    });
+      bestScore: Math.round(bestScore * 100) / 100, // Round to 2 decimals
+      averageScore: Math.round(averageScore * 100) / 100,
+    };
 
-    console.log('📈 Stats updated:', { totalAttempts, bestScore, averageScore });
+    console.log('📈 Stats updated:', newStats);
+    setStats(newStats);
   }, [progress]);
 
   if (loading) {
@@ -149,7 +170,7 @@ export default function UserProfile() {
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 text-center border-2 border-green-300 shadow-md hover:shadow-xl transition-shadow">
                 <Trophy className="w-7 h-7 text-green-600 mx-auto mb-3" />
                 <p className="text-4xl font-black text-green-700 mb-1">
-                  {stats.bestScore.toFixed(0)}%
+                  {stats.bestScore.toFixed(1)}%
                 </p>
                 <p className="text-sm text-green-800 font-bold">Điểm cao nhất</p>
               </div>
@@ -157,7 +178,7 @@ export default function UserProfile() {
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 text-center border-2 border-orange-300 shadow-md hover:shadow-xl transition-shadow">
                 <TrendingUp className="w-7 h-7 text-orange-600 mx-auto mb-3" />
                 <p className="text-4xl font-black text-orange-700 mb-1">
-                  {stats.averageScore.toFixed(0)}%
+                  {stats.averageScore.toFixed(1)}%
                 </p>
                 <p className="text-sm text-orange-800 font-bold">Điểm trung bình</p>
               </div>
@@ -171,7 +192,7 @@ export default function UserProfile() {
                   Lịch sử gần đây
                 </h3>
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
-                  {progress.slice(0, 5).map((item) => (
+                  {progress.slice(0, 10).map((item) => (
                     <div 
                       key={item.id} 
                       className="p-4 bg-gradient-to-r from-gray-50 to-orange-50 rounded-xl border-2 border-gray-200 hover:border-orange-300 transition-all hover:shadow-md"
@@ -193,16 +214,16 @@ export default function UserProfile() {
                               : 'N/A'}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {item.totalQuestions} câu hỏi
-                            {item.isDraft && <span className="text-orange-600 ml-2">• Nháp</span>}
+                            {item.totalQuestions || 0} câu hỏi
+                            {item.isDraft && <span className="text-orange-600 ml-2 font-semibold">• Nháp</span>}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="text-3xl font-black text-orange-600">
-                            {item.score?.toFixed(0)}%
+                            {parseFloat(item.score || 0).toFixed(1)}%
                           </p>
                           <p className="text-xs text-gray-600 font-semibold mt-1">
-                            {Math.round(item.totalQuestions * (item.score / 100))}/{item.totalQuestions}
+                            {Math.round((item.totalQuestions || 0) * (parseFloat(item.score || 0) / 100))}/{item.totalQuestions || 0}
                           </p>
                         </div>
                       </div>
