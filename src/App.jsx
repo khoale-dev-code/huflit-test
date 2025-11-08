@@ -20,6 +20,7 @@ import AuthModal from './components/AuthModal';
 import UserProfile from './components/UserProfile';
 import { useClerkFirebaseSync } from './hooks/useClerkFirebaseSync';
 import { useAutoSaveProgress } from './hooks/useAutoSaveProgress';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 function App() {
   // ============================================
@@ -35,7 +36,13 @@ function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // ============================================
-  // Test States - MOVE THESE UP BEFORE useAutoSaveProgress
+  // UI States - Collapsible sections for mobile
+  // ============================================
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showVoiceControls, setShowVoiceControls] = useState(true);
+
+  // ============================================
+  // Test States
   // ============================================
   const [selectedExam, setSelectedExam] = useState('exam1');
   const [testType, setTestType] = useState('listening');
@@ -47,7 +54,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
 
   // ============================================
-  // Helper Functions - Get partData
+  // Helper Functions
   // ============================================
   const getCurrentData = () => {
     if (practiceType) return null;
@@ -60,7 +67,7 @@ function App() {
   const partData = getCurrentData();
 
   // ============================================
-  // Auto-save Progress Hook - NOW AFTER answers is declared
+  // Auto-save Progress Hook
   // ============================================
   useAutoSaveProgress(answers, selectedExam, selectedPart, partData);
 
@@ -148,7 +155,6 @@ function App() {
   };
 
   const handleSubmit = () => {
-    // Just show results - QuestionDisplay will handle saving
     setShowResults(true);
   };
 
@@ -166,7 +172,7 @@ function App() {
   // ============================================
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col">
-      {/* Navbar */}
+      {/* Navbar - Fixed with better mobile support */}
       <Navbar
         testType={testType}
         onTestTypeChange={handleTestTypeChange}
@@ -176,71 +182,89 @@ function App() {
         onAuthClick={() => setShowAuthModal(true)}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      {/* Main Content - Better spacing and padding */}
+      <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8">
         {practiceType === 'vocabulary' ? (
           <VocabularyPractice />
         ) : (
-          <div className="max-w-6xl mx-auto">
-            {/* Header Section */}
-            <div className="text-center mb-12">
-              <h1 className="text-5xl sm:text-6xl font-black text-gray-900 mb-4 tracking-tight">
+          <div className="max-w-7xl mx-auto">
+            {/* Compact Header Section */}
+            <div className="text-center mb-6 sm:mb-8 md:mb-10">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-2 sm:mb-3 tracking-tight">
                 <span className="bg-gradient-to-r from-orange-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent">
                   🎧 HUFLIT Test Practice
                 </span>
               </h1>
-              <p className="text-xl text-gray-700 font-medium max-w-3xl mx-auto">
-                Công cụ luyện thi HUFLIT - Hỗ trợ Listening (audio 2 lần, đa giọng nam/nữ) và Reading (text)
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 font-medium max-w-3xl mx-auto px-2">
+                Luyện thi HUFLIT - Listening & Reading với đa giọng nói
               </p>
 
               {isSignedIn && user && (
-                <p className="text-sm text-orange-600 font-semibold mt-3 animate-pulse">
-                  👋 Xin chào, {user.displayName || user.email}! Tiến độ của bạn được lưu tự động.
-                </p>
+                <div className="mt-3 sm:mt-4 inline-block">
+                  <p className="text-xs sm:text-sm text-orange-600 font-semibold bg-orange-50 px-3 sm:px-4 py-2 rounded-full border border-orange-200">
+                    👋 Xin chào, {user.displayName || user.email?.split('@')[0]}!
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* User Profile Card - Only show if signed in */}
+            {/* User Profile Card - Compact on mobile */}
             {isSignedIn && (
-              <div id="user-profile-section" className="mb-8 scroll-mt-24">
+              <div id="user-profile-section" className="mb-4 sm:mb-6 md:mb-8 scroll-mt-24">
                 <UserProfile />
               </div>
             )}
 
-            {/* Info Box */}
-            <div className="mb-8">
-              <InfoBox title="📌 Hướng dẫn sử dụng:">
-                <ul className="space-y-2 text-gray-800">
-                  <li className="flex items-start gap-2">
-                    <span className="text-orange-500 font-bold mt-1">•</span>
-                    <span>Sử dụng navbar ở trên để chuyển nhanh giữa Listening, Reading, Ngữ Pháp, Từ Vựng</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-orange-500 font-bold mt-1">•</span>
-                    <span>Listening: Điều chỉnh giọng nam/nữ riêng để hội thoại tự nhiên; nhấn Play để nghe</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-orange-500 font-bold mt-1">•</span>
-                    <span>Reading: Đọc text và chọn đáp án</span>
-                  </li>
-                  {isSignedIn ? (
+            {/* Collapsible Instructions */}
+            <div className="mb-4 sm:mb-6 md:mb-8">
+              <button
+                onClick={() => setShowInstructions(!showInstructions)}
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-md border-2 border-orange-200 hover:border-orange-300 transition-all"
+              >
+                <span className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                  📌 Hướng dẫn sử dụng
+                </span>
+                {showInstructions ? (
+                  <ChevronUp className="w-5 h-5 text-orange-600" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-orange-600" />
+                )}
+              </button>
+              
+              {showInstructions && (
+                <div className="mt-2 p-3 sm:p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-md border-2 border-orange-200">
+                  <ul className="space-y-2 text-gray-800 text-sm sm:text-base">
                     <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold mt-1">✓</span>
-                      <span><strong>Tiến độ được lưu tự động</strong> - Bạn có thể xem lại kết quả bất kỳ lúc nào</span>
+                      <span className="text-orange-500 font-bold mt-0.5 text-lg">•</span>
+                      <span><strong>Navbar:</strong> Chuyển đổi giữa Listening, Reading, Ngữ Pháp, Từ Vựng</span>
                     </li>
-                  ) : (
                     <li className="flex items-start gap-2">
-                      <span className="text-orange-500 font-bold mt-1">•</span>
-                      <span><strong>Đăng nhập</strong> để lưu tiến độ học tập của bạn</span>
+                      <span className="text-orange-500 font-bold mt-0.5 text-lg">•</span>
+                      <span><strong>Listening:</strong> Chọn giọng nam/nữ, điều chỉnh tốc độ, nhấn Play để nghe</span>
                     </li>
-                  )}
-                </ul>
-              </InfoBox>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 font-bold mt-0.5 text-lg">•</span>
+                      <span><strong>Reading:</strong> Đọc đoạn văn và chọn đáp án phù hợp</span>
+                    </li>
+                    {isSignedIn ? (
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 font-bold mt-0.5 text-lg">✓</span>
+                        <span><strong className="text-green-600">Đã đăng nhập:</strong> Tiến độ được lưu tự động!</span>
+                      </li>
+                    ) : (
+                      <li className="flex items-start gap-2">
+                        <span className="text-orange-500 font-bold mt-0.5 text-lg">•</span>
+                        <span><strong>Đăng nhập</strong> để lưu tiến độ học tập</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
 
-            {/* Part Selector */}
+            {/* Part Selector - Better mobile layout */}
             {!practiceType && (
-              <div className="mb-8">
+              <div className="mb-4 sm:mb-6 md:mb-8">
                 <PartSelector
                   selectedExam={selectedExam}
                   onExamChange={handleExamChange}
@@ -253,11 +277,10 @@ function App() {
                 />
               </div>
             )}
-            <br />
 
             {/* Content Display */}
             {!practiceType && (
-              <div className="mb-8">
+              <div className="mb-4 sm:mb-6 md:mb-8">
                 <ContentDisplay
                   partData={partData}
                   selectedPart={selectedPart}
@@ -267,32 +290,49 @@ function App() {
               </div>
             )}
 
-            {/* Voice & Audio Controls */}
+            {/* Collapsible Voice & Audio Controls */}
             {testType === 'listening' && !practiceType && allVoices.length > 0 && (
-              <div className="space-y-8 mb-8">
-                <VoiceControls
-                  allVoices={allVoices}
-                  updateVoice={updateVoice}
-                  rate={rate}
-                  onRateChange={setRate}
-                />
-                <AudioControls
-                  status={status}
-                  progress={progress}
-                  playAudio={playAudio}
-                  pauseAudio={pauseAudio}
-                  stopAudio={stopAudio}
-                  partData={partData}
-                  selectedPart={selectedPart}
-                  currentQuestionIndex={currentQuestionIndex}
-                  testType={testType}
-                />
+              <div className="mb-4 sm:mb-6 md:mb-8">
+                <button
+                  onClick={() => setShowVoiceControls(!showVoiceControls)}
+                  className="w-full flex items-center justify-between p-3 sm:p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-md border-2 border-orange-200 hover:border-orange-300 transition-all mb-2"
+                >
+                  <span className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                    🎙️ Điều khiển giọng nói & Audio
+                  </span>
+                  {showVoiceControls ? (
+                    <ChevronUp className="w-5 h-5 text-orange-600" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-orange-600" />
+                  )}
+                </button>
+                
+                {showVoiceControls && (
+                  <div className="space-y-4 sm:space-y-6">
+                    <VoiceControls
+                      allVoices={allVoices}
+                      updateVoice={updateVoice}
+                      rate={rate}
+                      onRateChange={setRate}
+                    />
+                    <AudioControls
+                      status={status}
+                      progress={progress}
+                      playAudio={playAudio}
+                      pauseAudio={pauseAudio}
+                      stopAudio={stopAudio}
+                      partData={partData}
+                      selectedPart={selectedPart}
+                      currentQuestionIndex={currentQuestionIndex}
+                      testType={testType}
+                    />
+                  </div>
+                )}
               </div>
             )}
-            <br />
 
-            {/* Questions or Practice Content */}
-            <div className="mb-8">
+            {/* Questions Display */}
+            <div className="mb-4 sm:mb-6 md:mb-8">
               {!practiceType ? (
                 <QuestionDisplay
                   selectedPart={selectedPart}
@@ -315,9 +355,9 @@ function App() {
               ) : null}
             </div>
 
-            {/* Results */}
+            {/* Results Display */}
             {showResults && !practiceType && (
-              <div className="mb-8">
+              <div className="mb-4 sm:mb-6 md:mb-8">
                 <ResultsDisplay
                   score={score}
                   partData={partData}
@@ -327,28 +367,27 @@ function App() {
               </div>
             )}
 
-            {/* Warning Box */}
-            <div className="mb-8">
-              <InfoBox title="💡 Lưu ý quan trọng:" type="warning">
-                <ul className="space-y-2 text-gray-800">
+            {/* Compact Warning Box */}
+            <div className="mb-4 sm:mb-6 md:mb-8">
+              <div className="p-3 sm:p-4 bg-yellow-50/95 backdrop-blur-sm rounded-xl shadow-md border-2 border-yellow-200">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  💡 Lưu ý quan trọng
+                </h3>
+                <ul className="space-y-1.5 text-gray-800 text-xs sm:text-sm">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 font-bold mt-1">•</span>
-                    <span>Listening: Sử dụng Chrome/Edge cho đa giọng nói tự nhiên</span>
+                    <span className="text-yellow-600 font-bold mt-0.5">•</span>
+                    <span><strong>Listening:</strong> Dùng Chrome/Edge cho trải nghiệm tốt nhất</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 font-bold mt-1">•</span>
-                    <span>Reading: Tập trung vào ngữ pháp, từ vựng và suy luận</span>
+                    <span className="text-yellow-600 font-bold mt-0.5">•</span>
+                    <span><strong>Chấm điểm:</strong> Listening 5đ/câu, Reading 2.5đ/câu</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 font-bold mt-1">•</span>
-                    <span>Điểm: Listening 5đ/câu, Reading 2.5đ/câu</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 font-bold mt-1">•</span>
-                    <span>Firebase sẽ tự động lưu tiến độ khi bạn nộp bài (nếu đã đăng nhập)</span>
+                    <span className="text-yellow-600 font-bold mt-0.5">•</span>
+                    <span><strong>Tự động lưu:</strong> Tiến độ được lưu khi đã đăng nhập</span>
                   </li>
                 </ul>
-              </InfoBox>
+              </div>
             </div>
           </div>
         )}
@@ -360,7 +399,7 @@ function App() {
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
 
-      {/* Auth Modal - if needed for legacy auth (optional) */}
+      {/* Auth Modal */}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </div>
   );
