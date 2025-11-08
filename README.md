@@ -86,16 +86,6 @@
 
 <div align="center">
 
-### 📸 Screenshots
-
-| Trang chủ | Listening Test |
-|-----------|----------------|
-| ![Home](https://via.placeholder.com/400x250/FF6B35/FFFFFF?text=Home+Page) | ![Listening](https://via.placeholder.com/400x250/FFA500/FFFFFF?text=Listening+Test) |
-
-| Reading Test | User Profile |
-|--------------|--------------|
-| ![Reading](https://via.placeholder.com/400x250/FFD700/FFFFFF?text=Reading+Test) | ![Profile](https://via.placeholder.com/400x250/FF8C00/FFFFFF?text=User+Profile) |
-
 </div>
 
 ---
