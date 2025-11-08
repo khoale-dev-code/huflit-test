@@ -13,8 +13,7 @@
 
 [🚀 Truy cập ngay](https://huflit-test.vercel.app) • [📖 Tài liệu](https://github.com/khoale-dev-code/huflit-test#readme) • [🐛 Báo lỗi](https://github.com/khoale-dev-code/huflit-test/issues) • [✨ Đề xuất](https://github.com/khoale-dev-code/huflit-test/issues/new)
 
-![HUFLIT Test Practice Banner](https://via.placeholder.com/1200x400/FF6B35/FFFFFF?text=HUFLIT+Test+Practice)
-
+ 
 </div>
 
 ---
