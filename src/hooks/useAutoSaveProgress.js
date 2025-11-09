@@ -26,6 +26,12 @@ export const useAutoSaveProgress = (answers, selectedExam, selectedPart, partDat
       return;
     }
 
+    // Validate inputs
+    if (!selectedExam || !selectedPart) {
+      console.log('⏸️ Auto-save skipped: Missing exam or part');
+      return;
+    }
+
     // Check if answers changed
     const currentAnswersStr = JSON.stringify(answers);
     const answersChanged = currentAnswersStr !== lastSavedAnswersRef.current;
@@ -35,7 +41,7 @@ export const useAutoSaveProgress = (answers, selectedExam, selectedPart, partDat
       hasAnswers,
       answersChanged,
       answerCount: Object.keys(answers).length,
-      clerkUserId: clerkUser.id
+      clerkUserId: clerkUser.id,
     });
 
     if (answersChanged && hasAnswers) {
@@ -44,38 +50,57 @@ export const useAutoSaveProgress = (answers, selectedExam, selectedPart, partDat
       // Auto-save after 30 seconds of inactivity
       saveTimeoutRef.current = setTimeout(async () => {
         try {
-          // Calculate score
-          const correct = Object.entries(answers).filter(
-            ([questionId, answerIndex]) => {
-              const question = partData.questions.find(q => q.id === questionId);
-              return question && question.correct === answerIndex;
-            }
-          ).length;
-
+          // Calculate score from answers
+          let correct = 0;
           const total = partData.questions.length;
+
+          // answers is an object: { questionId: answerIndex, ... }
+          // Convert to proper format for saving
+          const answersList = [];
+          
+          partData.questions.forEach((question) => {
+            const answerIndex = answers[question.id];
+            if (answerIndex !== undefined) {
+              answersList.push({
+                questionId: question.id,
+                answerIndex: answerIndex,
+              });
+              
+              // Check if correct
+              if (question.correct === answerIndex) {
+                correct++;
+              }
+            }
+          });
+
           const percentage = total > 0 ? (correct / total) * 100 : 0;
 
           console.log('💾 Auto-saving progress...', {
             exam: selectedExam,
             part: selectedPart,
-            score: percentage,
-            answersCount: Object.keys(answers).length,
-            totalQuestions: total
+            score: Math.round(percentage),
+            answersCount: answersList.length,
+            totalQuestions: total,
           });
 
-          await saveProgress({
+          // Save with all required fields
+          const success = await saveProgress({
             exam: selectedExam,
             part: selectedPart,
-            score: percentage,
-            answers: answers,
+            score: Math.round(percentage),
+            answers: answersList, // Send as array of objects
             totalQuestions: total,
             isDraft: true, // Mark as draft (not submitted)
           });
 
-          lastSavedAnswersRef.current = currentAnswersStr;
-          console.log('✅ Auto-save successful!');
+          if (success) {
+            lastSavedAnswersRef.current = currentAnswersStr;
+            console.log('✅ Auto-save successful!');
+          } else {
+            console.warn('⚠️ Auto-save returned false');
+          }
         } catch (error) {
-          console.error('❌ Error auto-saving:', error);
+          console.error('❌ Error auto-saving:', error.message);
         }
       }, 30000); // 30 seconds
     }
