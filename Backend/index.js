@@ -2,30 +2,21 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { server } from './chat-server.js'; // Import destructured server
+import app from './chat-server.js';
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(`📡 Socket.IO ready for connections`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
 });
 
 // Graceful shutdown
-const gracefulShutdown = () => {
-  console.log('Received shutdown signal, closing server gracefully...');
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
   server.close(() => {
-    console.log('Server closed successfully');
-    process.exit(0);
+    console.log('HTTP server closed');
   });
+});
 
-  setTimeout(() => {
-    console.error('Could not close connections in time, forcefully shutting down');
-    process.exit(1);
-  }, 10000);
-};
-
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+export default app;
