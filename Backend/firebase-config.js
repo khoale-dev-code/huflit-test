@@ -4,7 +4,34 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
+let serviceAccount;
+
+try {
+  const firebaseEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+  
+  if (!firebaseEnv) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable not found');
+  }
+  
+  // Parse JSON từ env variable
+  if (typeof firebaseEnv === 'string') {
+    serviceAccount = JSON.parse(firebaseEnv);
+  } else {
+    serviceAccount = firebaseEnv;
+  }
+  
+  // Validate required fields
+  if (!serviceAccount.project_id) {
+    throw new Error('Firebase service account missing project_id');
+  }
+  
+  console.log('✅ Firebase credentials loaded:', serviceAccount.project_id);
+  
+} catch (error) {
+  console.error('❌ Failed to load Firebase credentials:', error.message);
+  console.log('Firebase service account:', process.env.FIREBASE_SERVICE_ACCOUNT?.substring(0, 50) + '...');
+  process.exit(1);
+}
 
 if (!admin.apps.length) {
   admin.initializeApp({
