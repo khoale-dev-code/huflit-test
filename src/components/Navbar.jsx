@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
-import { Menu, X, Headphones, BookOpen, BookMarked, Sparkles, User, ChevronDown, LogOut, GraduationCap, LogIn, ChevronRight, Loader2, MessageCircle } from 'lucide-react';
+import { Menu, X, Headphones, BookOpen, BookMarked, Sparkles, User, ChevronDown, LogOut, GraduationCap, LogIn, ChevronRight, Loader2 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
@@ -184,21 +184,6 @@ const SignInButton = React.memo(({ onSignIn, loading }) => (
 SignInButton.displayName = 'SignInButton';
 
 // ======================================================================
-// ChatButton Component
-// ======================================================================
-const ChatButton = React.memo(({ onChatClick }) => (
-  <button
-    onClick={onChatClick}
-    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl group"
-    title="Mở chat"
-  >
-    <MessageCircle className="w-5 h-5 group-hover:animate-pulse" />
-    <span className="hidden lg:inline">Chat</span>
-  </button>
-));
-ChatButton.displayName = 'ChatButton';
-
-// ======================================================================
 // Main Navbar Component
 // ======================================================================
 export default function Navbar({
@@ -207,7 +192,6 @@ export default function Navbar({
   practiceType,
   onPracticeTypeChange,
   onAuthClick,
-  onChatClick,
 }) {
   const { user, isSignedIn, signInWithGoogle, signOut, loading } = useFirebaseAuth();
 
@@ -301,12 +285,6 @@ export default function Navbar({
     setIsOpen(false);
   };
 
-  const handleChatClick = useCallback(() => {
-    setIsOpen(false);
-    setShowProfileMenu(false);
-    if (onChatClick) onChatClick();
-  }, [onChatClick]);
-
   return (
     <>
       {/* ====== NAVBAR ====== */}
@@ -329,9 +307,6 @@ export default function Navbar({
 
           {/* Right Section - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Chat Button */}
-            <ChatButton onChatClick={handleChatClick} />
-
             {isSignedIn && user ? (
               <div className="relative" ref={profileMenuRef}>
                 <ProfileButton
@@ -404,17 +379,6 @@ export default function Navbar({
             </div>
 
             <hr className="my-4 border-amber-100" />
-
-            {/* Chat Button Mobile */}
-            <div className="sm:hidden">
-              <button
-                onClick={handleChatClick}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-4 py-3 rounded-lg font-semibold transition-all"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Mở Chat</span>
-              </button>
-            </div>
 
             {/* Mobile Profile / Sign In */}
             <div className="pt-2">
