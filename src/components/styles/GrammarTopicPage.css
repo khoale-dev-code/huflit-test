@@ -1,0 +1,727 @@
+/* ============================================
+   GRAMMAR TOPIC PAGE STYLES
+   ============================================ */
+
+/* Animations */
+@keyframes blob {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1); 
+  }
+  25% { 
+    transform: translate(20px, -50px) scale(1.1); 
+  }
+  50% { 
+    transform: translate(-20px, 20px) scale(0.9); 
+  }
+  75% { 
+    transform: translate(50px, 50px) scale(1.05); 
+  }
+}
+
+@keyframes confetti {
+  0% { 
+    transform: translateY(0) rotate(0deg); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateY(1000px) rotate(720deg); 
+    opacity: 0; 
+  }
+}
+
+@keyframes shimmer {
+  0% { 
+    transform: translateX(-100%); 
+  }
+  100% { 
+    transform: translateX(100%); 
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.02); 
+  }
+}
+
+@keyframes fade-in {
+  from { 
+    opacity: 0; 
+    transform: translateY(-10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes bounce-icon {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation Classes */
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animate-confetti {
+  animation: confetti 3s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 0.5s ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-bounce-icon {
+  animation: bounce-icon 2s ease-in-out infinite;
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 20s linear infinite;
+}
+
+/* Animation Delays */
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Background Blobs Container */
+.background-blobs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.background-blob {
+  position: absolute;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 9999px;
+  mix-blend-mode: multiply;
+  filter: blur(64px);
+}
+
+.background-blob-1 {
+  top: 5rem;
+  left: 2.5rem;
+  background-color: #93c5fd;
+}
+
+.background-blob-2 {
+  top: 10rem;
+  right: 2.5rem;
+  background-color: #c4b5fd;
+}
+
+.background-blob-3 {
+  bottom: 5rem;
+  left: 50%;
+  background-color: #f9a8d4;
+}
+
+/* Confetti Container */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Progress Bar Shimmer Effect */
+.progress-bar-shimmer {
+  position: absolute;
+  inset: 0;
+  background-color: white;
+  opacity: 0.3;
+}
+
+/* Custom Badges */
+.grammar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.badge-difficulty {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+}
+
+.badge-streak {
+  background: linear-gradient(to right, #fb923c, #ec4899);
+  color: white;
+}
+
+.badge-completion {
+  background: linear-gradient(to right, #4ade80, #10b981);
+  color: white;
+}
+
+.badge-completed {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+/* Lesson Card */
+.lesson-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  border: 2px solid #e9d5ff;
+  transition: all 0.3s ease;
+}
+
+.lesson-card:hover {
+  border-color: #c084fc;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-number {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom right, #60a5fa, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Language Toggle */
+.language-toggle-container {
+  display: flex;
+  background: linear-gradient(to right, #f3f4f6, #e5e7eb);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+}
+
+.language-toggle-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.language-toggle-button.active {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.language-toggle-button:not(.active) {
+  color: #4b5563;
+}
+
+.language-toggle-button:not(.active):hover {
+  color: #1f2937;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Content Area */
+.content-area {
+  max-width: none;
+  background: linear-gradient(to bottom right, white, #dbeafe, #f3e8ff);
+  padding: 2rem;
+  border-radius: 0.75rem;
+  border: 2px solid #bfdbfe;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Example Cards */
+.example-card {
+  background: linear-gradient(to bottom right, white, #dbeafe);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 2px solid #bfdbfe;
+  transition: all 0.3s ease;
+}
+
+.example-card:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.example-vietnamese {
+  padding: 1rem;
+  background: linear-gradient(to right, #dcfce7, #d1fae5);
+  border-radius: 0.5rem;
+  border: 2px solid #86efac;
+  margin-top: 1rem;
+}
+
+/* Exercise Card */
+.exercise-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  border: 2px solid #fed7aa;
+  transition: all 0.3s ease;
+}
+
+.exercise-card:hover {
+  border-color: #fb923c;
+}
+
+.exercise-number {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom right, #fb923c, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-question {
+  padding: 1.5rem;
+  background: linear-gradient(to right, #fef3c7, #fed7aa);
+  border-radius: 0.75rem;
+  border: 2px solid #fcd34d;
+  margin-bottom: 1.5rem;
+}
+
+/* Exercise Options */
+.exercise-option {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  background: linear-gradient(to right, #f9fafb, #dbeafe);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #e5e7eb;
+}
+
+.exercise-option:hover {
+  background: linear-gradient(to right, #f3f4f6, #bfdbfe);
+  border-color: #60a5fa;
+}
+
+.exercise-option input[type="radio"] {
+  margin-right: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #3b82f6;
+}
+
+/* Exercise Feedback */
+.exercise-feedback {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  border: 2px solid;
+}
+
+.exercise-feedback.correct {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.exercise-feedback.incorrect {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+/* Hints Box */
+.hints-box {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background-color: #dbeafe;
+  border-radius: 0.75rem;
+  border: 2px solid #93c5fd;
+  font-size: 0.875rem;
+}
+
+/* Vocabulary Table */
+.vocabulary-table {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 2px solid #86efac;
+}
+
+.vocabulary-table thead {
+  background: linear-gradient(to right, #10b981, #059669);
+  color: white;
+}
+
+.vocabulary-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vocabulary-table tbody tr {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vocabulary-table tbody tr:hover {
+  background: linear-gradient(to right, #dcfce7, #d1fae5);
+}
+
+.vocabulary-table td {
+  padding: 1.25rem 1.5rem;
+}
+
+.vocabulary-word {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #15803d;
+  background-color: #dcfce7;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+.vocabulary-table tbody tr:hover .vocabulary-word {
+  background-color: #86efac;
+}
+
+.vocabulary-example {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  display: block;
+  border: 1px solid #d1d5db;
+  font-family: 'Courier New', monospace;
+}
+
+/* Section Headers */
+.section-header {
+  font-size: 1.875rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: white;
+}
+
+.section-header.lessons {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+}
+
+.section-header.exercises {
+  background: linear-gradient(to right, #fb923c, #ec4899);
+}
+
+.section-header.vocabulary {
+  background: linear-gradient(to right, #4ade80, #10b981);
+}
+
+/* Accordion Button */
+.accordion-button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: linear-gradient(to right, #f9fafb, #dbeafe);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.accordion-button:hover {
+  background: linear-gradient(to right, #f3f4f6, #bfdbfe);
+  border-color: #60a5fa;
+}
+
+.accordion-content {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 0.75rem;
+  border: 2px solid #c084fc;
+}
+
+/* Motivational Footer */
+.motivational-footer {
+  background: linear-gradient(to right, #8b5cf6, #ec4899, #ef4444);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  text-align: center;
+  color: white;
+}
+
+.footer-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.footer-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(10px);
+}
+
+/* Button Styles */
+.btn-complete {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, #4ade80, #10b981);
+  color: white;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  transform: scale(1);
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-complete:hover {
+  background: linear-gradient(to right, #22c55e, #059669);
+  transform: scale(1.05);
+}
+
+/* Input Styles */
+.exercise-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+}
+
+.exercise-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .lesson-card,
+  .exercise-card {
+    padding: 1.5rem;
+  }
+
+  .section-header {
+    font-size: 1.5rem;
+    padding: 1rem;
+  }
+
+  .content-area {
+    padding: 1.5rem;
+  }
+
+  .footer-stats {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* Prose Styles for Markdown Content */
+.prose h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prose p {
+  color: #374151;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+
+.prose ul {
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+}
+
+.prose li {
+  color: #374151;
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose strong {
+  color: #1e40af;
+  font-weight: bold;
+  background-color: #dbeafe;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.prose code {
+  background: linear-gradient(to right, #f3e8ff, #fce7f3);
+  color: #7c3aed;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-family: 'Courier New', monospace;
+  border: 1px solid #c084fc;
+}
+
+.prose blockquote {
+  border-left: 4px solid #4ade80;
+  background: linear-gradient(to right, #dcfce7, #d1fae5);
+  padding: 1.25rem;
+  font-style: italic;
+  margin: 1rem 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode styles if needed */
+}
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optimize rendering */
+.lesson-card,
+.exercise-card,
+.example-card {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}

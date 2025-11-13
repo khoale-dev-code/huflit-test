@@ -1,0 +1,51 @@
+{
+  "name": "listening",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "start": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "eject": "echo \"Not supported in Vite\" && exit 1",
+    "upload:all": "node scripts/uploadAllData.js",
+    "upload:real": "node scripts/uploadRealData.js",
+    "upload:vocabulary": "node scripts/uploadvocabularyData.js",
+    "upload:grammar": "node scripts/uploadGrammarData.js",
+    "upload:exam": "node scripts/uploadExamData.js",
+    "firebase:deploy": "firebase deploy",
+    "firebase:console": "start https://console.firebase.google.com/project/huflit-test-4ce25/overview",
+    "firebase:hosting": "firebase open hosting",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@clerk/clerk-react": "^5.53.8",
+    "firebase": "^12.5.0",
+    "firebase-admin": "^13.6.0",
+    "lucide-react": "^0.552.0",
+    "react": "^19.1.1",
+    "react-audio-player": "^0.17.0",
+    "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
+    "recharts": "^3.4.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.4",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.22",
+    "globals": "^16.4.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
+    "vite": "^5.3.1"
+  }
+}

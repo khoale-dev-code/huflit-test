@@ -1,0 +1,27 @@
+@keyframes progressShine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.audio-progress-bar {
+  background: linear-gradient(90deg, #f97316 0%, #fbbf24 50%, #f97316 100%);
+  background-size: 200% 100%;
+  animation: progressShine 2s linear infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

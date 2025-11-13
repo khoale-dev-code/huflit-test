@@ -1,0 +1,491 @@
+/* ============================================
+   UserProfile.module.css - CSS Module cho UserProfile
+   ============================================ */
+
+/* Container */
+.container {
+  background: linear-gradient(to bottom right, white, #faf5f0);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #fed7aa;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  position: relative;
+  background: linear-gradient(to right, #f97316, #fbbf24, #fbbf24);
+  padding: 1.5rem 2rem;
+}
+
+.headerOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.headerContent {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Avatar */
+.avatar {
+  position: relative;
+}
+
+.avatarImg {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 1rem;
+  border: 4px solid white;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+}
+
+.avatarDefault {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 1rem;
+  border: 4px solid white;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to bottom right, #fb923c, #fbbf24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.streakBadge {
+  position: absolute;
+  bottom: -0.5rem;
+  right: -0.5rem;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 900;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* User Info */
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: white;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.1));
+}
+
+.userNameContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.authBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.authBadgeClerk {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #ea580c;
+}
+
+.authBadgeFirebase {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #2563eb;
+}
+
+.userEmail {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.875rem;
+  font-weight: 600;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.05));
+}
+
+.lastActivity {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Main Content */
+.mainContent {
+  padding: 1.5rem;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.emptyStateIcon {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.emptyStateIconBg {
+  position: absolute;
+  inset: 0;
+  background-color: #fed7aa;
+  border-radius: 9999px;
+  filter: blur(3rem);
+  opacity: 0.5;
+}
+
+.emptyStateTitle {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+}
+
+.emptyStateText {
+  color: #4b5563;
+  font-weight: 500;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.statCard {
+  position: relative;
+  border-radius: 1.25rem;
+  padding: 1rem;
+  border: 2px solid;
+  transition: all 300ms;
+  cursor: pointer;
+}
+
+.statCard:hover {
+  border-opacity: 1;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.statCardIcon {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.statCardIconBg {
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 300ms;
+}
+
+.statCard:hover .statCardIconBg {
+  transform: scale(1.1);
+}
+
+.statCardLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statCardValue {
+  font-size: 1.875rem;
+  font-weight: 900;
+}
+
+/* Additional Stats */
+.additionalStats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .additionalStats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.additionalStatCard {
+  background-color: white;
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 300ms;
+}
+
+.additionalStatCard:hover {
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Bar */
+.progressBar {
+  height: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: all 300ms;
+}
+
+/* Recent Activity */
+.recentActivity {
+  background-color: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.recentActivityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.recentActivityTitle {
+  font-weight: 900;
+  color: #111827;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recentActivityCount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 24rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.activityList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activityList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.activityList::-webkit-scrollbar-thumb {
+  background: #fb923c;
+  border-radius: 10px;
+}
+
+.activityList::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+.activityItem {
+  position: relative;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 2px solid;
+  transition: all 300ms;
+}
+
+.activityItem:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.activityItemRecent {
+  background: linear-gradient(to right, #fef3c7, #fed7aa);
+  border-color: #fed7aa;
+}
+
+.activityItemRecent:hover {
+  border-color: #fbbf24;
+}
+
+.activityItemOld {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.activityItemOld:hover {
+  border-color: #d1d5db;
+}
+
+.activityItemNew {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background-color: #f97316;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 900;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.activityItemContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activityItemInfo {
+  flex: 1;
+}
+
+.activityItemTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.activityItemTitleText {
+  font-weight: 900;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.activityItemDraftBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  background-color: #fef08a;
+  color: #854d0e;
+  border-radius: 9999px;
+}
+
+.activityItemMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.activityItemScore {
+  text-align: right;
+  margin-left: 1rem;
+}
+
+.activityItemScoreValue {
+  font-size: 2.25rem;
+  font-weight: 900;
+  margin-bottom: 0.25rem;
+}
+
+.activityItemScoreGreen {
+  color: #16a34a;
+}
+
+.activityItemScoreBlue {
+  color: #2563eb;
+}
+
+.activityItemScoreAmber {
+  color: #b45309;
+}
+
+.activityItemScoreRed {
+  color: #dc2626;
+}
+
+/* Loading State */
+.loading {
+  background: linear-gradient(to bottom right, white, #faf5f0);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #fed7aa;
+  padding: 2rem;
+}
+
+.loadingSpinner {
+  text-align: center;
+}
+
+.loadingSpinnerIcon {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+}
+
+.loadingSpinnerIcon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid #fed7aa;
+  border-radius: 9999px;
+}
+
+.loadingSpinnerIcon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid #ea580c;
+  border-top: transparent;
+  border-radius: 9999px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: #4b5563;
+  font-weight: 500;
+}
