@@ -12,14 +12,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'clerk': ['@clerk/clerk-react'],
-          'firebase': ['firebase'],
-          'socket': ['socket.io-client'],
-        },
-      },
+    target: 'esnext',
+    minify: 'terser',
+    commonjsOptions: {
+      transformMixedEsModules: true,
     },
+  },
+  optimizeDeps: {
+    exclude: ['firebase', 'firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
   },
 })
