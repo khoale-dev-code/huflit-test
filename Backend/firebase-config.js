@@ -143,4 +143,5 @@ export const cleanupOldMessages = async () => {
 };
 
 export { isFirebaseEnabled };
+export { db };
 export default db;
