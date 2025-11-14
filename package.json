@@ -23,6 +23,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.53.8",
     "firebase": "^9.23.0",
+    "firebase-admin": "^13.6.0",
     "lucide-react": "^0.552.0",
     "react": "^19.1.1",
     "react-audio-player": "^0.17.0",
