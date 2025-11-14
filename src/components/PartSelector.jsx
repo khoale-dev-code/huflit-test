@@ -153,11 +153,11 @@ const PartSelector = React.memo(({
         
         <hr className="border-orange-200/50 mb-6 sm:mb-8 md:mb-10" />
 
-        {/* Selection Cards */}
+        {/* Selection Cards - Updated for mobile stacking */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12">
           
-          {/* Exam Selection Card */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-orange-200/50 hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 hover:border-orange-300">
+          {/* Exam Selection Card - Added higher z-index on mobile */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-orange-200/50 hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 hover:border-orange-300 relative z-30 lg:z-10">
             <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
               <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg sm:rounded-xl shadow-md">
                 <Target className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -178,9 +178,9 @@ const PartSelector = React.memo(({
                 }`} />
               </button>
               
-              {/* Dropdown Menu */}
+              {/* Dropdown Menu - Increased z-index */}
               {isExamDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-md border border-orange-200 rounded-xl shadow-2xl w-full max-h-60 overflow-y-auto z-20 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-md border border-orange-200 rounded-xl shadow-2xl w-full max-h-60 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                   <ul className="p-2">
                     {Object.keys(EXAM_DATA).map(key => (
                       <DropdownItem 
@@ -197,8 +197,8 @@ const PartSelector = React.memo(({
             </div>
           </div>
 
-          {/* Test Type Selection Card */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-amber-200/50 hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 hover:border-amber-300">
+          {/* Test Type Selection Card - Lower z-index on mobile */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-amber-200/50 hover:shadow-xl sm:hover:shadow-2xl transition-all duration-500 hover:border-amber-300 relative z-10">
             <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
               <div className="p-1.5 sm:p-2 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg sm:rounded-xl shadow-md">
                 <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
