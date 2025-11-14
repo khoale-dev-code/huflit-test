@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AlertCircle, Headphones, FileText } from 'lucide-react';
+import { AlertCircle, Headphones, FileText, BookOpen } from 'lucide-react'; // Thêm BookOpen
 import ReadingPart6Display from './ReadingPart6Display';
 import ReadingPart7Display from './ReadingPart7Display';
 import ReadingPart8Display from './ReadingPart8Display';
@@ -37,71 +37,84 @@ const ContentDisplay = React.memo(({
     return testType === 'listening' ? 'script' : 'text';
   }, [testType]);
 
-  // If no content, show placeholder
+  // ========================================
+  // YÊU CẦU MỚI: ẨN NẾU LÀ READING PART 5 (vì Part 5 không có văn bản chung)
+  // ========================================
+  if (testType === 'reading' && selectedPart === 'part5') {
+    // Part 5 thường chỉ hiển thị câu hỏi, không có nội dung văn bản (text/script)
+    // Trả về null để ẩn component này
+    return null;
+  }
+
+  // Nếu không có partData, hiển thị placeholder
   if (!partData) {
     return (
-      <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-8 animate-in fade-in duration-300">
         <div className="text-center py-8">
-          <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500 font-semibold">Vui lòng chọn Part để xem nội dung</p>
+          <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 font-semibold text-lg">Vui lòng chọn Part để xem nội dung</p>
         </div>
       </div>
     );
   }
 
+  // Nếu có partData nhưng không có nội dung (ngoại trừ Part 5 đã bị loại ở trên)
   if (!content.trim()) {
     return (
-      <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-8 animate-in fade-in duration-300">
         <div className="text-center py-8">
-          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500 font-semibold">
-            Không có {contentType === 'script' ? 'script' : 'văn bản'} cho phần này
+          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 font-semibold text-lg">
+            Không có {contentType === 'script' ? 'Script' : 'Văn bản'} cho Part này
           </p>
-          <p className="text-gray-400 text-sm mt-2">Kiểm tra lại dữ liệu hoặc chọn part khác</p>
+          <p className="text-gray-400 text-sm mt-2">Văn bản sẽ hiển thị ở đây nếu có.</p>
         </div>
       </div>
     );
   }
 
   // ========================================
-  // READING PART 6 - CLOZE TEXT (EMAIL/ANNOUNCEMENT)
+  // READING PARTS (Sử dụng component chuyên biệt)
   // ========================================
-  if (testType === 'reading' && selectedPart === 'part6') {
-    return (
-      <div className="animate-in fade-in duration-300">
-        <ReadingPart6Display 
-          part6={partData}
-          examNumber={1} // Có thể truyền từ component cha nếu cần
-          onAnswerSelect={onAnswerSelect}
-        />
-      </div>
-    );
+  if (testType === 'reading') {
+    if (selectedPart === 'part6') {
+      return (
+        <div className="animate-in fade-in duration-300">
+          <ReadingPart6Display 
+            part6={partData}
+            examNumber={1} 
+            onAnswerSelect={onAnswerSelect}
+          />
+        </div>
+      );
+    }
+
+    if (selectedPart === 'part7') {
+      return (
+        <div className="animate-in fade-in duration-300">
+          <ReadingPart7Display text={content} type="reading" />
+        </div>
+      );
+    }
+
+    if (selectedPart === 'part8') {
+      return (
+        <div className="animate-in fade-in duration-300">
+          <ReadingPart8Display text={content} type="reading" />
+        </div>
+      );
+    }
   }
 
-  // Reading Part 7 - Email/Advertisement/Article
-  if (testType === 'reading' && selectedPart === 'part7') {
-    return (
-      <div className="animate-in fade-in duration-300">
-        <ReadingPart7Display text={content} type="reading" />
-      </div>
-    );
-  }
-
-  // Reading Part 8 - Text Message Chain
-  if (testType === 'reading' && selectedPart === 'part8') {
-    return (
-      <div className="animate-in fade-in duration-300">
-        <ReadingPart8Display text={content} type="reading" />
-      </div>
-    );
-  }
 
   // ========================================
-  // LISTENING PARTS - USE NEW ScriptDisplay
+  // LISTENING PARTS - Hiển thị Script & Tips (Giao diện mới)
   // ========================================
   if (testType === 'listening') {
+    const partNumber = selectedPart.replace('part', '');
     return (
-      <div className="animate-in fade-in duration-300 space-y-4">
+      <div className="animate-in fade-in duration-300 space-y-5">
+        
         {/* New Script Display Component */}
         <ScriptDisplay 
           script={content}
@@ -111,40 +124,42 @@ const ContentDisplay = React.memo(({
           isPlaying={isPlayingScript}
         />
 
-        {/* Additional Info Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border-2 border-blue-200 shadow-md">
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-blue-300 shadow-sm">
-              <span className="text-xs font-semibold text-gray-600">📊 Độ dài:</span>
-              <span className="text-sm font-bold text-blue-600">
-                {Math.ceil(content.length / 50)} × 50 ký tự
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-purple-300 shadow-sm">
-              <span className="text-xs font-semibold text-gray-600">⏱️ Thời gian:</span>
-              <span className="text-sm font-bold text-purple-600">
-                ~30-60 giây
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-orange-300 shadow-sm">
+        {/* Additional Info Section (Sử dụng theme xanh dương/tím) */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200 shadow-lg">
+          <h3 className="text-lg font-bold text-indigo-800 mb-3 flex items-center gap-2">
+             <Headphones className='w-5 h-5 text-indigo-500' /> Thông tin bổ sung
+          </h3>
+          <div className="flex flex-wrap gap-4 border-b pb-4 border-blue-100">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-blue-300 shadow-sm">
               <span className="text-xs font-semibold text-gray-600">🎯 Part:</span>
+              <span className="text-sm font-bold text-blue-600">
+                Part {partNumber}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-purple-300 shadow-sm">
+              <span className="text-xs font-semibold text-gray-600">📊 Ký tự:</span>
+              <span className="text-sm font-bold text-purple-600">
+                {content.length} ký tự
+              </span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-orange-300 shadow-sm">
+              <span className="text-xs font-semibold text-gray-600">⏱️ Thời gian:</span>
               <span className="text-sm font-bold text-orange-600">
-                {selectedPart.replace('part', 'Part ')}
+                ~{Math.ceil(content.length / 500) * 30} giây (ước tính)
               </span>
             </div>
           </div>
 
           {/* Tips for Listening */}
-          <div className="mt-4 p-4 rounded-lg border-l-4 bg-blue-50 border-blue-500 text-blue-900">
+          <div className="mt-4 p-4 rounded-lg border-l-4 bg-indigo-50 border-indigo-500 text-indigo-900">
             <p className="text-xs font-bold mb-2 flex items-center gap-2">
               <span>💡</span>
               <span>Mẹo nghe hiệu quả:</span>
             </p>
-            <ul className="text-xs space-y-1 ml-6">
-              <li>✓ Đọc câu hỏi trước khi nghe để biết thông tin cần chú ý</li>
-              <li>✓ Chú ý các từ khóa: tên người, số liệu, thời gian, địa điểm</li>
-              <li>✓ Sử dụng chức năng lọc theo người nói để tập trung</li>
-              <li>✓ Nghe nhiều lần với các tốc độ khác nhau để làm quen</li>
+            <ul className="text-xs space-y-1 ml-6 list-disc">
+              <li>Đọc câu hỏi trước, nghe để tìm **từ khóa (keywords)**.</li>
+              <li>Tập trung vào **giọng điệu** và **ý chính** của cuộc hội thoại.</li>
+              <li>Hạn chế nhìn vào script (nếu không phải là chế độ luyện tập).</li>
             </ul>
           </div>
         </div>
@@ -153,20 +168,20 @@ const ContentDisplay = React.memo(({
   }
 
   // ========================================
-  // READING PARTS (Default) - Keep original display for other reading parts
+  // READING PARTS (Default/Generic display cho những part còn lại)
   // ========================================
   return (
-    <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 overflow-hidden animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="px-6 py-4 border-b-2 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+    <div className="bg-white rounded-xl shadow-xl border-2 border-gray-100 overflow-hidden animate-in fade-in duration-300">
+      {/* Header (Sử dụng theme xanh lá cây/xanh ngọc) */}
+      <div className="px-6 py-4 border-b-2 bg-gradient-to-r from-emerald-50 to-green-100 border-emerald-200">
         <div className="flex items-center gap-3">
-          <FileText className="w-6 h-6 text-green-600 flex-shrink-0" />
+          <BookOpen className="w-6 h-6 text-emerald-600 flex-shrink-0" />
           <div>
-            <h2 className="text-lg font-bold text-green-900">
-              📖 Văn Bản
+            <h2 className="text-lg font-bold text-emerald-900">
+              📖 Văn Bản Đọc - Part {selectedPart.replace('part', '')}
             </h2>
-            <p className="text-xs text-green-700">
-              Part {selectedPart.replace('part', '')} - Đọc kỹ
+            <p className="text-xs text-emerald-700">
+              {partData.title || 'Nội dung chung của phần thi đọc'}
             </p>
           </div>
         </div>
@@ -174,42 +189,35 @@ const ContentDisplay = React.memo(({
 
       {/* Content */}
       <div className="p-6">
-        <div className="p-5 rounded-lg border-2 leading-relaxed whitespace-pre-wrap overflow-y-auto bg-green-50 border-green-300 text-green-900 max-h-96">
+        <div className="p-5 rounded-lg border-2 leading-relaxed whitespace-pre-wrap overflow-y-auto bg-green-50 border-emerald-300 text-green-900 max-h-[30rem] shadow-inner">
           <p className="text-sm md:text-base font-medium">
             {content}
           </p>
         </div>
 
         {/* Info Footer */}
-        <div className="mt-4 flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-lg border border-amber-200">
+        <div className="mt-4 flex flex-wrap gap-4">
+          <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-xl border border-amber-200">
             <span className="text-xs font-semibold text-gray-600">📊 Độ dài:</span>
             <span className="text-sm font-bold text-orange-600">
-              {Math.ceil(content.length / 50)} × 50 ký tự
+              {content.length} ký tự
             </span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
-            <span className="text-xs font-semibold text-gray-600">⏱️ Thời gian:</span>
+          <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 rounded-xl border border-yellow-200">
+            <span className="text-xs font-semibold text-gray-600">⏱️ Ước tính đọc:</span>
             <span className="text-sm font-bold text-orange-600">
-              ~3-5 phút
-            </span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 rounded-lg border border-orange-200">
-            <span className="text-xs font-semibold text-gray-600">🎯 Loại:</span>
-            <span className="text-sm font-bold text-orange-600">
-              Reading
+              ~{Math.ceil(content.length / 250) * 60} giây
             </span>
           </div>
         </div>
 
         {/* Tips */}
-        <div className="mt-4 p-4 rounded-lg border-l-4 bg-green-50 border-green-500 text-green-900">
-          <p className="text-xs font-bold mb-2">💡 Mẹo:</p>
-          <ul className="text-xs space-y-1">
-            <li>✓ Đọc tiêu đề và câu hỏi trước</li>
-            <li>✓ Tìm những từ khóa trong câu hỏi</li>
-            <li>✓ Đọc kỹ tất cả các lựa chọn trước khi chọn</li>
-            <li>✓ Chú ý đến các chi tiết như số liệu, tên riêng</li>
+        <div className="mt-4 p-4 rounded-lg border-l-4 bg-emerald-50 border-emerald-500 text-emerald-900">
+          <p className="text-xs font-bold mb-2 flex items-center gap-2">💡 Mẹo:</p>
+          <ul className="text-xs space-y-1 ml-6 list-disc">
+            <li>Lướt qua văn bản để nắm được **chủ đề chính**.</li>
+            <li>Sử dụng kỹ thuật **Scanning & Skimming** để tìm thông tin nhanh.</li>
+            <li>Đừng cố gắng đọc và hiểu từng từ một.</li>
           </ul>
         </div>
       </div>
