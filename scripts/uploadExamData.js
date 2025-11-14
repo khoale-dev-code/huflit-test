@@ -30,9 +30,9 @@ const db = admin.firestore();
 // ============================================
 // Import Individual Exam Files
 // ============================================
-let EXAMS = {}; // { exam1: EXAM1_DATA, exam2: EXAM2_DATA, ... exam8: EXAM8_DATA }
+let EXAMS = {}; // { exam1: EXAM1_DATA, exam2: EXAM2_DATA, ... exam12: EXAM12_DATA }
 
-const examNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const examNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 try {
   for (const num of examNumbers) {
@@ -44,12 +44,12 @@ try {
   }
 } catch (e) {
   console.error('Import error for one or more exam files:', e.message);
-  console.error('Fix: Ensure files exist at src/data/exams/exam1.js through exam8.js and export const EXAMN_DATA = { ... };');
+  console.error('Fix: Ensure files exist at src/data/exams/exam1.js through exam12.js and export const EXAMN_DATA = { ... };');
   process.exit(1);
 }
 
-if (Object.keys(EXAMS).length < 10) {
-  console.error('Less than 10 exams loaded. Check files.');
+if (Object.keys(EXAMS).length < 12) {
+  console.error('Less than 12 exams loaded. Check files.');
   process.exit(1);
 }
 
@@ -225,7 +225,7 @@ async function uploadExamStats() {
 // ============================================
 async function main() {
   logSection('Firebase Exam Data Upload (Fixed Version - Separate Imports)');
-  logInfo('This will upload data from exam1.js through exam8.js to Firebase');
+  logInfo('This will upload data from exam1.js through exam12.js to Firebase');
 
   try {
     console.log('\nLoading exam files...\n');
@@ -238,7 +238,7 @@ async function main() {
     console.log(`\nSummary:`);
     console.log(`   Exams: ${exams}`);
     console.log(`   Parts: ${parts}`);
-    console.log(`\nAll exam data from 10 files successfully uploaded to Firebase Firestore!`);
+    console.log(`\nAll exam data from 12 files successfully uploaded to Firebase Firestore!`);
     console.log(`\nView your data:`);
     console.log(`   https://console.firebase.google.com/u/0/project/huflit-test-4ce25/firestore (collection: examData)\n`);
 

@@ -17,7 +17,7 @@ export const ENHANCED_VOICE_SETTINGS = {
   // Professional Males - điều chỉnh để tự nhiên hơn
   Mark: { 
     pitch: 0.95,
-    rate: 1.25,
+    rate: 1.0,
     volume: 0.85,
     style: "professional",
     emotion: "confident",
