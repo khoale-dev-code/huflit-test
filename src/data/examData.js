@@ -8,6 +8,8 @@ import { EXAM5_DATA } from './exams/exam5';
 import { EXAM6_DATA } from './exams/exam6';
 import { EXAM7_DATA } from './exams/exam7';
 import { EXAM8_DATA } from './exams/exam8';
+import { EXAM9_DATA } from './exams/exam9';
+import { EXAM10_DATA } from './exams/exam10';
 
 export const EXAM_DATA = {
   exam1: EXAM1_DATA,
@@ -18,6 +20,8 @@ export const EXAM_DATA = {
   exam6: EXAM6_DATA,
   exam7: EXAM7_DATA,
   exam8: EXAM8_DATA,
+  exam9: EXAM9_DATA,
+  exam10: EXAM10_DATA,
  // Khi thêm exam mới:
   // import { EXAM4_DATA } from './exams/exam4';
   // exam4: EXAM4_DATA,

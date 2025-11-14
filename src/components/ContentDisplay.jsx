@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { AlertCircle, Headphones, FileText } from 'lucide-react';
+import ReadingPart6Display from './ReadingPart6Display';
 import ReadingPart7Display from './ReadingPart7Display';
 import ReadingPart8Display from './ReadingPart8Display';
 import ScriptDisplay from './ScriptDisplay';
@@ -10,7 +11,8 @@ const ContentDisplay = React.memo(({
   currentQuestionIndex, 
   testType,
   onPlayScript = null,
-  isPlayingScript = false
+  isPlayingScript = false,
+  onAnswerSelect = null // Thêm prop này cho Part 6
 }) => {
   
   // Memoized content extraction
@@ -57,6 +59,21 @@ const ContentDisplay = React.memo(({
           </p>
           <p className="text-gray-400 text-sm mt-2">Kiểm tra lại dữ liệu hoặc chọn part khác</p>
         </div>
+      </div>
+    );
+  }
+
+  // ========================================
+  // READING PART 6 - CLOZE TEXT (EMAIL/ANNOUNCEMENT)
+  // ========================================
+  if (testType === 'reading' && selectedPart === 'part6') {
+    return (
+      <div className="animate-in fade-in duration-300">
+        <ReadingPart6Display 
+          part6={partData}
+          examNumber={1} // Có thể truyền từ component cha nếu cần
+          onAnswerSelect={onAnswerSelect}
+        />
       </div>
     );
   }
@@ -136,7 +153,7 @@ const ContentDisplay = React.memo(({
   }
 
   // ========================================
-  // READING PARTS (Default) - Keep original display
+  // READING PARTS (Default) - Keep original display for other reading parts
   // ========================================
   return (
     <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 overflow-hidden animate-in fade-in duration-300">

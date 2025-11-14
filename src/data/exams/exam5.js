@@ -1,599 +1,699 @@
 export const EXAM5_DATA = {
-  title: "HUFLIT Listening & Reading Practice - Exam 5 (Chủ Đề Công Nghệ & Kinh Doanh)",
-  description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT. Part 1 mở rộng: 5 câu hỏi từ 1 hội thoại dài để luyện nghe chi tiết về ứng dụng công nghệ trong kinh doanh.",
+  title: "HUFLIT Listening & Reading Practice - Exam 5 (Công Nghệ & Kinh Doanh)",
+  description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Tập trung vào chủ đề Công Nghệ & Kinh Doanh. Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT.",
   parts: {
-    // Listening Parts - Part 1 cập nhật: 1 hội thoại chung cho 5 câu hỏi
-   part1: {
-  title: "PART 1: Short Conversations (Mở Rộng - 1 Hội Thoại Chung Cho 5 Câu)",
-  description: "5 câu hỏi - 1 đoạn hội thoại dài giữa Emma và Ben về việc áp dụng AI trong quản lý kinh doanh. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D) dựa trên chi tiết. (Hỗ trợ luyện nghe hội thoại thực tế HUFLIT).",
-  type: "listening",
-  script: "Emma: Hi Ben, how's the new AI tool working out for your sales team? I heard it's revolutionizing forecasting.\nBen: It's been a game-changer, Emma. We implemented it three months ago, and our accuracy jumped from 70% to 95%. But training the staff took longer than expected—about two weeks of workshops.\nEmma: Impressive. At my firm, we're piloting blockchain for supply chain transparency. It cuts down on fraud risks significantly.\nBen: Sounds solid. Did you face any integration issues with legacy systems?\nEmma: A few, but the vendor provided solid support. Overall, ROI is projected at 25% within the first year. Tech investments like these are key to staying competitive.",
-  questions: [
-    {
-      id: 1,
-      question: "How long ago did Ben's team implement the AI tool?",
-      options: [
-        "(A) One month ago.",
-        "(B) Two months ago.",
-        "(C) Three months ago.",
-        "(D) Six months ago."
-      ],
-      correct: 2,
-      explanation: "Ben: 'We implemented it three months ago.' (Ben: 'Chúng tôi triển khai nó ba tháng trước.') - Luyện nghe thời gian áp dụng công nghệ trong kinh doanh."
+    part1: {
+      title: "PART 1: Short Conversations",
+      description: "Nghe đoạn hội thoại giữa Anna và Ben về công ty công nghệ. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
+      type: "listening",
+      script: "Anna: Ben, have you heard about the new AI project our company is launching next quarter?\nBen: Yes, I attended the presentation yesterday. The development team has been working on it for over six months. They're using machine learning algorithms to optimize our customer service operations.\nAnna: That's impressive! I heard we're investing nearly $2 million in this initiative. The CEO believes it will increase our efficiency by at least 40%.\nBen: Absolutely. But we'll need extensive training for all staff members. The HR department is already preparing a comprehensive program that will start next month.\nAnna: Speaking of training, I'm concerned about the cybersecurity aspects. With all this new technology, we need to ensure our data protection measures are robust.\nBen: Good point. The IT security team has assured management that they've implemented multiple layers of protection, including advanced encryption and regular security audits.",
+      questions: [
+        {
+          id: 1,
+          options: [
+            "For three months",
+            "For over six months", 
+            "For one year",
+            "For two years"
+          ],
+          correct: 1,
+          explanation: "Ben nói: 'The development team has been working on it for over six months.' (Đội phát triển đã làm việc trên dự án hơn sáu tháng)."
+        },
+        {
+          id: 2,
+          options: [
+            "$1 million",
+            "$2 million",
+            "$3 million", 
+            "$4 million"
+          ],
+          correct: 1,
+          explanation: "Anna nói: 'I heard we're investing nearly $2 million in this initiative.' (Tôi nghe chúng ta đang đầu tư gần 2 triệu đô la cho sáng kiến này)."
+        },
+        {
+          id: 3,
+          options: [
+            "20% efficiency increase",
+            "30% efficiency increase", 
+            "40% efficiency increase",
+            "50% efficiency increase"
+          ],
+          correct: 2,
+          explanation: "Anna nói: 'The CEO believes it will increase our efficiency by at least 40%.' (CEO tin rằng nó sẽ tăng hiệu suất ít nhất 40%)."
+        },
+        {
+          id: 4,
+          options: [
+            "Next week",
+            "Next month", 
+            "In three months",
+            "Next year"
+          ],
+          correct: 1,
+          explanation: "Ben nói: 'The HR department is already preparing a comprehensive program that will start next month.' (Phòng nhân sự đang chuẩn bị chương trình toàn diện sẽ bắt đầu tháng tới)."
+        },
+        {
+          id: 5,
+          options: [
+            "Customer satisfaction",
+            "Cybersecurity aspects", 
+            "Budget constraints",
+            "Staff recruitment"
+          ],
+          correct: 1,
+          explanation: "Anna nói: 'I'm concerned about the cybersecurity aspects.' (Tôi lo ngại về các khía cạnh an ninh mạng)."
+        }
+      ]
     },
-    {
-      id: 2,
-      question: "What improvement did the AI tool bring to Ben's team?",
-      options: [
-        "(A) Reduced staff training time.",
-        "(B) Increased forecasting accuracy from 70% to 95%.",
-        "(C) Lowered supply chain costs.",
-        "(D) Enhanced customer service only."
-      ],
-      correct: 1,
-      explanation: "Ben: 'Our accuracy jumped from 70% to 95%.' (Ben: 'Độ chính xác của chúng tôi tăng từ 70% lên 95%.') - Luyện nghe lợi ích cụ thể của AI trong dự báo bán hàng."
+    part2: {
+      title: "PART 2: Longer Conversation",
+      description: "5 câu hỏi - Một đoạn hội thoại dài trong cuộc họp kinh doanh. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+      type: "listening", 
+      script: "Manager: Good morning team. Let's start with the quarterly financial report. Sarah, could you begin?\nSarah: Thank you, Tom. Our revenue increased by 15% this quarter, primarily due to successful product launches in the Asian market. However, operating costs rose by 8% because of higher raw material prices.\nTom: Interesting. Mike, what's the marketing team's analysis of these numbers?\nMike: We've seen excellent response to our digital campaigns. Social media engagement is up 60%, and website traffic has grown by 45%. The new influencer partnerships are performing particularly well.\nSarah: That's encouraging. On the operational side, we've reduced production time by 20% through automation. But we're facing challenges with supply chain delays from our European suppliers.\nTom: Understood. Lisa, any updates from the R&D department?\nLisa: Yes, we're making good progress on the new eco-friendly product line. We expect to complete testing by the end of next month and begin production in Q3.\nTom: Excellent work everyone. Let's focus on addressing the supply chain issues in our next meeting.",
+      questions: [
+        {
+          id: 6,
+          question: "What was the revenue increase this quarter?",
+          options: [
+            "8%",
+            "15%", 
+            "20%",
+            "45%"
+          ],
+          correct: 1,
+          explanation: "Sarah nói: 'Our revenue increased by 15% this quarter.' (Doanh thu của chúng tôi tăng 15% trong quý này)."
+        },
+        {
+          id: 7,
+          question: "Why did operating costs increase?",
+          options: [
+            "Higher marketing expenses",
+            "Increased staff salaries", 
+            "Higher raw material prices",
+            "New equipment purchases"
+          ],
+          correct: 2,
+          explanation: "Sarah nói: 'Operating costs rose by 8% because of higher raw material prices.' (Chi phí vận hành tăng 8% do giá nguyên vật liệu cao hơn)."
+        },
+        {
+          id: 8,
+          question: "How much has social media engagement increased?",
+          options: [
+            "45%",
+            "60%", 
+            "75%",
+            "90%"
+          ],
+          correct: 1,
+          explanation: "Mike nói: 'Social media engagement is up 60%.' (Tương tác mạng xã hội tăng 60%)."
+        },
+        {
+          id: 9,
+          question: "What operational improvement was mentioned?",
+          options: [
+            "Reduced staff turnover",
+            "Increased customer satisfaction", 
+            "Reduced production time by 20%",
+            "Improved product quality"
+          ],
+          correct: 2,
+          explanation: "Sarah nói: 'We've reduced production time by 20% through automation.' (Chúng tôi đã giảm thời gian sản xuất 20% thông qua tự động hóa)."
+        },
+        {
+          id: 10,
+          question: "When does R&D expect to begin production of the new product line?",
+          options: [
+            "Next month",
+            "Q2", 
+            "Q3",
+            "Next year"
+          ],
+          correct: 2,
+          explanation: "Lisa nói: 'We expect to begin production in Q3.' (Chúng tôi dự kiến bắt đầu sản xuất vào quý 3)."
+        }
+      ]
     },
-    {
-      id: 3,
-      question: "How long did training the staff take for Ben?",
-      options: [
-        "(A) One week.",
-        "(B) Two weeks.",
-        "(C) One month.",
-        "(D) Three weeks."
-      ],
-      correct: 1,
-      explanation: "Ben: 'Training the staff took longer than expected—about two weeks of workshops.' (Ben: 'Việc đào tạo nhân viên mất lâu hơn dự kiến—khoảng hai tuần hội thảo.') - Luyện nghe thách thức triển khai công nghệ."
+    part3: {
+      title: "PART 3: Monologue",
+      description: "5 câu hỏi - Một bài thuyết trình về công nghệ blockchain. Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+      type: "listening",
+      script: "Professor: Good afternoon, students. Today we're discussing blockchain technology and its business applications. Blockchain is essentially a decentralized digital ledger that records transactions across multiple computers. This technology offers three key benefits: enhanced security through cryptography, increased transparency as all participants can view transactions, and reduced costs by eliminating intermediaries. Major corporations like IBM and Walmart are already using blockchain for supply chain management. For instance, Walmart reduced food traceability time from seven days to just 2.2 seconds using blockchain. However, challenges remain, including scalability issues and regulatory uncertainty. As future business leaders, understanding this technology will be crucial for your careers. The potential applications extend beyond cryptocurrency to areas like smart contracts, voting systems, and digital identity verification.",
+      questions: [
+        {
+          id: 11,
+          question: "What is blockchain described as?",
+          options: [
+            "A centralized database",
+            "A type of cryptocurrency", 
+            "A decentralized digital ledger",
+            "A financial intermediary"
+          ],
+          correct: 2,
+          explanation: "Professor: 'Blockchain is essentially a decentralized digital ledger.' (Blockchain về cơ bản là một sổ cái kỹ thuật số phi tập trung)."
+        },
+        {
+          id: 12,
+          question: "How many key benefits of blockchain are mentioned?",
+          options: [
+            "Two",
+            "Three", 
+            "Four",
+            "Five"
+          ],
+          correct: 1,
+          explanation: "Professor: 'This technology offers three key benefits.' (Công nghệ này mang lại ba lợi ích chính)."
+        },
+        {
+          id: 13,
+          question: "Which company was mentioned as using blockchain for supply chain?",
+          options: [
+            "Amazon",
+            "Microsoft", 
+            "IBM",
+            "Google"
+          ],
+          correct: 2,
+          explanation: "Professor: 'Major corporations like IBM and Walmart are already using blockchain for supply chain management.' (Các tập đoàn lớn như IBM và Walmart đang sử dụng blockchain cho quản lý chuỗi cung ứng)."
+        },
+        {
+          id: 14,
+          question: "How much did Walmart reduce food traceability time?",
+          options: [
+            "From 7 days to 2.2 seconds", 
+            "From 5 days to 1 hour",
+            "From 3 days to 10 minutes",
+            "From 10 days to 5 seconds"
+          ],
+          correct: 0,
+          explanation: "Professor: 'Walmart reduced food traceability time from seven days to just 2.2 seconds using blockchain.' (Walmart giảm thời gian truy xuất nguồn gốc thực phẩm từ bảy ngày xuống chỉ 2.2 giây bằng blockchain)."
+        },
+        {
+          id: 15,
+          question: "What challenge was NOT mentioned about blockchain?",
+          options: [
+            "Scalability issues",
+            "Regulatory uncertainty", 
+            "High energy consumption",
+            "Technical complexity"
+          ],
+          correct: 3,
+          explanation: "Professor chỉ đề cập 'scalability issues and regulatory uncertainty' (vấn đề khả năng mở rộng và sự không chắc chắn về quy định), không nói đến 'technical complexity' (độ phức tạp kỹ thuật)."
+        }
+      ]
     },
-    {
-      id: 4,
-      question: "What technology is Emma's firm piloting?",
-      options: [
-        "(A) AI for sales forecasting.",
-        "(B) Blockchain for supply chain transparency.",
-        "(C) Cloud computing for data storage.",
-        "(D) VR for employee training."
-      ],
-      correct: 1,
-      explanation: "Emma: 'We're piloting blockchain for supply chain transparency.' (Emma: 'Chúng tôi đang thử nghiệm blockchain cho tính minh bạch chuỗi cung ứng.') - Luyện nghe công nghệ mới trong quản lý kinh doanh."
+    part4: {
+      title: "PART 4: Extended Conversation",
+      description: "5 câu hỏi - Một cuộc phỏng vấn kinh doanh. Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+      type: "listening",
+      script: "Interviewer 1: Welcome to our final round interview, Emma. We're impressed with your background in digital marketing.\nEmma: Thank you, I'm excited to be here and learn more about the Growth Marketing Manager position.\nInterviewer 2: Let's start with your experience. Could you tell us about a successful campaign you led?\nEmma: Certainly. At my previous company, I developed a comprehensive social media strategy that increased our online engagement by 150% over six months. We focused on creating valuable content and building authentic relationships with our audience.\nInterviewer 1: That's impressive. How do you stay updated with the latest marketing trends?\nEmma: I regularly attend industry conferences, participate in webinars, and I'm part of several professional marketing groups. I also believe in continuous learning through online courses.\nInterviewer 2: What would be your approach to developing our brand presence in new international markets?\nEmma: I would begin with thorough market research to understand cultural nuances, then develop localized content strategies while maintaining our core brand identity. Building partnerships with local influencers would also be key.\nInterviewer 1: Excellent. One final question - how do you measure campaign success beyond basic metrics?\nEmma: Beyond clicks and conversions, I look at customer lifetime value, brand sentiment analysis, and the quality of engagement. Sustainable growth requires understanding the long-term impact on brand perception.",
+      questions: [
+        {
+          id: 16,
+          question: "What position is Emma applying for?",
+          options: [
+            "Digital Marketing Specialist",
+            "Social Media Manager", 
+            "Growth Marketing Manager",
+            "Marketing Director"
+          ],
+          correct: 2,
+          explanation: "Emma nói: 'Learn more about the Growth Marketing Manager position.' (Tìm hiểu thêm về vị trí Quản lý Marketing Tăng trưởng)."
+        },
+        {
+          id: 17,
+          question: "How much did Emma increase online engagement in her previous campaign?",
+          options: [
+            "100%",
+            "125%", 
+            "150%",
+            "175%"
+          ],
+          correct: 2,
+          explanation: "Emma nói: 'Increased our online engagement by 150% over six months.' (Tăng tương tác trực tuyến 150% trong sáu tháng)."
+        },
+        {
+          id: 18,
+          question: "How does Emma stay updated with marketing trends?",
+          options: [
+            "Only through online courses",
+            "By reading books", 
+            "Through conferences, webinars, and professional groups",
+            "By following competitors"
+          ],
+          correct: 2,
+          explanation: "Emma nói: 'I regularly attend industry conferences, participate in webinars, and I'm part of several professional marketing groups.' (Tôi thường xuyên tham dự hội nghị ngành, tham gia hội thảo trực tuyến, và là thành viên của nhiều nhóm marketing chuyên nghiệp)."
+        },
+        {
+          id: 19,
+          question: "What would be Emma's first step in international market expansion?",
+          options: [
+            "Hiring local staff",
+            "Developing advertising campaigns", 
+            "Conducting thorough market research",
+            "Setting up local offices"
+          ],
+          correct: 2,
+          explanation: "Emma nói: 'I would begin with thorough market research to understand cultural nuances.' (Tôi sẽ bắt đầu với nghiên cứu thị trường kỹ lưỡng để hiểu các sắc thái văn hóa)."
+        },
+        {
+          id: 20,
+          question: "What advanced metric does Emma consider for campaign success?",
+          options: [
+            "Number of social media followers",
+            "Website traffic volume", 
+            "Customer lifetime value",
+            "Email open rates"
+          ],
+          correct: 2,
+          explanation: "Emma nói: 'Beyond clicks and conversions, I look at customer lifetime value.' (Ngoài số nhấp chuột và chuyển đổi, tôi xem xét giá trị trọn đời của khách hàng)."
+        }
+      ]
     },
-    {
-      id: 5,
-      question: "What is the projected ROI for Emma's project?",
-      options: [
-        "(A) 15% within the first year.",
-        "(B) 20% within six months.",
-        "(C) 25% within the first year.",
-        "(D) 30% over two years."
-      ],
-      correct: 2,
-      explanation: "Emma: 'Overall, ROI is projected at 25% within the first year.' (Emma: 'Tổng thể, ROI dự kiến 25% trong năm đầu.') - Luyện nghe chỉ số kinh doanh từ đầu tư công nghệ."
-    }
-  ]
-},
-part2: {
-  title: "PART 2: Longer Conversation",
-  description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người: Lisa, Mike và John. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-  type: "listening",
-  script: "Narrator: At a business networking event.\nLisa: Great to meet you both. Mike, tell us about your startup—how's the fintech app performing?\nMike: Thriving, Lisa. User base grew 40% last quarter thanks to our machine learning algorithms for fraud detection.\nJohn: Fascinating. We're in e-commerce; integrating AR for virtual try-ons boosted conversions by 25%. But scaling servers was costly.\nLisa: Understood. At our agency, we specialize in digital marketing AI—personalized ads that increase ROI by 30%. Partnerships are key.\nMike: Agreed. John, any advice on venture capital pitches?\nJohn: Focus on metrics like CAC and LTV. Investors love data-driven stories.",
-  questions: [
-    {
-      id: 6,
-      question: "What is Mike's startup focused on?",
-      options: ["(A) E-commerce platforms", "(B) Fintech app with fraud detection", "(C) Digital marketing tools", "(D) AR development"],
-      correct: 1,
-      explanation: "Mike: 'Our fintech app... machine learning algorithms for fraud detection.' (Mike: 'Ứng dụng fintech của chúng tôi... thuật toán học máy phát hiện gian lận.') - Luyện nghe lĩnh vực kinh doanh công nghệ."
+    part5: {
+      title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
+      description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu về chủ đề công nghệ và kinh doanh.",
+      type: "reading",
+      questions: [
+        {
+          id: 21,
+          question: "The new software update significantly ________ the company's data processing capabilities.",
+          options: ["enhance", "enhances", "enhancing", "enhancement"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'enhances' vì chủ ngữ 'update' số ít cần động từ chia ngôi thứ ba số ít. Kiến thức ngữ pháp: Chủ ngữ số ít (software update) + động từ thêm 's'."
+        },
+        {
+          id: 22,
+          question: "Despite the economic challenges, the startup managed to ________ its quarterly targets.",
+          options: ["exceed", "exceeding", "exceeded", "exceeds"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'exceed' vì đây là động từ nguyên thể sau 'managed to'. Kiến thức ngữ pháp: Cấu trúc 'manage to + V nguyên thể'."
+        },
+        {
+          id: 23,
+          question: "The marketing team is developing a new strategy to ________ younger demographics.",
+          options: ["target", "targets", "targeting", "targeted"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'target' vì đây là động từ nguyên thể sau 'to'. Kiến thức ngữ pháp: 'to + V nguyên thể' để chỉ mục đích."
+        },
+        {
+          id: 24,
+          question: "Our company's ________ to digital transformation has been remarkably successful.",
+          options: ["adapt", "adapts", "adaptation", "adaptive"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) 'adaptation' vì cần danh từ sau tính từ sở hữu 'company's'. Kiến thức từ vựng: 'adaptation' (sự thích ứng) là danh từ phù hợp ngữ cảnh."
+        },
+        {
+          id: 25,
+          question: "The CEO emphasized the ________ of innovation in maintaining competitive advantage.",
+          options: ["important", "importance", "importantly", "importing"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'importance' vì cần danh từ sau mạo từ 'the'. Kiến thức ngữ pháp: 'the + danh từ + of'."
+        },
+        {
+          id: 26,
+          question: "All employees are required to ________ the new cybersecurity protocols immediately.",
+          options: ["implement", "implements", "implementing", "implementation"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'implement' vì đây là động từ nguyên thể sau 'to'. Kiến thức ngữ pháp: 'are required to + V nguyên thể'."
+        },
+        {
+          id: 27,
+          question: "The research and development department ________ made significant progress this year.",
+          options: ["have", "has", "having", "to have"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'has' vì 'department' là chủ ngữ số ít. Kiến thức ngữ pháp: Danh từ tập thể xem như số ít cần động từ số ít."
+        },
+        {
+          id: 28,
+          question: "We need to analyze the data more ________ before making final decisions.",
+          options: ["careful", "carefully", "carefulness", "caring"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'carefully' vì cần trạng từ bổ nghĩa cho động từ 'analyze'. Kiến thức ngữ pháp: Trạng từ bổ nghĩa cho động từ."
+        },
+        {
+          id: 29,
+          question: "The company's expansion into Asian markets ________ completed ahead of schedule.",
+          options: ["was", "were", "been", "being"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'was' vì chủ ngữ 'expansion' số ít trong câu bị động. Kiến thức ngữ pháp: Chủ ngữ số ít + was + V3."
+        },
+        {
+          id: 30,
+          question: "Effective communication is ________ for successful project management.",
+          options: ["essence", "essential", "essentially", "essentialize"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'essential' vì cần tính từ sau 'is'. Kiến thức từ vựng: 'essential' (thiết yếu) là tính từ phù hợp ngữ cảnh."
+        }
+      ]
     },
-    {
-      id: 7,
-      question: "By what percentage did Mike's user base grow?",
-      options: ["(A) 20%", "(B) 30%", "(C) 40%", "(D) 50%"],
-      correct: 2,
-      explanation: "Mike: 'User base grew 40% last quarter.' (Mike: 'Cơ sở người dùng tăng 40% quý trước.') - Luyện nghe chỉ số tăng trưởng kinh doanh."
+    part6: {
+      title: "PART 6: Cloze Text (Business Email)",
+      description: "10 câu hỏi - Điền từ/cụm vào văn bản email về chiến lược kinh doanh.",
+      type: "reading",
+      text: `To: All Department Heads
+From: David Chen, CEO
+Subject: Q4 Strategic Initiatives and Digital Transformation Update
+
+Dear Team,
+
+I am writing to provide an update on our strategic initiatives for the fourth quarter and outline our progress in digital transformation. As we approach the final quarter of the year, it is crucial that we maintain our momentum and (31) focused on our key objectives.
+
+Our digital transformation efforts have yielded significant results. We have successfully (32) our customer relationship management system, which has improved our response times by 40%. The new AI-powered analytics platform is providing valuable insights that help us make data-driven decisions more (33).
+
+However, we must remain vigilant about cybersecurity. The IT department will be conducting mandatory security training for all employees next month. Please ensure your team members (34) this training seriously, as it is essential for protecting our company's sensitive information.
+
+Looking ahead to Q4, our primary goals include:
+- Increasing market share in the Southeast Asian region by 15%
+- Launching three new eco-friendly product lines
+- Improving customer satisfaction scores by 20 points
+
+To achieve these targets, we need full cooperation and innovative thinking from every department. I am confident that with our team's expertise and dedication, we will (35) these ambitious goals.
+
+Please schedule a meeting with your teams to discuss how these objectives align with your departmental plans. I look forward to hearing your innovative ideas and strategies.
+
+Best regards,
+
+David Chen
+CEO`,
+      questions: [
+        {
+          id: 31,
+          type: "fill",
+          question: "(31) - Điền từ thích hợp",
+          context: "It is crucial that we maintain our momentum and (31) focused on our key objectives.",
+          options: ["remain", "remains", "remaining", "remained"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'remain' vì đây là động từ nguyên thể trong cấu trúc song song với 'maintain'. Kiến thức ngữ pháp: Cấu trúc song song 'maintain... and remain...'."
+        },
+        {
+          id: 32,
+          type: "fill", 
+          question: "(32) - Điền từ thích hợp",
+          context: "We have successfully (32) our customer relationship management system...",
+          options: ["implement", "implements", "implemented", "implementing"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) 'implemented' vì cần quá khứ phân từ trong thì hiện tại hoàn thành. Kiến thức ngữ pháp: 'have + V3' trong thì hiện tại hoàn thành."
+        },
+        {
+          id: 33,
+          type: "fill",
+          question: "(33) - Điền từ thích hợp", 
+          context: "...which helps us make data-driven decisions more (33).",
+          options: ["efficient", "efficiently", "efficiency", "efficiencies"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'efficiently' vì cần trạng từ bổ nghĩa cho cụm động từ 'make decisions'. Kiến thức ngữ pháp: Trạng từ bổ nghĩa cho động từ."
+        },
+        {
+          id: 34,
+          type: "fill",
+          question: "(34) - Điền từ thích hợp",
+          context: "Please ensure your team members (34) this training seriously...",
+          options: ["take", "takes", "taking", "took"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'take' vì chủ ngữ 'members' số nhiều cần động từ nguyên thể trong câu mệnh lệnh gián tiếp. Kiến thức ngữ pháp: 'ensure + (that) + S + V' với S số nhiều."
+        },
+        {
+          id: 35,
+          type: "fill",
+          question: "(35) - Điền từ thích hợp",
+          context: "I am confident that... we will (35) these ambitious goals.",
+          options: ["achieve", "achieves", "achieving", "achieved"],
+          correct: 0,
+          explanation: "Đáp án đúng là (A) 'achieve' vì đây là động từ nguyên thể sau 'will'. Kiến thức ngữ pháp: 'will + V nguyên thể'."
+        },
+        {
+          id: 36,
+          type: "comprehension",
+          question: "(36) - What is the main purpose of this email?",
+          options: ["To announce employee layoffs", "To provide updates on strategic initiatives", "To introduce new team members", "To complain about poor performance"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì email bắt đầu với 'provide an update on our strategic initiatives'. Kiến thức đọc hiểu: Xác định mục đích chính từ câu mở đầu."
+        },
+        {
+          id: 37,
+          type: "comprehension", 
+          question: "(37) - How much has response time improved with the new system?",
+          options: ["20%", "30%", "40%", "50%"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì email nói 'improved our response times by 40%'. Kiến thức đọc hiểu: Tìm thông tin số liệu cụ thể trong văn bản."
+        },
+        {
+          id: 38,
+          type: "comprehension",
+          question: "(38) - What training will be conducted next month?",
+          options: ["Customer service training", "Sales techniques training", "Security training", "Leadership development training"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì email nói 'The IT department will be conducting mandatory security training'. Kiến thức đọc hiểu: Xác định loại hình đào tạo từ ngữ cảnh."
+        },
+        {
+          id: 39,
+          type: "comprehension",
+          question: "(39) - What is the target for market share increase in Southeast Asia?",
+          options: ["10%", "15%", "20%", "25%"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì email nói 'Increasing market share... by 15%'. Kiến thức đọc hiểu: Tìm thông tin số liệu trong mục tiêu."
+        },
+        {
+          id: 40,
+          type: "comprehension",
+          question: "(40) - Who is the sender of this email?",
+          options: ["HR Manager", "IT Director", "CEO", "Marketing Head"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì email từ 'David Chen, CEO'. Kiến thức đọc hiểu: Xác định người gửi từ phần thông tin."
+        }
+      ]
     },
-    {
-      id: 8,
-      question: "What technology boosted John's conversions?",
-      options: ["(A) Machine learning", "(B) Blockchain", "(C) Augmented Reality (AR)", "(D) Cloud computing"],
-      correct: 2,
-      explanation: "John: 'Integrating AR for virtual try-ons boosted conversions by 25%.' (John: 'Tích hợp AR cho thử đồ ảo tăng chuyển đổi 25%.') - Luyện nghe ứng dụng công nghệ trong thương mại điện tử."
-    },
-    {
-      id: 9,
-      question: "What does Lisa's agency specialize in?",
-      options: ["(A) Fintech development", "(B) Digital marketing AI", "(C) Server scaling", "(D) Venture funding"],
-      correct: 1,
-      explanation: "Lisa: 'We specialize in digital marketing AI—personalized ads that increase ROI by 30%.' (Lisa: 'Chúng tôi chuyên về AI marketing kỹ thuật số—quảng cáo cá nhân hóa tăng ROI 30%.') - Luyện nghe chuyên môn công ty."
-    },
-    {
-      id: 10,
-      question: "What metrics does John recommend for pitches?",
-      options: ["(A) Revenue and profit only", "(B) CAC and LTV", "(C) User engagement scores", "(D) Market share percentages"],
-      correct: 1,
-      explanation: "John: 'Focus on metrics like CAC and LTV.' (John: 'Tập trung vào chỉ số như CAC và LTV.') - Luyện nghe lời khuyên gọi vốn kinh doanh."
-    }
-  ]
-},
-part3: {
-  title: "PART 3: Monologue",
-  description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn) của Professor về xu hướng công nghệ trong kinh doanh. Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-  type: "listening",
-  script: "Professor: Welcome to today's lecture on tech trends in business. Cloud computing has transformed operations, enabling scalability without heavy upfront costs. Last semester, a case study on Amazon Web Services showed 50% cost savings for SMEs. Cybersecurity remains critical—ransomware attacks rose 20% last year. Ethical AI is emerging; companies must address bias in algorithms. Finally, remote work tools like Zoom have boosted productivity by 15%, per recent surveys.",
-  questions: [
-    {
-      id: 11,
-      question: "The lecture focuses on __________.",
-      options: ["(A) Traditional marketing strategies", "(B) Tech trends in business", "(C) Supply chain logistics", "(D) Financial accounting"],
-      correct: 1,
-      explanation: "Professor: 'Today's lecture on tech trends in business.' (Giáo sư: 'Bài giảng hôm nay về xu hướng công nghệ trong kinh doanh.') - Luyện nghe chủ đề bài giảng."
-    },
-    {
-      id: 12,
-      question: "What has cloud computing enabled?",
-      options: ["(A) Increased upfront costs", "(B) Scalability without heavy investments", "(C) Reduced data security", "(D) Offline operations only"],
-      correct: 1,
-      explanation: "Professor: 'Cloud computing has transformed operations, enabling scalability without heavy upfront costs.' (Giáo sư: 'Điện toán đám mây biến đổi hoạt động, cho phép mở rộng mà không tốn kém ban đầu.') - Luyện nghe lợi ích công nghệ đám mây."
-    },
-    {
-      id: 13,
-      question: "What percentage of cost savings was shown in the AWS case study?",
-      options: ["(A) 30%", "(B) 40%", "(C) 50%", "(D) 60%"],
-      correct: 2,
-      explanation: "Professor: 'A case study on Amazon Web Services showed 50% cost savings for SMEs.' (Giáo sư: 'Nghiên cứu trường hợp AWS cho thấy tiết kiệm 50% chi phí cho doanh nghiệp nhỏ.') - Luyện nghe ví dụ tiết kiệm chi phí."
-    },
-    {
-      id: 14,
-      question: "By what percentage did ransomware attacks rise?",
-      options: ["(A) 10%", "(B) 15%", "(C) 20%", "(D) 25%"],
-      correct: 2,
-      explanation: "Professor: 'Cybersecurity remains critical—ransomware attacks rose 20% last year.' (Giáo sư: 'An ninh mạng vẫn quan trọng—tấn công ransomware tăng 20% năm ngoái.') - Luyện nghe rủi ro an ninh mạng."
-    },
-    {
-      id: 15,
-      question: "What has boosted productivity according to surveys?",
-      options: ["(A) In-office mandates", "(B) Remote work tools like Zoom", "(C) Manual processes", "(D) Paper-based systems"],
-      correct: 1,
-      explanation: "Professor: 'Remote work tools like Zoom have boosted productivity by 15%.' (Giáo sư: 'Công cụ làm việc từ xa như Zoom tăng năng suất 15%.') - Luyện nghe tác động công nghệ làm việc từ xa."
-    }
-  ]
-},
-part4: {
-  title: "PART 4: Extended Conversation",
-  description: "5 câu hỏi - Một đoạn hội thoại mở rộng giữa Customer và Sales Associate về phần mềm quản lý kinh doanh. Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-  type: "listening",
-  script: "Customer: Hi, I'm interested in your CRM software for my small business. Does it integrate with QuickBooks?\nSales Associate: Yes, seamless integration via API. It automates invoicing and tracks leads in real-time.\nCustomer: Excellent. What's the pricing for up to 10 users?\nSales Associate: Starts at $29 per user monthly, with a free trial. We've seen 35% efficiency gains for similar clients.\nCustomer: Noted. Any data migration support?\nSales Associate: Included for the first three months. It minimizes downtime during setup.",
-  questions: [
-    {
-      id: 16,
-      question: "What software is the customer inquiring about?",
-      options: ["(A) Accounting software", "(B) CRM software", "(C) HR management tool", "(D) E-commerce platform"],
-      correct: 1,
-      explanation: "Customer: 'Your CRM software for my small business.' (Khách hàng: 'Phần mềm CRM cho doanh nghiệp nhỏ của tôi.') - Luyện nghe loại phần mềm kinh doanh."
-    },
-    {
-      id: 17,
-      question: "What does the CRM integrate with?",
-      options: ["(A) Microsoft Word", "(B) QuickBooks", "(C) Adobe Photoshop", "(D) Google Maps"],
-      correct: 1,
-      explanation: "Sales Associate: 'Seamless integration via API' with QuickBooks. (Nhân viên: 'Tích hợp liền mạch qua API' với QuickBooks.) - Luyện nghe tính năng tích hợp."
-    },
-    {
-      id: 18,
-      question: "What is the starting price per user?",
-      options: ["(A) $19 monthly", "(B) $29 monthly", "(C) $39 monthly", "(D) $49 monthly"],
-      correct: 1,
-      explanation: "Sales Associate: 'Starts at $29 per user monthly.' (Nhân viên: 'Bắt đầu từ $29 mỗi người dùng hàng tháng.') - Luyện nghe mô hình giá cả."
-    },
-    {
-      id: 19,
-      question: "What efficiency gain have similar clients seen?",
-      options: ["(A) 20%", "(B) 25%", "(C) 30%", "(D) 35%"],
-      correct: 3,
-      explanation: "Sales Associate: 'We've seen 35% efficiency gains for similar clients.' (Nhân viên: 'Chúng tôi thấy tăng hiệu quả 35% cho khách hàng tương tự.') - Luyện nghe lợi ích định lượng."
-    },
-    {
-      id: 20,
-      question: "What support is included for data migration?",
-      options: ["(A) None", "(B) For the first month", "(C) For the first three months", "(D) Lifetime support"],
-      correct: 2,
-      explanation: "Sales Associate: 'Included for the first three months.' (Nhân viên: 'Bao gồm trong ba tháng đầu.') - Luyện nghe dịch vụ hỗ trợ triển khai."
-    }
-  ]
-},
-    // Reading Parts - Thêm 5 câu hỏi mở rộng cho Part 5 để cân bằng, chủ đề công nghệ & kinh doanh
-part5: {
-  title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
-  description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
-  type: "reading",
-  questions: [
-    {
-      id: 21,
-      question: "The startup's innovative app has disrupted the market by offering seamless integration with existing business _______.",
-      options: ["(A) Infrastructure", "(B) Infrastructures", "(C) Infrastructural", "(D) Infrastructed"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'Infrastructure' vì đây là danh từ không đếm được chỉ 'cơ sở hạ tầng' kinh doanh. Kiến thức ngữ pháp: Danh từ không đếm sau 'existing'; (B) số nhiều không phù hợp, (C) tính từ, (D) không tồn tại."
-    },
-    {
-      id: 22,
-      question: "Many companies are adopting cloud-based solutions to enhance scalability and reduce operational _______ .",
-      options: ["(A) Cost", "(B) Costs", "(C) Costly", "(D) Costed"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Costs' vì danh từ số nhiều chỉ 'chi phí hoạt động'. Kiến thức từ vựng: 'Operational costs' trong ngữ cảnh kinh doanh; 'cost' số ít, 'costly' tính từ, 'costed' quá khứ."
-    },
-    {
-      id: 23,
-      question: "Since launching the e-commerce platform, sales have increased _______ 50 percent year-over-year.",
-      options: ["(A) At", "(B) By", "(C) In", "(D) On"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'By' vì chỉ mức độ tăng (by 50 percent). Kiến thức ngữ pháp: Giới từ 'by' với phần trăm thay đổi; 'at/in/on' không phù hợp."
-    },
-    {
-      id: 24,
-      question: "The CEO emphasized the importance of cybersecurity in protecting sensitive customer _______.",
-      options: ["(A) Data", "(B) Datas", "(C) Datums", "(D) Dataful"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'Data' vì danh từ không đếm được chỉ 'dữ liệu'. Kiến thức ngữ pháp: 'Customer data' không chia số nhiều; 'datas/datums' hiếm dùng, 'dataful' không tồn tại."
-    },
-    {
-      id: 25,
-      question: "Investors are keen on startups that demonstrate strong potential for rapid _______ .",
-      options: ["(A) Grow", "(B) Grows", "(C) Growth", "(D) Growing"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) 'Growth' vì danh từ chỉ 'tăng trưởng'. Kiến thức từ vựng: 'Rapid growth' trong ngữ cảnh đầu tư; 'grow' động từ, 'grows' ngôi thứ ba, 'growing' V-ing."
-    },
-    {
-      id: 26,
-      question: "The merger will allow the company to expand its market share and leverage synergies in technology _______.",
-      options: ["(A) Develop", "(B) Development", "(C) Developed", "(D) Developing"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Development' vì danh từ chỉ 'phát triển công nghệ'. Kiến thức ngữ pháp: 'Technology development' sau 'in'; 'develop' động từ, 'developed' quá khứ, 'developing' V-ing."
-    },
-    {
-      id: 27,
-      question: "Blockchain technology is revolutionizing transactions by providing secure and transparent _______ .",
-      options: ["(A) Record", "(B) Records", "(C) Recording", "(D) Recorded"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Records' vì danh từ số nhiều chỉ 'hồ sơ giao dịch'. Kiến thức từ vựng: 'Transparent records' trong blockchain; 'record' số ít, 'recording' V-ing, 'recorded' quá khứ."
-    },
-    {
-      id: 28,
-      question: "To stay competitive, businesses must continuously innovate and adapt to emerging market _______ .",
-      options: ["(A) Trend", "(B) Trends", "(C) Trending", "(D) Trended"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Trends' vì danh từ số nhiều chỉ 'xu hướng thị trường'. Kiến thức ngữ pháp: Số nhiều sau 'emerging'; 'trend' số ít, 'trending' V-ing, 'trended' quá khứ."
-    },
-    {
-      id: 29,
-      question: "The annual report highlights a 15 percent increase in revenue, driven by digital transformation _______ .",
-      options: ["(A) Initiate", "(B) Initiatives", "(C) Initiating", "(D) Initiated"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Initiatives' vì danh từ số nhiều chỉ 'sáng kiến chuyển đổi số'. Kiến thức từ vựng: 'Digital transformation initiatives'; 'initiate' động từ, 'initiating' V-ing, 'initiated' quá khứ."
-    },
-    {
-      id: 30,
-      question: "Effective project management software helps teams collaborate efficiently and meet deadlines _______ .",
-      options: ["(A) Consistent", "(B) Consistently", "(C) Consistency", "(D) Consistenting"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Consistently' vì trạng từ bổ nghĩa 'meet' (động từ). Kiến thức ngữ pháp: Trạng từ 'consistently' chỉ cách thức; 'consistent' tính từ, 'consistency' danh từ, 'consistening' không tồn tại."
-    }
-  ]
-},
-part6: {
-  title: "PART 6: Cloze Text (Email/Announcement)",
-  description: "10 câu hỏi - Điền từ/cụm vào văn bản email về hội thảo công nghệ kinh doanh. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-  type: "reading",
-  text: `To: All Department Heads
-From: Dr. Chen, Innovation Director
-Subject: Invitation to TechBiz Summit 2025 - Register Now
-Dear Colleagues,
-We are excited to announce our sponsorship of the upcoming TechBiz Summit, a premier event focused on the intersection of technology and business innovation. Scheduled for March 15-17 in San Francisco, the summit will feature keynote speeches from industry leaders on topics like AI-driven analytics and sustainable tech practices.
-To maximize our participation, we have secured 20 complimentary tickets for our team. Attendance is encouraged for those in R&D, marketing, and strategy roles to gain insights that can inform our quarterly objectives. The agenda includes interactive workshops on cybersecurity threats and blockchain applications in supply chains.
-Please register by February 28 through the attached form to ensure your spot. Travel reimbursements will cover economy flights and standard hotel stays, with a per diem of $75 for meals. For remote attendees, virtual access is available at no cost, including live streams and on-demand recordings.
-This investment in professional development aligns with our commitment to fostering a culture of continuous learning and adaptability in a fast-paced digital economy.
-Should you have any queries, contact my assistant at ext. 789.
-Warm regards,
-Dr. Chen
-Innovation Director`,
-  questions: [
-    {
-      id: 31,
-      question: "(31)",
-      options: ["(A) Announce", "(B) Announcement", "(C) Announced", "(D) Announcing"],
-      correct: 3,
-      explanation: "Đáp án đúng là (D) 'Announcing' vì V-ing sau 'excited to' (hào hứng thông báo). Kiến thức ngữ pháp: 'Excited to + V-ing'; 'announce' nguyên thể, 'announcement' danh từ, 'announced' quá khứ."
-    },
-    {
-      id: 32,
-      question: "(32)",
-      options: ["(A) Feature", "(B) Featuring", "(C) Featured", "(D) Features"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'Featuring' vì V-ing mô tả 'agenda' (lịch trình bao gồm). Kiến thức ngữ pháp: Phân từ hiện tại 'featuring' bổ nghĩa danh từ; 'feature' nguyên thể, 'featured' quá khứ, 'features' ngôi thứ ba."
-    },
-    {
-      id: 33,
-      question: "(33)",
-      options: ["(A) Inform", "(B) Informed", "(C) Informing", "(D) Information"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) 'Informing' vì V-ing chỉ mục đích (để cung cấp thông tin). Kiến thức ngữ pháp: 'To + V-ing' mục đích; 'inform' nguyên thể, 'informed' quá khứ, 'information' danh từ."
-    },
-    {
-      id: 34,
-      question: "(34)",
-      options: ["(A) Reimbursements", "(B) Reimbursement", "(C) Reimburse", "(D) Reimbursed"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'Reimbursements' vì danh từ số nhiều chỉ 'hoàn tiền'. Kiến thức từ vựng: 'Travel reimbursements' trong chính sách; 'reimbursement' số ít, 'reimburse' động từ, 'reimbursed' quá khứ."
-    },
-    {
-      id: 35,
-      question: "(35)",
-      options: ["(A) Align", "(B) Aligns", "(C) Aligned", "(D) Alignment"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'Align' vì nguyên thể sau 'will' (sẽ phù hợp). Kiến thức ngữ pháp: 'Will + V nguyên thể'; 'aligns' ngôi thứ ba, 'aligned' quá khứ, 'alignment' danh từ."
-    },
-    {
-      id: 36,
-      question: "The summit is scheduled for (37).",
-      options: ["(A) February 28", "(B) March 15-17", "(C) April 1", "(D) May 20"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Scheduled for March 15-17'. Kiến thức đọc hiểu: Ngày sự kiện từ phần giới thiệu."
-    },
-    {
-      id: 37,
-      question: "How many complimentary tickets were secured?",
-      options: ["(A) 10", "(B) 15", "(C) 20", "(D) 25"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) vì 'secured 20 complimentary tickets'. Kiến thức đọc hiểu: Số lượng vé từ email."
-    },
-    {
-      id: 38,
-      question: "What is the main purpose of this email?",
-      options: ["(A) To report summit outcomes", "(B) To invite registration for the summit", "(C) To cancel travel plans", "(D) To announce budget cuts"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Invitation to TechBiz Summit... Register Now'. Kiến thức đọc hiểu: Mục đích từ tiêu đề và lời kêu gọi đăng ký."
-    },
-    {
-      id: 39,
-      question: "Who is the sender?",
-      options: ["(A) A marketing head", "(B) The Innovation Director", "(C) An assistant", "(D) A travel coordinator"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Dr. Chen, Innovation Director'. Kiến thức đọc hiểu: Người gửi từ 'From' và chữ ký."
-    },
-    {
-      id: 40,
-      question: "What is the per diem amount for meals?",
-      options: ["(A) $50", "(B) $65", "(C) $75", "(D) $85"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) vì 'per diem of $75 for meals'. Kiến thức đọc hiểu: Khoản phụ cấp từ phần logistics."
-    }
-  ]
-},
-part7: {
-  title: "PART 7: Multiple Texts (Advertisement + Email)",
-  description: "10 câu hỏi - Đọc quảng cáo về dịch vụ tư vấn công nghệ và email yêu cầu, chọn đáp án tốt nhất (A, B, C, D).",
-  type: "reading",
-  text: `**InnoTech Solutions Advertisement**
-Empower Your Business with Cutting-Edge Digital Transformation Services
-InnoTech Solutions delivers tailored IT consulting to drive growth and efficiency. From cloud migration to AI implementation, our experts ensure seamless adoption and measurable ROI.
-**Core Offerings:**
-1. **Cloud Migration Services** – Assess, plan, and execute transitions to AWS, Azure, or Google Cloud. Free consultation available at innotech.com.
-2. **AI & Machine Learning Integration** – Develop custom models for predictive analytics and automation.
-3. **Cybersecurity Audits** – Identify vulnerabilities and implement robust defenses.
-4. **Digital Strategy Consulting** – Roadmap development for tech-enabled business models.
-Email us at consult@innotech.com for a no-obligation quote. Response within 24 business hours.
+    part7: {
+      title: "PART 7: Multiple Texts (Business Report + Chart Analysis)",
+      description: "10 câu hỏi - Đọc báo cáo kinh doanh và phân tích biểu đồ, chọn đáp án tốt nhất (A, B, C, D).",
+      type: "reading", 
+      text: `**Quarterly Business Performance Report - TechSolutions Inc.**
+
+**Executive Summary**
+TechSolutions Inc. demonstrated strong performance in Q3 2024, with total revenue reaching $45 million, representing a 22% increase compared to the same period last year. The company's strategic focus on cloud computing services and AI solutions has driven this growth, accounting for 65% of total revenue.
+
+**Key Performance Indicators**
+- Revenue: $45 million (22% increase YoY)
+- Net Profit: $8.5 million (18% increase YoY) 
+- Customer Acquisition: 15,000 new clients
+- Customer Retention Rate: 92%
+- Employee Satisfaction: 88%
+
+**Department Performance**
+The Research & Development department successfully launched two new AI products, contributing significantly to revenue growth. The Marketing department expanded our presence in European markets, resulting in a 35% increase in international sales. Operations improved efficiency by implementing automation, reducing costs by 12%.
+
+**Challenges and Opportunities**
+While supply chain disruptions affected hardware delivery times, our software services continued to perform exceptionally well. The growing demand for cybersecurity solutions presents a significant opportunity for Q4.
+
 ---
-**Email Message**
-**To:** consult@innotech.com
-**From:** mark.thompson@globaltrade.co
-**Date:** January 15
-**Subject:** Request for Cloud Migration Consultation
-Hello InnoTech Team,
-I discovered your services via a LinkedIn ad and believe they align perfectly with our needs at Global Trade Corp. As we scale internationally, we're seeking assistance with migrating our legacy systems to the cloud to improve data accessibility and reduce latency. Specifically, we'd like to explore Azure integration for our 200-user enterprise.
-Additionally, a brief audit on cybersecurity would be valuable. Please provide an overview of your process, estimated timeline, and pricing structure. Our IT director prefers a call between 2:00 P.M. and 5:00 P.M. CST next week.
-Best,
-Mark Thompson
-Operations Manager
-Global Trade Corp.
-456 Enterprise Blvd, Chicago, IL 60601
-Phone: 312-555-0198`,
- 
-  questions: [
+
+**Revenue Distribution by Product Category - Q3 2024**
+
+Cloud Services: $18 million (40%)
+AI Solutions: $11.25 million (25%)
+Cybersecurity: $9 million (20%)
+Hardware: $4.5 million (10%)
+Consulting: $2.25 million (5%)
+
+Total: $45 million (100%)`,
+      questions: [
+        {
+          id: 41,
+          question: "What was TechSolutions Inc.'s total revenue in Q3 2024?",
+          options: ["$35 million", "$40 million", "$45 million", "$50 million"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì báo cáo nêu 'total revenue reaching $45 million'. Kiến thức đọc hiểu: Tìm thông tin số liệu chính xác từ báo cáo."
+        },
+        {
+          id: 42,
+          question: "Which product category generated the highest revenue?",
+          options: ["AI Solutions", "Cloud Services", "Cybersecurity", "Hardware"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì biểu đồ cho thấy Cloud Services chiếm 40% ($18 million). Kiến thức đọc hiểu: So sánh các phần trăm trong biểu đồ phân phối."
+        },
+        {
+          id: 43,
+          question: "What percentage of total revenue came from AI solutions and cloud services combined?",
+          options: ["50%", "60%", "65%", "70%"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì Cloud Services (40%) + AI Solutions (25%) = 65%. Kiến thức tính toán: Cộng các phần trăm từ biểu đồ."
+        },
+        {
+          id: 44,
+          question: "What was the customer retention rate?",
+          options: ["85%", "88%", "90%", "92%"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) vì báo cáo nêu 'Customer Retention Rate: 92%'. Kiến thức đọc hiểu: Tìm thông tin số liệu từ chỉ số hiệu suất."
+        },
+        {
+          id: 45,
+          question: "Which department was mentioned for expanding European market presence?",
+          options: ["Sales", "Marketing", "Operations", "R&D"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì báo cáo nói 'The Marketing department expanded our presence in European markets'. Kiến thức đọc hiểu: Xác định bộ phận từ mô tả thành tích."
+        },
+        {
+          id: 46,
+          question: "How much did operations reduce costs through automation?",
+          options: ["8%", "10%", "12%", "15%"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì báo cáo nói 'reducing costs by 12%'. Kiến thức đọc hiểu: Tìm thông tin số liệu cụ thể về cải tiến."
+        },
+        {
+          id: 47,
+          question: "What challenge did the company face regarding hardware?",
+          options: ["High production costs", "Supply chain disruptions", "Poor quality", "Low demand"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì báo cáo nói 'supply chain disruptions affected hardware delivery times'. Kiến thức đọc hiểu: Xác định thách thức từ phần vấn đề."
+        },
+        {
+          id: 48,
+          question: "What opportunity is mentioned for Q4?",
+          options: ["Expanding to Asian markets", "Growing demand for cybersecurity", "Developing mobile applications", "Acquiring competitors"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì báo cáo nói 'The growing demand for cybersecurity solutions presents a significant opportunity'. Kiến thức đọc hiểu: Xác định cơ hội từ phần kết luận."
+        },
+        {
+          id: 49,
+          question: "How many new clients were acquired in Q3?",
+          options: ["12,000", "15,000", "18,000", "20,000"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì báo cáo nêu 'Customer Acquisition: 15,000 new clients'. Kiến thức đọc hiểu: Tìm thông tin số liệu từ chỉ số hiệu suất."
+        },
+        {
+          id: 50,
+          question: "What was the net profit increase compared to last year?",
+          options: ["15%", "18%", "20%", "22%"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì báo cáo nêu 'Net Profit: $8.5 million (18% increase YoY)'. Kiến thức đọc hiểu: Tìm thông tin phần trăm tăng trưởng."
+        }
+      ]
+    },
+    part8: {
+  "title": "PART 8: Text Message Chain",
+  "description": "10 câu hỏi - Đọc chuỗi tin nhắn, chọn đáp án tốt nhất (A, B, C, D).",
+  "type": "reading",
+  "text": "Mr. Smith (11:59): Our software development meeting has been rescheduled to 2 PM tomorrow due to the client's request.\nMr. Johnson (12:01): Understood. Should I inform the QA team about this change?\nMr. Smith (12:03): Yes, please. Also, remind them about the deadline for the beta testing report.\nMr. Johnson (12:05): Will do. By the way, the new project manager from the Berlin office will be joining us virtually.\nMr. Smith (12:07): Excellent. Make sure the video conferencing equipment is properly set up in Conference Room B.\nMr. Johnson (12:10): I've already checked it this morning. Everything is working perfectly.\nMr. Smith (12:12): Great. Don't forget to share the updated agenda with all team members by end of day.\nMr. Johnson (12:15): I'll send it out right after I finish reviewing the budget projections.",
+  "questions": [
     {
-      id: 41,
-      question: "According to the advertisement, what can clients access on the InnoTech Web site?",
-      options: [
-        "(A) A free consultation",
-        "(B) Downloadable AI models",
-        "(C) Pricing calculators",
-        "(D) Employee training videos"
+      "id": 51,
+      "question": "Why was the meeting rescheduled?",
+      "options": [
+        "Due to room unavailability",
+        "Because of the client's request",
+        "Due to technical issues",
+        "Because team members were sick"
       ],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) vì 'Free consultation available at innotech.com'. Kiến thức đọc hiểu: Dịch vụ miễn phí từ quảng cáo."
+      "correct": 1,
+      "explanation": "Đáp án đúng là (B) vì Mr. Smith nói: 'due to the client's request' (do yêu cầu của khách hàng). Kiến thức đọc hiểu: Xác định lý do từ thông tin trực tiếp trong tin nhắn."
     },
     {
-      id: 42,
-      question: "How did Mr. Thompson learn about InnoTech?",
-      options: [
-        "(A) Through a trade show",
-        "(B) Via a LinkedIn ad",
-        "(C) From a referral",
-        "(D) In a magazine"
+      "id": 52,
+      "question": "What does Mr. Smith ask Mr. Johnson to remind the QA team about?",
+      "options": [
+        "The new project manager",
+        "The budget projections",
+        "The deadline for the beta testing report",
+        "The video conferencing setup"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'via a LinkedIn ad'. Kiến thức suy luận: Nguồn tiếp cận từ email."
+      "correct": 2,
+      "explanation": "Đáp án đúng là (C) vì Mr. Smith nói: 'remind them about the deadline for the beta testing report' (nhắc họ về hạn chót cho báo cáo kiểm thử beta). Kiến thức đọc hiểu: Tìm thông tin cụ thể về nhiệm vụ được giao."
     },
     {
-      id: 43,
-      question: "What role does Mr. Thompson hold?",
-      options: [
-        "(A) IT Director",
-        "(B) Operations Manager",
-        "(C) CEO",
-        "(D) Consultant"
+      "id": 53,
+      "question": "Where is the new project manager from?",
+      "options": [
+        "London office",
+        "New York office",
+        "Berlin office",
+        "Tokyo office"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Mark Thompson, Operations Manager'. Kiến thức đọc hiểu: Chức vụ từ chữ ký."
+      "correct": 2,
+      "explanation": "Đáp án đúng là (C) vì Mr. Johnson nói: 'the new project manager from the Berlin office' (quản lý dự án mới từ văn phòng Berlin). Kiến thức đọc hiểu: Xác định địa điểm từ thông tin chi tiết."
     },
     {
-      id: 44,
-      question: "Which service does Mr. Thompson NOT request?",
-      options: [
-        "(A) Cloud migration",
-        "(B) AI integration",
-        "(C) Cybersecurity audit",
-        "(D) Digital strategy consulting"
+      "id": 54,
+      "question": "Which conference room will be used for the meeting?",
+      "options": [
+        "Conference Room C",
+        "Conference Room B",
+        "Main Conference Hall",
+        "Conference Room A"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì email chỉ đề cập cloud và cybersecurity, không AI. Kiến thức đọc hiểu: So sánh yêu cầu với offerings."
+      "correct": 1,
+      "explanation": "Đáp án đúng là (B) vì Mr. Smith nói: 'video conferencing equipment is properly set up in Conference Room B' (thiết bị hội nghị truyền hình được thiết lập đúng ở Phòng họp B). Kiến thức đọc hiểu: Xác định địa điểm cụ thể từ chỉ dẫn."
     },
     {
-      id: 45,
-      question: "What will Mr. Thompson most likely receive within 24 hours?",
-      options: [
-        "(A) A full migration plan",
-        "(B) A response from InnoTech",
-        "(C) An Azure license",
-        "(D) Audit results"
+      "id": 55,
+      "question": "What did Mr. Johnson check this morning?",
+      "options": [
+        "The budget projections",
+        "The meeting agenda",
+        "The video conferencing equipment",
+        "The beta testing report"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Response within 24 business hours'. Kiến thức suy luận: Thời gian phản hồi từ quảng cáo."
+      "correct": 2,
+      "explanation": "Đáp án đúng là (C) vì Mr. Johnson nói: 'I've already checked it this morning. Everything is working perfectly.' (Tôi đã kiểm tra nó sáng nay. Mọi thứ đang hoạt động hoàn hảo.) - ám chỉ thiết bị hội nghị truyền hình. Kiến thức suy luận: Hiểu ngữ cảnh từ các tin nhắn trước đó."
     },
     {
-      id: 46,
-      question: "What cloud platform does Mr. Thompson want to explore?",
-      options: [
-        "(A) AWS",
-        "(B) Azure",
-        "(C) Google Cloud",
-        "(D) All options"
+      "id": 56,
+      "question": "When should the updated agenda be shared with team members?",
+      "options": [
+        "Tomorrow morning",
+        "Immediately",
+        "By end of day",
+        "By lunch time"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'explore Azure integration'. Kiến thức đọc hiểu: Nền tảng cụ thể từ email."
+      "correct": 2,
+      "explanation": "Đáp án đúng là (C) vì Mr. Smith nói: 'share the updated agenda with all team members by end of day' (chia sẻ chương trình làm việc đã cập nhật với tất cả thành viên nhóm trước cuối ngày). Kiến thức đọc hiểu: Xác định thời hạn từ chỉ dẫn cụ thể."
     },
     {
-      id: 47,
-      question: "What is the size of Mr. Thompson's enterprise?",
-      options: [
-        "(A) 100 users",
-        "(B) 150 users",
-        "(C) 200 users",
-        "(D) 250 users"
+      "id": 57,
+      "question": "What is Mr. Johnson doing before sending out the agenda?",
+      "options": [
+        "Setting up the conference room",
+        "Preparing the beta report",
+        "Contacting the QA team",
+        "Reviewing the budget projections"
       ],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) vì '200-user enterprise'. Kiến thức đọc hiểu: Quy mô từ email."
+      "correct": 3,
+      "explanation": "Đáp án đúng là (D) vì Mr. Johnson nói: 'I'll send it out right after I finish reviewing the budget projections' (Tôi sẽ gửi nó ngay sau khi tôi hoàn thành việc xem xét các dự báo ngân sách). Kiến thức đọc hiểu: Xác định hành động hiện tại từ kế hoạch công việc."
     },
     {
-      id: 48,
-      question: "What is the primary need for Mr. Thompson's company?",
-      options: [
-        "(A) Reducing staff size",
-        "(B) Improving data accessibility and reducing latency",
-        "(C) Marketing campaigns",
-        "(D) Hardware upgrades"
+      "id": 58,
+      "question": "How will the new project manager join the meeting?",
+      "options": [
+        "Will not join",
+        "In person",
+        "By telephone",
+        "Virtually"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'improve data accessibility and reduce latency'. Kiến thức đọc hiểu: Nhu cầu chính từ email."
+      "correct": 3,
+      "explanation": "Đáp án đúng là (D) vì Mr. Johnson nói: 'will be joining us virtually' (sẽ tham gia với chúng ta một cách ảo). Kiến thức đọc hiểu: Hiểu từ ngữ chỉ phương thức tham gia."
     },
     {
-      id: 49,
-      question: "When does the IT director prefer a call?",
-      options: [
-        "(A) Morning hours",
-        "(B) Between 2:00 P.M. and 5:00 P.M. CST",
-        "(C) Evenings",
-        "(D) Weekends"
+      "id": 59,
+      "question": "What was the original time of the meeting?",
+      "options": [
+        "Not mentioned in the messages",
+        "12:00 PM",
+        "2:00 PM",
+        "11:59 AM"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'between 2:00 P.M. and 5:00 P.M. CST next week'. Kiến thức đọc hiểu: Khung giờ từ email."
+      "correct": 0,
+      "explanation": "Đáp án đúng là (A) vì tin nhắn chỉ đề cập thời gian mới (2 PM tomorrow) mà không nói thời gian gốc. Kiến thức suy luận: Nhận biết thông tin không được cung cấp."
     },
     {
-      id: 50,
-      question: "What company does Mr. Thompson represent?",
-      options: [
-        "(A) InnoTech Solutions",
-        "(B) Global Trade Corp",
-        "(C) LinkedIn Inc.",
-        "(D) Azure Technologies"
+      "id": 60,
+      "question": "What is the main topic of this text conversation?",
+      "options": [
+        "Meeting preparation",
+        "Budget planning",
+        "Client presentation",
+        "Team building activities"
       ],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Global Trade Corp'. Kiến thức đọc hiểu: Tên công ty từ email."
-    }
-  ]
-},
-part8: {
-  title: "PART 8: Text Message Chain",
-  description: "10 câu hỏi - Đọc chuỗi tin nhắn về họp trực tuyến kinh doanh, chọn đáp án tốt nhất (A, B, C, D).",
-  type: "reading",
-  text: `Sarah (14:20): Team, quarterly review Zoom starts in 10 min. Link: zoom.us/j/123456. Agenda attached.\nMark (14:22): Got it. Prepping slides on Q4 revenue projections—up 18% from last year.\nSarah (14:25): Thanks Mark. John, your update on the app launch?\nJohn (14:28): Ready. Beta testing complete; rollout next week. Expect 30% user growth.\nMark (14:35): Quick note: Tech support if audio issues—dial-in option available.\nSarah (14:38): Appreciate it. Let's aim to wrap by 3 PM sharp.\nJohn (14:45): In the meeting. All set!`,
-  questions: [
-    {
-      id: 51,
-      question: "What is the purpose of the meeting?",
-      options: ["(A) Social gathering", "(B) Quarterly review", "(C) Team building", "(D) Holiday planning"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'quarterly review Zoom'. Kiến thức đọc hiểu: Mục đích từ tin nhắn đầu."
-    },
-    {
-      id: 52,
-      question: "What does Mark mean by 'up 18% from last year'?",
-      options: ["(A) Revenue decline", "(B) Revenue increase in projections", "(C) User drop", "(D) Cost reduction"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Q4 revenue projections—up 18%'. Kiến thức suy luận: Tăng doanh thu từ dự báo."
-    },
-    {
-      id: 53,
-      question: "Who is providing the app launch update?",
-      options: ["(A) Sarah", "(B) Mark", "(C) John", "(D) The team lead"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) vì 'John, your update on the app launch?'. Kiến thức đọc hiểu: Phân công từ Sarah."
-    },
-    {
-      id: 54,
-      question: "When is the app rollout expected?",
-      options: ["(A) This week", "(B) Next week", "(C) Next month", "(D) Q1 next year"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'rollout next week'. Kiến thức đọc hiểu: Thời gian từ John."
-    },
-    {
-      id: 55,
-      question: "What is Mark preparing?",
-      options: ["(A) Agenda", "(B) Slides on revenue projections", "(C) Beta tests", "(D) Zoom link"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Prepping slides on Q4 revenue projections'. Kiến thức đọc hiểu: Chuẩn bị của Mark."
-    },
-    {
-      id: 56,
-      question: "What can be inferred about the app launch?",
-      options: ["(A) Testing failed", "(B) Beta testing complete", "(C) Delayed indefinitely", "(D) Canceled"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Beta testing complete'. Kiến thức suy luận: Trạng thái sẵn sàng từ John."
-    },
-    {
-      id: 57,
-      question: "Why does Mark mention tech support?",
-      options: ["(A) To cancel the meeting", "(B) For audio issues with dial-in", "(C) To share the agenda", "(D) To reschedule"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'Tech support if audio issues—dial-in option'. Kiến thức suy luận: Hỗ trợ kỹ thuật dự phòng."
-    },
-    {
-      id: 58,
-      question: "What user growth does John expect?",
-      options: ["(A) 20%", "(B) 25%", "(C) 30%", "(D) 35%"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) vì 'Expect 30% user growth'. Kiến thức đọc hiểu: Dự báo từ John."
-    },
-    {
-      id: 59,
-      question: "What time does Sarah want to end the meeting?",
-      options: ["(A) 2:30 PM", "(B) 3:00 PM", "(C) 3:30 PM", "(D) 4:00 PM"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'wrap by 3 PM sharp'. Kiến thức đọc hiểu: Thời gian kết thúc từ Sarah."
-    },
-    {
-      id: 60,
-      question: "What does John confirm in his last message?",
-      options: ["(A) He's late", "(B) Everything is set for the meeting", "(C) Slides are ready", "(D) Link is broken"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'In the meeting. All set!'. Kiến thức suy luận: Xác nhận sẵn sàng từ John."
+      "correct": 0,
+      "explanation": "Đáp án đúng là (A) vì toàn bộ cuộc trò chuyện xoay quanh việc chuẩn bị cho cuộc họp (lịch trình, thiết bị, thông báo). Kiến thức tổng hợp: Xác định chủ đề chính từ nội dung tổng thể."
     }
   ]
 }

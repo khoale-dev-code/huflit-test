@@ -14,7 +14,7 @@ export const GENDER_CATEGORIES = {
   MALE: ['Man', 'Mark', 'Ben', 'Client 1', 'Professor', 'John', 'Mike', 'Waiter', 
          'Customer', 'Manager', 'HR Rep', 'Interviewer 1', 'Interviewer 2', 
          'Candidate', 'Professor A', 'Student 1', 'Student', 'Parent', 
-         'Travel Agent', 'Narrator', 'Dr. Smith', 'Tom'],
+         'Travel Agent', 'Narrator', 'Smith', 'Tom'],
   NEUTRAL: ['Narrator', 'System', 'AI Assistant']
 };
 
@@ -44,8 +44,9 @@ export const VOICE_SETTINGS = {
   Mike: { pitch: 0.89, rate: 1.05, volume: 1.0,style: "friendly" },
   John: { pitch: 0.95, rate: 1.1, volume: 1.0, style: "serious",break_after: 1.0,delay_before: 0.5   },
   Ben: { pitch: 0.72, rate: 1.0, volume: 1.0, style: "confident" },
-  DrSmith: { pitch: 0.72, rate: 1.0, volume: 1.0, style: "authoritative" },
+  Smith: { pitch: 0.72, rate: 1.0, volume: 1.0, style: "authoritative" },
   Anna: { pitch: 1.45, rate: 0.75, volume: 1.0, style: "enthusiastic" },
+  Lisa: { pitch: 1.55, rate: 0.25, volume: 1.0, style: "soothing" },
   
   // Academic Speakers
   Professor: { pitch: 0.58, rate: 0.85, volume: 1.0 },
@@ -289,12 +290,15 @@ export const SPEAKER_ICONS = {
   Counselor: '🧑‍⚕️',
   
   // General
-  Mark: '👨',
+  Mark: '🧑‍🔬',
   Sarah: '👩',
   Anna: '👩',
   Ben: '👨',
   Mike: '👨',
   John: '👨',
+  Tom: '🧑‍🎓',
+  Emma: '👩',
+  Lisa: '👩',
   'Older Woman': '👵',
   Parent: '👪',
   

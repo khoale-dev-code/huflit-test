@@ -32,7 +32,7 @@ const db = admin.firestore();
 // ============================================
 let EXAMS = {}; // { exam1: EXAM1_DATA, exam2: EXAM2_DATA, ... exam8: EXAM8_DATA }
 
-const examNumbers = [1, 2, 3, 4, 5, 6, 7, 8];
+const examNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 try {
   for (const num of examNumbers) {
@@ -48,8 +48,8 @@ try {
   process.exit(1);
 }
 
-if (Object.keys(EXAMS).length < 8) {
-  console.error('Less than 8 exams loaded. Check files.');
+if (Object.keys(EXAMS).length < 10) {
+  console.error('Less than 10 exams loaded. Check files.');
   process.exit(1);
 }
 
@@ -238,7 +238,7 @@ async function main() {
     console.log(`\nSummary:`);
     console.log(`   Exams: ${exams}`);
     console.log(`   Parts: ${parts}`);
-    console.log(`\nAll exam data from 8 files successfully uploaded to Firebase Firestore!`);
+    console.log(`\nAll exam data from 10 files successfully uploaded to Firebase Firestore!`);
     console.log(`\nView your data:`);
     console.log(`   https://console.firebase.google.com/u/0/project/huflit-test-4ce25/firestore (collection: examData)\n`);
 
