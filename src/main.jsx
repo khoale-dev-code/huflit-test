@@ -37,7 +37,7 @@ const Root = () => (
       afterSignOutUrl="/"
       // ✅ Optimized Clerk config
       appearance={{
-        baseTheme: undefined, // Use default theme
+        baseTheme: undefined,
         variables: {
           colorPrimary: '#f97316', // Orange
         }
@@ -59,10 +59,32 @@ if (!rootElement) {
   throw new Error('Root element with id="root" not found in HTML');
 }
 
-ReactDOM.createRoot(rootElement).render(<Root />);
+const root = ReactDOM.createRoot(rootElement);
+root.render(<Root />);
 
-// ✅ Optional: Report Web Vitals for monitoring (install with: npm install web-vitals)
+// ✅ Optimize React for production: disable strict mode in prod
 if (process.env.NODE_ENV === 'production') {
+  // Remove StrictMode by re-rendering without it
+  root.render(
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY}
+      afterSignOutUrl="/"
+      appearance={{
+        baseTheme: undefined,
+        variables: {
+          colorPrimary: '#f97316',
+        }
+      }}
+    >
+      <Suspense fallback={<RootFallback />}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </Suspense>
+    </ClerkProvider>
+  );
+
+  // Report Web Vitals for monitoring
   try {
     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
       getCLS(console.log);
@@ -71,8 +93,23 @@ if (process.env.NODE_ENV === 'production') {
       getLCP(console.log);
       getTTFB(console.log);
     });
-  } catch (error) {
-    // web-vitals not installed, continue without monitoring
+  } catch {
     console.log('web-vitals not installed. Skipping performance monitoring.');
+  }
+
+  // ✅ Enable paint timing API for scroll performance monitoring
+  if (window.PerformanceObserver) {
+    try {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.duration > 50) { // Log slow frames (>50ms)
+            console.warn(`Slow paint: ${entry.name} - ${entry.duration.toFixed(2)}ms`);
+          }
+        }
+      });
+      observer.observe({ entryTypes: ['measure', 'navigation'] });
+    } catch (e) {
+      // PerformanceObserver not supported
+    }
   }
 }

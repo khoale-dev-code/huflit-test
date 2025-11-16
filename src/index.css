@@ -705,3 +705,18 @@ h4 {
     animation: fadeIn 0.4s ease-in-out;
   }
 }
+
+/* Thêm vào index.css */
+html {
+  scroll-behavior: auto; /* Không smooth-scroll */
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Bỏ position: relative trên các parent nếu có */
+}
+
+* {
+  /* Tránh sử dụng will-change quá nhiều */
+}

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, lazy, Suspense, memo, useCallback, useRef } from 'react';
+import React, { useMemo, useState, lazy, Suspense, useCallback, memo } from 'react';
 import { EXAM_DATA } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import MainLayout from './components/layout/MainLayout';
@@ -12,16 +12,13 @@ import ResultsDisplay from './components/ResultsDisplay';
 import VocabularyPractice from './components/VocabularyPractice';
 import AuthModal from './components/AuthModal';
 
-import { Target, Trophy, FileText, Zap, GraduationCap, MessageCircle, X } from 'lucide-react';
+import { Target, Trophy, FileText, Zap, GraduationCap } from 'lucide-react';
 
 // ✅ Lazy load components
 const GrammarReview = lazy(() => import('./components/GrammarReview'));
 const FullExamMode = lazy(() => import('./components/FullExamMode'));
-const ChatApp = lazy(() => import('./components/ChatApp.jsx'));
 
-// --- Memoized Sub-Components ---
-
-// ✅ StatCard - Custom comparison tối ưu
+// --- StatCard được memo hóa ---
 const StatCard = memo(({ icon: Icon, label, value, color }) => {
   const colorMap = {
     orange: 'border-orange-300 text-orange-700 bg-orange-50',
@@ -37,11 +34,11 @@ const StatCard = memo(({ icon: Icon, label, value, color }) => {
       <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">{value}</p>
     </div>
   );
-}, (prev, next) => prev.value === next.value && prev.color === next.color);
+});
 
 StatCard.displayName = 'StatCard';
 
-// ✅ StatsSection - Tối ưu comparison
+// --- StatsSection được memo hóa ---
 const StatsSection = memo(({ score, isSignedIn }) => {
   if (!isSignedIn || score.total === 0) return null;
 
@@ -53,20 +50,16 @@ const StatsSection = memo(({ score, isSignedIn }) => {
       <StatCard icon={Zap} label="%" value={`${score.percentage.toFixed(0)}%`} color="orange" />
     </section>
   );
-}, (prev, next) => {
-  return prev.score.total === next.score.total &&
-    prev.score.correct === next.score.correct &&
-    prev.isSignedIn === next.isSignedIn;
 });
 
 StatsSection.displayName = 'StatsSection';
 
-// ✅ FullExamPrompt - Không cần thay đổi khi parent re-render
+// --- FullExamPrompt được memo hóa ---
 const FullExamPrompt = memo(({ onStartFullExam }) => (
-  <section className="bg-white rounded-2xl sm:rounded-3xl border-3 sm:border-4 border-amber-300 p-4 sm:p-6 md:p-8 shadow-md hover:shadow-lg transition-shadow duration-200">
+  <section className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
       <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        <div className="p-3 sm:p-4 rounded-full bg-amber-100 border-2 border-amber-500">
+        <div className="p-3 sm:p-4 rounded-full bg-amber-100 border border-amber-300">
           <GraduationCap className="w-6 h-6 sm:w-8 text-amber-700" />
         </div>
         <h3 className="text-lg sm:text-2xl font-bold text-gray-800">
@@ -87,58 +80,12 @@ const FullExamPrompt = memo(({ onStartFullExam }) => (
       </div>
     </div>
   </section>
-), () => true);
+));
 
 FullExamPrompt.displayName = 'FullExamPrompt';
 
-// ✅ Chat Modal - Optimized with proper memo
-const ChatModal = memo(({ onClose, user }) => (
-  <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:justify-end">
-    <div className="w-full sm:w-[600px] h-screen sm:h-[600px] bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-600 text-white p-4 rounded-t-3xl sm:rounded-t-2xl flex-shrink-0">
-        <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 truncate">
-          <MessageCircle className="w-5 h-5 flex-shrink-0" />
-          <span className="truncate">Trò Chuyện Chung</span>
-        </h2>
-        <button
-          onClick={onClose}
-          className="hover:bg-orange-400 p-2 rounded-lg transition-colors flex-shrink-0 ml-2"
-          aria-label="Đóng chat"
-        >
-          <X className="w-5 h-5 sm:w-6" />
-        </button>
-      </div>
-
-      {/* Chat Content */}
-      <div className="flex-1 overflow-hidden">
-        <Suspense fallback={<LoadingSpinner />}>
-          <ChatApp user={user} />
-        </Suspense>
-      </div>
-    </div>
-  </div>
-), (prev, next) => prev.user?.id === next.user?.id);
-
-ChatModal.displayName = 'ChatModal';
-
-// ✅ Chat Button - Tách riêng để tránh re-render
-const ChatButton = memo(({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full p-3 sm:p-4 shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 z-40"
-    title="Mở chat"
-    aria-label="Mở trò chuyện"
-  >
-    <MessageCircle className="w-5 h-5 sm:w-6" />
-  </button>
-));
-
-ChatButton.displayName = 'ChatButton';
-
-// 🔥 FIX: Part Test Content - BỎ MEMO HOẶC FIX COMPARISON
-// Cách 1: Bỏ memo (đơn giản nhất)
-const PartTestContent = ({
+// --- PartTestContent được memo hóa ---
+const PartTestContent = memo(({
   isSignedIn,
   user,
   selectedExam,
@@ -203,52 +150,13 @@ const PartTestContent = ({
     <StatsSection score={score} isSignedIn={isSignedIn} />
     <FullExamPrompt onStartFullExam={onStartFullExam} />
   </div>
-);
+));
 
 PartTestContent.displayName = 'PartTestContent';
 
-// 🔥 NẾU MUỐN GIỮ MEMO, DÙNG CÁCH NÀY:
-/*
-const PartTestContent = memo(({
-  isSignedIn,
-  user,
-  selectedExam,
-  handleExamChange,
-  testType,
-  handleTestTypeChange,
-  selectedPart,
-  handlePartChange,
-  partData,
-  currentQuestionIndex,
-  setCurrentQuestionIndex,
-  answers,
-  handleAnswerSelect,
-  showResults,
-  handleSubmit,
-  handleReset,
-  score,
-  onStartFullExam
-}) => (
-  // ... same JSX ...
-), (prev, next) => {
-  // ✅ PHẢI CHECK ANSWERS!
-  return prev.selectedExam === next.selectedExam &&
-    prev.selectedPart === next.selectedPart &&
-    prev.currentQuestionIndex === next.currentQuestionIndex &&
-    prev.showResults === next.showResults &&
-    prev.isSignedIn === next.isSignedIn &&
-    prev.answers === next.answers; // ← THIẾU DÒNG NÀY!
-});
-*/
-
 // --- Main App Component ---
-
 function App() {
-  const [showChat, setShowChat] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  // ✅ useRef for handlers to avoid recreating functions
-  const modalStateRef = useRef({ chat: false, auth: false });
 
   const {
     selectedExam,
@@ -270,15 +178,6 @@ function App() {
     user,
   } = useAppState();
 
-  // ✅ Optimized callbacks - giữ reference
-  const handleChatClose = useCallback(() => {
-    setShowChat(false);
-  }, []);
-
-  const handleChatOpen = useCallback(() => {
-    setShowChat(true);
-  }, []);
-
   const handleAuthClose = useCallback(() => {
     setShowAuthModal(false);
   }, []);
@@ -287,13 +186,11 @@ function App() {
     setShowAuthModal(true);
   }, []);
 
-  // ✅ Memoized partData - efficient
   const partData = useMemo(() => {
     if (practiceType) return null;
     return EXAM_DATA[selectedExam]?.parts?.[selectedPart] || null;
   }, [practiceType, selectedExam, selectedPart]);
 
-  // ✅ Optimized score calculation - for loop instead of forEach
   const score = useMemo(() => {
     if (practiceType || !partData?.questions) {
       return { correct: 0, total: 0, percentage: 0 };
@@ -302,7 +199,6 @@ function App() {
     let correct = 0;
     const total = partData.questions.length;
 
-    // ✅ for loop là nhanh nhất
     for (let i = 0; i < total; i++) {
       const q = partData.questions[i];
       if (answers[q.id] === q.correct) {
@@ -317,19 +213,15 @@ function App() {
     };
   }, [practiceType, partData, answers]);
 
-  // ✅ Start full exam handler - memoized
   const handleStartFullExam = useCallback(() => {
     handleTestTypeChange('full');
   }, [handleTestTypeChange]);
 
-  // ✅ Render main content - optimized logic
   const renderMainContent = useCallback(() => {
-    // Practice Mode - Vocabulary
     if (practiceType === 'vocabulary') {
       return <VocabularyPractice />;
     }
 
-    // Practice Mode - Grammar
     if (practiceType === 'grammar') {
       return (
         <Suspense fallback={<LoadingSpinner />}>
@@ -342,7 +234,6 @@ function App() {
       );
     }
 
-    // Full Exam Mode
     if (testType === 'full') {
       return (
         <Suspense fallback={<LoadingSpinner />}>
@@ -354,7 +245,6 @@ function App() {
       );
     }
 
-    // Part Test Mode (Default)
     return (
       <PartTestContent
         isSignedIn={isSignedIn}
@@ -392,23 +282,13 @@ function App() {
       onPracticeTypeChange={handlePracticeTypeChange}
       user={user}
       onAuthClick={handleAuthOpen}
-      onChatClick={handleChatOpen}
     >
-      {/* Main Content */}
       <div className="relative z-10 p-4 sm:p-6">
         <Suspense fallback={<LoadingSpinner />}>
           {renderMainContent()}
         </Suspense>
         {showAuthModal && <AuthModal onClose={handleAuthClose} />}
       </div>
-
-      {/* Chat Button - Memoized */}
-      <ChatButton onClick={handleChatOpen} />
-
-      {/* Chat Modal */}
-      {showChat && (
-        <ChatModal onClose={handleChatClose} user={user} />
-      )}
     </MainLayout>
   );
 }
