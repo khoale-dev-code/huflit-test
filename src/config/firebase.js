@@ -2,8 +2,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
+import { getDatabase } from "firebase/database"; // Thêm
 
-// Your Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,33 +13,25 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Validate config
 if (!firebaseConfig.apiKey) {
-  console.warn('⚠️ Firebase config is missing. Check your .env file.');
+  console.warn('Firebase config is missing. Check your .env file.');
 }
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
-
-// Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
-
-// Initialize Cloud Storage and get a reference to the service
 export const storage = getStorage(app);
+export const rtdb = getDatabase(app); // Export RTDB
 
-// Development: Connect to emulators
 if (process.env.NODE_ENV === 'development' && import.meta.env.VITE_USE_EMULATOR === 'true') {
   try {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectStorageEmulator(storage, 'localhost', 9199);
-    console.log('✅ Connected to Firebase Emulators');
+    console.log('Connected to Firebase Emulators');
   } catch (error) {
-    // Emulators already connected or not running
-    console.log('ℹ️ Firebase Emulators not available');
+    console.log('Firebase Emulators not available');
   }
 }
 

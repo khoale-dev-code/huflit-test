@@ -3,7 +3,7 @@ import { Menu, X, Headphones, BookOpen, BookMarked, Sparkles, User, ChevronDown,
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
-
+import OnlineStats from '../components/OnlineStats'; // THÊM DÒNG NÀY
 // ✅ CSS Module Import ☝️
 
 // ======================================================================
@@ -308,8 +308,10 @@ export default function Navbar({
             ))}
           </div>
 
-          {/* Right Section - Desktop */}
+         {/* Right Section - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
+            <OnlineStats /> {/* Thêm dòng này */}
+
             {isSignedIn && user ? (
               <div className="relative" ref={profileMenuRef}>
                 <ProfileButton
