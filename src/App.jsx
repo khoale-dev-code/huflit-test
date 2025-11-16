@@ -265,13 +265,7 @@ function App() {
           ← Quay lại trang chính
         </button>
         
-        <button
-          onClick={handleGoToAnswers}
-          className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition-colors ml-auto"
-          style={{ display: currentPage === 'main' ? 'inline-flex' : 'none' }}
-        >
-          📚 Xem Đáp Án
-        </button>
+      
       </div>
     );
   }, [currentPage, handleBackToMain, handleGoToAnswers]);
