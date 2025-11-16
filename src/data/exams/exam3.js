@@ -66,74 +66,74 @@ export const EXAM3_DATA = {
         }
       ]
     },
-    part2: {
-      title: "PART 2: Longer Conversation",
-      description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại phòng khám về giáo dục sức khỏe. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-      type: "listening",
-      script: "Narrator: At the clinic waiting room.\nDr. Chen: Good morning, John and Mike. You're here for the wellness workshop signup?\nJohn: Yes, Doctor. Mike's been having sleep issues, so we're interested in the session on healthy habits.\nMike: Exactly. I work late shifts and struggle with insomnia. Does the workshop cover relaxation techniques?\nDr. Chen: It does—mindfulness and yoga basics. Sarah, our nutritionist, leads it; she emphasizes balanced meals to improve sleep quality.\nJohn: Sounds perfect. When is the next one? We both need to fit it into our schedules.\nMike: Also, any prerequisites? Like a doctor's note?\nDr. Chen: None required. It's open to all staff and students. Sign up online by Friday to secure spots.",
-      questions: [
-        {
-          id: 6,
-          question: "Why are the men at the clinic?",
-          options: [
-            "For a routine checkup",
-            "For wellness workshop signup",
-            "For medication refill",
-            "For surgery consultation"
-          ],
-          correct: 1,
-          explanation: "Dr. Chen nói: 'You're here for the wellness workshop signup?' (Các anh đến để đăng ký hội thảo sức khỏe?) Kiến thức ngữ pháp: Câu hỏi yes/no với 'be + here for + danh từ' chỉ mục đích; thì hiện tại đơn 'are' cho tình huống hiện tại, nhấn mạnh ngữ cảnh giáo dục sức khỏe."
-        },
-        {
-          id: 7,
-          question: "What problem does Mike have?",
-          options: [
-            "Overeating",
-            "Sleep issues",
-            "High energy",
-            "Early shifts"
-          ],
-          correct: 1,
-          explanation: "John nói: 'Mike's been having sleep issues.' (Mike đang gặp vấn đề giấc ngủ.) Kiến thức ngữ pháp: Thì hiện tại hoàn thành tiếp diễn 'has been having' chỉ vấn đề kéo dài từ quá khứ đến hiện tại; sở hữu 'Mike's' rút gọn 'Mike has' để mượt mà."
-        },
-        {
-          id: 8,
-          question: "What does the workshop cover?",
-          options: [
-            "Only nutrition",
-            "Relaxation techniques",
-            "Surgery basics",
-            "No techniques"
-          ],
-          correct: 1,
-          explanation: "Dr. Chen nói: 'It does—mindfulness and yoga basics.' (Nó có—chánh niệm và cơ bản yoga.) Kiến thức ngữ pháp: Câu trả lời ngắn 'It does' xác nhận câu hỏi trước; liệt kê song song 'mindfulness and yoga basics' với 'and' nối hai danh từ chỉ kỹ thuật thư giãn."
-        },
-        {
-          id: 9,
-          question: "Who leads the workshop?",
-          options: [
-            "Dr. Chen",
-            "John",
-            "Sarah, the nutritionist",
-            "Mike"
-          ],
-          correct: 2,
-          explanation: "Dr. Chen nói: 'Sarah, our nutritionist, leads it.' (Sarah, chuyên gia dinh dưỡng của chúng tôi, dẫn dắt nó.) Kiến thức ngữ pháp: Appositive phrase 'our nutritionist' bổ nghĩa 'Sarah' (ngắt bằng dấu phẩy); thì hiện tại đơn 'leads' chỉ vai trò thường xuyên."
-        },
-        {
-          id: 10,
-          question: "What is required to sign up?",
-          options: [
-            "A doctor's note",
-            "Online signup by Friday",
-            "Payment",
-            "Prerequisites"
-          ],
-          correct: 1,
-          explanation: "Dr. Chen nói: 'Sign up online by Friday to secure spots.' (Đăng ký trực tuyến trước thứ Sáu để giữ chỗ.) Kiến thức ngữ pháp: Cấu trúc mệnh lệnh 'sign up + trạng từ' chỉ hành động cần làm; 'to + V nguyên thể' chỉ mục đích (to secure), với 'by + thời gian' chỉ hạn chót."
-        }
-      ]
+   part2: {
+  title: "PART 2: Longer Conversation",
+  description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại phòng khám về giáo dục sức khỏe. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Narrator: At the clinic waiting room.\nDoctor Chen: Good morning, John and Mike. You're here for the wellness workshop signup?\nJohn: Yes, Doctor. Mike's been having sleep issues, so we're interested in the session on healthy habits.\nMike: Exactly. I work late shifts and struggle with insomnia. Does the workshop cover relaxation techniques?\nDoctor Chen: It does—mindfulness and yoga basics. Sarah, our nutritionist, leads it; she emphasizes balanced meals to improve sleep quality.\nJohn: Sounds perfect. When is the next one? We both need to fit it into our schedules.\nMike: Also, any prerequisites? Like a doctor's note?\nDoctor Chen: None required. It's open to all staff and students. Sign up online by Friday to secure spots.",
+  questions: [
+    {
+      id: 6,
+      question: "Why are the men at the clinic?",
+      options: [
+        "For a routine checkup",
+        "For wellness workshop signup",
+        "For medication refill",
+        "For surgery consultation"
+      ],
+      correct: 1,
+      explanation: "Doctor Chen nói: 'You're here for the wellness workshop signup?' (Các anh đến để đăng ký hội thảo sức khỏe?) Kiến thức ngữ pháp: Câu hỏi yes/no với 'be + here for + danh từ' chỉ mục đích; thì hiện tại đơn 'are' cho tình huống hiện tại, nhấn mạnh ngữ cảnh giáo dục sức khỏe."
     },
+    {
+      id: 7,
+      question: "What problem does Mike have?",
+      options: [
+        "Overeating",
+        "Sleep issues",
+        "High energy",
+        "Early shifts"
+      ],
+      correct: 1,
+      explanation: "John nói: 'Mike's been having sleep issues.' (Mike đang gặp vấn đề giấc ngủ.) Kiến thức ngữ pháp: Thì hiện tại hoàn thành tiếp diễn 'has been having' chỉ vấn đề kéo dài từ quá khứ đến hiện tại; sở hữu 'Mike's' rút gọn 'Mike has' để mượt mà."
+    },
+    {
+      id: 8,
+      question: "What does the workshop cover?",
+      options: [
+        "Only nutrition",
+        "Relaxation techniques",
+        "Surgery basics",
+        "No techniques"
+      ],
+      correct: 1,
+      explanation: "Doctor Chen nói: 'It does—mindfulness and yoga basics.' (Nó có—chánh niệm và cơ bản yoga.) Kiến thức ngữ pháp: Câu trả lời ngắn 'It does' xác nhận câu hỏi trước; liệt kê song song 'mindfulness and yoga basics' với 'and' nối hai danh từ chỉ kỹ thuật thư giãn."
+    },
+    {
+      id: 9,
+      question: "Who leads the workshop?",
+      options: [
+        "Doctor Chen",
+        "John",
+        "Sarah, the nutritionist",
+        "Mike"
+      ],
+      correct: 2,
+      explanation: "Doctor Chen nói: 'Sarah, our nutritionist, leads it.' (Sarah, chuyên gia dinh dưỡng của chúng tôi, dẫn dắt nó.) Kiến thức ngữ pháp: Appositive phrase 'our nutritionist' bổ nghĩa 'Sarah' (ngắt bằng dấu phẩy); thì hiện tại đơn 'leads' chỉ vai trò thường xuyên."
+    },
+    {
+      id: 10,
+      question: "What is required to sign up?",
+      options: [
+        "A doctor's note",
+        "Online signup by Friday",
+        "Payment",
+        "Prerequisites"
+      ],
+      correct: 1,
+      explanation: "Doctor Chen nói: 'Sign up online by Friday to secure spots.' (Đăng ký trực tuyến trước thứ Sáu để giữ chỗ.) Kiến thức ngữ pháp: Cấu trúc mệnh lệnh 'sign up + trạng từ' chỉ hành động cần làm; 'to + V nguyên thể' chỉ mục đích (to secure), với 'by + thời gian' chỉ hạn chót."
+    }
+  ]
+},
     part3: {
       title: "PART 3: Monologue",
       description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn) của giảng viên về giáo dục sức khỏe. Nghe và chọn đáp án tốt nhất (A, B, C, D).",

@@ -2,8 +2,8 @@
 
 export const GENDER_CATEGORIES = {
   FEMALE: ['Woman', 'Sarah', 'Anna', 'Client 2', 'Sales Associate', 'Older Woman', 
-           'Student B', 'Student 2', 'Counselor', 'Emma', 'Lisa', 'Dr. Chen'],
-  MALE: ['Man', 'Mark', 'Ben', 'Client 1', 'Professor', 'John', 'Mike', 'Waiter', 
+           'Student B', 'Student 2', 'Counselor', 'Emma', 'Lisa', 'Doctor Chen'],
+  MALE: ['Man', 'Mark', 'Dr.Chen','Ben', 'Client 1', 'Professor', 'John', 'Mike', 'Waiter', 
          'Customer', 'Manager', 'HR Rep', 'Interviewer 1', 'Interviewer 2', 
          'Candidate', 'Professor A', 'Student 1', 'Student', 'Parent', 
          'Travel Agent', 'Narrator', 'Smith', 'Tom'],
@@ -29,7 +29,7 @@ export const ENHANCED_VOICE_SETTINGS = {
   },
   
   John: { 
-    pitch: 1.05,
+    pitch: 0.75,
     rate: 1.1,
     volume: 0.9,
     style: "serious",
@@ -51,9 +51,19 @@ export const ENHANCED_VOICE_SETTINGS = {
     pauseFrequency: "medium",
     emphasis: "clear"
   },
+'Doctor Chen': { 
+    pitch: 1.32,
+    rate: 0.88,
+    volume: 0.89,
+    style: "professional",
+    emotion: "caring",
+    speechPattern: "measured",
+    pauseFrequency: "medium",
+    emphasis: "clear"
+  },
 
   Mike: { 
-    pitch: 0.98,
+    pitch: 0.38,
     rate: 1.05,
     volume: 0.87,
     style: "friendly",
@@ -415,6 +425,18 @@ export const ENHANCED_SPEAKER_THEMES = {
       happy: 'from-blue-100 to-green-100 border-green-400'
     }
   },
+    "Dr.Chen": {
+    gradient: 'from-blue-50 to-blue-100',
+    border: 'border-blue-400',
+    text: 'text-blue-900',
+    shadow: 'shadow-blue-200',
+    emotional: {
+      excited: 'from-blue-100 to-blue-200 border-blue-500',
+      angry: 'from-red-50 to-red-100 border-red-400',
+      happy: 'from-blue-100 to-green-100 border-green-400'
+    }
+  },
+
   
   // Pink/Rose tones - Professional females
   Sarah: {
@@ -642,6 +664,10 @@ export const SPEAKER_ICONS = {
   
   // Healthcare/Counseling
   Counselor: '🧑‍⚕️',
+
+  'Doctor Chen':'👩‍⚕️',
+    
+  
   
   // General
   Mark: '🧑‍🔬',
