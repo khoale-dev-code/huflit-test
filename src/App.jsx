@@ -1,64 +1,227 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useState, lazy, Suspense, memo, useCallback, useRef } from 'react';
 import { EXAM_DATA } from './data/examData';
-import { useVoices } from './hooks/useVoices';
-import { useAudio } from './hooks/useAudio';
-import { useUserProgress } from './hooks/useUserProgress';
-import { useUnifiedAuth } from './hooks/useUnifiedAuth';
-import { useClerkFirebaseSync } from './hooks/useClerkFirebaseSync';
-import { useFirebaseUserSync } from './hooks/useFirebaseUserSync';
-import { useAutoSaveProgress } from './hooks/useAutoSaveProgress';
 import { useAppState } from './hooks/useAppState';
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
-import { HeaderSection } from './components/sections/HeaderSection';
-import { InstructionsSection } from './components/sections/InstructionsSection';
+import HeaderSection from './components/sections/HeaderSection';
 import UserProfile from './components/UserProfile';
 import PartSelector from './components/PartSelector';
 import ContentDisplay from './components/ContentDisplay';
 import QuestionDisplay from './components/QuestionDisplay';
 import ResultsDisplay from './components/ResultsDisplay';
-import GrammarReview from './components/GrammarReview';
 import VocabularyPractice from './components/VocabularyPractice';
-import FullExamMode from './components/FullExamMode';
 import AuthModal from './components/AuthModal';
-import ChatApp from './components/ChatApp.jsx';
+
 import { Target, Trophy, FileText, Zap, GraduationCap, MessageCircle, X } from 'lucide-react';
 
-import './styles/animations.css'; // Đảm bảo file này chứa keyframes blob
+// ✅ Lazy load components
+const GrammarReview = lazy(() => import('./components/GrammarReview'));
+const FullExamMode = lazy(() => import('./components/FullExamMode'));
+const ChatApp = lazy(() => import('./components/ChatApp.jsx'));
+
+// --- Memoized Sub-Components ---
+
+// ✅ StatCard - Custom comparison tối ưu
+const StatCard = memo(({ icon: Icon, label, value, color }) => {
+  const colorMap = {
+    orange: 'border-orange-300 text-orange-700 bg-orange-50',
+    green: 'border-green-300 text-green-700 bg-green-50',
+    red: 'border-red-300 text-red-700 bg-red-50',
+    brown: 'border-amber-300 text-amber-700 bg-amber-50',
+  };
+
+  return (
+    <div className={`rounded-xl p-3 sm:p-4 shadow-sm border-2 transition-shadow hover:shadow-md ${colorMap[color]} text-center`}>
+      <Icon className="w-5 h-5 sm:w-6 mx-auto mb-1.5 opacity-80" />
+      <p className="text-xs text-gray-600 font-semibold uppercase tracking-tight">{label}</p>
+      <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">{value}</p>
+    </div>
+  );
+}, (prev, next) => prev.value === next.value && prev.color === next.color);
+
+StatCard.displayName = 'StatCard';
+
+// ✅ StatsSection - Tối ưu comparison
+const StatsSection = memo(({ score, isSignedIn }) => {
+  if (!isSignedIn || score.total === 0) return null;
+
+  return (
+    <section className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      <StatCard icon={Target} label="Câu" value={score.total} color="brown" />
+      <StatCard icon={Trophy} label="Đúng" value={score.correct} color="green" />
+      <StatCard icon={FileText} label="Sai" value={score.total - score.correct} color="red" />
+      <StatCard icon={Zap} label="%" value={`${score.percentage.toFixed(0)}%`} color="orange" />
+    </section>
+  );
+}, (prev, next) => {
+  return prev.score.total === next.score.total &&
+    prev.score.correct === next.score.correct &&
+    prev.isSignedIn === next.isSignedIn;
+});
+
+StatsSection.displayName = 'StatsSection';
+
+// ✅ FullExamPrompt - Không cần thay đổi khi parent re-render
+const FullExamPrompt = memo(({ onStartFullExam }) => (
+  <section className="bg-white rounded-2xl sm:rounded-3xl border-3 sm:border-4 border-amber-300 p-4 sm:p-6 md:p-8 shadow-md hover:shadow-lg transition-shadow duration-200">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+        <div className="p-3 sm:p-4 rounded-full bg-amber-100 border-2 border-amber-500">
+          <GraduationCap className="w-6 h-6 sm:w-8 text-amber-700" />
+        </div>
+        <h3 className="text-lg sm:text-2xl font-bold text-gray-800">
+          Thi Thử <span className="text-amber-600">Toàn Phần</span>
+        </h3>
+      </div>
+
+      <div className="flex-1 min-w-0 w-full sm:w-auto">
+        <p className="text-gray-600 mb-3 sm:mb-4 text-xs sm:text-sm leading-relaxed">
+          Thi mô phỏng 60 câu với timer chuẩn
+        </p>
+        <button
+          onClick={onStartFullExam}
+          className="w-full sm:w-auto px-5 sm:px-8 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 text-sm sm:text-base"
+        >
+          🚀 Bắt đầu ngay
+        </button>
+      </div>
+    </div>
+  </section>
+), () => true);
+
+FullExamPrompt.displayName = 'FullExamPrompt';
+
+// ✅ Chat Modal - Optimized with proper memo
+const ChatModal = memo(({ onClose, user }) => (
+  <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:justify-end">
+    <div className="w-full sm:w-[600px] h-screen sm:h-[600px] bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-600 text-white p-4 rounded-t-3xl sm:rounded-t-2xl flex-shrink-0">
+        <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 truncate">
+          <MessageCircle className="w-5 h-5 flex-shrink-0" />
+          <span className="truncate">Trò Chuyện Chung</span>
+        </h2>
+        <button
+          onClick={onClose}
+          className="hover:bg-orange-400 p-2 rounded-lg transition-colors flex-shrink-0 ml-2"
+          aria-label="Đóng chat"
+        >
+          <X className="w-5 h-5 sm:w-6" />
+        </button>
+      </div>
+
+      {/* Chat Content */}
+      <div className="flex-1 overflow-hidden">
+        <Suspense fallback={<LoadingSpinner />}>
+          <ChatApp user={user} />
+        </Suspense>
+      </div>
+    </div>
+  </div>
+), (prev, next) => prev.user?.id === next.user?.id);
+
+ChatModal.displayName = 'ChatModal';
+
+// ✅ Chat Button - Tách riêng để tránh re-render
+const ChatButton = memo(({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full p-3 sm:p-4 shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 z-40"
+    title="Mở chat"
+    aria-label="Mở trò chuyện"
+  >
+    <MessageCircle className="w-5 h-5 sm:w-6" />
+  </button>
+));
+
+ChatButton.displayName = 'ChatButton';
+
+// ✅ Part Test Content - Optimized với proper deps
+const PartTestContent = memo(({
+  isSignedIn,
+  user,
+  selectedExam,
+  handleExamChange,
+  testType,
+  handleTestTypeChange,
+  selectedPart,
+  handlePartChange,
+  partData,
+  currentQuestionIndex,
+  setCurrentQuestionIndex,
+  answers,
+  handleAnswerSelect,
+  showResults,
+  handleSubmit,
+  handleReset,
+  score,
+  onStartFullExam
+}) => (
+  <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+    <HeaderSection isSignedIn={isSignedIn} user={user} />
+    {isSignedIn && <UserProfile />}
+    
+    <PartSelector
+      selectedExam={selectedExam}
+      onExamChange={handleExamChange}
+      testType={testType}
+      onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
+      selectedPart={selectedPart}
+      onPartChange={handlePartChange}
+    />
+
+    <ContentDisplay
+      partData={partData}
+      selectedPart={selectedPart}
+      currentQuestionIndex={currentQuestionIndex}
+      testType={testType}
+    />
+
+    <QuestionDisplay
+      selectedPart={selectedPart}
+      selectedExam={selectedExam}
+      partData={partData}
+      currentQuestionIndex={currentQuestionIndex}
+      onQuestionChange={setCurrentQuestionIndex}
+      answers={answers}
+      onAnswerSelect={handleAnswerSelect}
+      showResults={showResults}
+      onSubmit={handleSubmit}
+      testType={testType}
+    />
+
+    {showResults && (
+      <ResultsDisplay
+        score={score}
+        partData={partData}
+        answers={answers}
+        onReset={handleReset}
+      />
+    )}
+
+    <StatsSection score={score} isSignedIn={isSignedIn} />
+    <FullExamPrompt onStartFullExam={onStartFullExam} />
+  </div>
+), (prev, next) => {
+  return prev.selectedExam === next.selectedExam &&
+    prev.selectedPart === next.selectedPart &&
+    prev.currentQuestionIndex === next.currentQuestionIndex &&
+    prev.showResults === next.showResults &&
+    prev.isSignedIn === next.isSignedIn;
+});
+
+PartTestContent.displayName = 'PartTestContent';
+
+// --- Main App Component ---
 
 function App() {
-  // Auth
-  const { user, isSignedIn, isLoaded, authProvider } = useUnifiedAuth();
-  
-  // Chat state
   const [showChat, setShowChat] = useState(false);
-  
-  // Debug auth state
-  useEffect(() => {
-    console.log('🔍 [App.jsx] Auth State:', { 
-      user: user?.id || user?.email || null, 
-      isSignedIn, 
-      isLoaded, 
-      authProvider 
-    });
-  }, [user, isSignedIn, isLoaded, authProvider]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  useClerkFirebaseSync();
-  useFirebaseUserSync();
+  // ✅ useRef for handlers to avoid recreating functions
+  const modalStateRef = useRef({ chat: false, auth: false });
 
-  const { saveProgress, currentUser } = useUserProgress();
-
-  // Audio
-  const voicesHook = useVoices();
-  const { allVoices, maleVoice, femaleVoice } = voicesHook;
-  const { status, progress, playAudio, pauseAudio, stopAudio } = useAudio(maleVoice, femaleVoice, 1.0);
-
-  // App State - Destructure setCurrentQuestionIndex
   const {
-    showInstructions,
-    setShowInstructions,
-    showAuthModal,
-    setShowAuthModal,
     selectedExam,
     testType,
     handleTestTypeChange,
@@ -66,7 +229,7 @@ function App() {
     handlePracticeTypeChange,
     selectedPart,
     currentQuestionIndex,
-    setCurrentQuestionIndex, 
+    setCurrentQuestionIndex,
     answers,
     handleAnswerSelect,
     handleSubmit,
@@ -74,255 +237,151 @@ function App() {
     handleReset,
     handleExamChange,
     handlePartChange,
+    isSignedIn,
+    user,
   } = useAppState();
 
-  // Memoized
+  // ✅ Optimized callbacks - giữ reference
+  const handleChatClose = useCallback(() => {
+    setShowChat(false);
+  }, []);
+
+  const handleChatOpen = useCallback(() => {
+    setShowChat(true);
+  }, []);
+
+  const handleAuthClose = useCallback(() => {
+    setShowAuthModal(false);
+  }, []);
+
+  const handleAuthOpen = useCallback(() => {
+    setShowAuthModal(true);
+  }, []);
+
+  // ✅ Memoized partData - efficient
   const partData = useMemo(() => {
     if (practiceType) return null;
-    const exam = EXAM_DATA[selectedExam];
-    return exam?.parts[selectedPart] || null;
+    return EXAM_DATA[selectedExam]?.parts?.[selectedPart] || null;
   }, [practiceType, selectedExam, selectedPart]);
 
+  // ✅ Optimized score calculation - for loop instead of forEach
   const score = useMemo(() => {
     if (practiceType || !partData?.questions) {
       return { correct: 0, total: 0, percentage: 0 };
     }
+
     let correct = 0;
-    partData.questions.forEach(q => {
-      if (answers[q.id] === q.correct) correct++;
-    });
     const total = partData.questions.length;
-    return { correct, total, percentage: total > 0 ? (correct / total) * 100 : 0 };
+
+    // ✅ for loop là nhanh nhất
+    for (let i = 0; i < total; i++) {
+      const q = partData.questions[i];
+      if (answers[q.id] === q.correct) {
+        correct++;
+      }
+    }
+
+    return {
+      correct,
+      total,
+      percentage: total > 0 ? (correct / total) * 100 : 0
+    };
   }, [practiceType, partData, answers]);
 
-  useAutoSaveProgress(answers, selectedExam, selectedPart, partData);
+  // ✅ Start full exam handler - memoized
+  const handleStartFullExam = useCallback(() => {
+    handleTestTypeChange('full');
+  }, [handleTestTypeChange]);
 
-  // Loading state
-  if (!isLoaded) {
-    return <LoadingSpinner />;
-  }
-
-  // Chat Modal - Cập nhật màu sắc
-  const ChatModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-end">
-      <div className="w-full sm:w-2xl h-screen sm:h-[600px] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-600 text-white p-4 rounded-t-2xl">
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Global Chat
-          </h2>
-          <button
-            onClick={() => setShowChat(false)}
-            className="hover:bg-orange-400 p-2 rounded-lg transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Chat Content */}
-        <div className="flex-1 overflow-hidden">
-          <ChatApp user={user} />
-        </div>
-      </div>
-    </div>
-  );
-
-  const contentComponent = (() => {
-    if (practiceType === 'vocabulary') return <VocabularyPractice />;
-    if (testType === 'full') {
-      return (
-        <FullExamMode 
-          examData={EXAM_DATA} 
-          onComplete={() => handleTestTypeChange('')} 
-        />
-      );
+  // ✅ Render main content - optimized logic
+  const renderMainContent = useCallback(() => {
+    // Practice Mode - Vocabulary
+    if (practiceType === 'vocabulary') {
+      return <VocabularyPractice />;
     }
-    
-    return (
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        <HeaderSection 
-          isSignedIn={isSignedIn} 
-          user={user} 
-          authProvider={authProvider} 
-        />
-        
-        {isSignedIn && (
-          <div key="user-profile-section">
-            <UserProfile currentUser={currentUser} />
-          </div>
-        )}        
-        
-        <InstructionsSection 
-          isOpen={showInstructions} 
-          onToggle={() => setShowInstructions(!showInstructions)} 
-          isSignedIn={isSignedIn} 
-          authProvider={authProvider} 
-        />
-        
-        {/* Phần Lựa Chọn và Hiển Thị */}
-        {!practiceType && testType !== 'full' && (
-          <>
-            <PartSelector
-              selectedExam={selectedExam}
-              onExamChange={handleExamChange}
-              testType={testType}
-              onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
-              selectedPart={selectedPart}
-              onPartChange={handlePartChange}
-              examData={EXAM_DATA[selectedExam]}
-              partData={partData}
-            />
 
-            <ContentDisplay
-              partData={partData}
-              selectedPart={selectedPart}
-              currentQuestionIndex={currentQuestionIndex}
-              testType={testType}
-            />
-
-            <QuestionDisplay
-              selectedPart={selectedPart}
-              selectedExam={selectedExam}
-              partData={partData}
-              currentQuestionIndex={currentQuestionIndex}
-              onQuestionChange={setCurrentQuestionIndex} 
-              answers={answers}
-              onAnswerSelect={handleAnswerSelect}
-              showResults={showResults}
-              onSubmit={handleSubmit}
-              testType={testType}
-            />
-          </>
-        )}
-
-        {practiceType === 'grammar' && (
+    // Practice Mode - Grammar
+    if (practiceType === 'grammar') {
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
           <GrammarReview
             answers={answers}
             onAnswerSelect={handleAnswerSelect}
             onSubmit={handleSubmit}
           />
-        )}
+        </Suspense>
+      );
+    }
 
-        {showResults && !practiceType && testType !== 'full' && (
-          <ResultsDisplay
-            score={score}
-            partData={partData}
-            answers={answers}
-            onReset={handleReset}
+    // Full Exam Mode
+    if (testType === 'full') {
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <FullExamMode
+            examData={EXAM_DATA}
+            onComplete={() => handleTestTypeChange('')}
           />
-        )}
+        </Suspense>
+      );
+    }
 
-        {/* Quick Stats - Cập nhật màu sắc */}
-        {isSignedIn && score.total > 0 && (
-          <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <StatCard icon={Target} label="Câu hỏi" value={score.total} color="brown" />
-            <StatCard icon={Trophy} label="Đúng" value={score.correct} color="green" />
-            <StatCard icon={FileText} label="Sai" value={score.total - score.correct} color="red" />
-            <StatCard icon={Zap} label="Tỷ lệ" value={`${score.percentage.toFixed(0)}%`} color="orange" />
-          </section>
-        )}
-
-        {/* Full Exam Button - Cải Tiến Giao Diện */}
-        {!practiceType && testType !== 'full' && (
-          <section className="bg-white rounded-3xl border-4 border-amber-300 p-8 shadow-2xl transition-all hover:shadow-amber-300/50 duration-500">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              
-              {/* Icon & Title */}
-              <div className="flex items-center gap-4 flex-shrink-0">
-                <div className="p-4 rounded-full bg-amber-100 border-2 border-amber-500 shadow-xl">
-                  <GraduationCap className="w-8 h-8 text-amber-700" />
-                </div>
-                <h3 className="text-2xl font-extrabold text-gray-800">
-                  Chế Độ Thi Thử <span className="text-amber-600">Toàn Phần</span>
-                </h3>
-              </div>
-
-              {/* Description & Button */}
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-600 mb-4 mt-2 sm:mt-0 leading-relaxed">
-                  Trải nghiệm thi mô phỏng y hệt thực tế với 20 câu Listening và 40 câu Reading, kèm theo timer chuẩn.
-                </p>
-                <button
-                  onClick={() => handleTestTypeChange('full')}
-                  className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-bold text-lg shadow-xl shadow-orange-300/70 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  🚀 Bắt đầu thi thử ngay
-                </button>
-              </div>
-            </div>
-          </section>
-        )}
-      </div>
+    // Part Test Mode (Default)
+    return (
+      <PartTestContent
+        isSignedIn={isSignedIn}
+        user={user}
+        selectedExam={selectedExam}
+        handleExamChange={handleExamChange}
+        testType={testType}
+        handleTestTypeChange={handleTestTypeChange}
+        selectedPart={selectedPart}
+        handlePartChange={handlePartChange}
+        partData={partData}
+        currentQuestionIndex={currentQuestionIndex}
+        setCurrentQuestionIndex={setCurrentQuestionIndex}
+        answers={answers}
+        handleAnswerSelect={handleAnswerSelect}
+        showResults={showResults}
+        handleSubmit={handleSubmit}
+        handleReset={handleReset}
+        score={score}
+        onStartFullExam={handleStartFullExam}
+      />
     );
-  })();
+  }, [
+    practiceType, testType, answers, handleAnswerSelect, handleSubmit,
+    handleTestTypeChange, isSignedIn, user, selectedExam, handleExamChange,
+    selectedPart, handlePartChange, partData, currentQuestionIndex,
+    setCurrentQuestionIndex, showResults, handleReset, score, handleStartFullExam
+  ]);
 
   return (
-    // Áp dụng Blob Background vào MainLayout hoặc container ngoài cùng
     <MainLayout
       testType={testType}
       onTestTypeChange={handleTestTypeChange}
       practiceType={practiceType}
       onPracticeTypeChange={handlePracticeTypeChange}
       user={user}
-      onAuthClick={() => setShowAuthModal(true)}
-      onChatClick={() => setShowChat(true)}
+      onAuthClick={handleAuthOpen}
+      onChatClick={handleChatOpen}
     >
-      {/* Thêm Blob Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <style>{`
-          @keyframes blob {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(40px, -60px) scale(1.1); }
-            66% { transform: translate(-30px, 30px) scale(0.95); }
-          }
-          .animate-blob {
-            animation: blob 8s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
-          }
-        `}</style>
-        {/* Blob 1: Cam Nhạt */}
-        <div className="absolute top-0 left-0 w-[30rem] h-[30rem] bg-amber-300/30 rounded-full mix-blend-multiply blur-3xl -ml-40 -mt-40 opacity-70 animate-blob" />
-        {/* Blob 2: Vàng Nhạt */}
-        <div className="absolute bottom-0 right-0 w-[20rem] h-[20rem] bg-yellow-300/30 rounded-full mix-blend-multiply blur-3xl -mr-20 -mb-20 opacity-60 animate-blob" style={{ animationDelay: '4s' }} />
-      </div>
-      
-      {/* Nội dung chính */}
-      <div className="relative z-10 p-4 sm:p-6 md:p-8">
-        {contentComponent}
-        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      {/* Main Content */}
+      <div className="relative z-10 p-4 sm:p-6">
+        <Suspense fallback={<LoadingSpinner />}>
+          {renderMainContent()}
+        </Suspense>
+        {showAuthModal && <AuthModal onClose={handleAuthClose} />}
       </div>
 
-      {/* Chat Button - Floating - Cập nhật màu sắc */}
-      <button
-        onClick={() => setShowChat(true)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full p-4 shadow-xl shadow-orange-400/50 hover:scale-110 transition-all z-40"
-        title="Mở chat"
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
+      {/* Chat Button - Memoized */}
+      <ChatButton onClick={handleChatOpen} />
 
       {/* Chat Modal */}
-      {showChat && <ChatModal />}
+      {showChat && (
+        <ChatModal onClose={handleChatClose} user={user} />
+      )}
     </MainLayout>
   );
 }
-
-// StatCard - Cập nhật màu sắc theo theme Be/Cam/Vàng
-const StatCard = ({ icon: Icon, label, value, color }) => {
-  const colors = {
-    orange: 'border-orange-300 text-orange-700 bg-orange-50',
-    green: 'border-green-300 text-green-700 bg-green-50',
-    red: 'border-red-300 text-red-700 bg-red-50',
-    brown: 'border-amber-300 text-amber-700 bg-amber-50', // Màu Nâu/Vàng cho Câu hỏi
-  };
-
-  return (
-    <div className={`rounded-xl p-4 shadow-lg border-2 transition-all hover:shadow-xl ${colors[color]} text-center`}>
-      <Icon className="w-6 h-6 mx-auto mb-1 opacity-80" />
-      <p className="text-xs text-gray-600 font-semibold uppercase">{label}</p>
-      <p className="text-xl sm:text-2xl font-black text-gray-900">{value}</p>
-    </div>
-  );
-};
 
 export default App;

@@ -220,7 +220,7 @@ const App = () => {
   ];
 
   const contactDetails = [
-    { icon: Mail, label: 'support@huflit.edu.vn', href: 'mailto:support@huflit.edu.vn' },
+    { icon: Mail, label: 'lekhoale30092003@gmail.com', href: 'mailto:lekhoale30092003@gmail.com' },
     { icon: Phone, label: '+84 383196830', href: 'tel:+84383196830' },
     { icon: MapPin, label: 'TP. Hồ Chí Minh, Việt Nam', href: '#' },
   ];
@@ -238,7 +238,7 @@ const App = () => {
   ];
 
   const stats = [
-    { icon: UserCircle, number: '10K+', label: 'Người dùng' },
+    { icon: UserCircle, number: '500', label: 'Người dùng' },
     { icon: Trophy, number: '★ 4.8', label: 'Đánh giá' },
     { icon: TrendingUp, number: '500+', label: 'Bài tập' },
   ];

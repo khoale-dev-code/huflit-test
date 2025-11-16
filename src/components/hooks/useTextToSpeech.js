@@ -14,7 +14,9 @@ export const useTextToSpeech = ({
   const currentUtteranceRef = useRef(null);
   const isPlayingRef = useRef(false);
   const pausedUtteranceRef = useRef(null);
-  const isStoppingRef = useRef(false); // Track intentional stops
+  const isStoppingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const playbackTimeoutRef = useRef(null);
   const metricsRef = useRef({
     totalUtterances: 0,
     totalDuration: 0,
@@ -22,15 +24,27 @@ export const useTextToSpeech = ({
     interruptCount: 0
   });
 
+  // ==================== SAFETY CHECKS ====================
+
+  const isSynthAvailable = useCallback(() => {
+    return synthRef?.current && typeof synthRef.current.speak === 'function';
+  }, [synthRef]);
+
+  const safeSetState = useCallback((setter, value) => {
+    if (isMountedRef.current) {
+      setter(value);
+    }
+  }, []);
+
   // ==================== TEXT OPTIMIZATION ====================
 
   const optimizeText = useCallback((text) => {
-    if (!text) return '';
+    if (!text || typeof text !== 'string') return '';
     
     return text
-      .replace(/[^\w\s.,!?'-]/g, '') // Remove special chars
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/([.!?])\s+/g, '$1 ') // Normalize punctuation
+      .replace(/[^\w\s.,!?'-]/g, '')
+      .replace(/\s+/g, ' ')
+      .replace(/([.!?])\s+/g, '$1 ')
       .trim();
   }, []);
 
@@ -39,13 +53,10 @@ export const useTextToSpeech = ({
 
     const chunks = [];
     let current = '';
-
-    // Split by sentences first
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
 
     sentences.forEach(sentence => {
       sentence = sentence.trim();
-      
       if (!sentence) return;
 
       if ((current + sentence).length > maxLength) {
@@ -61,7 +72,11 @@ export const useTextToSpeech = ({
   }, []);
 
   const optimizeConversations = useCallback((conversations, chunkSize = 200) => {
+    if (!Array.isArray(conversations)) return [];
+    
     return conversations.flatMap(conv => {
+      if (!conv || !conv.text) return [];
+      
       const optimized = optimizeText(conv.text);
       const chunks = chunkText(optimized, chunkSize);
       
@@ -74,105 +89,120 @@ export const useTextToSpeech = ({
     });
   }, [optimizeText, chunkText]);
 
-  // Clean up utterance
+  // ==================== CLEANUP ====================
+
   const cleanupUtterance = useCallback(() => {
     if (currentUtteranceRef.current) {
-      currentUtteranceRef.current.onend = null;
-      currentUtteranceRef.current.onerror = null;
-      currentUtteranceRef.current = null;
+      try {
+        currentUtteranceRef.current.onend = null;
+        currentUtteranceRef.current.onerror = null;
+        currentUtteranceRef.current.onboundary = null;
+        currentUtteranceRef.current = null;
+      } catch (err) {
+        console.warn('Error cleaning up utterance:', err);
+      }
     }
   }, []);
 
-  // Stop all speech
+  const clearPlaybackTimeout = useCallback(() => {
+    if (playbackTimeoutRef.current) {
+      clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
+  }, []);
+
+  // ==================== SPEECH CONTROL ====================
+
   const stopAllSpeech = useCallback(() => {
-    isStoppingRef.current = true; // Mark as intentional stop
+    isStoppingRef.current = true;
+    clearPlaybackTimeout();
+    
     try {
-      if (synthRef.current) {
+      if (isSynthAvailable()) {
         synthRef.current.cancel();
       }
     } catch (err) {
       console.error('Error stopping speech:', err);
     }
-    // Reset flag after a short delay
-    setTimeout(() => {
+    
+    playbackTimeoutRef.current = setTimeout(() => {
       isStoppingRef.current = false;
     }, 100);
-  }, [synthRef]);
+  }, [synthRef, isSynthAvailable, clearPlaybackTimeout]);
 
-  // Pause speech
   const pauseScript = useCallback(() => {
-    if (!synthRef.current) return;
+    if (!isSynthAvailable()) return;
 
     try {
       if (synthRef.current.speaking && !synthRef.current.paused) {
         pausedUtteranceRef.current = currentUtteranceRef.current;
         synthRef.current.pause();
-        setIsPaused(true);
+        safeSetState(setIsPaused, true);
         isPlayingRef.current = false;
       }
     } catch (err) {
       console.error('Error pausing speech:', err);
       stopAllSpeech();
     }
-  }, [synthRef, stopAllSpeech]);
+  }, [synthRef, isSynthAvailable, stopAllSpeech, safeSetState]);
 
-  // Resume speech from pause
   const resumeScript = useCallback(() => {
-    if (!synthRef.current) return;
+    if (!isSynthAvailable()) return;
 
     try {
       if (synthRef.current.paused) {
         synthRef.current.resume();
-        setIsPaused(false);
+        safeSetState(setIsPaused, false);
         isPlayingRef.current = true;
       }
     } catch (err) {
       console.error('Error resuming speech:', err);
     }
-  }, [synthRef]);
+  }, [synthRef, isSynthAvailable, safeSetState]);
 
-  // Stop and reset everything
   const stopScript = useCallback(() => {
     stopAllSpeech();
     cleanupUtterance();
     utteranceQueueRef.current = [];
     pausedUtteranceRef.current = null;
-    setCurrentPlayingIndex(-1);
-    setPlayingTime(0);
-    setIsPaused(false);
+    safeSetState(setCurrentPlayingIndex, -1);
+    safeSetState(setPlayingTime, 0);
+    safeSetState(setIsPaused, false);
     isPlayingRef.current = false;
-  }, [stopAllSpeech, cleanupUtterance]);
+  }, [stopAllSpeech, cleanupUtterance, safeSetState]);
 
-  // Play next utterance in queue
+  // ==================== PLAYBACK ====================
+
   const speakNextInQueue = useCallback(() => {
-    if (!synthRef.current || currentUtteranceRef.current) {
+    if (!isSynthAvailable() || currentUtteranceRef.current || !isMountedRef.current) {
       return;
     }
 
-    // Queue is empty, stop playing
     if (utteranceQueueRef.current.length === 0) {
       if (isPlayingRef.current) {
-        setCurrentPlayingIndex(-1);
-        setPlayingTime(0);
+        safeSetState(setCurrentPlayingIndex, -1);
+        safeSetState(setPlayingTime, 0);
         isPlayingRef.current = false;
       }
       return;
     }
 
-    // Get next item from queue
     const next = utteranceQueueRef.current.shift();
-    if (!next) return;
-
-    // Find index in filtered conversations
-    const newIndex = filteredConversations.findIndex(
-      conv => conv.text === next.text && conv.speaker === next.speaker
-    );
-
-    if (newIndex !== -1) {
-      setCurrentPlayingIndex(newIndex);
+    if (!next || !next.text) {
+      return speakNextInQueue();
     }
 
-    // Get voice for speaker
+    // Safely find index
+    const newIndex = Array.isArray(filteredConversations) 
+      ? filteredConversations.findIndex(
+          conv => conv?.text === next.text && conv?.speaker === next.speaker
+        )
+      : -1;
+
+    if (newIndex !== -1) {
+      safeSetState(setCurrentPlayingIndex, newIndex);
+    }
+
     const voice = getSpeakerVoice(next.speaker);
     if (!voice) {
       console.warn(`No voice available for ${next.speaker}`);
@@ -180,47 +210,47 @@ export const useTextToSpeech = ({
     }
 
     try {
-      // Create utterance
       const utterance = new SpeechSynthesisUtterance(next.text);
       utterance.voice = voice;
-      utterance.rate = next.options.rate;
-      utterance.pitch = next.options.pitch;
-      utterance.volume = next.options.volume;
-      utterance.lang = voice.lang;
+      utterance.rate = Math.max(0.1, Math.min(2, next.options?.rate || 1));
+      utterance.pitch = Math.max(0, Math.min(2, next.options?.pitch || 1));
+      utterance.volume = Math.max(0, Math.min(1, next.options?.volume || 1));
+      utterance.lang = voice.lang || 'en-US';
 
       currentUtteranceRef.current = utterance;
-      setPlayingTime(prev => prev + 1);
+      safeSetState(setPlayingTime, prev => prev + 1);
 
-      // Handle utterance end
       utterance.onend = () => {
+        if (!isMountedRef.current) return;
+        
         metricsRef.current.totalUtterances++;
         metricsRef.current.totalDuration += utterance.duration || 0;
         cleanupUtterance();
         
-        // Only continue if still playing
         if (isPlayingRef.current) {
-          speakNextInQueue();
+          playbackTimeoutRef.current = setTimeout(() => {
+            if (isMountedRef.current) {
+              speakNextInQueue();
+            }
+          }, 50);
         }
       };
 
-      // Handle utterance error with better error classification
       utterance.onerror = (event) => {
-        // Don't log interrupted errors if we intentionally stopped
+        if (!isMountedRef.current) return;
+        
         if (event.error === 'interrupted' && isStoppingRef.current) {
           cleanupUtterance();
           return;
         }
 
-        // Don't log interrupted errors during queue changes
         if (event.error === 'interrupted' && utteranceQueueRef.current.length === 0) {
           cleanupUtterance();
           return;
         }
 
-        // Track different error types
         if (event.error === 'interrupted') {
           metricsRef.current.interruptCount++;
-          console.warn('Speech interrupted (non-critical)');
         } else {
           metricsRef.current.errorCount++;
           console.error('Utterance error:', event.error);
@@ -228,50 +258,62 @@ export const useTextToSpeech = ({
 
         cleanupUtterance();
         
-        // Try to continue if still playing and error wasn't fatal
         if (isPlayingRef.current && event.error !== 'canceled') {
-          speakNextInQueue();
+          playbackTimeoutRef.current = setTimeout(() => {
+            if (isMountedRef.current) {
+              speakNextInQueue();
+            }
+          }, 50);
         }
       };
 
-      // Speak
       synthRef.current.speak(utterance);
+      
     } catch (err) {
       console.error('Error creating utterance:', err);
       metricsRef.current.errorCount++;
       cleanupUtterance();
-      speakNextInQueue();
+      
+      playbackTimeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          speakNextInQueue();
+        }
+      }, 50);
     }
-  }, [synthRef, getSpeakerVoice, filteredConversations, cleanupUtterance]);
+  }, [synthRef, getSpeakerVoice, filteredConversations, cleanupUtterance, isSynthAvailable, safeSetState]);
 
-  // Queue conversations for playback
+  // ==================== QUEUE MANAGEMENT ====================
+
   const queueConversations = useCallback((conversations, getTTSOptions, autoOptimize = true) => {
-    if (!synthRef.current) return false;
+    if (!isSynthAvailable() || !Array.isArray(conversations)) {
+      return false;
+    }
 
     try {
-      // Mark as intentional stop before clearing
       isStoppingRef.current = true;
       
       stopAllSpeech();
       cleanupUtterance();
       utteranceQueueRef.current = [];
       pausedUtteranceRef.current = null;
-      setPlayingTime(0);
+      safeSetState(setPlayingTime, 0);
 
-      // Optimize conversations if enabled
       const toQueue = autoOptimize ? optimizeConversations(conversations) : conversations;
-
-      const queue = toQueue.map(conv => ({
-        text: conv.text,
-        speaker: conv.speaker,
-        options: getTTSOptions(conv.speaker)
-      }));
+      
+      const queue = toQueue
+        .filter(conv => conv && conv.text && conv.speaker)
+        .map(conv => ({
+          text: conv.text,
+          speaker: conv.speaker,
+          options: typeof getTTSOptions === 'function' 
+            ? getTTSOptions(conv.speaker) 
+            : { rate: 1, pitch: 1, volume: 1 }
+        }));
 
       utteranceQueueRef.current = queue;
       isPlayingRef.current = true;
       
-      // Reset stop flag after a short delay
-      setTimeout(() => {
+      playbackTimeoutRef.current = setTimeout(() => {
         isStoppingRef.current = false;
       }, 100);
       
@@ -281,9 +323,10 @@ export const useTextToSpeech = ({
       isStoppingRef.current = false;
       return false;
     }
-  }, [synthRef, stopAllSpeech, cleanupUtterance, optimizeConversations]);
+  }, [synthRef, stopAllSpeech, cleanupUtterance, optimizeConversations, isSynthAvailable, safeSetState]);
 
-  // Get TTS metrics
+  // ==================== METRICS ====================
+
   const getTTSMetrics = useCallback(() => {
     const { totalUtterances, totalDuration, errorCount, interruptCount } = metricsRef.current;
     
@@ -298,7 +341,6 @@ export const useTextToSpeech = ({
     };
   }, []);
 
-  // Reset metrics
   const resetMetrics = useCallback(() => {
     metricsRef.current = {
       totalUtterances: 0,
@@ -308,44 +350,39 @@ export const useTextToSpeech = ({
     };
   }, []);
 
-  // Check if currently speaking
   const isSpeaking = useCallback(() => {
-    return synthRef.current?.speaking ?? false;
-  }, [synthRef]);
+    return isSynthAvailable() && (synthRef.current?.speaking ?? false);
+  }, [synthRef, isSynthAvailable]);
 
-  // Cleanup on unmount
+  // ==================== LIFECYCLE ====================
+
   useEffect(() => {
+    isMountedRef.current = true;
+    
     return () => {
+      isMountedRef.current = false;
+      clearPlaybackTimeout();
       stopScript();
     };
-  }, [stopScript]);
+  }, [stopScript, clearPlaybackTimeout]);
 
   return {
-    // State
     currentPlayingIndex,
     setCurrentPlayingIndex,
     playingTime,
     setPlayingTime,
     isPaused,
-
-    // Control
     pauseScript,
     resumeScript,
     stopScript,
     speakNextInQueue,
     queueConversations,
     isSpeaking,
-
-    // Text Optimization
     optimizeText,
     chunkText,
     optimizeConversations,
-
-    // Metrics
     getTTSMetrics,
     resetMetrics,
-
-    // Internal refs
     utteranceQueueRef,
     currentUtteranceRef
   };
