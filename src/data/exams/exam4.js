@@ -526,12 +526,12 @@ GreenCity Network`,
       title: "PART 8: Text Message Chain",
       description: "10 câu hỏi - Đọc chuỗi tin nhắn về tổ chức sự kiện môi trường xã hội, chọn đáp án tốt nhất (A, B, C, D).",
       type: "reading",
-      text: `Tom (10:05): Hey Dr. Chen, ready for the eco-forum setup? Need more banners?
-  Dr. Chen (10:10): Yes, Tom. Focus on diversity themes—equity in sustainability.
+      text: `Tom (10:05): Hey Doctor Chen, ready for the eco-forum setup? Need more banners?
+  Doctor Chen (10:10): Yes, Tom. Focus on diversity themes—equity in sustainability.
   Tom (10:15): Got it. Also, youth group wants a slot for their anti-plastic talk.
-  Dr. Chen (10:20): Approve. Schedule after lunch. Promote on community board.
+  Doctor Chen (10:20): Approve. Schedule after lunch. Promote on community board.
   Tom (15:30): Setup done. Attendance looks high—over 100 RSVPs!
-  Dr. Chen (15:35): Excellent. Let's ensure inclusive discussions for all voices.`,
+  Doctor Chen (15:35): Excellent. Let's ensure inclusive discussions for all voices.`,
       questions: [
         {
           id: 51,

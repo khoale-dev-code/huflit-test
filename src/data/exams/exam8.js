@@ -2,7 +2,6 @@ export const EXAM8_DATA = {
   title: "HUFLIT Listening & Reading Practice - Exam 8 (Dựa trên Đề Thi Thử)",
   description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT. Part 1 mở rộng: 5 câu hỏi từ 1 hội thoại dài để luyện nghe chi tiết.",
   parts: {
-    // Listening Parts - Part 1 cập nhật: 1 hội thoại chung cho 5 câu hỏi
     part1: {
       title: "PART 1: Short Conversations",
       description: "Nghe đoạn hội thoại giữa Emma và Tom về kế hoạch du lịch. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
@@ -12,12 +11,12 @@ export const EXAM8_DATA = {
         {
           id: 1,
           options: [
-            "The tickets are too cheap.",
-            "She prefers crowded places.",
             "The flight tickets are way too expensive.",
-            "They have enough money saved."
+            "She prefers crowded places.",
+            "They have enough money saved.",
+            "The tickets are too cheap."
           ],
-          correct: 2,
+          correct: 0,
           explanation: "Tom nói: 'I was thinking about Bali, but the flight tickets are way too expensive right now.' (Tôi nghĩ về Bali, nhưng vé máy bay quá đắt lúc này.)"
         },
         {
@@ -25,8 +24,8 @@ export const EXAM8_DATA = {
           options: [
             "She enjoyed the romance but not the crowds.",
             "She wants to go back to Paris.",
-            "The mountains were too quiet last year.",
-            "Driving was easy in Paris."
+            "Driving was easy in Paris.",
+            "The mountains were too quiet last year."
           ],
           correct: 0,
           explanation: "Emma nói: 'Last year in Paris, everything was so romantic, but the crowds were overwhelming.' (Năm ngoái ở Paris, mọi thứ rất lãng mạn, nhưng đám đông quá áp đảo.)"
@@ -34,21 +33,21 @@ export const EXAM8_DATA = {
         {
           id: 3,
           options: [
-            "They plan to rent a car.",
             "Public transport is not an option.",
             "She doesn't want to rent a car again.",
+            "They plan to rent a car.",
             "Hiking requires a private vehicle."
           ],
-          correct: 2,
+          correct: 1,
           explanation: "Emma nói: 'I don't want to rent a car again like in Paris—it was stressful driving on the wrong side.' (Tôi không muốn thuê xe lần nữa như ở Paris—lái xe bên đường sai quá căng thẳng.)"
         },
         {
           id: 4,
           options: [
-            "Bali in winter for better weather.",
+            "Somewhere with more crowds.",
             "A cabin in the mountains for peace.",
-            "Paris again for romance.",
-            "Somewhere with more crowds."
+            "Bali in winter for better weather.",
+            "Paris again for romance."
           ],
           correct: 1,
           explanation: "Tom nói: 'How about a cozy cabin in the mountains? It'd be peaceful, and we could hike every day.' (Thế còn cabin ấm cúng ở núi? Sẽ yên bình, và chúng ta có thể đi bộ đường dài mỗi ngày.)"
@@ -57,8 +56,8 @@ export const EXAM8_DATA = {
           id: 5,
           options: [
             "They need to save more money.",
-            "Bali is the final choice.",
             "Public transport is unavailable.",
+            "Bali is the final choice.",
             "Driving is preferable now."
           ],
           correct: 0,
@@ -76,22 +75,22 @@ export const EXAM8_DATA = {
           id: 6,
           question: "How many people are having coffee?",
           options: [
-            "Two",
+            "One",
             "Three",
             "Four",
-            "One"
+            "Two"
           ],
-          correct: 2,
+          correct: 1,
           explanation: "Lisa mời 'everyone' (mọi người), và Ben, Anna, John đều ngụ ý tham gia (Ben cần coffee, Anna 'me three' ám chỉ cần coffee như Ben và Lisa)."
         },
         {
           id: 7,
           question: "Why is John wearing a new suit?",
           options: [
-            "For a casual Friday.",
-            "For the big presentation next week.",
             "To impress HR.",
-            "After the team-building retreat."
+            "For the big presentation next week.",
+            "After the team-building retreat.",
+            "For a casual Friday."
           ],
           correct: 1,
           explanation: "John nói: 'Tailored for the big presentation next week.' (May đo cho bài thuyết trình lớn tuần tới.)"
@@ -100,9 +99,9 @@ export const EXAM8_DATA = {
           id: 8,
           question: "What did John do well at the retreat?",
           options: [
-            "Led yoga classes.",
-            "Organized the schedule.",
             "Handled board questions.",
+            "Organized the schedule.",
+            "Led yoga classes.",
             "Signed up for wellness."
           ],
           correct: 1,
@@ -112,24 +111,24 @@ export const EXAM8_DATA = {
           id: 9,
           question: "What program did Ben and Anna sign up for?",
           options: [
-            "Team-building retreat.",
-            "Presentation training.",
+            "Coffee breaks.",
             "New wellness program with yoga.",
-            "Coffee breaks."
+            "Team-building retreat.",
+            "Presentation training."
           ],
-          correct: 2,
+          correct: 1,
           explanation: "Ben và Anna nói: 'I signed up for yoga classes... it's starting Monday.' (Tôi đăng ký lớp yoga... bắt đầu thứ Hai.)"
         },
         {
           id: 10,
           question: "What is John nervous about?",
           options: [
-            "The wellness program.",
-            "The team retreat.",
+            "Tough coffee conversations.",
             "Leading his first big presentation.",
-            "Tough coffee conversations."
+            "The wellness program.",
+            "The team retreat."
           ],
-          correct: 2,
+          correct: 1,
           explanation: "John nói: 'I'm nervous—it's my first time leading one.' (Tôi lo lắng—lần đầu dẫn dắt.)"
         }
       ]
@@ -138,41 +137,41 @@ export const EXAM8_DATA = {
       title: "PART 3: Monologue",
       description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
       type: "listening",
-      script: "Dr. Chen: Hello, class. Today we're discussing environmental policies in urban planning. This topic is crucial for sustainable cities, though implementation can be challenging. I've reviewed your midterm essays—average score is 7.2, solid progress. Note that late submissions without medical notes result in deductions, not zeros, but aim to submit on time like top student Sarah did. Finally, the campus cafe offers eco-friendly options: organic teas, vegan snacks, and zero-waste packaging—ideal for post-lecture breaks.",
+      script: "Dr. Chen: Hello, class. Today we're discussing environmental policies in urban planning. This topic is crucial for sustainable cities, though implementation can be challenging. I've reviewed your midterm essays—average score is 7.2, solid progress. Extensions for assignments require prior approval; otherwise, penalties apply, as seen with last semester's group. On a lighter note, the campus cafe offers eco-friendly options: organic teas, vegan snacks, and zero-waste packaging—ideal for post-lecture breaks.",
       questions: [
         {
           id: 11,
           question: "The topic is __________ for sustainable cities.",
-          options: ["(A) optional", "(B) irrelevant", "(C) crucial", "(D) boring"],
+          options: ["(A) boring", "(B) irrelevant", "(C) crucial", "(D) optional"],
           correct: 2,
           explanation: "Dr. Chen: 'This topic is crucial for sustainable cities.' (Chủ đề này rất quan trọng cho thành phố bền vững.) - Luyện nghe đánh giá tầm quan trọng."
         },
         {
           id: 12,
           question: "I have reviewed __________. ",
-          options: ["(A) your excuses", "(B) the campus menu", "(C) your midterm essays", "(D) late policies"],
+          options: ["(A) late policies", "(B) the campus menu", "(C) your midterm essays", "(D) your excuses"],
           correct: 2,
           explanation: "Dr. Chen: 'I've reviewed your midterm essays—average score is 7.2.' (Tôi đã xem bài luận giữa kỳ—điểm trung bình 7.2.) - Luyện nghe hành động đánh giá gần đây."
         },
         {
           id: 13,
-          question: "Late submissions without notes result in __________.",
-          options: ["(A) full credit", "(B) zeros", "(C) deductions", "(D) bonuses"],
-          correct: 2,
-          explanation: "Dr. Chen: 'Late submissions without medical notes result in deductions.' (Nộp muộn không có giấy bác sĩ dẫn đến trừ điểm.) - Luyện nghe quy định nộp bài."
+          question: "Extensions require __________.",
+          options: ["(A) extra fees", "(B) prior approval", "(C) group vote", "(D) no approval"],
+          correct: 1,
+          explanation: "Dr. Chen: 'Extensions for assignments require prior approval.' (Gia hạn bài tập cần phê duyệt trước.) - Luyện nghe quy định học tập."
         },
         {
           id: 14,
-          question: "Sarah __________.",
-          options: ["(A) submitted late", "(B) scored low", "(C) submitted on time", "(D) skipped class"],
+          question: "Last semester's group __________ penalties.",
+          options: ["(A) avoided", "(B) applied for", "(C) saw", "(D) ignored"],
           correct: 2,
-          explanation: "Dr. Chen: 'Aim to submit on time like top student Sarah did.' (Nộp đúng hạn như sinh viên xuất sắc Sarah.) - Luyện nghe ví dụ tích cực."
+          explanation: "Dr. Chen: 'Penalties apply, as seen with last semester's group.' (Như nhóm kỳ trước đã thấy.) - Luyện nghe ví dụ hậu quả."
         },
         {
           id: 15,
           question: "The campus cafe offers __________.",
-          options: ["(A) only coffee", "(B) eco-friendly options", "(C) meat dishes", "(D) all of the above"],
-          correct: 1,
+          options: ["(A) meat dishes", "(B) solar-powered chargers", "(C) eco-friendly options", "(D) all of the above"],
+          correct: 2,
           explanation: "Dr. Chen: 'The campus cafe offers eco-friendly options: organic teas, vegan snacks, and zero-waste packaging.' (Quán cà phê trường cung cấp lựa chọn thân thiện môi trường.) - Luyện nghe mô tả tiện ích."
         }
       ]
@@ -186,41 +185,40 @@ export const EXAM8_DATA = {
         {
           id: 16,
           question: "The laptop is for __________.",
-          options: ["(A) gaming", "(B) personal use", "(C) work", "(D) school"],
+          options: ["(A) school", "(B) personal use", "(C) work", "(D) gaming"],
           correct: 2,
           explanation: "Client 1: 'This is for my work computer.' (Đây là cho máy tính làm việc của tôi.) - Luyện nghe mục đích sử dụng."
         },
         {
           id: 17,
           question: "The purchase was __________.",
-          options: ["(A) last year", "(B) six months ago", "(C) recently", "(D) tomorrow"],
+          options: ["(A) tomorrow", "(B) six months ago", "(C) last year", "(D) recently"],
           correct: 1,
           explanation: "Client 1: 'About six months ago.' (Khoảng sáu tháng trước.) - Luyện nghe thời gian mua."
         },
         {
           id: 18,
           question: "The client has __________.",
-          options: ["(A) no proof", "(B) the receipt", "(C) the order email", "(D) the serial number"],
+          options: ["(A) the serial number", "(B) no proof", "(C) the order email", "(D) the receipt"],
           correct: 2,
           explanation: "Client 1: 'No receipt handy, but I have the order confirmation email.' (Không có biên lai, nhưng có email xác nhận đơn hàng.) - Luyện nghe phương tiện xác thực."
         },
         {
           id: 19,
           question: "Upgrades beyond warranty __________.",
-          options: ["(A) are free", "(B) might incur a fee", "(C) are unavailable", "(D) require new purchase"],
+          options: ["(A) require new purchase", "(B) might incur a fee", "(C) are unavailable", "(D) are free"],
           correct: 1,
           explanation: "Sales Associate: 'Upgrades beyond warranty might incur a fee.' (Nâng cấp ngoài bảo hành có thể mất phí.) - Luyện nghe điều khoản dịch vụ."
         },
         {
           id: 20,
           question: "The associate suggests __________.",
-          options: ["(A) delaying the service", "(B) checking the serial number", "(C) buying a new laptop", "(D) ignoring the issue"],
+          options: ["(A) ignoring the issue", "(B) checking the serial number", "(C) buying a new laptop", "(D) delaying the service"],
           correct: 1,
           explanation: "Sales Associate: 'We can check your serial number.' (Chúng tôi có thể kiểm tra số serial.) - Luyện nghe giải pháp hỗ trợ."
         }
       ]
     },
-    // Reading Parts
     part5: {
       title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
       description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
@@ -229,70 +227,70 @@ export const EXAM8_DATA = {
         {
           id: 21,
           question: "The conference agenda includes sessions on digital marketing, which has become increasingly __________ in recent years.",
-          options: ["importance", "important", "import", "imports"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'important' vì đây là tính từ bổ nghĩa cho danh từ 'marketing'. Kiến thức ngữ pháp: Tính từ 'important' (quan trọng) đứng trước danh từ; không dùng danh từ (A), động từ (C), hoặc danh từ số nhiều (D)."
+          options: ["imports", "import", "importance", "important"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'important' vì đây là tính từ bổ nghĩa cho danh từ 'marketing'. Kiến thức ngữ pháp: Tính từ 'important' (quan trọng) đứng trước danh từ; không dùng danh từ (A), động từ (C), hoặc danh từ số nhiều (D)."
         },
         {
           id: 22,
           question: "The research team __________ data from various sources before drawing conclusions.",
-          options: ["analyze", "analyzes", "analyzed", "analyzing"],
+          options: ["analyzing", "analyzes", "had analyzed", "analyze"],
           correct: 2,
-          explanation: "Đáp án đúng là (C) 'analyzed' vì đây là thì quá khứ đơn để diễn tả hành động hoàn thành trước. Kiến thức ngữ pháp: Thì quá khứ đơn 'analyzed' cho hành động trước 'drawing'; không dùng nguyên thể (A), hiện tại (B), hoặc V-ing (D)."
+          explanation: "Đáp án đúng là (C) 'had analyzed' vì thì quá khứ hoàn thành trước thời điểm quá khứ. Kiến thức ngữ pháp: 'By the time + past, past perfect'; không dùng hiện tại (A,B), V-ing (D)."
         },
         {
           id: 23,
           question: "Despite the challenges, the project was completed __________ schedule.",
-          options: ["in", "on", "at", "by"],
+          options: ["at", "on", "by", "in"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'on' vì cụm từ cố định 'on schedule' (đúng hạn). Kiến thức ngữ pháp: Giới từ 'on' với 'schedule'; 'in' (trong), 'at' (tại), 'by' (bằng) không phù hợp."
         },
         {
           id: 24,
           question: "Employees are encouraged to participate in volunteer activities to foster a sense of __________. ",
-          options: ["community", "communal", "commune", "communicate"],
+          options: ["community", "communicate", "commune", "communal"],
           correct: 0,
           explanation: "Đáp án đúng là (A) 'community' vì đây là danh từ chỉ 'cộng đồng'. Kiến thức từ vựng: Danh từ 'community' (cộng đồng) sau 'sense of'; tính từ (B), danh từ khác (C), động từ (D) không khớp."
         },
         {
           id: 25,
           question: "The CEO announced that the company __________ expanding its operations internationally next year.",
-          options: ["is", "are", "be", "been"],
+          options: ["is", "been", "be", "are"],
           correct: 0,
           explanation: "Đáp án đúng là (A) 'is' vì chủ ngữ 'company' số ít, thì hiện tại tiếp diễn 'is expanding'. Kiến thức ngữ pháp: Động từ 'to be' số ít 'is' + V-ing cho tương lai gần; 'are' (số nhiều), 'be' (nguyên thể), 'been' (quá khứ phân từ) sai."
         },
         {
           id: 26,
           question: "Please ensure that all documents are __________ prior to the meeting.",
-          options: ["prepare", "preparing", "prepared", "prepares"],
+          options: ["prepares", "preparing", "prepared", "prepare"],
           correct: 2,
           explanation: "Đáp án đúng là (C) 'prepared' vì dạng quá khứ phân từ trong cấu trúc bị động 'are prepared'. Kiến thức ngữ pháp: Bị động hiện tại 'are + V3' (prepared = chuẩn bị); không dùng nguyên thể (A), V-ing (B), ngôi thứ ba (D)."
         },
         {
           id: 27,
           question: "The workshop will cover advanced techniques __________ improving productivity.",
-          options: ["on", "for", "with", "by"],
+          options: ["by", "for", "with", "on"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'for' vì cụm 'techniques for improving' (kỹ thuật để cải thiện). Kiến thức ngữ pháp: Giới từ 'for' chỉ mục đích; 'on' (về), 'with' (với), 'by' (bằng) không phù hợp."
         },
         {
           id: 28,
           question: "She works __________ as a freelance consultant, allowing flexibility in her schedule.",
-          options: ["independent", "independently", "independence", "depend"],
+          options: ["independence", "independently", "independent", "depend"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'independently' vì trạng từ bổ nghĩa động từ 'works'. Kiến thức ngữ pháp: Trạng từ 'independently' (một cách độc lập); tính từ (A), danh từ (C), động từ sai (D) không đúng."
         },
         {
           id: 29,
           question: "Due to budget cuts, the event has been __________ to a virtual format.",
-          options: ["change", "changing", "changed", "changes"],
+          options: ["changes", "changing", "changed", "change"],
           correct: 2,
           explanation: "Đáp án đúng là (C) 'changed' vì thì hiện tại hoàn thành thụ động 'has been changed'. Kiến thức ngữ pháp: Bị động 'has been + V3'; không dùng nguyên thể (A), V-ing (B), ngôi thứ ba (D)."
         },
         {
           id: 30,
           question: "Innovation and adaptability are essential __________ navigating market changes.",
-          options: ["to", "for", "in", "at"],
+          options: ["to", "in", "for", "at"],
           correct: 0,
           explanation: "Đáp án đúng là (A) 'to' vì cụm 'essential to' (thiết yếu cho). Kiến thức ngữ pháp: 'Essential to + V-ing' chỉ mục đích; 'for' (cho), 'in' (trong), 'at' (tại) không khớp."
         }
@@ -322,7 +320,7 @@ export const EXAM8_DATA = {
           type: "fill",
           question: "(31) - Điền từ thích hợp",
           context: "...mandatory training sessions starting next Monday to (31) key selling techniques.",
-          options: ["review", "reinforce", "ignore", "delay"],
+          options: ["delay", "reinforce", "ignore", "review"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'reinforce' vì nó nghĩa là 'củng cố', phù hợp với 'to reinforce key selling techniques' (để củng cố kỹ thuật bán hàng chính). Kiến thức ngữ pháp: Động từ 'reinforce' + tân ngữ trong mục đích; 'review' (xem lại), 'ignore' (bỏ qua), 'delay' (trì hoãn) không phù hợp."
         },
@@ -331,7 +329,7 @@ export const EXAM8_DATA = {
           type: "fill",
           question: "(32) - Điền từ thích hợp",
           context: "This is designed to (32) your confidence when dealing with challenging clients.",
-          options: ["reduce", "build", "test", "lose"],
+          options: ["lose", "build", "test", "reduce"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'build' vì nó nghĩa là 'xây dựng', phù hợp với 'to build your confidence' (xây dựng sự tự tin). Kiến thức từ vựng: Động từ tích cực 'build' trong ngữ cảnh đào tạo; 'reduce' (giảm), 'test' (kiểm tra), 'lose' (mất) mang nghĩa tiêu cực."
         },
@@ -340,7 +338,7 @@ export const EXAM8_DATA = {
           type: "fill",
           question: "(33) - Điền từ thích hợp",
           context: "...so we can align them with the team objectives and (33) any gaps early.",
-          options: ["create", "identify", "hide", "fill"],
+          options: ["hide", "identify", "create", "fill"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'identify' vì nó nghĩa là 'xác định', phù hợp với 'identify any gaps' (xác định khoảng trống). Kiến thức ngữ pháp: Động từ 'identify' + tân ngữ trong cấu trúc phát hiện vấn đề; 'create' (tạo), 'hide' (che giấu), 'fill' (điền) không khớp."
         },
@@ -349,7 +347,7 @@ export const EXAM8_DATA = {
           type: "fill",
           question: "(34) - Điền từ thích hợp",
           context: "A preparation guide will be sent out tomorrow to (34) you get ready effectively.",
-          options: ["stop", "help", "force", "prevent"],
+          options: ["prevent", "help", "force", "stop"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'help' vì nó nghĩa là 'giúp', phù hợp với 'to help you get ready' (giúp bạn chuẩn bị). Kiến thức ngữ pháp: Động từ 'help' + tân ngữ + V nguyên thể; 'stop' (dừng), 'force' (buộc), 'prevent' (ngăn) không phù hợp."
         },
@@ -358,7 +356,7 @@ export const EXAM8_DATA = {
           type: "fill",
           question: "(35) - Điền từ thích hợp",
           context: "This will help you (35) faster and contribute sooner to our goals.",
-          options: ["struggle", "integrate", "leave", "hesitate"],
+          options: ["hesitate", "integrate", "leave", "struggle"],
           correct: 1,
           explanation: "Đáp án đúng là (B) 'integrate' vì nó nghĩa là 'hòa nhập', phù hợp với 'integrate faster' (hòa nhập nhanh hơn). Kiến thức từ vựng: Động từ 'integrate' chỉ quá trình thích nghi nhóm; 'struggle' (vật lộn), 'leave' (rời), 'hesitate' (do dự) tiêu cực."
         },
@@ -367,7 +365,7 @@ export const EXAM8_DATA = {
           type: "fill",
           question: "(36) - Điền từ thích hợp",
           context: "Remember, collaboration is key—feel free to (36) best practices during our weekly check-ins.",
-          options: ["postpone", "limit", "avoid", "promote"],
+          options: ["avoid", "limit", "postpone", "promote"],
           correct: 3,
           explanation: "Đáp án đúng là (D) 'promote' vì ngữ cảnh nhấn mạnh 'collaboration is key' và 'share best practices' ngụ ý 'promote' (thúc đẩy) chia sẻ. Kiến thức suy luận: Động từ tích cực phù hợp với tinh thần đội nhóm; các lựa chọn khác tiêu cực."
         },
@@ -375,33 +373,33 @@ export const EXAM8_DATA = {
           id: 37,
           type: "comprehension",
           question: "(37) - The sales target is to exceed last quarter by ___.",
-          options: ["5%", "20%", "10%", "15%"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) '15%' vì email nêu 'exceed last quarter's performance by 15%'. Kiến thức đọc hiểu: Trích dẫn trực tiếp mục tiêu từ phần review."
+          options: ["10%", "15%", "5%", "20%"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) '15%' vì email nêu 'exceed last quarter's performance by 15%'. Kiến thức đọc hiểu: Trích dẫn trực tiếp mục tiêu từ phần review."
         },
         {
           id: 38,
           type: "comprehension",
           question: "(38) - What is the primary focus of the training sessions?",
-          options: ["Hiring new staff", "Budget planning", "Role-playing and case studies", "Vacation scheduling"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì 'The training will include role-playing exercises and case studies'. Kiến thức đọc hiểu: Xác định nội dung chính từ phần training."
+          options: ["Vacation scheduling", "Role-playing and case studies", "Hiring new staff", "Budget planning"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'The training will include role-playing exercises and case studies'. Kiến thức đọc hiểu: Xác định nội dung chính từ phần training."
         },
         {
           id: 39,
           type: "comprehension",
           question: "(39) - When must sales forecasts be submitted?",
-          options: ["End of quarter", "April 20", "Next Monday", "April 10"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'by end of day Thursday, April 10'. Kiến thức đọc hiểu: Thời hạn cụ thể từ phần submit."
+          options: ["Next Monday", "April 20", "April 10", "End of quarter"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) vì 'by end of day Thursday, April 10'. Kiến thức đọc hiểu: Thời hạn cụ thể từ phần submit."
         },
         {
           id: 40,
           type: "comprehension",
           question: "(40) - What system is implemented for new hires?",
-          options: ["Salary review", "Independent assignments", "Remote training", "A buddy system"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'a buddy system has been implemented to pair you with experienced colleagues'. Kiến thức đọc hiểu: Hệ thống hỗ trợ từ phần new hires."
+          options: ["Remote training", "A buddy system", "Salary review", "Independent assignments"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'a buddy system has been implemented to pair you with experienced colleagues'. Kiến thức đọc hiểu: Hệ thống hỗ trợ từ phần new hires."
         }
       ]
     },
@@ -432,72 +430,72 @@ export const EXAM8_DATA = {
         {
           id: 41,
           question: "Why should customers visit the EcoTravel Adventures website?",
-          options: ["To book transport", "To view guide profiles", "To pay discounts", "To join social media"],
+          options: ["To pay discounts", "To view guide profiles", "To join social media", "To book transport"],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'Check ecotraveladventures.com for guide profiles and tour itineraries'. Kiến thức đọc hiểu: Mục đích từ phần Certified Guides."
         },
         {
           id: 42,
           question: "How was the advertisement discovered by Ms. Wilson?",
-          options: ["In a magazine.", "On social media.", "Via email.", "At a travel agency."],
+          options: ["Via email.", "On social media.", "At a travel agency.", "In a magazine."],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'I saw your ad on social media'. Kiến thức suy luận: Kênh quảng cáo từ email."
         },
         {
           id: 43,
           question: "Who is Ms. Wilson planning the tour for?",
-          options: ["Solo travelers", "A business group", "Her family of four", "Birdwatchers only"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì 'for my family of four (two adults, two kids)'. Kiến thức đọc hiểu: Số lượng và thành viên từ email."
+          options: ["Birdwatchers only", "Her family of four", "A business group", "Solo travelers"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'for my family of four (two adults, two kids)'. Kiến thức đọc hiểu: Số lượng và thành viên từ email."
         },
         {
           id: 44,
           question: "What does Ms. Wilson NOT mention in her email?",
-          options: ["Custom itineraries", "Group discounts", "Sustainable transport", "Kid-friendly activities"],
+          options: ["Sustainable transport", "Group discounts", "Custom itineraries", "Kid-friendly activities"],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì email không đề cập group discounts, dù quảng cáo có; tập trung vào customize và activities. Kiến thức đọc hiểu: So sánh yêu cầu email với dịch vụ."
         },
         {
           id: 45,
           question: "What will Ms. Wilson likely receive within 48 hours?",
-          options: ["A tour discount code", "Options and pricing", "A phone call", "Guide profiles only"],
+          options: ["A phone call", "Options and pricing", "A tour discount code", "Guide profiles only"],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'We'll respond within 48 hours with options and pricing'. Kiến thức suy luận: Quy trình từ quảng cáo."
         },
         {
           id: 46,
           question: "What discount is offered in the advertisement?",
-          options: ["Free transport", "5% off", "Weekly specials", "10% on first adventure"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'receive a 10% discount on your first adventure'. Kiến thức đọc hiểu: Ưu đãi trực tiếp."
+          options: ["Weekly specials", "10% on first adventure", "5% off", "Free transport"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'receive a 10% discount on your first adventure'. Kiến thức đọc hiểu: Ưu đãi trực tiếp."
         },
         {
           id: 47,
           question: "What is the focus of Ms. Wilson's requested tour?",
-          options: ["Electric bike tours", "Photography workshops", "Coastal wildlife viewing", "Birdwatching add-ons"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì 'focused on wildlife viewing, preferably in a coastal area'. Kiến thức đọc hiểu: Yêu cầu chính từ email."
+          options: ["Photography workshops", "Coastal wildlife viewing", "Electric bike tours", "Birdwatching add-ons"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'focused on wildlife viewing, preferably in a coastal area'. Kiến thức đọc hiểu: Yêu cầu chính từ email."
         },
         {
           id: 48,
           question: "When is Ms. Wilson available for the tour?",
-          options: ["Weekends preferred", "Before August 1", "Weekdays only", "After August 1"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'available after August 1'. Kiến thức đọc hiểu: Thời gian linh hoạt từ email."
+          options: ["Weekdays only", "After August 1", "Before August 1", "Weekends preferred"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'available after August 1'. Kiến thức đọc hiểu: Thời gian linh hoạt từ email."
         },
         {
           id: 49,
           question: "What time does Ms. Wilson prefer to be called?",
-          options: ["Weekends anytime", "Before 6:00 P.M.", "Mornings only", "After 6:00 P.M. weekdays"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'call me... after 6:00 P.M. weekdays'. Kiến thức đọc hiểu: Khung giờ từ email."
+          options: ["Mornings only", "After 6:00 P.M. weekdays", "Before 6:00 P.M.", "Weekends anytime"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'call me... after 6:00 P.M. weekdays'. Kiến thức đọc hiểu: Khung giờ từ email."
         },
         {
           id: 50,
           question: "How many days is the requested trip?",
-          options: ["One day", "A full week", "Two days", "Three days"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'a three-day trip'. Kiến thức đọc hiểu: Độ dài tour từ email."
+          options: ["Two days", "Three days", "A full week", "One day"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'a three-day trip'. Kiến thức đọc hiểu: Độ dài tour từ email."
         }
       ]
     },
@@ -514,14 +512,14 @@ export const EXAM8_DATA = {
         {
           id: 51,
           question: "What is implied about Sarah?",
-          options: ["She is leading the meeting.", "She is attending a client meeting.", "She works in traffic control.", "She canceled the Q&A."],
+          options: ["She works in traffic control.", "She is attending a client meeting.", "She is leading the meeting.", "She canceled the Q&A."],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'Client's presentation... don't want to miss the Q&A' ngụ ý tham gia họp khách hàng. Kiến thức suy luận: Ngữ cảnh business meeting."
         },
         {
           id: 52,
           question: "What does Mike mean by 'No worries'?",
-          options: ["He is annoyed by the delay.", "He will handle the update.", "He plans to reschedule.", "He doubts her excuse."],
+          options: ["He doubts her excuse.", "He will handle the update.", "He plans to reschedule.", "He is annoyed by the delay."],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'I'll update the team' sau 'No worries'. Kiến thức suy luận: Cụm từ trấn an kết nối với hành động hỗ trợ."
         },
@@ -529,97 +527,97 @@ export const EXAM8_DATA = {
           id: 53,
           question: "Why is Sarah delayed?",
           options: [
-            "Car breakdown.",
             "She overslept.",
+            "Bad weather and traffic.",
             "Client rescheduled.",
-            "Bad weather and traffic."
+            "Car breakdown."
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'Stuck in traffic... Weather's the culprit; roads are jammed'. Kiến thức đọc hiểu: Lý do trực tiếp từ tin nhắn."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'Stuck in traffic... Weather's the culprit; roads are jammed'. Kiến thức đọc hiểu: Lý do trực tiếp từ tin nhắn."
         },
         {
           id: 54,
           question: "What time does the meeting start?",
           options: [
-            "15:10",
-            "2 p.m.",
             "14:22",
-            "3 p.m."
+            "3 p.m.",
+            "15:10",
+            "2 p.m."
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'meeting starts at 3, right? Yes, 3 p.m.'. Kiến thức đọc hiểu: Thời gian xác nhận."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'meeting starts at 3, right? Yes, 3 p.m.'. Kiến thức đọc hiểu: Thời gian xác nhận."
         },
         {
           id: 55,
           question: "What does Sarah ask Mike to do last?",
           options: [
-            "Update the client",
-            "Start without her",
             "Check the weather",
-            "Save her a seat"
+            "Save her a seat",
+            "Start without her",
+            "Update the client"
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'Save me a seat?'. Kiến thức đọc hiểu: Yêu cầu cuối cùng."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'Save me a seat?'. Kiến thức đọc hiểu: Yêu cầu cuối cùng."
         },
         {
           id: 56,
           question: "What can be inferred about Mike and Sarah?",
           options: [
-            "They are strangers.", 
-            "They are family.",
             "They are competitors.",
-            "They are colleagues."
+            "They are colleagues.",
+            "They are family.",
+            "They are strangers."
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì ngữ cảnh họp team và hỗ trợ lẫn nhau. Kiến thức suy luận: Mối quan hệ đồng nghiệp từ 'update the team'."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì ngữ cảnh họp team và hỗ trợ lẫn nhau. Kiến thức suy luận: Mối quan hệ đồng nghiệp từ 'update the team'."
         },
         {
           id: 57,
           question: "Why does Sarah mention the Q&A?",
           options: [
-            "To skip it.", 
-            "To end early.",
             "To blame the client.",
-            "It's important to her."
+            "It's important to her.",
+            "To end early.",
+            "To skip it."
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'don't want to miss the Q&A'. Kiến thức suy luận: Nhấn mạnh phần quan trọng."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'don't want to miss the Q&A'. Kiến thức suy luận: Nhấn mạnh phần quan trọng."
         },
         {
           id: 58,
           question: "What does Mike attribute the delay to?",
           options: [
-            "Sarah's poor planning.",
-            "Meeting location.",
             "Client demands.",
-            "Heavy traffic from weather."
+            "Heavy traffic from weather.",
+            "Meeting location.",
+            "Sarah's poor planning."
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'Weather's the culprit; roads are jammed'. Kiến thức suy luận: Giải thích nguyên nhân."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'Weather's the culprit; roads are jammed'. Kiến thức suy luận: Giải thích nguyên nhân."
         },
         {
           id: 59,
           question: "What is suggested about the roads?",
           options: [
-            "They are clear.", 
-            "They are closed.",
             "They are empty.",
-            "They are jammed."
+            "They are jammed.",
+            "They are closed.",
+            "They are clear."
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'roads are jammed'. Kiến thức suy luận: Tình trạng giao thông."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'roads are jammed'. Kiến thức suy luận: Tình trạng giao thông."
         },
         {
           id: 60,
           question: "What does Sarah express in her first message?",
           options: [
-            "Excitement for the meeting",
-            "Request to cancel",
             "Complaint about Mike",
-            "Apology for lateness"
+            "Apology for lateness",
+            "Excitement for the meeting",
+            "Request to cancel"
           ],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) vì 'Running 20 mins late' ngụ ý xin lỗi gián tiếp. Kiến thức suy luận: Giọng điệu thông báo và xác nhận."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì 'Running 20 mins late' ngụ ý xin lỗi gián tiếp. Kiến thức suy luận: Giọng điệu thông báo và xác nhận."
         }
       ]
     }

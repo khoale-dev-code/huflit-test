@@ -2,7 +2,6 @@ export const EXAM7_DATA = {
   title: "HUFLIT Listening & Reading Practice - Exam 7",
   description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT.",
   parts: {
-    // Listening Parts
     part1: {
       title: "PART 1: Short Conversations",
       description: "Nghe đoạn hội thoại giữa Emma và Tom về kỳ nghỉ. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
@@ -24,9 +23,9 @@ export const EXAM7_DATA = {
           id: 2,
           options: [
             "She stayed for two weeks.",
-            "She stayed for one month.",
+            "She stayed for several months.",
             "She stayed for three weeks.",
-            "She stayed for several months."
+            "She stayed for one month."
           ],
           correct: 2,
           explanation: "Emma nói: 'I stayed there for three weeks exploring Seoul and Busan.' (Tôi ở đó ba tuần khám phá Seoul và Busan)."
@@ -57,11 +56,11 @@ export const EXAM7_DATA = {
           id: 5,
           options: [
             "She found it very difficult to get around.",
-            "She thought it was extremely easy to navigate.",
+            "She found it moderately easy to navigate.",
             "She found it impossible without a tour guide.",
-            "She found it moderately easy to navigate."
+            "She thought it was extremely easy to navigate."
           ],
-          correct: 3,
+          correct: 1,
           explanation: "Emma nói: 'I'd say it was moderately easy to navigate. The BTS and MRT systems are quite efficient.' (Tôi sẽ nói nó khá dễ di chuyển. Hệ thống BTS và MRT khá hiệu quả)."
         }
       ]
@@ -70,16 +69,16 @@ export const EXAM7_DATA = {
       title: "PART 2: Longer Conversation",
       description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại một cuộc họp. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
       type: "listening",
-      script: "Narrator: At the office meeting room.\nManager: Good morning, everyone. Let's start our team meeting. First, what would you like to drink?\nAnna: I'll have a green tea, please.\nBen: Same for me, a green tea.\nLisa: I'd also like a green tea, thank you.\nManager: Alright, that's three green teas.\nAnna: Lisa, I noticed you skipped breakfast this morning. Are you feeling okay?\nLisa: I'm fine, thanks. I actually had a big dinner last night, and I've been trying to practice intermittent fasting lately, so I'm skipping breakfast on purpose.\nBen: Speaking of changes, did you hear that Dr. Chen left his position at the hospital? What's he up to now?\nAnna: He still runs his private clinic, but now he's also teaching medical students at the university downtown. He's mentoring the next generation of doctors.\nLisa: That's wonderful! By the way, my mother and your aunt Maria are planning to visit us for dinner this weekend. Yes, your mother's sister will be joining us too.\nBen: For Michael's graduation, what should we give him?\nAnna: Cash would be practical.\nLisa: Maybe a nice watch?\nBen: How about a new laptop?\nAnna: Those are all good ideas. Let's discuss it more tonight.",
+      script: "Narrator: At the office meeting room.\nManager: Good morning, everyone. Let's start our team meeting. First, what would you like to drink?\nAnna: I'll have a green tea, please.\nBen: Same for me, a green tea.\nLisa: I'd also like a green tea, thank you.\nManager: Alright, that's three green teas.\nAnna: Lisa, I noticed you skipped breakfast this morning. Are you feeling okay?\nLisa: I'm fine, thanks. I actually had a big dinner last night, and I've been trying to practice intermittent fasting lately, so I'm skipping breakfast on purpose.\nBen: Speaking of changes, did you hear that Doctor Chen left his position at the hospital? What's he up to now?\nAnna: He still runs his private clinic, but now he's also teaching medical students at the university downtown. He's mentoring the next generation of doctors.\nLisa: That's wonderful! By the way, my mother and your aunt Maria are planning to visit us for dinner this weekend. Yes, your mother's sister will be joining us too.\nBen: For Michael's graduation, what should we give him?\nAnna: Cash would be practical.\nLisa: Maybe a nice watch?\nBen: How about a new laptop?\nAnna: Those are all good ideas. Let's discuss it more tonight.",
       questions: [
         {
           id: 6,
           question: "How many people ordered green tea?",
           options: [
-            "One",
+            "Two",
             "Four",
             "Three",
-            "Two"
+            "One"
           ],
           correct: 2,
           explanation: "Manager nói: 'That's three green teas.' (Đó là ba trà xanh.) Anna, Ben, và Lisa đều gọi green tea."
@@ -98,7 +97,7 @@ export const EXAM7_DATA = {
         },
         {
           id: 8,
-          question: "What does Dr. Chen do now?",
+          question: "What does Doctor Chen do now?",
           options: [
             "He only works at his private clinic.",
             "He teaches medical students at the university.",
@@ -270,7 +269,6 @@ export const EXAM7_DATA = {
         }
       ]
     },
-    // Reading Parts
     part5: {
       title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
       description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
@@ -279,9 +277,9 @@ export const EXAM7_DATA = {
         {
           id: 21,
           question: "The new software system has proven to be _______ efficient than the previous version.",
-          options: ["significantly more", "significant most", "significance more", "more significantly"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'significantly more' vì đây là cấu trúc so sánh hơn với trạng từ 'significantly' bổ nghĩa cho 'more efficient'. Kiến thức ngữ pháp: Trạng từ + so sánh hơn (adverb + comparative form)."
+          options: ["significance more", "significant most", "significantly more", "more significantly"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) 'significantly more' vì đây là cấu trúc so sánh hơn với trạng từ 'significantly' bổ nghĩa cho 'more efficient'. Kiến thức ngữ pháp: Trạng từ + so sánh hơn (adverb + comparative form)."
         },
         {
           id: 22,
@@ -384,9 +382,9 @@ TechVision Industries`,
           type: "fill",
           question: "(31) - Điền từ thích hợp",
           context: "Each department member will receive specific assignments to (31) effective collaboration across all divisions.",
-          options: ["facilitate", "complicate", "eliminate", "postpone"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'facilitate' vì nó nghĩa là 'tạo điều kiện thuận lợi', phù hợp với 'assignments to facilitate effective collaboration' (nhiệm vụ để tạo điều kiện cho sự hợp tác hiệu quả)."
+          options: ["complicate", "facilitate", "eliminate", "postpone"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'facilitate' vì nó nghĩa là 'tạo điều kiện thuận lợi', phù hợp với 'assignments to facilitate effective collaboration' (nhiệm vụ để tạo điều kiện cho sự hợp tác hiệu quả)."
         },
         {
           id: 32,
@@ -586,15 +584,15 @@ r.martinez@globaltechsolutions.com
       title: "PART 8: Text Message Chain",
       description: "10 câu hỏi - Đọc chuỗi tin nhắn, chọn đáp án tốt nhất (A, B, C, D).",
       type: "reading",
-      text: `Dr. Chen (09:45): Morning Anna! My train from Boston is running late – expected arrival at Penn Station 10:20 instead of 10:00. Apologies!
+      text: `Doctor Chen (09:45): Morning Anna! My train from Boston is running late – expected arrival at Penn Station 10:20 instead of 10:00. Apologies!
 Anna (09:47): No worries at all! I'll check the updated schedule and meet you at the main entrance.
-Dr. Chen (09:50): Perfect, we should still make it to our client presentation on time. Track maintenance caused the delay.
+Doctor Chen (09:50): Perfect, we should still make it to our client presentation on time. Track maintenance caused the delay.
 Anna (10:05): Understood. The conference room parking might be limited today, but I'll find a spot.
-Dr. Chen (14:30): Just arrived! Looking forward to seeing you shortly!`,
+Doctor Chen (14:30): Just arrived! Looking forward to seeing you shortly!`,
       questions: [
         {
           id: 51,
-          question: "What can be inferred about Dr. Chen?",
+          question: "What can be inferred about Doctor Chen?",
           options: ["He is traveling for business purposes.", "He works permanently in Boston.", "He missed his train completely.", "He is meeting a new client for the first time."],
           correct: 0,
           explanation: "Đáp án đúng là (A) vì đề cập 'our client presentation' (bài thuyết trình khách hàng của chúng ta) và chuyến tàu từ Boston đến Penn Station."
@@ -608,35 +606,40 @@ Dr. Chen (14:30): Just arrived! Looking forward to seeing you shortly!`,
         },
         {
           id: 53,
-          question: "Why was Dr. Chen's train delayed?",
+          question: "Why was Doctor Chen's train delayed?",
           options: ["Bad weather conditions", "Track maintenance work", "Mechanical problems with the train", "Overcrowding at the station"],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Dr. Chen nói 'Track maintenance caused the delay' (Bảo trì đường ray gây ra sự chậm trễ)."
+          explanation: "Đáp án đúng là (B) vì Doctor Chen nói 'Track maintenance caused the delay' (Bảo trì đường ray gây ra sự chậm trễ)."
         },
         {
           id: 54,
-          question: "What is Dr. Chen's updated arrival time?",
+          question: "What is Doctor Chen's updated arrival time?",
           options: ["09:45", "10:00", "10:20", "14:30"],
           correct: 2,
-          explanation: "Đáp án đúng là (C) vì Dr. Chen nói 'expected arrival at Penn Station 10:20 instead of 10:00' (dự kiến đến Penn Station 10:20 thay vì 10:00)."
+          explanation: "Đáp án đúng là (C) vì Doctor Chen nói 'expected arrival at Penn Station 10:20 instead of 10:00' (dự kiến đến Penn Station 10:20 thay vì 10:00)."
         },
         {
           id: 55,
-          question: "What does Anna offer to do for Dr. Chen?",
+          question: "What does Anna offer to do for Doctor Chen?",
           options: ["Book a hotel room", "Meet him at Penn Station", "Reschedule the presentation", "Drive him to Boston"],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì Anna nói 'meet you at the main entrance' (gặp bạn ở lối vào chính của Penn Station)."
         },
         {
           id: 56,
-          question: "What is the relationship between Dr. Chen and Anna?",
-          options: ["They are family members.", "They are colleagues working together.", "They are client and consultant.", "They have never met before."],
+          question: "What is the relationship between Doctor Chen and Anna?",
+          options: [
+            "They are family members.", 
+            "They are colleagues working together.", 
+            "They are client and consultant.", 
+            "They have never met before."
+          ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'our client presentation' (bài thuyết trình khách hàng của chúng ta) ngụ ý họ cùng làm việc."
         },
         {
           id: 57,
-          question: "At 09:50, why does Dr. Chen mention 'we should still make it to our client presentation on time'?",
+          question: "At 09:50, why does Doctor Chen mention 'we should still make it to our client presentation on time'?",
           options: ["To cancel the meeting", "To reassure Anna about the schedule", "To request a delay in the presentation", "To complain about the train service"],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì mục đích là trấn an Anna rằng dù chậm 20 phút vẫn kịp giờ thuyết trình."
@@ -657,7 +660,7 @@ Dr. Chen (14:30): Just arrived! Looking forward to seeing you shortly!`,
         },
         {
           id: 60,
-          question: "What does Dr. Chen's final message at 14:30 indicate?",
+          question: "What does Doctor Chen's final message at 14:30 indicate?",
           options: ["He is still on the train.", "He has arrived at the station.", "He is canceling the meeting.", "He is lost and needs directions."],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì 'Just arrived!' (Vừa đến nơi!) cho thấy đã đến Penn Station."

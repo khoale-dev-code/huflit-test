@@ -11,9 +11,9 @@ export const EXAM10_DATA = {
         {
           id: 1,
           options: [
-            "For about one week.",
-            "For approximately two weeks.",
             "For three weeks.",
+            "For approximately two weeks.",
+            "For one week.",
             "For one month."
           ],
           correct: 1,
@@ -22,10 +22,10 @@ export const EXAM10_DATA = {
         {
           id: 2,
           options: [
-            "She has been saving for one year.",
-            "She has been saving for three years.",
             "She has been saving for five years.",
-            "She just started saving."
+            "She has been saving for three years.",
+            "She just started saving.",
+            "She has been saving for one year."
           ],
           correct: 1,
           explanation: "Emma nói: 'I've been saving money for three years to make this dream come true.' (Tôi đã tiết kiệm tiền trong ba năm để thực hiện ước mơ này.)"
@@ -33,10 +33,10 @@ export const EXAM10_DATA = {
         {
           id: 3,
           options: [
-            "Vietnam, Thailand, and Laos.",
+            "Vietnam, Malaysia, and Singapore.",
             "Thailand, Cambodia, and Myanmar.",
             "Vietnam, Thailand, and Cambodia.",
-            "Vietnam, Malaysia, and Singapore."
+            "Vietnam, Thailand, and Laos."
           ],
           correct: 2,
           explanation: "Emma nói: 'I'm most interested in visiting Vietnam, Thailand, and Cambodia.' (Tôi hứng thú nhất với việc thăm Vietnam, Thailand, và Cambodia.)"
@@ -44,10 +44,10 @@ export const EXAM10_DATA = {
         {
           id: 4,
           options: [
-            "Tour groups are too expensive.",
+            "Tour groups provide free transportation.",
             "Tour groups have flexible schedules.",
             "Tour groups are too rigid and don't allow her to enjoy local culture in depth.",
-            "Tour groups provide free transportation."
+            "Tour groups are too expensive."
           ],
           correct: 2,
           explanation: "Emma nói: 'Tour groups are too rigid for me – they have fixed schedules and I can't really enjoy the local culture in depth.' (Tour groups quá cứng nhắc với tôi – chúng có những lịch trình cố định và tôi không thể thực sự tận hưởng văn hóa địa phương sâu sắc.)"
@@ -55,10 +55,10 @@ export const EXAM10_DATA = {
         {
           id: 5,
           options: [
-            "Hotels are always the best choice.",
+            "Accommodation costs are not important.",
             "Hostels in Southeast Asia are very affordable and offer free breakfast.",
             "Hostels don't meet international standards.",
-            "Accommodation costs are not important."
+            "Hotels are always the best choice."
           ],
           correct: 1,
           explanation: "Emma nói: 'I've read that hostels in Southeast Asia are very affordable and provide a great way to meet other travelers. Plus, many hostels offer free breakfast.' (Tôi đã đọc rằng hostels ở Đông Nam Á rất giá cả phải chăng và cung cấp cách tuyệt vời để gặp gỡ các du khách khác. Ngoài ra, nhiều hostels cung cấp bữa sáng miễn phí.)"
@@ -75,10 +75,10 @@ export const EXAM10_DATA = {
           id: 6,
           question: "By how much did the team exceed the sales target?",
           options: [
-            "By 20%.",
-            "By 15%.",
             "By 25%.",
-            "By 10%."
+            "By 15%.",
+            "By 10%.",
+            "By 20%."
           ],
           correct: 1,
           explanation: "Manager nói: 'Our team exceeded the target by 15%.' (Đội của chúng ta vượt quá mục tiêu 15%.)"
@@ -87,10 +87,10 @@ export const EXAM10_DATA = {
           id: 7,
           question: "What was the result of the digital marketing campaign?",
           options: [
-            "A 20% increase in engagement.",
-            "A 40% increase in online engagement.",
             "A 50% decrease in engagement.",
-            "No significant change."
+            "A 40% increase in online engagement.",
+            "No significant change.",
+            "A 20% increase in engagement."
           ],
           correct: 1,
           explanation: "Ben nói: 'We saw a 40% increase in online engagement.' (Chúng tôi thấy tăng 40% trong lượng tương tác trực tuyến.)"
@@ -99,10 +99,10 @@ export const EXAM10_DATA = {
           id: 8,
           question: "Which region underperformed?",
           options: [
-            "The Southeast region.",
+            "The Northeast region.",
             "The Southwest region.",
             "The Northwest region.",
-            "The Northeast region."
+            "The Southeast region."
           ],
           correct: 2,
           explanation: "Anna nói: 'However, the Northwest region underperformed compared to last quarter.' (Tuy nhiên, khu vực Tây Bắc có kết quả kém hơn so với quý trước.)"
@@ -111,10 +111,10 @@ export const EXAM10_DATA = {
           id: 9,
           question: "What does Ben suggest as the reason for the Northwest region's underperformance?",
           options: [
-            "Poor marketing support.",
+            "Low product quality.",
             "High customer complaints.",
             "Staffing issues - the team lost experienced salespeople.",
-            "Low product quality."
+            "Poor marketing support."
           ],
           correct: 2,
           explanation: "Ben nói: 'I think the problem might be staffing. The Northwest team lost two experienced salespeople recently.' (Tôi nghĩ vấn đề có thể là nhân sự. Đội Tây Bắc đã mất hai nhân viên bán hàng giàu kinh nghiệm gần đây.)"
@@ -123,10 +123,10 @@ export const EXAM10_DATA = {
           id: 10,
           question: "When will Anna have the recruitment plan ready?",
           options: [
-            "By tomorrow.",
+            "By the end of the month.",
             "By next week.",
             "By next Friday.",
-            "By the end of the month."
+            "By tomorrow."
           ],
           correct: 2,
           explanation: "Anna nói: 'I can have the recruitment plan prepared by next Friday.' (Tôi có thể chuẩn bị kế hoạch tuyển dụng vào thứ Sáu tuần tới.)"
@@ -143,10 +143,10 @@ export const EXAM10_DATA = {
           id: 11,
           question: "When is the company picnic scheduled?",
           options: [
-            "Next Friday.",
-            "Next Saturday.",
             "Next Sunday.",
-            "The following weekend."
+            "Next Saturday.",
+            "The following weekend.",
+            "Next Friday."
           ],
           correct: 1,
           explanation: "System nói: 'We are pleased to announce our annual company picnic scheduled for next Saturday at Central Park.' (Chúng tôi rất vui thông báo buổi dã ngoại hàng năm được lên lịch vào thứ Bảy tới tại Central Park.)"
@@ -155,34 +155,34 @@ export const EXAM10_DATA = {
           id: 12,
           question: "What is the cost of attending the picnic?",
           options: [
-            "$10 per person.",
-            "$25 per family.",
+            "$50 per employee.",
             "No cost.",
-            "$50 per employee."
+            "$25 per family.",
+            "$10 per person."
           ],
-          correct: 2,
+          correct: 1,
           explanation: "System nói: 'There is no cost to attend.' (Không có chi phí tham gia.)"
         },
         {
           id: 13,
           question: "What activities are mentioned?",
           options: [
-            "Soccer, basketball, and swimming.",
-            "Tennis, golf, and swimming.",
+            "Hiking, cycling, and kayaking.",
             "Volleyball, badminton, and a barbecue.",
-            "Hiking, cycling, and kayaking."
+            "Soccer, basketball, and swimming.",
+            "Tennis, golf, and swimming."
           ],
-          correct: 2,
+          correct: 1,
           explanation: "System nói: 'We have arranged various activities including volleyball, badminton, and a barbecue.' (Chúng tôi đã sắp xếp các hoạt động khác nhau bao gồm bóng chuyền, cầu lông, và nướng thịt.)"
         },
         {
           id: 14,
           question: "When is the registration deadline?",
           options: [
-            "Tuesday.",
-            "Wednesday.",
             "Thursday.",
-            "Friday."
+            "Wednesday.",
+            "Friday.",
+            "Tuesday."
           ],
           correct: 1,
           explanation: "System nói: 'Please register by Wednesday to help us plan for food quantities.' (Vui lòng đăng ký vào Thứ Tư để giúp chúng tôi lên kế hoạch về số lượng thực phẩm.)"
@@ -191,12 +191,12 @@ export const EXAM10_DATA = {
           id: 15,
           question: "What will happen if it rains?",
           options: [
-            "The event will be cancelled.",
-            "The event will move indoors.",
+            "The event will be shortened.",
             "The event will be rescheduled to the following weekend.",
-            "The event will be shortened."
+            "The event will move indoors.",
+            "The event will be cancelled."
           ],
-          correct: 2,
+          correct: 1,
           explanation: "System nói: 'In case of rain, we will reschedule the event to the following weekend.' (Trong trường hợp mưa, chúng tôi sẽ lên lịch lại sự kiện vào cuối tuần sau.)"
         }
       ]
@@ -205,16 +205,16 @@ export const EXAM10_DATA = {
       title: "PART 4: Extended Conversation",
       description: "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
       type: "listening",
-      script: "Student 1: Hi Dr. Chen, I wanted to discuss my recent exam grade. I'm not happy with the result.\nDr. Chen: Of course, let's sit down. What specifically are you concerned about?\nStudent 1: I studied hard, but I think I didn't understand some of the questions. Also, the material covered in the last chapter was confusing.\nDr. Chen: I see. Which topics were most difficult for you?\nStudent 1: The section on statistical analysis was really challenging. I struggled with the formulas and how to apply them.\nDr. Chen: That's understandable. Many students find that section challenging. I recommend reviewing the textbook chapter again and watching the online tutorial videos I posted.\nStudent 1: Will that be enough? I'm worried about the final exam.\nDr. Chen: It should help significantly. Additionally, I can arrange tutoring sessions with a teaching assistant. We have slots available on Mondays and Thursdays after class.\nStudent 1: That would be great! Can I sign up today?\nDr. Chen: Absolutely. I'll give you the contact information. Work hard, and I'm confident you'll improve. Don't hesitate to reach out if you have questions.",
+      script: "Student 1: Hi Doctor Chen, I wanted to discuss my recent exam grade. I'm not happy with the result.\nDoctor Chen: Of course, let's sit down. What specifically are you concerned about?\nStudent 1: I studied hard, but I think I didn't understand some of the questions. Also, the material covered in the last chapter was confusing.\nDoctor Chen: I see. Which topics were most difficult for you?\nStudent 1: The section on statistical analysis was really challenging. I struggled with the formulas and how to apply them.\nDoctor Chen: That's understandable. Many students find that section challenging. I recommend reviewing the textbook chapter again and watching the online tutorial videos I posted.\nStudent 1: Will that be enough? I'm worried about the final exam.\nDoctor Chen: It should help significantly. Additionally, I can arrange tutoring sessions with a teaching assistant. We have slots available on Mondays and Thursdays after class.\nStudent 1: That would be great! Can I sign up today?\nDoctor Chen: Absolutely. I'll give you the contact information. Work hard, and I'm confident you'll improve. Don't hesitate to reach out if you have questions.",
       questions: [
         {
           id: 16,
           question: "What is the student's main concern?",
           options: [
-            "The teacher is unfair in grading.",
+            "The classroom is too noisy.",
             "The exam was too long.",
             "The student is not happy with the exam grade.",
-            "The classroom is too noisy."
+            "The teacher is unfair in grading."
           ],
           correct: 2,
           explanation: "Student 1 nói: 'I wanted to discuss my recent exam grade. I'm not happy with the result.' (Tôi muốn thảo luận về điểm thi gần đây. Tôi không hài lòng với kết quả.)"
@@ -223,49 +223,49 @@ export const EXAM10_DATA = {
           id: 17,
           question: "Which topic did the student find most difficult?",
           options: [
-            "General mathematics.",
-            "Statistical analysis.",
             "Chemistry formulas.",
-            "Historical events."
+            "Statistical analysis.",
+            "Historical events.",
+            "General mathematics."
           ],
           correct: 1,
           explanation: "Student 1 nói: 'The section on statistical analysis was really challenging. I struggled with the formulas and how to apply them.' (Phần về phân tích thống kê thực sự đầy thách thức. Tôi gặp khó khăn với các công thức và cách áp dụng chúng.)"
         },
         {
           id: 18,
-          question: "What does Dr. Chen recommend first?",
+          question: "What does Doctor Chen recommend first?",
           options: [
-            "Taking the exam again immediately.",
-            "Changing to a different class.",
+            "Skipping the final exam.",
             "Reviewing the textbook chapter and watching online tutorial videos.",
-            "Skipping the final exam."
+            "Changing to a different class.",
+            "Taking the exam again immediately."
           ],
-          correct: 2,
-          explanation: "Dr. Chen nói: 'I recommend reviewing the textbook chapter again and watching the online tutorial videos I posted.' (Tôi khuyến nghị xem lại chương sách giáo khoa và xem các video hướng dẫn trực tuyến tôi đã đăng.)"
+          correct: 1,
+          explanation: "Doctor Chen nói: 'I recommend reviewing the textbook chapter again and watching the online tutorial videos I posted.' (Tôi khuyến nghị xem lại chương sách giáo khoa và xem các video hướng dẫn trực tuyến tôi đã đăng.)"
         },
         {
           id: 19,
           question: "When are tutoring sessions available?",
           options: [
-            "Monday and Wednesday mornings.",
-            "Tuesday and Friday afternoons.",
+            "Wednesday and Saturday evenings.",
             "Monday and Thursday after class.",
-            "Wednesday and Saturday evenings."
+            "Tuesday and Friday afternoons.",
+            "Monday and Wednesday mornings."
           ],
-          correct: 2,
-          explanation: "Dr. Chen nói: 'We have slots available on Mondays and Thursdays after class.' (Chúng tôi có các slot trống vào thứ Hai và thứ Năm sau giờ học.)"
+          correct: 1,
+          explanation: "Doctor Chen nói: 'We have slots available on Mondays and Thursdays after class.' (Chúng tôi có các slot trống vào thứ Hai và thứ Năm sau giờ học.)"
         },
         {
           id: 20,
-          question: "What does Dr. Chen offer to do?",
+          question: "What does Doctor Chen offer to do?",
           options: [
-            "Give the student a higher grade immediately.",
-            "Allow the student to retake the exam.",
+            "Excuse the student from the final exam.",
             "Provide contact information for tutoring sessions.",
-            "Excuse the student from the final exam."
+            "Allow the student to retake the exam.",
+            "Give the student a higher grade immediately."
           ],
-          correct: 2,
-          explanation: "Dr. Chen nói: 'I'll give you the contact information.' (Tôi sẽ cung cấp cho bạn thông tin liên lạc.) liên quan đến việc đăng ký buổi dạy kèm."
+          correct: 1,
+          explanation: "Doctor Chen nói: 'I'll give you the contact information.' (Tôi sẽ cung cấp cho bạn thông tin liên lạc.) liên quan đến việc đăng ký buổi dạy kèm."
         }
       ]
     },
@@ -277,80 +277,80 @@ export const EXAM10_DATA = {
         {
           id: 21,
           question: "The new software system has proven to be __________ user-friendly, reducing training time significantly.",
-          options: ["remarkably", "barely", "slightly", "somewhat"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'remarkably' (một cách đáng chú ý) vì nó diễn tả mức độ cao của tính năng thân thiện. Kiến thức ngữ pháp: Trạng từ bổ nghĩa tính từ; 'barely' (hầu như không), 'slightly' (nhẹ nhàng), 'somewhat' (phần nào) không thể hiện sự tích cực như 'remarkably'."
+          options: ["slightly", "barely", "remarkably", "somewhat"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) 'remarkably' (một cách đáng chú ý) vì nó diễn tả mức độ cao của tính năng thân thiện. Kiến thức ngữ pháp: Trạng từ bổ nghĩa tính từ; 'barely' (hầu như không), 'slightly' (nhẹ nhàng), 'somewhat' (phần nào) không thể hiện sự tích cực như 'remarkably'."
         },
         {
           id: 22,
           question: "Among the candidates interviewed yesterday, Lisa demonstrated the most __________ leadership qualities.",
-          options: ["promising", "doubtful", "mediocre", "concerning"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'promising' (hứa hẹn) vì nó chỉ phẩm chất tích cực. Kiến thức từ vựng: Tính từ mô tả phẩm chất lãnh đạo; 'doubtful' (nghi ngờ), 'mediocre' (trung bình), 'concerning' (đáng lo ngại) không phù hợp."
+          options: ["mediocre", "doubtful", "concerning", "promising"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'promising' (hứa hẹn) vì nó chỉ phẩm chất tích cực. Kiến thức từ vựng: Tính từ mô tả phẩm chất lãnh đạo; 'doubtful' (nghi ngờ), 'mediocre' (trung bình), 'concerning' (đáng lo ngại) không phù hợp."
         },
         {
           id: 23,
           question: "The company has been investing in renewable energy __________ it joined the sustainability initiative.",
-          options: ["while", "unless", "since", "despite"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'since' (vì, từ khi) chỉ thời điểm bắt đầu. Kiến thức ngữ pháp: Liên từ thời gian 'since + thời điểm cụ thể' kết hợp thì hiện tại hoàn thành; 'while' (trong khi), 'unless' (trừ khi), 'despite' (mặc dù) không phù hợp."
+          options: ["despite", "unless", "while", "since"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'since' (vì, từ khi) chỉ thời điểm bắt đầu. Kiến thức ngữ pháp: Liên từ thời gian 'since + thời điểm cụ thể' kết hợp thì hiện tại hoàn thành; 'while' (trong khi), 'unless' (trừ khi), 'despite' (mặc dù) không phù hợp."
         },
         {
           id: 24,
           question: "The company's commitment to ethical practices has earned it numerous __________ from international organizations.",
-          options: ["criticisms", "controversies", "recognitions", "complaints"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'recognitions' (sự công nhận) vì đi cùng với 'commitment to ethical practices' (cam kết thực hành đạo đức). Kiến thức từ vựng: Danh từ chỉ thành tích tích cực; 'criticisms' (chỉ trích), 'controversies' (tranh cãi), 'complaints' (phàn nàn) mang tính tiêu cực."
+          options: ["complaints", "controversies", "criticisms", "recognitions"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'recognitions' (sự công nhận) vì đi cùng với 'commitment to ethical practices' (cam kết thực hành đạo đức). Kiến thức từ vựng: Danh từ chỉ thành tích tích cực; 'criticisms' (chỉ trích), 'controversies' (tranh cãi), 'complaints' (phàn nàn) mang tính tiêu cực."
         },
         {
           id: 25,
           question: "Health and safety protocols are __________ enforced across all department to ensure employee well-being.",
-          options: ["carelessly", "loosely", "strictly", "informally"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'strictly' (nghiêm ngặt) vì các quy định an toàn cần được tuân thủ chặt chẽ. Kiến thức ngữ pháp: Trạng từ bổ nghĩa động từ 'enforced'; 'carelessly' (bất cẩn), 'loosely' (lỏng lẻo), 'informally' (không chính thức) không phù hợp."
+          options: ["informally", "loosely", "carelessly", "strictly"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'strictly' (nghiêm ngặt) vì các quy định an toàn cần được tuân thủ chặt chẽ. Kiến thức ngữ pháp: Trạng từ bổ nghĩa động từ 'enforced'; 'carelessly' (bất cẩn), 'loosely' (lỏng lẻo), 'informally' (không chính thức) không phù hợp."
         },
         {
           id: 26,
           question: "The new office space will __________ state-of-the-art technology and modern furniture.",
-          options: ["feature", "features", "featured", "featuring"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'feature' vì đây là động từ nguyên thể sau 'will' (tương lai đơn). Kiến thức ngữ pháp: Cấu trúc 'will + V nguyên thể'; 'features' (ngôi thứ ba), 'featured' (quá khứ), 'featuring' (V-ing) không phù hợp."
+          options: ["featuring", "features", "featured", "feature"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'feature' vì đây là động từ nguyên thể sau 'will' (tương lai đơn). Kiến thức ngữ pháp: Cấu trúc 'will + V nguyên thể'; 'features' (ngôi thứ ba), 'featured' (quá khứ), 'featuring' (V-ing) không phù hợp."
         },
         {
           id: 27,
           question: "The project must be completed __________ the end of Q3 to meet our strategic objectives.",
-          options: ["until", "by", "through", "within"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'by' (vào lúc) chỉ hạn chót thời gian. Kiến thức ngữ pháp: Giới từ chỉ thời gian 'by + thời điểm cụ thể'; 'until' (cho đến), 'through' (xuyên suốt), 'within' (trong vòng) không thể hiện hạn chót chính xác."
+          options: ["through", "until", "within", "by"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'by' (vào lúc) chỉ hạn chót thời gian. Kiến thức ngữ pháp: Giới từ chỉ thời gian 'by + thời điểm cụ thể'; 'until' (cho đến), 'through' (xuyên suốt), 'within' (trong vòng) không thể hiện hạn chót chính xác."
         },
         {
           id: 28,
           question: "Team members must communicate __________ and transparently to avoid misunderstandings.",
-          options: ["poorly", "effectively", "reluctantly", "occasionally"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'effectively' (có hiệu quả) vì nó kết hợp với 'transparently' (một cách minh bạch). Kiến thức từ vựng: Trạng từ bổ nghĩa động từ 'communicate'; 'poorly' (kém), 'reluctantly' (miễn cưỡng), 'occasionally' (thỉnh thoảng) không phù hợp."
+          options: ["occasionally", "poorly", "reluctantly", "effectively"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'effectively' (có hiệu quả) vì nó kết hợp với 'transparently' (một cách minh bạch). Kiến thức từ vựng: Trạng từ bổ nghĩa động từ 'communicate'; 'poorly' (kém), 'reluctantly' (miễn cưỡng), 'occasionally' (thỉnh thoảng) không phù hợp."
         },
         {
           id: 29,
           question: "Due to budget constraints, several non-essential positions have been __________.",
-          options: ["eliminated", "eliminating", "eliminates", "eliminate"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'eliminated' (quá khứ phân từ) trong thì hiện tại hoàn thành thụ động 'have been + V3'. Kiến thức ngữ pháp: Cấu trúc bị động 'have been eliminated'; 'eliminating' (V-ing), 'eliminates' (hiện tại), 'eliminate' (nguyên thể) không phù hợp."
+          options: ["eliminate", "eliminating", "eliminates", "eliminated"],
+          correct: 3,
+          explanation: "Đáp án đúng là (D) 'eliminated' (quá khứ phân từ) trong thì hiện tại hoàn thành thụ động 'have been + V3'. Kiến thức ngữ pháp: Cấu trúc bị động 'have been eliminated'; 'eliminating' (V-ing), 'eliminates' (hiện tại), 'eliminate' (nguyên thể) không phù hợp."
         },
         {
           id: 30,
           question: "The HR department is responsible for maintaining a positive and inclusive workplace __________.",
-          options: ["environment", "development", "agreement", "agreement"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'environment' (môi trường) vì diễn tả bối cảnh làm việc. Kiến thức từ vựng: Danh từ chỉ môi trường làm việc; 'development' (phát triển), 'agreement' (thỏa thuận) không phù hợp với ngữ cảnh."
+          options: ["development", "agreement", "environment", "agreement"],
+          correct: 2,
+          explanation: "Đáp án đúng là (C) 'environment' (môi trường) vì diễn tả bối cảnh làm việc. Kiến thức từ vựng: Danh từ chỉ môi trường làm việc; 'development' (phát triển), 'agreement' (thỏa thuận) không phù hợp với ngữ cảnh."
         }
       ]
     },
-  part6: {
-  title: "PART 6: Cloze Text (Email/Announcement)",
-  description: "10 câu hỏi - Điền từ/cụm vào văn bản email. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-  type: "reading",
-  text: `To: All Marketing Staff
+    part6: {
+      title: "PART 6: Cloze Text (Email/Announcement)",
+      description: "10 câu hỏi - Điền từ/cụm vào văn bản email. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+      type: "reading",
+      text: `To: All Marketing Staff
 From: Sarah Johnson, Marketing Manager
 Subject: Update on Q4 Campaign Timeline and Task Coordination
 
@@ -370,118 +370,115 @@ Best regards,
 Sarah Johnson
 Marketing Manager
 Global Marketing Solutions`,
-  questions: [
-    {
-      id: 31,
-      type: "fill",
-      question: "(31) - Điền từ thích hợp",
-      context: "...decided to (31) our promotional activities earlier...",
-      options: ["initiate", "postpone", "limit", "abandon"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'initiate' (bắt đầu) vì công ty quyết định triển khai hoạt động sớm hơn. Các lựa chọn khác mang nghĩa ngược lại."
+      questions: [
+        {
+          id: 31,
+          type: "fill",
+          question: "(31) - Điền từ thích hợp",
+          context: "...decided to (31) our promotional activities earlier...",
+          options: ["postpone", "initiate", "abandon", "limit"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'initiate' (bắt đầu) vì công ty quyết định triển khai hoạt động sớm hơn. Các lựa chọn khác mang nghĩa ngược lại."
+        },
+        {
+          id: 32,
+          type: "fill",
+          question: "(32) - Điền từ thích hợp",
+          context: "each department must (32) the revised schedule...",
+          options: ["reject", "follow", "delay", "ignore"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'follow' (tuân theo). Ngữ cảnh yêu cầu các bộ phận tuân thủ lịch trình cập nhật."
+        },
+        {
+          id: 33,
+          type: "fill",
+          question: "(33) - Điền từ thích hợp",
+          context: "...deadlines are essential (33) we are working under a compressed timeline.",
+          options: ["although", "because", "whether", "unless"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'because' giải thích lý do vì sao deadline quan trọng."
+        },
+        {
+          id: 34,
+          type: "fill",
+          question: "(34) - Điền từ thích hợp",
+          context: "internal workshops, (34) will help streamline communication...",
+          options: ["where", "that", "what", "who"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'that' — đại từ quan hệ cho sự vật (workshops)."
+        },
+        {
+          id: 35,
+          type: "fill",
+          question: "(35) - Điền từ thích hợp",
+          context: "track their expenses (35) following the standard reporting guidelines.",
+          options: ["rarely", "properly", "closely", "approximately"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'properly' (đúng cách) phù hợp với bối cảnh quản lý chi phí."
+        },
+        {
+          id: 36,
+          type: "fill",
+          question: "(36) - Điền từ thích hợp",
+          context: "Please do not (36) to contact me...",
+          options: ["attempt", "hesitate", "refuse", "forget"],
+          correct: 1,
+          explanation: "Đáp án đúng là (B) 'hesitate' — cụm cố định 'do not hesitate to...'"
+        },
+        {
+          id: 37,
+          type: "comprehension",
+          question: "(37) - Why did the company adjust the campaign timeline?",
+          options: [
+            "Because a new product was postponed.",
+            "Because customer behavior changed.",
+            "Because team members requested more time.",
+            "Because budget approval was delayed."
+          ],
+          correct: 1,
+          explanation: "Email ghi rằng do 'recent changes in customer behavior'."
+        },
+        {
+          id: 38,
+          type: "comprehension",
+          question: "(38) - What is the purpose of the internal workshops?",
+          options: [
+            "To recruit temporary staff.",
+            "To improve communication and collaboration.",
+            "To evaluate individual performance.",
+            "To train new employees."
+          ],
+          correct: 1,
+          explanation: "Email nêu rõ workshops được tổ chức để cải thiện giao tiếp và hợp tác."
+        },
+        {
+          id: 39,
+          type: "comprehension",
+          question: "(39) - What must the design team deliver by October 25?",
+          options: [
+            "Workshop schedules",
+            "Visual assets",
+            "Email templates",
+            "Marketing budget reports"
+          ],
+          correct: 1,
+          explanation: "Email: 'design team should deliver the visual assets no later than October 25'."
+        },
+        {
+          id: 40,
+          type: "comprehension",
+          question: "(40) - What should employees do before submitting expense reports?",
+          options: [
+            "Submit them directly to the CEO",
+            "Follow the standard reporting guidelines",
+            "Convert files into PDF format",
+            "Request approval from the finance director"
+          ],
+          correct: 1,
+          explanation: "Email yêu cầu tất cả chi phí được báo cáo theo đúng quy trình tiêu chuẩn."
+        }
+      ]
     },
-    {
-      id: 32,
-      type: "fill",
-      question: "(32) - Điền từ thích hợp",
-      context: "each department must (32) the revised schedule...",
-      options: ["ignore", "follow", "reject", "delay"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'follow' (tuân theo). Ngữ cảnh yêu cầu các bộ phận tuân thủ lịch trình cập nhật."
-    },
-    {
-      id: 33,
-      type: "fill",
-      question: "(33) - Điền từ thích hợp",
-      context: "...deadlines are essential (33) we are working under a compressed timeline.",
-      options: ["because", "unless", "although", "whether"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'because' giải thích lý do vì sao deadline quan trọng."
-    },
-    {
-      id: 34,
-      type: "fill",
-      question: "(34) - Điền từ thích hợp",
-      context: "internal workshops, (34) will help streamline communication...",
-      options: ["that", "who", "where", "what"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'that' — đại từ quan hệ cho sự vật (workshops)."
-    },
-    {
-      id: 35,
-      type: "fill",
-      question: "(35) - Điền từ thích hợp",
-      context: "track their expenses (35) following the standard reporting guidelines.",
-      options: ["properly", "rarely", "approximately", "closely"],
-      correct: 0,
-      explanation: "Đáp án đúng là (A) 'properly' (đúng cách) phù hợp với bối cảnh quản lý chi phí."
-    },
-    {
-      id: 36,
-      type: "fill",
-      question: "(36) - Điền từ thích hợp",
-      context: "Please do not (36) to contact me...",
-      options: ["forget", "hesitate", "attempt", "refuse"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) 'hesitate' — cụm cố định 'do not hesitate to...'"
-    },
-
-    // ------ COMPREHENSION ------
-    {
-      id: 37,
-      type: "comprehension",
-      question: "(37) - Why did the company adjust the campaign timeline?",
-      options: [
-        "Because budget approval was delayed.",
-        "Because customer behavior changed.",
-        "Because team members requested more time.",
-        "Because a new product was postponed."
-      ],
-      correct: 1,
-      explanation: "Email ghi rằng do 'recent changes in customer behavior'."
-    },
-    {
-      id: 38,
-      type: "comprehension",
-      question: "(38) - What is the purpose of the internal workshops?",
-      options: [
-        "To train new employees.",
-        "To evaluate individual performance.",
-        "To improve communication and collaboration.",
-        "To recruit temporary staff."
-      ],
-      correct: 2,
-      explanation: "Email nêu rõ workshops được tổ chức để cải thiện giao tiếp và hợp tác."
-    },
-    {
-      id: 39,
-      type: "comprehension",
-      question: "(39) - What must the design team deliver by October 25?",
-      options: [
-        "Marketing budget reports",
-        "Visual assets",
-        "Workshop schedules",
-        "Email templates"
-      ],
-      correct: 1,
-      explanation: "Email: 'design team should deliver the visual assets no later than October 25'."
-    },
-    {
-      id: 40,
-      type: "comprehension",
-      question: "(40) - What should employees do before submitting expense reports?",
-      options: [
-        "Request approval from the finance director",
-        "Convert files into PDF format",
-        "Follow the standard reporting guidelines",
-        "Submit them directly to the CEO"
-      ],
-      correct: 2,
-      explanation: "Email yêu cầu tất cả chi phí được báo cáo theo đúng quy trình tiêu chuẩn."
-    }
-  ]
-},
-
     part7: {
       title: "PART 7: Multiple Texts (Advertisement + Email)",
       description: "10 câu hỏi - Đọc quảng cáo và email, chọn đáp án tốt nhất (A, B, C, D).",
@@ -537,10 +534,10 @@ mark.chen@businesscorp.com
           id: 41,
           question: "How many professionals has the institute trained since its establishment?",
           options: [
-            "Over 5,000",
+            "Over 15,000",
             "Over 8,000",
             "Over 10,000",
-            "Over 15,000"
+            "Over 5,000"
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì quảng cáo nêu 'Our institute has trained over 10,000 professionals since our establishment in 2008' (Viện của chúng tôi đã đào tạo hơn 10.000 chuyên gia kể từ khi thành lập năm 2008)."
@@ -549,9 +546,9 @@ mark.chen@businesscorp.com
           id: 42,
           question: "What is the success rate for first-time test takers in certification programs?",
           options: [
-            "80%",
-            "85%",
             "90%",
+            "85%",
+            "80%",
             "95%"
           ],
           correct: 3,
@@ -561,10 +558,10 @@ mark.chen@businesscorp.com
           id: 43,
           question: "Which language programs are NOT mentioned in the advertisement?",
           options: [
-            "English and Mandarin",
+            "All of the above are mentioned",
             "Spanish and German",
             "French and Italian",
-            "All of the above are mentioned"
+            "English and Mandarin"
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì quảng cáo chỉ đề cập đến English, Mandarin, Spanish, và German; French và Italian không được đề cập."
@@ -573,10 +570,10 @@ mark.chen@businesscorp.com
           id: 44,
           question: "What is Mark's current English proficiency level?",
           options: [
-            "Beginner",
+            "Fluent",
             "Intermediate",
             "Advanced",
-            "Fluent"
+            "Beginner"
           ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì Mark nói 'My current English proficiency is intermediate – I can hold basic conversations but struggle with technical vocabulary' (Trình độ tiếng Anh hiện tại của tôi là trung cấp – tôi có thể nói chuyện cơ bản nhưng gặp khó khăn với từ vựng kỹ thuật)."
@@ -585,10 +582,10 @@ mark.chen@businesscorp.com
           id: 45,
           question: "How many hours per week can Mark dedicate to language training?",
           options: [
-            "5 hours",
+            "15 hours",
             "8 hours",
             "10 hours",
-            "15 hours"
+            "5 hours"
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì Mark nói 'I can dedicate approximately 10 hours per week to language training' (Tôi có thể dành khoảng 10 giờ mỗi tuần cho đào tạo ngôn ngữ)."
@@ -597,9 +594,9 @@ mark.chen@businesscorp.com
           id: 46,
           question: "What TOEIC score is Mark aiming to achieve?",
           options: [
-            "700 or higher",
-            "750 or higher",
             "800 or higher",
+            "750 or higher",
+            "700 or higher",
             "850 or higher"
           ],
           correct: 3,
@@ -609,34 +606,34 @@ mark.chen@businesscorp.com
           id: 47,
           question: "What is Mark's primary motivation for seeking language training?",
           options: [
-            "Personal interest in languages",
-            "To impress his colleagues",
+            "To relocate to another country",
             "His job requires communication with international colleagues and clients",
-            "To relocate to another country"
+            "To impress his colleagues",
+            "Personal interest in languages"
           ],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì Mark nói 'I frequently communicate with international colleagues and clients. I believe your training would significantly improve my professional communication skills' (Tôi thường xuyên giao tiếp với các đồng nghiệp và khách hàng quốc tế)."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì Mark nói 'I frequently communicate with international colleagues and clients. I believe your training would significantly improve my professional communication skills' (Tôi thường xuyên giao tiếp với các đồng nghiệp và khách hàng quốc tế)."
         },
         {
           id: 48,
           question: "Which sectors does Mark's company specialize in?",
           options: [
-            "Retail and manufacturing",
-            "Tourism and hospitality",
+            "Healthcare and education",
             "Technology and finance",
-            "Healthcare and education"
+            "Tourism and hospitality",
+            "Retail and manufacturing"
           ],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì Mark nói 'my company specializes in these areas' (công ty của tôi chuyên về các lĩnh vực này) referring to technology and finance sectors."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì Mark nói 'my company specializes in these areas' (công ty của tôi chuyên về các lĩnh vực này) referring to technology and finance sectors."
         },
         {
           id: 49,
           question: "What promotion-related incentive is mentioned in the advertisement?",
           options: [
-            "10% discount for first-time students",
+            "Free weekend immersion program",
             "20% discount on first course",
             "Free certification exam fee",
-            "Free weekend immersion program"
+            "10% discount for first-time students"
           ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì quảng cáo nêu 'Enroll today and receive a 20% discount on your first course' (Đăng ký ngay hôm nay và nhận 20% giảm giá khóa học đầu tiên)."
@@ -645,10 +642,10 @@ mark.chen@businesscorp.com
           id: 50,
           question: "What is Mark's position at his company?",
           options: [
-            "Senior Manager",
+            "Executive Director",
             "Middle Manager",
-            "Junior Manager",
-            "Executive Director"
+            "Senior Manager",
+            "Junior Manager"
           ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì Mark ký tên 'Middle Manager, Technology Division' (Trưởng phòng Kỹ thuật, Bộ phận Công nghệ)."
@@ -665,10 +662,10 @@ mark.chen@businesscorp.com
           id: 51,
           question: "What feedback did the client provide about the prototype?",
           options: [
-            "They rejected the entire prototype.",
+            "They asked for a complete redesign.",
             "Overall positive, but requested modifications to the user interface.",
             "They loved it without any changes needed.",
-            "They asked for a complete redesign."
+            "They rejected the entire prototype."
           ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì Manager nói 'Overall positive, but they requested some modifications to the user interface' (Tích cực nói chung, nhưng họ yêu cầu một số sửa đổi giao diện người dùng)."
@@ -677,10 +674,10 @@ mark.chen@businesscorp.com
           id: 52,
           question: "What concern does the Designer raise about the modifications?",
           options: [
-            "The changes are too expensive.",
+            "The technical team cannot do it.",
             "The color scheme change might affect brand consistency.",
             "It will take too long to implement.",
-            "The technical team cannot do it."
+            "The changes are too expensive."
           ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì Designer nói 'The color scheme change might affect our brand consistency' (Thay đổi bảng màu có thể ảnh hưởng đến tính nhất quán của thương hiệu chúng tôi)."
@@ -689,10 +686,10 @@ mark.chen@businesscorp.com
           id: 53,
           question: "How long does Developer 1 estimate for implementing the changes?",
           options: [
-            "1-2 days",
-            "2-3 days",
             "3-4 days",
-            "4-5 days"
+            "2-3 days",
+            "4-5 days",
+            "1-2 days"
           ],
           correct: 1,
           explanation: "Đáp án đúng là (B) vì Developer 1 nói 'I estimate 2-3 days to implement all the changes' (Tôi ước tính 2-3 ngày để triển khai tất cả các thay đổi)."
@@ -701,10 +698,10 @@ mark.chen@businesscorp.com
           id: 54,
           question: "What is the client's expected delivery date?",
           options: [
-            "This Friday",
+            "Two weeks from now",
             "Next week",
             "Next Friday",
-            "Two weeks from now"
+            "This Friday"
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì Project Coordinator nói 'The client expects delivery by next Friday' (Khách hàng dự kiến giao hàng vào thứ Sáu tuần tới)."
@@ -713,22 +710,22 @@ mark.chen@businesscorp.com
           id: 55,
           question: "What type of testing is required after modifications?",
           options: [
-            "Only testing of changed features.",
-            "Unit testing only.",
+            "No testing is needed.",
             "Full regression testing.",
-            "No testing is needed."
+            "Only testing of changed features.",
+            "Unit testing only."
           ],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì Manager nói 'Thorough testing is required. After any significant changes, we need full regression testing' (Cần kiểm tra kỹ lưỡng. Sau bất kỳ thay đổi đáng kể nào, chúng ta cần kiểm tra hồi quy đầy đủ)."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì Manager nói 'Thorough testing is required. After any significant changes, we need full regression testing' (Cần kiểm tra kỹ lưỡng. Sau bất kỳ thay đổi đáng kể nào, chúng ta cần kiểm tra hồi quy đầy đủ)."
         },
         {
           id: 56,
           question: "What is the revised total timeline including testing?",
           options: [
-            "2-3 days",
+            "5-6 days",
             "3-4 days",
             "4-5 days",
-            "5-6 days"
+            "2-3 days"
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì Developer 1 nói 'Adding 2 days for testing. So total will be 4-5 days' (Thêm 2 ngày để kiểm tra. Vậy tổng cộng sẽ là 4-5 ngày)."
@@ -737,10 +734,10 @@ mark.chen@businesscorp.com
           id: 57,
           question: "When does the Designer plan to start the redesign work?",
           options: [
-            "Immediately",
+            "Next week",
             "Tomorrow morning",
             "Tomorrow afternoon",
-            "Next week"
+            "Immediately"
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì Designer nói 'Planning to start redesign work by afternoon' (Kế hoạch bắt đầu công việc thiết kế lại vào buổi chiều)."
@@ -749,22 +746,22 @@ mark.chen@businesscorp.com
           id: 58,
           question: "What is the Project Coordinator responsible for?",
           options: [
-            "Designing the user interface.",
-            "Writing the code.",
+            "Testing the software.",
             "Updating the project timeline and notifying stakeholders.",
-            "Testing the software."
+            "Writing the code.",
+            "Designing the user interface."
           ],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) vì Project Coordinator nói 'I'll update the project timeline and notify all stakeholders' và 'I'll revise the schedule and create a detailed project plan' (Cập nhật lịch trình dự án và thông báo cho tất cả các bên liên quan; Sửa đổi lịch trình và tạo kế hoạch dự án chi tiết)."
+          correct: 1,
+          explanation: "Đáp án đúng là (B) vì Project Coordinator nói 'I'll update the project timeline and notify all stakeholders' và 'I'll revise the schedule and create a detailed project plan' (Cập nhật lịch trình dự án và thông báo cho tất cả các bên liên quan; Sửa đổi lịch trình và tạo kế hoạch dự án chi tiết)."
         },
         {
           id: 59,
           question: "When is the team scheduled to reconvene?",
           options: [
-            "Today at 2 p.m.",
+            "Next week",
             "Tomorrow at 9 a.m.",
             "Tomorrow at 10 a.m.",
-            "Next week"
+            "Today at 2 p.m."
           ],
           correct: 2,
           explanation: "Đáp án đúng là (C) vì Manager nói 'Let's reconvene tomorrow at 10 a.m.' (Hãy gặp lại vào ngày mai lúc 10 giờ sáng)."
@@ -773,9 +770,9 @@ mark.chen@businesscorp.com
           id: 60,
           question: "What is the Manager's overall assessment of the project?",
           options: [
-            "The project is behind schedule.",
-            "The project is on track.",
             "The project will be late.",
+            "The project is on track.",
+            "The project is behind schedule.",
             "The project is not feasible."
           ],
           correct: 1,
