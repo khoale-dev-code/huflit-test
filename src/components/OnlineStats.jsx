@@ -1,11 +1,12 @@
 // src/components/OnlineStats.jsx
 import React, { memo } from 'react';
 import { Users, Globe } from 'lucide-react';
-import { useOnlineUsers } from '../hooks/useOnlineUsers.js'; // ✅ .js
+import { useOnlineUsers } from '../hooks/useOnlineUsers.js'; // ← .js
 
 const OnlineStats = memo(() => {
   const { onlineCount, totalUsers } = useOnlineUsers();
 
+  // Không render gì nếu chưa có dữ liệu (tránh flash)
   if (onlineCount === 0 && totalUsers === 0) return null;
 
   return (
@@ -15,6 +16,7 @@ const OnlineStats = memo(() => {
         <Users className="w-4 h-4 text-green-600" />
         <span>{onlineCount} online</span>
       </div>
+
       <div className="flex items-center gap-1 text-gray-500">
         <Globe className="w-4 h-4" />
         <span>{totalUsers.toLocaleString()}</span>

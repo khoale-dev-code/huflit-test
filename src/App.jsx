@@ -11,6 +11,7 @@ import QuestionDisplay from './components/QuestionDisplay';
 import ResultsDisplay from './components/ResultsDisplay';
 import VocabularyPractice from './components/VocabularyPractice';
 import AuthModal from './components/AuthModal';
+import { useOnlineUsers } from './hooks/useOnlineUsers.js'; // ✅ ĐÃ SỬA: thêm .js
 
 import { Target, Trophy, FileText, Zap, GraduationCap } from 'lucide-react';
 
@@ -75,7 +76,7 @@ const FullExamPrompt = memo(({ onStartFullExam }) => (
           onClick={onStartFullExam}
           className="w-full sm:w-auto px-5 sm:px-8 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 text-sm sm:text-base"
         >
-          🚀 Bắt đầu ngay
+          Bắt đầu ngay
         </button>
       </div>
     </div>
@@ -167,6 +168,9 @@ function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [viewMode, setViewMode] = useState('test'); // 'test', 'profile'
 
+  // ✅ BẮT BUỘC: GỌI HOOK ONLINE USERS Ở CẤP CAO NHẤT
+  const { onlineCount, totalUsers } = useOnlineUsers();
+
   const {
     selectedExam,
     testType,
@@ -195,12 +199,10 @@ function App() {
     setShowAuthModal(true);
   }, []);
 
-  // ✅ Xử lý chuyển đến trang profile
   const handleViewProfile = useCallback(() => {
     setViewMode('profile');
   }, []);
 
-  // ✅ Xử lý quay lại trang test
   const handleBackToTest = useCallback(() => {
     setViewMode('test');
   }, []);
@@ -237,7 +239,6 @@ function App() {
   }, [handleTestTypeChange]);
 
   const renderMainContent = useCallback(() => {
-    // ✅ Kiểm tra viewMode trước
     if (viewMode === 'profile') {
       return (
         <div className="max-w-7xl mx-auto">
@@ -318,6 +319,9 @@ function App() {
       onAuthClick={handleAuthOpen}
       onProfileClick={handleViewProfile}
       viewMode={viewMode}
+      // ✅ TRUYỀN DỮ LIỆU ONLINE USERS XUỐNG NAVBAR
+      onlineCount={onlineCount}
+      totalUsers={totalUsers}
     >
       <div className="relative z-10 p-4 sm:p-6">
         <Suspense fallback={<LoadingSpinner />}>

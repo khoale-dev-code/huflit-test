@@ -10,59 +10,62 @@ export const useOnlineUsers = () => {
   const [totalUsers, setTotalUsers] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      // ---- Cleanup cũ ----
       let cleanup = () => {};
+      if (unsubAuth) unsubAuth();
 
-      if (user) {
-        const userId = user.uid;
-        const presenceRef = ref(rtdb, `presence/${userId}`);
-        const visitRef = doc(db, 'userVisits', userId);
-        const statsRef = doc(db, 'stats', 'appUsage');
-
-        // Ghi nhận online
-        await set(presenceRef, {
-          online: true,
-          lastSeen: serverTimestamp(),
-          name: user.displayName || 'Ẩn danh',
-        });
-
-        // Tăng tổng người dùng nếu chưa từng truy cập
-        const visitSnap = await getDoc(visitRef);
-        if (!visitSnap.exists()) {
-          const statsSnap = await getDoc(statsRef);
-          const currentTotal = statsSnap.exists() ? statsSnap.data().totalUsers || 0 : 0;
-          await setDoc(statsRef, { totalUsers: currentTotal + 1 }, { merge: true });
-          await setDoc(visitRef, { visited: true });
-        }
-
-        // Xóa khi disconnect
-        const disconnectRef = onDisconnect(presenceRef);
-        await disconnectRef.remove();
-        cleanup = () => disconnectRef.cancel();
-
-        // Đếm online real-time
-        const presenceListRef = ref(rtdb, 'presence');
-        const unsubOnline = onValue(presenceListRef, (snap) => {
-          setOnlineCount(snap.numChildren());
-        });
-
-        // Lắng nghe tổng người dùng
-        const unsubTotal = onSnapshot(statsRef, (snap) => {
-          setTotalUsers(snap.data()?.totalUsers || 0);
-        });
-
-        return () => {
-          unsubOnline();
-          unsubTotal();
-          cleanup();
-        };
-      } else {
+      if (!user) {
         setOnlineCount(0);
         setTotalUsers(0);
+        return;
       }
+
+      const uid = user.uid;
+      const presenceRef = ref(rtdb, `presence/${uid}`);
+      const visitRef = doc(db, 'userVisits', uid);
+      const statsRef = doc(db, 'stats', 'appUsage');
+
+      // ---- Ghi presence ----
+      await set(presenceRef, {
+        online: true,
+        lastSeen: serverTimestamp(),
+        name: user.displayName || 'Ẩn danh',
+      });
+
+      // ---- Tăng totalUsers nếu chưa từng ----
+      const visitSnap = await getDoc(visitRef);
+      if (!visitSnap.exists()) {
+        const statsSnap = await getDoc(statsRef);
+        const cur = statsSnap.exists() ? statsSnap.data().totalUsers || 0 : 0;
+        await setDoc(statsRef, { totalUsers: cur + 1 }, { merge: true });
+        await setDoc(visitRef, { visited: true });
+      }
+
+      // ---- Xóa khi disconnect ----
+      const disc = onDisconnect(presenceRef);
+      await disc.remove();
+      cleanup = () => disc.cancel();
+
+      // ---- Lắng nghe số online ----
+      const onlineUnsub = onValue(ref(rtdb, 'presence'), (snap) => {
+        setOnlineCount(snap.numChildren());
+      });
+
+      // ---- Lắng nghe totalUsers ----
+      const totalUnsub = onSnapshot(statsRef, (snap) => {
+        setTotalUsers(snap.data()?.totalUsers || 0);
+      });
+
+      // ---- Cleanup khi user thay đổi ----
+      return () => {
+        onlineUnsub();
+        totalUnsub();
+        cleanup();
+      };
     });
 
-    return () => unsubscribe();
+    return () => unsubAuth && unsubAuth();
   }, []);
 
   return { onlineCount, totalUsers };
