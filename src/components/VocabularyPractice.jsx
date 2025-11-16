@@ -1,691 +1,778 @@
-// src/pages/VocabularyPractice.jsx
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Volume2, ChevronRight, ChevronLeft, RotateCcw, BookOpen, Brain, Zap, Settings, Download, Share2, BarChart3, Trash2, Copy, Check, X } from 'lucide-react';
 import { useSpeech } from '../components/hooks/useSpeech';
 import { vocabularyData } from '../data/vocabularyData';
-import {
-  SpeakerWaveIcon,
-  MagnifyingGlassIcon,
-  ChevronDownIcon,
-  FunnelIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  HeartIcon,
-  LanguageIcon,
-  PlayIcon,
-  XMarkIcon,
-  ExclamationTriangleIcon,
-  AdjustmentsHorizontalIcon,
-  MoonIcon,
-  SunIcon,
-  ArrowDownTrayIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  StarIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
-import { saveAs } from 'file-saver';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 
-const ITEMS_PER_PAGE = 100;
+export default function VocabularyPractice() {
+  const { speak, sentenceId, playingId, rate, setRate, pitch, setPitch } = useSpeech();
+  const [mode, setMode] = useState('learn');
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedSubtopic, setSelectedSubtopic] = useState(null);
+  const [currentWords, setCurrentWords] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [favorited, setFavorited] = useState(new Set());
+  const [learned, setLearned] = useState(new Set());
+  const [masteredWords, setMasteredWords] = useState(new Set());
+  const [showStats, setShowStats] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredWords, setFilteredWords] = useState([]);
+  const [quizMode, setQuizMode] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizAnswered, setQuizAnswered] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [quizOptions, setQuizOptions] = useState([]);
+  const [quizCorrectAnswer, setQuizCorrectAnswer] = useState(null);
 
-// --- UI TEXT (VI/EN) ---
-const UI_TEXT = {
-  en: {
-    title: 'Vocabulary Practice',
-    searchPlaceholder: 'Search word, meaning, or example...',
-    filters: 'Filters',
-    reset: 'Reset All',
-    allLevels: 'All Levels',
-    allTopics: 'All Topics',
-    showing: 'Showing',
-    of: 'of',
-    words: 'words',
-    page: 'Page',
-    topic: 'Topic',
-    totalInDB: 'Total in database',
-    flashcardMode: 'Flashcard Mode',
-    quizMode: 'Quiz Mode',
-    gridMode: 'Grid Mode',
-    favorite: 'Favorite',
-    playWord: 'Play word',
-    playSentence: 'Play sentence',
-    showAnswer: 'Show Answer',
-    next: 'Next',
-    score: 'Score',
-    correct: 'Correct!',
-    wrong: 'Wrong!',
-    finish: 'Finish Quiz',
-    switchLang: 'Tiếng Việt',
-    voiceSettings: 'Voice Settings',
-    rate: 'Speed',
-    pitch: 'Pitch',
-    noVoice: 'Speech not supported.',
-    voiceError: 'Speech error. Try refreshing.',
-    darkMode: 'Dark Mode',
-    exportPDF: 'Export PDF',
-    learned: 'Learned',
-    notLearned: 'Not Learned',
-    showOnlyNotLearned: 'Show only not learned',
-    clearLearned: 'Clear Learned',
-    progress: 'Progress',
-    mastered: 'Mastered',
-    studying: 'Studying',
-    new: 'New',
-  },
-  vi: {
-    title: 'Luyện Từ Vựng',
-    searchPlaceholder: 'Tìm từ, nghĩa hoặc ví dụ...',
-    filters: 'Bộ lọc',
-    reset: 'Đặt lại',
-    allLevels: 'Tất cả cấp độ',
-    allTopics: 'Tất cả chủ đề',
-    showing: 'Hiển thị',
-    of: 'trong',
-    words: 'từ',
-    page: 'Trang',
-    topic: 'Chủ đề',
-    totalInDB: 'Tổng trong CSDL',
-    flashcardMode: 'Chế độ Thẻ',
-    quizMode: 'Chế độ Trắc nghiệm',
-    gridMode: 'Chế độ Lưới',
-    favorite: 'Yêu thích',
-    playWord: 'Phát từ',
-    playSentence: 'Phát câu ví dụ',
-    showAnswer: 'Hiện đáp án',
-    next: 'Tiếp theo',
-    score: 'Điểm',
-    correct: 'Đúng!',
-    wrong: 'Sai!',
-    finish: 'Hoàn thành',
-    switchLang: 'English',
-    voiceSettings: 'Cài đặt giọng nói',
-    rate: 'Tốc độ',
-    pitch: 'Âm điệu',
-    noVoice: 'Trình duyệt không hỗ trợ phát âm.',
-    voiceError: 'Lỗi phát âm. Vui lòng tải lại trang.',
-    darkMode: 'Chế độ tối',
-    exportPDF: 'Xuất PDF',
-    learned: 'Đã học',
-    notLearned: 'Chưa học',
-    showOnlyNotLearned: 'Chỉ hiện từ chưa học',
-    clearLearned: 'Xóa danh sách đã học',
-    progress: 'Tiến độ',
-    mastered: 'Thành thạo',
-    studying: 'Đang học',
-    new: 'Mới',
-  },
-};
+  const topics = Object.keys(vocabularyData);
 
-// --- LOCAL STORAGE KEYS ---
-const STORAGE_KEYS = {
-  FAVORITES: 'vocab_favorites',
-  LEARNED: 'vocab_learned',
-  DARK_MODE: 'vocab_dark_mode',
-  LANG: 'vocab_lang',
-};
-
-const VocabularyPractice = () => {
-  // --- Speech ---
-  const {
-    speak,
-    stop,
-    playingId,
-    sentenceId,
-    isSupported,
-    error,
-    rate,
-    setRate,
-    pitch,
-    setPitch,
-  } = useSpeech();
-
-  // --- App State ---
-  const [lang, setLang] = useState(() => localStorage.getItem(STORAGE_KEYS.LANG) || 'vi');
-  const t = UI_TEXT[lang];
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.DARK_MODE);
-    return saved ? JSON.parse(saved) : false;
-  });
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [selectedSubtopic, setSelectedSubtopic] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState('grid');
-  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
-  const [showOnlyNotLearned, setShowOnlyNotLearned] = useState(false);
-
-  // --- User Data ---
-  const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [learned, setLearned] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LEARNED);
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [flippedCards, setFlippedCards] = useState({});
-  const [quizState, setQuizState] = useState(null);
-
-  // --- Data ---
-  const topics = useMemo(() => Object.keys(vocabularyData), []);
-
-  // --- Filtered Words ---
-  const filteredWords = useMemo(() => {
-    let words = [];
-
-    if (selectedTopic && selectedSubtopic) {
-      words = vocabularyData[selectedTopic]?.[selectedSubtopic] || [];
-    } else if (selectedTopic) {
-      Object.values(vocabularyData[selectedTopic] || {}).forEach(arr => words.push(...arr));
-    } else {
-      Object.values(vocabularyData).forEach(topicObj =>
-        Object.values(topicObj).forEach(arr => words.push(...arr))
-      );
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase().trim();
-      words = words.filter(w =>
-        w.word.toLowerCase().includes(term) ||
-        w.vietnamese.toLowerCase().includes(term) ||
-        w.example.toLowerCase().includes(term)
-      );
-    }
-
-    if (selectedLevel !== 'all') {
-      words = words.filter(w => w.level === selectedLevel);
-    }
-
-    if (showOnlyNotLearned) {
-      words = words.filter(w => !learned.includes(w.word));
-    }
-
-    return words.sort((a, b) => a.word.localeCompare(b.word));
-  }, [selectedTopic, selectedSubtopic, searchTerm, selectedLevel, showOnlyNotLearned, learned]);
-
-  // --- Pagination ---
-  const totalPages = Math.ceil(filteredWords.length / ITEMS_PER_PAGE);
-  const paginatedWords = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredWords.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredWords, currentPage]);
-
-  // --- Effects ---
-  useEffect(() => setCurrentPage(1), [filteredWords.length]);
-  useEffect(() => setSelectedSubtopic(''), [selectedTopic]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.LANG, lang), [lang]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.DARK_MODE, JSON.stringify(darkMode)), [darkMode]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites)), [favorites]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.LEARNED, JSON.stringify(learned)), [learned]);
-
-  // --- Dark Mode ---
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-  }, [darkMode]);
+    if (searchQuery.trim() === '') {
+      setFilteredWords(currentWords);
+    } else {
+      const query = searchQuery.toLowerCase();
+      setFilteredWords(
+        currentWords.filter(
+          w =>
+            w.word.toLowerCase().includes(query) ||
+            w.vietnamese.toLowerCase().includes(query) ||
+            w.example.toLowerCase().includes(query)
+        )
+      );
+    }
+    setCurrentIndex(0);
+  }, [searchQuery, currentWords]);
 
-  // --- Actions ---
-  const toggleFavorite = (word) => {
-    setFavorites(prev => prev.includes(word) ? prev.filter(f => f !== word) : [...prev, word]);
+  // Shuffle array
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   };
 
-  const toggleLearned = (word) => {
-    setLearned(prev => prev.includes(word) ? prev.filter(f => f !== word) : [...prev, word]);
+  const handleSelectTopic = (topic) => {
+    setSelectedTopic(topic);
+    setSelectedSubtopic(null);
+    setCurrentWords([]);
   };
 
-  const clearLearned = () => {
-    if (confirm(lang === 'vi' ? 'Xóa toàn bộ từ đã học?' : 'Clear all learned words?')) {
-      setLearned([]);
+  const handleSelectSubtopic = (subtopic) => {
+    const words = vocabularyData[selectedTopic][subtopic];
+    setSelectedSubtopic(subtopic);
+    setCurrentWords(words);
+    setFilteredWords(words);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setQuizMode(false);
+  };
+
+  const handleSpeak = () => {
+    if (displayedWords[currentIndex]) {
+      const word = displayedWords[currentIndex];
+      speak(word.word, `word-${currentIndex}`);
     }
   };
 
-  const resetFilters = () => {
-    setSelectedTopic('');
-    setSelectedSubtopic('');
-    setSearchTerm('');
-    setSelectedLevel('all');
-    setShowOnlyNotLearned(false);
-    setCurrentPage(1);
-  };
-
-  const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleSpeakExample = () => {
+    if (displayedWords[currentIndex]) {
+      const word = displayedWords[currentIndex];
+      speak(word.example, `example-${currentIndex}`, 'en', true);
     }
   };
 
-  // --- Flashcard ---
-  const flipCard = useCallback((idx) => {
-    const globalIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx;
-    setFlippedCards(prev => ({ ...prev, [globalIndex]: !prev[globalIndex] }));
-    if (!flippedCards[globalIndex]) {
-      speak(paginatedWords[idx].word, globalIndex, 'en');
+  const handleNext = () => {
+    if (currentIndex < displayedWords.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+      setQuizAnswered(false);
+      setSelectedAnswer(null);
+      generateQuizOptions(currentIndex + 1);
     }
-  }, [currentPage, flippedCards, paginatedWords, speak]);
+  };
 
-  // --- Quiz ---
-  const startQuiz = useCallback(() => {
-    if (filteredWords.length < 4) return alert(t.wrong + ' Cần ít nhất 4 từ.');
-    const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
-    const question = shuffled[0];
-    const options = [question];
-    while (options.length < 4) {
-      const rand = filteredWords[Math.floor(Math.random() * filteredWords.length)];
-      if (!options.includes(rand)) options.push(rand);
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+      setQuizAnswered(false);
+      setSelectedAnswer(null);
+      generateQuizOptions(currentIndex - 1);
     }
-    setQuizState({
-      question,
-      options: options.sort(() => Math.random() - 0.5),
-      selected: null,
-      showResult: false,
-      score: 0,
-      total: 0,
-    });
-  }, [filteredWords, t]);
+  };
 
-  const selectAnswer = (opt) => {
-    if (quizState.showResult) return;
-    const isCorrect = opt.word === quizState.question.word;
-    setQuizState(prev => ({
-      ...prev,
-      selected: opt,
-      showResult: true,
-      score: isCorrect ? prev.score + 1 : prev.score,
-      total: prev.total + 1,
+  const toggleFavorite = () => {
+    const word = displayedWords[currentIndex];
+    const newFavorited = new Set(favorited);
+    if (newFavorited.has(word.word)) {
+      newFavorited.delete(word.word);
+    } else {
+      newFavorited.add(word.word);
+    }
+    setFavorited(newFavorited);
+  };
+
+  const toggleLearned = () => {
+    const word = displayedWords[currentIndex];
+    const newLearned = new Set(learned);
+    if (newLearned.has(word.word)) {
+      newLearned.delete(word.word);
+    } else {
+      newLearned.add(word.word);
+    }
+    setLearned(newLearned);
+  };
+
+  const toggleMastered = () => {
+    const word = displayedWords[currentIndex];
+    const newMastered = new Set(masteredWords);
+    if (newMastered.has(word.word)) {
+      newMastered.delete(word.word);
+    } else {
+      newMastered.add(word.word);
+    }
+    setMasteredWords(newMastered);
+  };
+
+  const handleReset = () => {
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  const generateQuizOptions = (index) => {
+    const currentWord = displayedWords[index];
+    const correctAnswer = currentWord.word;
+    
+    // Lấy 3 từ sai khác
+    const otherWords = displayedWords
+      .filter((w, idx) => idx !== index)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3)
+      .map(w => w.word);
+    
+    const options = [correctAnswer, ...otherWords];
+    setQuizCorrectAnswer(correctAnswer);
+    setQuizOptions(shuffleArray(options));
+  };
+
+  const startQuiz = () => {
+    setQuizMode(true);
+    setQuizScore(0);
+    setCurrentIndex(0);
+    setQuizAnswered(false);
+    setSelectedAnswer(null);
+    generateQuizOptions(0);
+  };
+
+  const handleQuizAnswer = (selectedWord) => {
+    setSelectedAnswer(selectedWord);
+    setQuizAnswered(true);
+    
+    if (selectedWord === quizCorrectAnswer) {
+      setQuizScore(quizScore + 1);
+      toggleMastered();
+    }
+  };
+
+  const exportToCSV = () => {
+    const data = displayedWords.map(w => ({
+      Word: w.word,
+      Phonetic: w.phonetic,
+      Vietnamese: w.vietnamese,
+      PartOfSpeech: w.pos,
+      Example: w.example,
+      Level: w.level,
+      Favorite: favorited.has(w.word) ? 'Yes' : 'No',
+      Mastered: masteredWords.has(w.word) ? 'Yes' : 'No'
     }));
+
+    const csv = [
+      Object.keys(data[0]).join(','),
+      ...data.map(row =>
+        Object.values(row)
+          .map(val => `"${val}"`)
+          .join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vocabulary-${selectedSubtopic}.csv`;
+    a.click();
   };
 
-  const nextQuestion = useCallback(() => {
-    const used = quizState.options.map(o => o.word);
-    const remaining = filteredWords.filter(w => !used.includes(w.word));
-    if (remaining.length < 3) {
-      alert(`${t.finish}! ${t.score}: ${quizState.score}/${quizState.total}`);
-      setQuizState(null);
-      return;
-    }
-    const question = remaining[0];
-    const options = [question];
-    while (options.length < 4) {
-      const rand = filteredWords[Math.floor(Math.random() * filteredWords.length)];
-      if (!options.includes(rand)) options.push(rand);
-    }
-    setQuizState(prev => ({
-      ...prev,
-      question,
-      options: options.sort(() => Math.random() - 0.5),
-      selected: null,
-      showResult: false,
-    }));
-  }, [filteredWords, quizState, t]);
-
-  // --- Audio ---
-  const playWord = (word, id) => speak(word, id, 'en');
-  const playSentence = (sentence, id) => speak(sentence, id, 'en', true);
-  const playVietnamese = (text, id) => speak(text, id, 'vi');
-
-  // --- Export PDF ---
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFont('helvetica');
-    doc.setFontSize(16);
-    doc.text(t.title, 14, 20);
-
-    const tableData = filteredWords.map(w => [
-      w.word,
-      w.phonetic,
-      w.vietnamese,
-      w.example,
-      w.level,
-    ]);
-
-    doc.autoTable({
-      head: [['Word', 'Phonetic', 'Vietnamese', 'Example', 'Level']],
-      body: tableData,
-      startY: 30,
-      theme: 'grid',
-      styles: { fontSize: 10, cellPadding: 2 },
-      headStyles: { fillColor: [79, 70, 229] },
-    });
-
-    doc.save('vocabulary-practice.pdf');
+  const copyToClipboard = () => {
+    const word = displayedWords[currentIndex];
+    const text = `${word.word} (${word.phonetic}) - ${word.vietnamese}\nExample: ${word.example}`;
+    navigator.clipboard.writeText(text);
+    alert('Đã sao chép!');
   };
 
-  // --- Progress Stats ---
-  const totalWords = Object.values(vocabularyData).flatMap(t => Object.values(t).flat()).length;
-  const learnedCount = learned.length;
-  const favoriteCount = favorites.length;
-  const progressPercent = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
+  const clearAllData = () => {
+    if (window.confirm('Bạn chắc chắn muốn xóa toàn bộ dữ liệu?')) {
+      setFavorited(new Set());
+      setLearned(new Set());
+      setMasteredWords(new Set());
+    }
+  };
+
+  const displayedWords = filteredWords.length > 0 ? filteredWords : currentWords;
+  const currentWord = displayedWords[currentIndex];
+  const isFavorited = currentWord && favorited.has(currentWord.word);
+  const isLearned = currentWord && learned.has(currentWord.word);
+  const isMastered = currentWord && masteredWords.has(currentWord.word);
+  const progressPercent = displayedWords.length > 0 ? ((currentIndex + 1) / displayedWords.length) * 100 : 0;
+
+  const stats = {
+    total: currentWords.length,
+    mastered: Array.from(masteredWords).filter(w => currentWords.some(cw => cw.word === w)).length,
+    learned: Array.from(learned).filter(w => currentWords.some(cw => cw.word === w)).length,
+    favorited: Array.from(favorited).filter(w => currentWords.some(cw => cw.word === w)).length,
+    remaining: currentWords.length - Array.from(masteredWords).filter(w => currentWords.some(cw => cw.word === w)).length
+  };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-blue-50 to-indigo-100'} p-4`}>
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <header className="text-center mb-8 pt-6">
-          <h1 className={`text-4xl font-bold ${darkMode ? 'text-indigo-400' : 'text-indigo-800'} mb-2`}>{t.title}</h1>
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            {t.showing} <strong className="text-indigo-500">{filteredWords.length}</strong> {t.words} • {t.page} {currentPage} {t.of} {totalPages || 1}
-          </p>
-        </header>
-
-        {/* Top Bar */}
-        <div className={`flex flex-wrap justify-between items-center gap-3 mb-4 p-3 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
-          <div className="flex gap-2">
-            <button onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm">
-              <LanguageIcon className="h-4 w-4" /> {t.switchLang}
-            </button>
-            <button onClick={() => setDarkMode(!darkMode)} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              {darkMode ? <SunIcon className="h-5 w-5 text-yellow-500" /> : <MoonIcon className="h-5 w-5 text-gray-700" />}
-            </button>
-            <button onClick={exportToPDF} className="flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg text-sm">
-              <ArrowDownTrayIcon className="h-4 w-4" /> {t.exportPDF}
-            </button>
-          </div>
-
-          {/* Progress */}
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <CheckCircleIcon className="h-5 w-5 text-green-500" />
-              <span>{learnedCount} {t.learned}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <HeartIcon className="h-5 w-5 text-red-500" />
-              <span>{favoriteCount} {t.favorite}</span>
-            </div>
-            <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div className="bg-indigo-600 h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
-            </div>
-            <span className="text-xs">{progressPercent}%</span>
-          </div>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-orange-600 mb-2 drop-shadow-lg">
+            🎯 Vocabulary Master
+          </h1>
+          <p className="text-gray-700">Học từ vựng tiếng Anh từ A1 đến C2 một cách hiệu quả</p>
         </div>
 
-        {/* Filters & Controls */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6`}>
-          <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-            <div className="relative flex-1 w-full md:max-w-md">
-              <MagnifyingGlassIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder={t.searchPlaceholder}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-              <button onClick={() => setViewMode(viewMode === 'grid' ? 'flashcard' : 'grid')} className={`px-4 py-2.5 rounded-lg text-sm font-medium ${viewMode === 'flashcard' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                {t.flashcardMode}
-              </button>
-              <button onClick={() => viewMode === 'quiz' ? setQuizState(null) : startQuiz()} className={`px-4 py-2.5 rounded-lg text-sm font-medium ${viewMode === 'quiz' ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                {viewMode === 'quiz' ? <XMarkIcon className="h-5 w-5" /> : t.quizMode}
-              </button>
-              <button onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm font-medium">
-                <FunnelIcon className="h-5 w-5" /> {t.filters}
-                <ChevronDownIcon className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-              </button>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={showOnlyNotLearned} onChange={(e) => setShowOnlyNotLearned(e.target.checked)} className="rounded" />
-                <span className="text-sm">{t.showOnlyNotLearned}</span>
-              </label>
-              <button onClick={clearLearned} className="px-3 py-1.5 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg text-xs flex items-center gap-1">
-                <TrashIcon className="h-4 w-4" /> {t.clearLearned}
-              </button>
-              {(selectedTopic || selectedSubtopic || selectedLevel !== 'all' || searchTerm || showOnlyNotLearned) && (
-                <button onClick={resetFilters} className="px-4 py-2.5 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium">
-                  {t.reset}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <select value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)} className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 rounded-lg text-sm">
-                <option value="all">{t.allLevels}</option>
-                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(l => <option key={l} value={l}>{l}</option>)}
-              </select>
-              <select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 rounded-lg text-sm">
-                <option value="">{t.allTopics}</option>
-                {topics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
-              </select>
-              {selectedTopic && (
-                <div className="flex gap-2 flex-wrap col-span-2">
-                  {Object.keys(vocabularyData[selectedTopic]).map(sub => (
-                    <button
-                      key={sub}
-                      onClick={() => setSelectedSubtopic(selectedSubtopic === sub ? '' : sub)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium ${selectedSubtopic === sub ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}
-                    >
-                      {sub}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Voice Settings */}
-        <button onClick={() => setShowVoiceSettings(!showVoiceSettings)} className="w-full mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-between text-sm">
-          <span className="flex items-center gap-2">
-            <AdjustmentsHorizontalIcon className="h-5 w-5" /> {t.voiceSettings}
-          </span>
-          <ChevronDownIcon className={`h-5 w-5 transition-transform ${showVoiceSettings ? 'rotate-180' : ''}`} />
-        </button>
-        {showVoiceSettings && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.rate} ({rate.toFixed(1)})</label>
-                <input type="range" min="0.5" max="1.5" step="0.1" value={rate} onChange={(e) => setRate(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t.pitch} ({pitch.toFixed(1)})</label>
-                <input type="range" min="0.5" max="1.5" step="0.1" value={pitch} onChange={(e) => setPitch(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg" />
-              </div>
-            </div>
-            {!isSupported && <p className="mt-3 text-sm text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-4 w-4" /> {t.noVoice}</p>}
-            {error && <p className="mt-3 text-sm text-red-600 flex items-center gap-1"><ExclamationTriangleIcon className="h-4 w-4" /> {t.voiceError}</p>}
-          </div>
-        )}
-
-        {/* Quiz Mode */}
-        {viewMode === 'quiz' && quizState && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-6">
-            <div className="text-center mb-6">
-              <p className="text-sm text-gray-500 dark:text-gray-400">{t.score}: {quizState.score}/{quizState.total}</p>
-            </div>
-            <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold text-indigo-700 dark:text-indigo-400 mb-2">{quizState.question.word}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{quizState.question.phonetic}</p>
-              <button onClick={() => playWord(quizState.question.word)} className="mt-2 p-2 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full hover:bg-indigo-200">
-                <SpeakerWaveIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {quizState.options.map((opt, i) => (
+        {/* Mode Selection */}
+        {!selectedTopic && (
+          <div className="mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              {[
+                { id: 'learn', icon: BookOpen, label: 'Học', color: 'from-blue-400 to-blue-500' },
+                { id: 'flashcard', icon: Brain, label: 'Flashcard', color: 'from-orange-400 to-orange-500' },
+                { id: 'quiz', icon: Zap, label: 'Quiz', color: 'from-amber-300 to-orange-400' }
+              ].map(m => (
                 <button
-                  key={i}
-                  onClick={() => selectAnswer(opt)}
-                  disabled={quizState.showResult}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    quizState.showResult
-                      ? opt.word === quizState.question.word
-                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
-                        : quizState.selected?.word === opt.word
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900/30'
-                        : 'border-gray-200 dark:border-gray-700'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
+                  key={m.id}
+                  onClick={() => setMode(m.id)}
+                  className={`p-6 rounded-2xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg ${
+                    mode === m.id
+                      ? `bg-gradient-to-r ${m.color} text-white shadow-xl`
+                      : `bg-white text-gray-700 shadow hover:shadow-md`
                   }`}
                 >
-                  <p className="font-medium">{opt.vietnamese}</p>
+                  <m.icon className="w-8 h-8 mx-auto mb-2" />
+                  {m.label}
                 </button>
               ))}
             </div>
-            {quizState.showResult && (
-              <div className="mt-6 text-center">
-                <p className={`text-lg font-bold ${quizState.selected.word === quizState.question.word ? 'text-green-600' : 'text-red-600'}`}>
-                  {quizState.selected.word === quizState.question.word ? t.correct : t.wrong}
+          </div>
+        )}
+
+        {/* Topic Selection */}
+        {selectedTopic === null && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {topics.map(topic => (
+              <button
+                key={topic}
+                onClick={() => handleSelectTopic(topic)}
+                className="p-6 bg-white hover:bg-amber-50 rounded-xl shadow-md hover:shadow-lg transition-all text-left hover:translate-y-[-2px] border-2 border-orange-200"
+              >
+                <h3 className="font-bold text-lg text-orange-600 mb-2">{topic}</h3>
+                <p className="text-sm text-gray-600">
+                  {Object.keys(vocabularyData[topic]).length} chủ đề
                 </p>
-                <p className="italic text-sm text-gray-600 dark:text-gray-400 mt-2">"{quizState.question.example}"</p>
-                <button onClick={nextQuestion} className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  {t.next}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Subtopic Selection */}
+        {selectedTopic && selectedSubtopic === null && (
+          <div>
+            <button
+              onClick={() => setSelectedTopic(null)}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-semibold transition"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Quay lại
+            </button>
+            <h2 className="text-2xl font-bold text-orange-600 mb-6">{selectedTopic}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.keys(vocabularyData[selectedTopic]).map(subtopic => (
+                <button
+                  key={subtopic}
+                  onClick={() => handleSelectSubtopic(subtopic)}
+                  className="p-6 bg-white hover:bg-amber-50 rounded-xl shadow-md hover:shadow-lg transition-all text-left hover:translate-y-[-2px] border-2 border-orange-200"
+                >
+                  <h3 className="font-bold text-lg text-orange-600 mb-2">{subtopic}</h3>
+                  <p className="text-sm text-gray-600">
+                    {vocabularyData[selectedTopic][subtopic].length} từ
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Learning Interface */}
+        {currentWords.length > 0 && currentWord && (
+          <div>
+            {/* Top Controls */}
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+              <button
+                onClick={() => {
+                  setSelectedTopic(null);
+                  setSelectedSubtopic(null);
+                  setCurrentWords([]);
+                  setFilteredWords([]);
+                  setCurrentIndex(0);
+                  setSearchQuery('');
+                  setQuizMode(false);
+                }}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Quay lại
+              </button>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowStats(!showStats)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition shadow-md"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Thống kê
+                </button>
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg font-semibold transition shadow-md"
+                >
+                  <Settings className="w-4 h-4" />
+                  Cài đặt
+                </button>
+              </div>
+            </div>
+
+            {/* Settings Panel */}
+            {showSettings && (
+              <div className="bg-white border-2 border-orange-400 rounded-xl p-6 mb-6 shadow-lg">
+                <h3 className="text-orange-600 font-bold mb-4">⚙️ Cài Đặt Phát Âm</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-gray-700 font-semibold block mb-2">Tốc độ: {rate.toFixed(1)}x</label>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2"
+                      step="0.1"
+                      value={rate}
+                      onChange={(e) => setRate(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-700 font-semibold block mb-2">Cao độ: {pitch.toFixed(1)}</label>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2"
+                      step="0.1"
+                      value={pitch}
+                      onChange={(e) => setPitch(parseFloat(e.target.value))}
+                      className="w-full accent-orange-500"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={clearAllData}
+                  className="mt-4 flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition shadow-md"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa toàn bộ dữ liệu
                 </button>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Main Content */}
-        {viewMode !== 'quiz' && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            {paginatedWords.length === 0 ? (
-              <div className="p-16 text-center text-gray-500 dark:text-gray-400">
-                <p className="text-lg">{lang === 'vi' ? 'Không tìm thấy từ nào.' : 'No words found.'}</p>
+            {/* Search Bar */}
+            {!quizMode && (
+              <div className="mb-6">
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm từ, dịch nghĩa, hoặc ví dụ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border-2 border-orange-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition shadow-md"
+                />
+              </div>
+            )}
+
+            {/* Stats Panel */}
+            {showStats && (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                <div className="bg-gradient-to-br from-blue-400 to-blue-500 p-4 rounded-lg text-center shadow-lg">
+                  <p className="text-2xl font-bold text-white">{stats.total}</p>
+                  <p className="text-xs text-blue-100">Tổng từ</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-400 to-orange-500 p-4 rounded-lg text-center shadow-lg">
+                  <p className="text-2xl font-bold text-white">{stats.mastered}</p>
+                  <p className="text-xs text-orange-100">Đã nắm vững</p>
+                </div>
+                <div className="bg-gradient-to-br from-amber-300 to-amber-400 p-4 rounded-lg text-center shadow-lg">
+                  <p className="text-2xl font-bold text-white">{stats.learned}</p>
+                  <p className="text-xs text-white">Đã học</p>
+                </div>
+                <div className="bg-gradient-to-br from-rose-400 to-rose-500 p-4 rounded-lg text-center shadow-lg">
+                  <p className="text-2xl font-bold text-white">{stats.favorited}</p>
+                  <p className="text-xs text-rose-100">Yêu thích</p>
+                </div>
+                <div className="bg-gradient-to-br from-gray-400 to-gray-500 p-4 rounded-lg text-center shadow-lg">
+                  <p className="text-2xl font-bold text-white">{stats.remaining}</p>
+                  <p className="text-xs text-gray-100">Còn lại</p>
+                </div>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-semibold text-gray-700">
+                  {currentIndex + 1}/{displayedWords.length}
+                </span>
+                <span className="text-sm font-semibold text-gray-700">
+                  {Math.round(progressPercent)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-300 rounded-full h-3 overflow-hidden shadow-md">
+                <div
+                  className="bg-gradient-to-r from-blue-500 via-orange-400 to-amber-300 h-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Quiz Mode */}
+            {quizMode ? (
+              <div className="mb-8">
+                <div className="bg-white border-4 border-orange-400 rounded-2xl p-8 text-center min-h-96 flex flex-col justify-center shadow-2xl">
+                  <p className="text-orange-500 text-sm mb-4 uppercase tracking-widest font-bold">Câu hỏi {currentIndex + 1}/{displayedWords.length}</p>
+                  <p className="text-4xl font-bold text-orange-600 mb-8">{currentWord.vietnamese}</p>
+                  <p className="text-gray-700 mb-6 font-semibold">Chọn đáp án đúng:</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {quizOptions.map((option, idx) => {
+                      const isCorrect = option === quizCorrectAnswer;
+                      const isSelected = option === selectedAnswer;
+                      
+                      let buttonClass = 'bg-white border-2 border-gray-300 text-gray-800 hover:border-orange-400';
+                      
+                      if (quizAnswered) {
+                        if (isCorrect) {
+                          buttonClass = 'bg-green-100 border-2 border-green-500 text-green-800';
+                        } else if (isSelected && !isCorrect) {
+                          buttonClass = 'bg-red-100 border-2 border-red-500 text-red-800';
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => !quizAnswered && handleQuizAnswer(option)}
+                          disabled={quizAnswered}
+                          className={`p-4 rounded-lg font-semibold transition ${buttonClass} ${quizAnswered ? 'cursor-default' : 'cursor-pointer'}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{option}</span>
+                            {quizAnswered && isCorrect && <Check className="w-5 h-5 text-green-600" />}
+                            {quizAnswered && isSelected && !isCorrect && <X className="w-5 h-5 text-red-600" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {quizAnswered && (
+                    <div className={`mt-6 p-4 rounded-lg font-semibold text-lg ${
+                      selectedAnswer === quizCorrectAnswer
+                        ? 'bg-green-100 border-2 border-green-500 text-green-800'
+                        : 'bg-red-100 border-2 border-red-500 text-red-800'
+                    }`}>
+                      {selectedAnswer === quizCorrectAnswer ? (
+                        <div className="flex items-center gap-2">
+                          <Check className="w-6 h-6" />
+                          Chính xác! ✨
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <X className="w-6 h-6" />
+                            Sai rồi!
+                          </div>
+                          <p className="text-sm">Đáp án đúng: <span className="font-bold">{quizCorrectAnswer}</span></p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
-              <>
-                <div className={viewMode === 'flashcard' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6' : 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-6'}>
-                  {paginatedWords.map((item, idx) => {
-                    const globalIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx;
-                    const isFlipped = flippedCards[globalIndex];
-                    const isFavorite = favorites.includes(item.word);
-                    const isLearned = learned.includes(item.word);
-
-                    return viewMode === 'flashcard' ? (
-                      <div key={globalIndex} onClick={() => flipCard(idx)} className="cursor-pointer perspective-1000">
-                        <div className={`relative w-full h-64 preserve-3d transition-transform duration-600 ${isFlipped ? 'rotate-y-180' : ''}`}>
-                          {/* Front */}
-                          <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-6 flex flex-col justify-center items-center text-white shadow-lg">
-                            <h3 className="text-3xl font-bold">{item.word}</h3>
-                            <p className="text-sm mt-2 opacity-80">{item.phonetic}</p>
-                            <div className="flex gap-2 mt-4">
-                              <button onClick={(e) => { e.stopPropagation(); playWord(item.word, globalIndex); }} className="p-2 bg-white/20 rounded-full">
-                                <SpeakerWaveIcon className="h-5 w-5" />
-                              </button>
-                              <button onClick={(e) => { e.stopPropagation(); playVietnamese(item.vietnamese, globalIndex); }} className="p-2 bg-white/20 rounded-full">
-                                <LanguageIcon className="h-5 w-5" />
-                              </button>
-                              <button onClick={(e) => { e.stopPropagation(); toggleFavorite(item.word); }} className="p-2 bg-white/20 rounded-full">
-                                <HeartIcon className={`h-5 w-5 ${isFavorite ? 'fill-red-500' : ''}`} />
-                              </button>
-                            </div>
-                          </div>
-                          {/* Back */}
-                          <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white dark:bg-gray-700 rounded-xl p-6 flex flex-col justify-center shadow-lg">
-                            <p className="font-semibold text-indigo-700 dark:text-indigo-400 text-lg">{item.vietnamese}</p>
-                            <p className="italic text-gray-600 dark:text-gray-400 mt-2 text-sm">"{item.example}"</p>
-                            <div className="flex justify-between items-center mt-4">
-                              <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded-full text-xs font-bold">{item.level}</span>
-                              <div className="flex gap-2">
-                                <button onClick={(e) => { e.stopPropagation(); playSentence(item.example, globalIndex); }} className={`p-2 rounded-full ${sentenceId === globalIndex ? 'bg-green-600 text-white animate-pulse' : 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 hover:bg-green-200'}`}>
-                                  <PlayIcon className="h-5 w-5" />
-                                </button>
-                                <button onClick={(e) => { e.stopPropagation(); toggleLearned(item.word); }} className={`p-2 rounded-full ${isLearned ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
-                                  <CheckCircleIcon className="h-5 w-5" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+              /* Card */
+              <div
+                onClick={() => setIsFlipped(!isFlipped)}
+                className="mb-8 cursor-pointer"
+              >
+                <div className={`min-h-96 bg-gradient-to-br from-white to-amber-50 rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center transition-all duration-500 transform hover:shadow-2xl hover:scale-102 border-4 ${
+                  isMastered ? 'border-orange-400' : 'border-orange-200'
+                }`}>
+                  {!isFlipped ? (
+                    <div className="text-center w-full">
+                      <p className="text-gray-500 text-sm mb-4 uppercase tracking-widest">Từ Vựng</p>
+                      <p className="text-5xl md:text-6xl font-bold text-blue-600 mb-4 break-words">{currentWord.word}</p>
+                      <p className="text-gray-600 text-lg italic mb-8">{currentWord.phonetic}</p>
+                      <p className="text-gray-600 text-lg">Bấm để xem dịch nghĩa</p>
+                      <div className="mt-8 inline-block bg-amber-100 px-4 py-2 rounded-lg border-2 border-orange-300">
+                        <p className="text-xs text-gray-700">Level: <span className="text-orange-600 font-bold">{currentWord.level}</span></p>
                       </div>
-                    ) : (
-                      <div key={globalIndex} className={`group border ${darkMode ? 'border-gray-700' : 'border-gray-200'} rounded-xl p-5 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-gray-700`}>
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 pr-2">
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-400 group-hover:text-indigo-800 dark:group-hover:text-indigo-300">{item.word}</h3>
-                              <button onClick={() => playWord(item.word, globalIndex)} className={`p-1.5 rounded-full transition-all ${playingId === globalIndex ? 'bg-indigo-600 text-white animate-pulse' : 'bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-200'}`} title={t.playWord}>
-                                <SpeakerWaveIcon className="h-4 w-4" />
-                              </button>
-                              <button onClick={() => playVietnamese(item.vietnamese, globalIndex)} className="p-1.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 hover:bg-purple-200" title="Phát nghĩa tiếng Việt">
-                                <LanguageIcon className="h-4 w-4" />
-                              </button>
-                              <button onClick={() => playSentence(item.example, globalIndex)} className={`p-1.5 rounded-full transition-all ${sentenceId === globalIndex ? 'bg-green-600 text-white animate-pulse' : 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 hover:bg-green-200'}`} title={t.playSentence}>
-                                <PlayIcon className="h-4 w-4" />
-                              </button>
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">{item.phonetic}</p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button onClick={() => toggleFavorite(item.word)} className="p-1.5">
-                              <HeartIcon className={`h-5 w-5 transition-all ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400 dark:text-gray-500'}`} />
-                            </button>
-                            <button onClick={() => toggleLearned(item.word)} className={`p-1.5 rounded-full ${isLearned ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-                              <CheckCircleIcon className="h-4 w-4" />
-                            </button>
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${item.level.startsWith('A') ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300' : item.level.startsWith('B') ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300' : 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300'}`}>
-                              {item.level}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <p className="text-gray-700 dark:text-gray-300">
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{item.pos}:</span> {item.vietnamese}
-                          </p>
-                          <p className="italic text-gray-600 dark:text-gray-400 text-xs leading-relaxed line-clamp-2">"{item.example}"</p>
-                        </div>
+                    </div>
+                  ) : (
+                    <div className="text-center w-full">
+                      <p className="text-orange-500 text-sm mb-4 uppercase tracking-widest">Dịch Nghĩa</p>
+                      <p className="text-4xl font-bold text-orange-600 mb-6 break-words">{currentWord.vietnamese}</p>
+                      <div className="bg-blue-50 p-4 rounded-lg mb-6 text-left border-2 border-blue-200">
+                        <p className="text-xs text-gray-700 mb-2 uppercase font-bold">Loại từ</p>
+                        <p className="text-gray-800 font-semibold">{currentWord.pos}</p>
                       </div>
-                    );
-                  })}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && viewMode !== 'flashcard' && (
-                  <div className="border-t dark:border-gray-700 px-6 py-4">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {t.showing} <strong>{(currentPage - 1) * ITEMS_PER_PAGE + 1}</strong> - <strong>{Math.min(currentPage * ITEMS_PER_PAGE, filteredWords.length)}</strong> {t.of} <strong>{filteredWords.length}</strong> {t.words}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className={`p-2 rounded-lg ${currentPage === 1 ? 'bg-gray-100 dark:bg-gray-700 text-gray-400' : 'bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 shadow-sm'}`}>
-                          <ChevronLeftIcon className="h-5 w-5" />
-                        </button>
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNum = totalPages <= 5 ? i + 1 : currentPage <= 3 ? i + 1 : currentPage >= totalPages - 2 ? totalPages - 4 + i : currentPage - 2 + i;
-                          return (
-                            <button key={pageNum} onClick={() => goToPage(pageNum)} className={`px-3 py-1.5 rounded-lg text-sm font-medium ${currentPage === pageNum ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 shadow-sm'}`}>
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-                        {totalPages > 5 && currentPage < totalPages - 2 && (
-                          <>
-                            <span className="px-2 text-gray-400">...</span>
-                            <button onClick={() => goToPage(totalPages)} className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 shadow-sm">
-                              {totalPages}
-                            </button>
-                          </>
-                        )}
-                        <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className={`p-2 rounded-lg ${currentPage === totalPages ? 'bg-gray-100 dark:bg-gray-700 text-gray-400' : 'bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 shadow-sm'}`}>
-                          <ChevronRightIcon className="h-5 w-5" />
+                      <div className="bg-amber-100 p-4 rounded-lg text-left border-2 border-orange-300">
+                        <p className="text-xs text-gray-700 mb-2 uppercase font-bold">Ví dụ</p>
+                        <p className="text-gray-800 italic">{currentWord.example}</p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSpeakExample();
+                          }}
+                          className={`mt-3 flex items-center gap-2 px-3 py-1 rounded text-sm font-semibold transition shadow-md ${
+                            sentenceId === `example-${currentIndex}`
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-blue-300 text-white hover:bg-blue-400'
+                          }`}
+                        >
+                          <Volume2 className="w-4 h-4" />
+                          Phát ví dụ
                         </button>
                       </div>
                     </div>
-                  </div>
-                )}
-              </>
+                  )}
+                </div>
+              </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+              <button
+                onClick={handleSpeak}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition shadow-md ${
+                  playingId === `word-${currentIndex}`
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                }`}
+              >
+                <Volume2 className="w-5 h-5" />
+                <span className="hidden md:inline">Phát</span>
+              </button>
+              <button
+                onClick={toggleFavorite}
+                className={`px-4 py-3 rounded-lg font-semibold transition flex items-center justify-center shadow-md ${
+                  isFavorited
+                    ? 'bg-rose-500 text-white'
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                }`}
+              >
+                ❤️ <span className="hidden md:inline">Yêu</span>
+              </button>
+              <button
+                onClick={toggleLearned}
+                className={`px-4 py-3 rounded-lg font-semibold transition flex items-center justify-center shadow-md ${
+                  isLearned
+                    ? 'bg-amber-400 text-white'
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                }`}
+              >
+                📚 <span className="hidden md:inline">Học</span>
+              </button>
+              <button
+                onClick={toggleMastered}
+                className={`px-4 py-3 rounded-lg font-semibold transition flex items-center justify-center shadow-md ${
+                  isMastered
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                }`}
+              >
+                ✓ <span className="hidden md:inline">Nắm</span>
+              </button>
+              <button
+                onClick={handleReset}
+                className="px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center shadow-md"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Secondary Actions */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+              {!quizMode && (
+                <>
+                  <button
+                    onClick={startQuiz}
+                    className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span className="hidden md:inline">Bắt đầu Quiz</span>
+                    <span className="md:hidden">Quiz</span>
+                  </button>
+                  <button
+                    onClick={copyToClipboard}
+                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span className="hidden md:inline">Sao chép</span>
+                  </button>
+                  <button
+                    onClick={exportToCSV}
+                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span className="hidden md:inline">Tải CSV</span>
+                  </button>
+                  <button
+                    onClick={() => alert('Chia sẻ tính năng sẽ sớm được cập nhật!')}
+                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span className="hidden md:inline">Chia sẻ</span>
+                  </button>
+                </>
+              )}
+              {quizMode && (
+                <button
+                  onClick={() => setQuizMode(false)}
+                  className="col-span-2 md:col-span-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition shadow-md"
+                >
+                  Kết thúc Quiz (Điểm: {quizScore}/{displayedWords.length})
+                </button>
+              )}
+            </div>
+
+           {/* Navigation */}
+            <div className="space-y-3">
+              {/* Progress Indicator */}
+              <div className="bg-white rounded-xl p-4 shadow-lg border border-orange-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-bold text-gray-700">{currentIndex + 1}/{displayedWords.length}</span>
+                  <span className="text-sm font-bold text-blue-600">{Math.round(progressPercent)}%</span>
+                </div>
+                
+                {/* Mini dots grid */}
+                <div className="grid grid-cols-8 md:grid-cols-12 gap-1.5">
+                  {displayedWords.map((_, idx) => {
+                    const isMasteredWord = displayedWords[idx] && masteredWords.has(displayedWords[idx].word);
+                    const isCurrentWord = idx === currentIndex;
+                    
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setCurrentIndex(idx);
+                          setIsFlipped(false);
+                          setQuizAnswered(false);
+                          setSelectedAnswer(null);
+                          if (quizMode) generateQuizOptions(idx);
+                        }}
+                        className={`relative w-full aspect-square rounded-lg transition-all font-semibold text-[10px] flex items-center justify-center ${
+                          isCurrentWord
+                            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg scale-110'
+                            : isMasteredWord
+                            ? 'bg-gradient-to-br from-green-400 to-green-500 text-white shadow-md hover:scale-105'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
+                        }`}
+                      >
+                        {idx + 1}
+                        {isMasteredWord && !isCurrentWord && (
+                          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-yellow-400 rounded-full"></div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg font-semibold hover:from-gray-500 hover:to-gray-600 transition disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="text-sm">Trước</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (quizMode) {
+                      setQuizMode(false);
+                    } else {
+                      startQuiz();
+                    }
+                  }}
+                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg font-semibold hover:from-amber-500 hover:to-orange-600 transition shadow-md"
+                >
+                  <Zap className="w-4 h-4" />
+                  <span className="text-sm">{quizMode ? 'Dừng' : 'Quiz'}</span>
+                </button>
+
+                <button
+                  onClick={handleNext}
+                  disabled={currentIndex === displayedWords.length - 1}
+                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
+                >
+                  <span className="text-sm">Tiếp</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Stats Footer */}
+              <div className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg p-3 border border-orange-200 shadow-md">
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div>
+                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm">✓</div>
+                    <p className="text-[10px] text-gray-600 mb-0.5">Nắm vững</p>
+                    <p className="text-sm font-bold text-blue-600">{stats.mastered}</p>
+                  </div>
+                  <div>
+                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm">📚</div>
+                    <p className="text-[10px] text-gray-600 mb-0.5">Đã học</p>
+                    <p className="text-sm font-bold text-amber-600">{stats.learned}</p>
+                  </div>
+                  <div>
+                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm">❤️</div>
+                    <p className="text-[10px] text-gray-600 mb-0.5">Yêu thích</p>
+                    <p className="text-sm font-bold text-rose-600">{stats.favorited}</p>
+                  </div>
+                  <div>
+                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-sm">⏳</div>
+                    <p className="text-[10px] text-gray-600 mb-0.5">Còn lại</p>
+                    <p className="text-sm font-bold text-gray-600">{stats.remaining}</p>
+                  </div>
+                </div>
+            
+              </div>
+            </div>
           </div>
         )}
-
-        {/* Stats */}
-        <div className="mt-6 flex flex-wrap justify-between items-center text-sm text-gray-600 dark:text-gray-400 px-1 gap-2">
-          <p>
-            {selectedTopic && `${t.topic}: "${selectedTopic}"`}
-            {selectedSubtopic && ` > "${selectedSubtopic}"`}
-          </p>
-          <p className="text-xs">
-            {t.totalInDB}: <strong>{totalWords}</strong> • {t.progress}: {progressPercent}%
-          </p>
-        </div>
       </div>
     </div>
   );
-};
-
-export default VocabularyPractice;
+}
