@@ -1,15 +1,19 @@
+// src/components/Navbar.jsx
 import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
-import { Menu, X, Headphones, BookOpen, BookMarked, Sparkles, User, ChevronDown, LogOut, GraduationCap, LogIn, ChevronRight, Loader2 } from 'lucide-react';
+import {
+  Menu, X, Headphones, BookOpen, BookMarked, Sparkles,
+  User, ChevronDown, LogOut, GraduationCap, ChevronRight, Loader2
+} from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
-import OnlineStats from '../components/OnlineStats.jsx'; // ✅ Giữ lại nếu dùng component riêng
+import OnlineStats from '../components/OnlineStats.jsx'; // Tự fetch dữ liệu
 
 // ======================================================================
 // Google Logo SVG Component
 // ======================================================================
 const GoogleLogo = React.memo(() => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24">
+  <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -33,6 +37,7 @@ const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
             ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-orange-300/50`
             : 'bg-white text-gray-700 hover:bg-amber-50 border border-transparent hover:border-amber-200'
         }`}
+        aria-current={item.isActive ? 'page' : undefined}
       >
         <div className="flex items-center gap-3">
           <div
@@ -42,6 +47,7 @@ const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
           >
             <IconComponent
               className={`w-5 h-5 ${item.isActive ? 'text-white' : 'text-orange-600'}`}
+              aria-hidden="true"
             />
           </div>
           <div className="flex-1 text-left min-w-0">
@@ -51,7 +57,7 @@ const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
             </p>
           </div>
         </div>
-        {!item.isActive && <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500" />}
+        {!item.isActive && <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500" aria-hidden="true" />}
       </button>
     );
   }
@@ -64,8 +70,9 @@ const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
           ? `${styles.navItemActive} bg-gradient-to-r ${item.gradient}`
           : styles.navItemInactive
       }`}
+      aria-current={item.isActive ? 'page' : undefined}
     >
-      <IconComponent className="w-4 h-4 flex-shrink-0" />
+      <IconComponent className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
       <span className="relative">{item.label}</span>
       {item.isActive && (
         <div className="absolute inset-0 z-0 bg-white/10 animate-pulse rounded-full opacity-50"></div>
@@ -79,9 +86,9 @@ NavItem.displayName = 'NavItem';
 // ProfileButton Component
 // ======================================================================
 const ProfileButton = React.memo(({ user, onToggle, showProfileMenu }) => {
-  const displayName = user.displayName || user.email?.split('@')[0];
+  const displayName = user.displayName || user.email?.split('@')[0] || 'User';
   const imageUrl = user.photoURL;
-  const userInitial = displayName[0]?.toUpperCase() || 'U';
+  const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
     <button
@@ -89,12 +96,13 @@ const ProfileButton = React.memo(({ user, onToggle, showProfileMenu }) => {
       className={styles.profileBtn}
       aria-expanded={showProfileMenu}
       aria-controls="profile-dropdown"
+      aria-label={`Tài khoản: ${displayName}`}
     >
       <div className={styles.profileAvatar}>
         {imageUrl ? (
-          <img src={imageUrl} alt={displayName} className="w-full h-full object-cover" />
+          <img src={imageUrl} alt={displayName} className="w-full h-full object-cover rounded-full" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
+          <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br from-orange-500 to-amber-600 rounded-full">
             {userInitial}
           </div>
         )}
@@ -106,6 +114,7 @@ const ProfileButton = React.memo(({ user, onToggle, showProfileMenu }) => {
           className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${
             showProfileMenu ? styles.chevronRotate : ''
           }`}
+          aria-hidden="true"
         />
       </div>
     </button>
@@ -117,11 +126,17 @@ ProfileButton.displayName = 'ProfileButton';
 // ProfileDropdown Component
 // ======================================================================
 const ProfileDropdown = React.memo(({ user, onProfileClick, onSignOut }) => {
-  const displayName = user.displayName || user.email;
-  const initial = user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U';
+  const displayName = user.displayName || user.email || 'Người dùng';
+  const email = user.email || 'Không có email';
 
   return (
-    <div id="profile-dropdown" className={styles.profileDropdown}>
+    <div
+      id="profile-dropdown"
+      className={styles.profileDropdown}
+      role="menu"
+      aria-orientation="vertical"
+      aria-labelledby="profile-button"
+    >
       <div className={styles.profileDropdownHeader}>
         <div className="flex items-center gap-2 mb-2">
           <GoogleLogo />
@@ -129,27 +144,29 @@ const ProfileDropdown = React.memo(({ user, onProfileClick, onSignOut }) => {
             Tài khoản Google
           </span>
         </div>
-        <p className="text-base font-extrabold text-gray-900 truncate">
-          {user?.displayName || 'Tài khoản của bạn'}
+        <p className="text-base font-extrabold text-gray-900 truncate max-w-[200px]">
+          {displayName}
         </p>
-        <p className="text-xs text-gray-500 truncate mt-1">
-          {user?.email}
+        <p className="text-xs text-gray-500 truncate max-w-[200px] mt-1">
+          {email}
         </p>
       </div>
 
-      <div className="py-1">
+      <div className="py-1 border-t border-gray-100">
         <button
           onClick={onProfileClick}
           className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-amber-50 transition-all text-sm font-medium"
+          role="menuitem"
         >
-          <User className="w-5 h-5 text-orange-600 flex-shrink-0" />
+          <User className="w-5 h-5 text-orange-600 flex-shrink-0" aria-hidden="true" />
           <span>Xem Profile</span>
         </button>
         <button
           onClick={onSignOut}
-          className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-all text-sm font-medium border-t border-gray-100 mt-1"
+          className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-all text-sm font-medium"
+          role="menuitem"
         >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
+          <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
           <span>Đăng Xuất</span>
         </button>
       </div>
@@ -166,12 +183,12 @@ const SignInButton = React.memo(({ onSignIn, loading }) => (
     onClick={onSignIn}
     disabled={loading}
     className={styles.signInBtn}
+    aria-label="Đăng nhập với Google"
   >
     <div className={styles.signInBtnHover}></div>
-
     <div className={styles.signInBtnContent}>
       {loading ? (
-        <Loader2 className="w-5 h-5 text-orange-600 animate-spin" />
+        <Loader2 className="w-5 h-5 text-orange-600 animate-spin" aria-hidden="true" />
       ) : (
         <GoogleLogo />
       )}
@@ -190,66 +207,29 @@ export default function Navbar({
   onTestTypeChange,
   practiceType,
   onPracticeTypeChange,
-  onAuthClick,
   onProfileClick,
-  viewMode,
-  onlineCount,   // ✅ NHẬN TỪ MAINLAYOUT
-  totalUsers     // ✅ NHẬN TỪ MAINLAYOUT
 }) {
-  const { user, isSignedIn, signInWithGoogle, signOut, loading } = useFirebaseAuth();
+  const { user, isSignedIn, signInWithGoogle, signOut, loading: authLoading } = useFirebaseAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
+  // === Menu Items ===
   const testMenuItems = useMemo(() => [
-    { 
-      id: 'listening', 
-      label: 'Thi Nghe', 
-      subtext: 'Listening Test', 
-      icon: Headphones, 
-      gradient: 'from-amber-500 to-orange-600', 
-      isActive: testType === 'listening' 
-    },
-    { 
-      id: 'reading', 
-      label: 'Thi Đọc', 
-      subtext: 'Reading Test', 
-      icon: BookOpen, 
-      gradient: 'from-yellow-500 to-amber-600', 
-      isActive: testType === 'reading' 
-    },
-    { 
-      id: 'full', 
-      label: 'Thi Thử', 
-      subtext: 'Full Mock Exam', 
-      icon: GraduationCap, 
-      gradient: 'from-red-500 to-orange-600', 
-      isActive: testType === 'full' 
-    },
+    { id: 'listening', label: 'Thi Nghe', subtext: 'Listening Test', icon: Headphones, gradient: 'from-amber-500 to-orange-600', isActive: testType === 'listening' },
+    { id: 'reading', label: 'Thi Đọc', subtext: 'Reading Test', icon: BookOpen, gradient: 'from-yellow-500 to-amber-600', isActive: testType === 'reading' },
+    { id: 'full', label: 'Thi Thử', subtext: 'Full Mock Exam', icon: GraduationCap, gradient: 'from-red-500 to-orange-600', isActive: testType === 'full' },
   ], [testType]);
 
   const practiceMenuItems = useMemo(() => [
-    { 
-      id: 'grammar', 
-      label: 'Ngữ Pháp', 
-      subtext: 'Grammar Practice', 
-      icon: BookMarked, 
-      gradient: 'from-orange-500 to-amber-600', 
-      isActive: practiceType === 'grammar' 
-    },
-    { 
-      id: 'vocabulary', 
-      label: 'Từ Vựng', 
-      subtext: 'Vocabulary Building', 
-      icon: Sparkles, 
-      gradient: 'from-pink-500 to-red-500', 
-      isActive: practiceType === 'vocabulary' 
-    },
+    { id: 'grammar', label: 'Ngữ Pháp', subtext: 'Grammar Practice', icon: BookMarked, gradient: 'from-orange-500 to-amber-600', isActive: practiceType === 'grammar' },
+    { id: 'vocabulary', label: 'Từ Vựng', subtext: 'Vocabulary Building', icon: Sparkles, gradient: 'from-pink-500 to-red-500', isActive: practiceType === 'vocabulary' },
   ], [practiceType]);
 
   const allMenuItems = useMemo(() => [...testMenuItems, ...practiceMenuItems], [testMenuItems, practiceMenuItems]);
 
+  // === Click Outside Handler ===
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
@@ -260,8 +240,9 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // === Handlers ===
   const handleMenuClick = useCallback((item) => {
-    if (item.id === 'listening' || item.id === 'reading' || item.id === 'full') {
+    if (['listening', 'reading', 'full'].includes(item.id)) {
       onTestTypeChange(item.id);
     } else {
       onPracticeTypeChange(item.id);
@@ -269,20 +250,18 @@ export default function Navbar({
     setIsOpen(false);
   }, [onTestTypeChange, onPracticeTypeChange]);
 
-  const handleProfileClickFromDropdown = useCallback(() => {
+  const handleProfileClick = useCallback(() => {
     onProfileClick?.();
     setShowProfileMenu(false);
     setIsOpen(false);
   }, [onProfileClick]);
 
-  const handleSignInAndCloseMenu = async () => {
+  const handleSignIn = async () => {
     const result = await signInWithGoogle();
-    if (result.success) {
-      setIsOpen(false);
-    }
+    if (result.success) setIsOpen(false);
   };
 
-  const handleSignOutAndCloseMenu = async () => {
+  const handleSignOut = async () => {
     await signOut();
     setShowProfileMenu(false);
     setIsOpen(false);
@@ -291,18 +270,18 @@ export default function Navbar({
   return (
     <>
       {/* ====== NAVBAR ====== */}
-      <nav className={styles.navContainer}>
+      <nav className={styles.navContainer} aria-label="Thanh điều hướng chính">
         <div className={styles.navContent}>
-          {/* Logo Section */}
+          {/* Logo */}
           <a href="/" className={styles.logoGroup} aria-label="Trang chủ HUFLIT Exam Prep">
             <div className={styles.logoIcon}>
-              <img src={logo} alt="Logo" className={styles.logoImg} />
+              <img src={logo} alt="" className={styles.logoImg} />
             </div>
             <h1 className={styles.logoText}>HUFLIT Exam Prep</h1>
           </a>
 
           {/* Desktop Menu */}
-          <div className={styles.desktopMenu}>
+          <div className={styles.desktopMenu} role="navigation" aria-label="Menu chính">
             {allMenuItems.map((item) => (
               <NavItem key={item.id} item={item} onItemClick={handleMenuClick} />
             ))}
@@ -310,49 +289,37 @@ export default function Navbar({
 
           {/* Right Section - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* HIỂN THỊ ONLINE STATS (Tích hợp trực tiếp hoặc dùng component) */}
-            {onlineCount !== undefined && totalUsers !== undefined && (
-              <div className="flex items-center gap-4 text-xs text-gray-600 font-medium">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="font-bold text-green-600">{onlineCount}</span>
-                  <span>online</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <span className="font-bold">{totalUsers.toLocaleString()}</span>
-                  <span>tổng</span>
-                </div>
-              </div>
-            )}
+            {/* Online Stats – Tự động fetch */}
+            <OnlineStats />
 
-            {/* Dùng component nếu muốn */}
-            {/* <OnlineStats /> */}
-
+            {/* Auth */}
             {isSignedIn && user ? (
               <div className="relative" ref={profileMenuRef}>
                 <ProfileButton
                   user={user}
-                  onToggle={() => setShowProfileMenu(!showProfileMenu)}
+                  onToggle={() => setShowProfileMenu(prev => !prev)}
                   showProfileMenu={showProfileMenu}
                 />
                 {showProfileMenu && (
                   <ProfileDropdown
                     user={user}
-                    onProfileClick={handleProfileClickFromDropdown}
-                    onSignOut={handleSignOutAndCloseMenu}
+                    onProfileClick={handleProfileClick}
+                    onSignOut={handleSignOut}
                   />
                 )}
               </div>
             ) : (
-              <SignInButton onSignIn={handleSignInAndCloseMenu} loading={loading} />
+              <SignInButton onSignIn={handleSignIn} loading={authLoading} />
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsOpen(prev => !prev)}
             className={styles.mobileMenuBtn}
-            aria-label="Toggle menu"
+            aria-label={isOpen ? "Đóng menu" : "Mở menu"}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -361,14 +328,18 @@ export default function Navbar({
 
       {/* ====== MOBILE MENU OVERLAY ====== */}
       <div
-        className={`${styles.mobileOverlay} ${isOpen ? '' : styles.hidden}`}
+        className={`${styles.mobileOverlay} ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
         onClick={() => setIsOpen(false)}
-        aria-hidden={!isOpen}
-      ></div>
+        aria-hidden="true"
+      />
 
       {/* ====== MOBILE MENU ====== */}
       <div
+        id="mobile-menu"
         className={`${styles.mobileMenu} ${isOpen ? styles.mobileMenuOpen : styles.mobileMenuClosed}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu di động"
       >
         <div className="p-4 flex flex-col h-full">
           {/* Header */}
@@ -377,7 +348,7 @@ export default function Navbar({
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 transition-all"
-              aria-label="Close menu"
+              aria-label="Đóng menu"
             >
               <X className="w-6 h-6" />
             </button>
@@ -390,18 +361,13 @@ export default function Navbar({
             </h3>
             <div className="space-y-2">
               {allMenuItems.map((item) => (
-                <NavItem
-                  key={item.id}
-                  item={item}
-                  isMobile={true}
-                  onItemClick={handleMenuClick}
-                />
+                <NavItem key={item.id} item={item} isMobile onItemClick={handleMenuClick} />
               ))}
             </div>
 
             <hr className="my-4 border-amber-100" />
 
-            {/* Mobile Profile / Sign In */}
+            {/* Mobile Auth */}
             <div className="pt-2">
               {isSignedIn && user ? (
                 <>
@@ -410,40 +376,34 @@ export default function Navbar({
                   </h3>
                   <div className="bg-amber-50 rounded-xl p-3 flex items-center gap-3 mb-4 border border-amber-200">
                     {user.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt={user.displayName}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                      <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-sm">
-                        {user.displayName?.[0]?.toUpperCase() || 'U'}
+                        {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm truncate">
-                        {user.displayName || user.email}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="-font-bold text-sm truncate">{user.displayName || user.email}</p>
                       <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
                   </div>
                   <button
-                    onClick={handleProfileClickFromDropdown}
+                    onClick={handleProfileClick}
                     className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-amber-100 transition-all text-sm font-medium rounded-lg"
                   >
                     <User className="w-5 h-5 text-orange-600 flex-shrink-0" />
                     <span>Xem Profile</span>
                   </button>
                   <button
-                    onClick={handleSignOutAndCloseMenu}
-                    className="w-full flex items-center gap-3 px-4 py-3 mt-1 text-gray-700 hover:bg-red-100 transition-all text-sm font-medium rounded-lg"
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3 px-4 py-3 mt-1 text-red-600 hover:bg-red-100 transition-all text-sm font-medium rounded-lg"
                   >
-                    <LogOut className="w-5 h-5 text-red-600 flex-shrink-0" />
+                    <LogOut className="w-5 h-5 flex-shrink-0" />
                     <span>Đăng Xuất</span>
                   </button>
                 </>
               ) : (
-                <SignInButton onSignIn={handleSignInAndCloseMenu} loading={loading} />
+                <SignInButton onSignIn={handleSignIn} loading={authLoading} />
               )}
             </div>
           </div>
@@ -452,3 +412,5 @@ export default function Navbar({
     </>
   );
 }
+
+Navbar.displayName = 'Navbar';

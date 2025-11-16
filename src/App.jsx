@@ -320,8 +320,8 @@ function App() {
       onProfileClick={handleViewProfile}
       viewMode={viewMode}
       // ✅ TRUYỀN DỮ LIỆU ONLINE USERS XUỐNG NAVBAR
-      onlineCount={onlineCount}
-      totalUsers={totalUsers}
+      onlineCount={onlineCount}   // ✅ TRUYỀN
+      totalUsers={totalUsers}     // ✅ TRUYỀN
     >
       <div className="relative z-10 p-4 sm:p-6">
         <Suspense fallback={<LoadingSpinner />}>

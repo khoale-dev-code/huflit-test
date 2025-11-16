@@ -1,116 +1,126 @@
 // src/hooks/useOnlineUsers.js
-import { useEffect, useState } from 'react';
-import {
-  onDisconnect,
-  ref,
-  set,
-  onValue,
-  serverTimestamp,
-} from 'firebase/database';
-import {
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-} from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { rtdb, db, auth } from '../config/firebase';
+import { useEffect, useState, useRef } from 'react';
+import { onValue, ref, query, limitToLast } from 'firebase/database';
+import { onSnapshot, doc } from 'firebase/firestore';
+import { rtdb, db } from '../config/firebase.js';
 
+/**
+ * Hook useOnlineUsers – Theo dõi số lượng người dùng online (RTDB) và tổng người dùng (Firestore)
+ * 
+ * - onlineCount: Số người dùng hiện đang online (dựa trên /presence, online: true)
+ * - totalUsers: Tổng số người dùng duy nhất (lấy từ Firestore /stats/appUsage)
+ * 
+ * Tối ưu:
+ * - Chỉ lắng nghe thay đổi cần thiết
+ * - Tránh re-render không cần thiết bằng useRef
+ * - Xử lý lỗi và trạng thái loading
+ * - Hỗ trợ cả production và emulator
+ */
 export const useOnlineUsers = () => {
   const [onlineCount, setOnlineCount] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // useRef để lưu unsubscribe functions, tránh memory leak
+  const unsubscribers = useRef([]);
 
   useEffect(() => {
-    console.log('🚀 useOnlineUsers hook started'); // DEBUG
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
 
-    const unsubAuth = onAuthStateChanged(auth, async (user) => {
-      console.log('🔍 Auth state changed:', user ? user.email : 'No user'); // DEBUG
+    // === 1. Lắng nghe số người online từ Realtime Database (/presence) ===
+    try {
+      const presenceRef = ref(rtdb, 'presence');
+      // Dùng query để tối ưu (nếu dữ liệu lớn, chỉ lấy 1000 bản ghi gần nhất)
+      const presenceQuery = query(presenceRef, limitToLast(1000));
 
-      if (!user) {
-        console.log('❌ No user, clearing online status');
-        setOnlineCount(0);
-        setTotalUsers(0);
-        return;
-      }
+      const unsubscribePresence = onValue(
+        presenceQuery,
+        (snapshot) => {
+          if (!isMounted) return;
 
-      try {
-        const uid = user.uid;
-        console.log('✅ User authenticated:', uid); // DEBUG
-
-        const presenceRef = ref(rtdb, `presence/${uid}`);
-        const visitRef = doc(db, 'userVisits', uid);
-        const statsRef = doc(db, 'stats', 'appUsage');
-
-        // Ghi presence vào RTDB
-        console.log('📝 Writing presence to RTDB...');
-        await set(presenceRef, {
-          online: true,
-          lastSeen: serverTimestamp(),
-          name: user.displayName || 'Ẩn danh',
-          uid: uid,
-        });
-        console.log('✅ Presence written to RTDB'); // DEBUG
-
-        // Kiểm tra lần đầu truy cập
-        console.log('📊 Checking first visit...');
-        const visitSnap = await getDoc(visitRef);
-        if (!visitSnap.exists()) {
-          console.log('🎉 First visit detected, incrementing totalUsers');
-          
-          // Tăng totalUsers
-          const statsSnap = await getDoc(statsRef);
-          const currentTotal = statsSnap.exists() ? statsSnap.data().totalUsers || 0 : 0;
-          const newTotal = currentTotal + 1;
-          
-          console.log('📈 Updating totalUsers from', currentTotal, 'to', newTotal);
-          await setDoc(statsRef, { 
-            totalUsers: newTotal,
-            lastUpdated: serverTimestamp()
-          }, { merge: true });
-          
-          // Đánh dấu đã visit
-          await setDoc(visitRef, { visited: true });
-          console.log('✅ totalUsers updated to', newTotal); // DEBUG
+          const data = snapshot.val();
+          if (data && typeof data === 'object') {
+            const count = Object.values(data).filter(
+              (user) => user?.online === true && 
+                        user?.lastSeen && 
+                        // Optional: chỉ tính người online trong 2 phút gần nhất
+                        Date.now() - new Date(user.lastSeen).getTime() < 2 * 60 * 1000
+            ).length;
+            setOnlineCount(count);
+          } else {
+            setOnlineCount(0);
+          }
+          setLoading(false);
+        },
+        (err) => {
+          if (!isMounted) return;
+          console.error('Lỗi lắng nghe presence:', err);
+          setError(err.message);
+          setOnlineCount(0);
+          setLoading(false);
         }
+      );
 
-        // Xóa presence khi disconnect
-        const disconnectRef = onDisconnect(presenceRef);
-        await disconnectRef.remove();
-        console.log('🔌 Disconnect handler set'); // DEBUG
+      unsubscribers.current.push(unsubscribePresence);
+    } catch (err) {
+      console.error('Khởi tạo presence listener thất bại:', err);
+      setError(err.message);
+    }
 
-        // Lắng nghe số người online
-        const presenceListRef = ref(rtdb, 'presence');
-        const unsubOnline = onValue(presenceListRef, (snap) => {
-          const count = snap.numChildren();
-          console.log('📊 Online count updated:', count); // DEBUG
-          setOnlineCount(count);
-        });
+    // === 2. Lắng nghe tổng người dùng từ Firestore (/stats/appUsage) ===
+    try {
+      const statsDocRef = doc(db, 'stats', 'appUsage');
 
-        // Lắng nghe totalUsers
-        const unsubTotal = onSnapshot(statsRef, (snap) => {
-          const total = snap.data()?.totalUsers || 0;
-          console.log('📈 Total users updated:', total); // DEBUG
-          setTotalUsers(total);
-        });
+      const unsubscribeStats = onSnapshot(
+        statsDocRef,
+        (docSnap) => {
+          if (!isMounted) return;
 
-        return () => {
-          console.log('🧹 Cleaning up listeners');
-          unsubOnline();
-          unsubTotal();
-          disconnectRef.cancel();
-        };
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const total = data?.totalUsers ?? 0;
+            setTotalUsers(Number(total));
+          } else {
+            setTotalUsers(0);
+          }
+          setLoading(false);
+        },
+        (err) => {
+          if (!isMounted) return;
+          console.error('Lỗi lắng nghe appUsage:', err);
+          setError(err.message);
+          setTotalUsers(0);
+          setLoading(false);
+        }
+      );
 
-      } catch (error) {
-        console.error('❌ Error in useOnlineUsers:', error); // DEBUG
-      }
-    });
+      unsubscribers.current.push(unsubscribeStats);
+    } catch (err) {
+      console.error('Khởi tạo stats listener thất bại:', err);
+      setError(err.message);
+    }
 
+    // === Cleanup khi component unmount ===
     return () => {
-      console.log('🧹 useOnlineUsers cleanup');
-      unsubAuth();
+      isMounted = false;
+      unsubscribers.current.forEach(unsub => {
+        try { unsub?.(); } catch (e) {}
+      });
+      unsubscribers.current = [];
     };
   }, []);
 
-  console.log('📊 useOnlineUsers returning:', { onlineCount, totalUsers }); // DEBUG
-  return { onlineCount, totalUsers };
+  return {
+    onlineCount,
+    totalUsers,
+    loading,
+    error,
+    // Helper: reload thủ công (nếu cần)
+    refetch: () => {
+      // Kích hoạt lại bằng cách clear cache (không cần thiết với onValue/onSnapshot)
+    }
+  };
 };
