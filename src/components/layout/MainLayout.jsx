@@ -3,7 +3,6 @@ import React from 'react';
 import Navbar from '../Navbar';
 import Footer from '../footer/Footer';
 import ScrollToTopButton from '../footer/ScrollToTopButton';
-import AnnouncementBanner from '../AnnouncementBanner';
 
 const MainLayout = ({ 
   children, 
