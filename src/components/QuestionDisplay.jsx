@@ -1,293 +1,214 @@
-import React, { useMemo, useCallback, useState, memo } from 'react';
-import { ChevronLeft, ChevronRight, Save, History, CheckCircle, AlertCircle, Volume2, Check } from 'lucide-react';
+import React, { useMemo, useCallback, useState } from 'react';
+import { Save, CheckCircle, AlertCircle, Volume2, Check } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useUnifiedAuth } from '../hooks/useUnifiedAuth';
 
-// --- Memoized Components ---
+// --- Components (NO MEMO) ---
 
-const ProgressBar = memo(({ percentage }) => (
-  <div className="bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+const ProgressBar = ({ percentage }) => (
+  <div className="bg-gray-200 rounded-lg h-2 overflow-hidden">
     <div
       className="bg-gradient-to-r from-orange-500 to-amber-500 h-full transition-all duration-500"
       style={{ width: `${percentage}%` }}
     />
   </div>
-), (prev, next) => Math.abs(prev.percentage - next.percentage) < 1);
+);
 
-ProgressBar.displayName = 'ProgressBar';
-
-const StatusBadge = memo(({ isAnswered, answersCount, totalQuestions }) => {
+const StatusBadge = ({ isAnswered, answersCount, totalQuestions }) => {
   const isAllAnswered = answersCount === totalQuestions && totalQuestions > 0;
 
   return (
-    <div className="flex items-center justify-between text-sm font-bold gap-2 flex-wrap">
+    <div className="flex items-center justify-between text-sm font-medium gap-2">
       <span className="text-gray-700">
-        Đã trả lời: <span className="text-orange-600 text-base">{answersCount}</span> / {totalQuestions}
+        Đã trả lời: <span className="text-orange-600">{answersCount}</span> / {totalQuestions}
       </span>
       {isAllAnswered ? (
-        <span className="text-green-600 font-bold flex items-center gap-1 text-xs sm:text-sm">
+        <span className="text-green-600 font-medium flex items-center gap-1 text-sm">
           <CheckCircle className="w-4 h-4" /> Hoàn thành
         </span>
       ) : (
-        <span className="text-red-500 text-xs sm:text-sm flex items-center gap-1">
+        <span className="text-red-500 text-sm flex items-center gap-1">
           <AlertCircle className="w-4 h-4" /> Còn {totalQuestions - answersCount}
         </span>
       )}
     </div>
   );
-}, (prev, next) => prev.answersCount === next.answersCount && prev.totalQuestions === next.totalQuestions);
+};
 
-StatusBadge.displayName = 'StatusBadge';
-
-const AuthNotice = memo(({ isSignedIn, authProvider }) => (
-  <div className={`p-3 sm:p-4 border-2 rounded-xl shadow-md ${
+const AuthNotice = ({ isSignedIn, authProvider }) => (
+  <div className={`p-3 border rounded-lg ${
     isSignedIn
       ? 'bg-green-50 border-green-300'
-      : 'bg-yellow-50 border-yellow-400'
+      : 'bg-yellow-50 border-yellow-300'
   }`}>
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-2">
       {isSignedIn ? (
-        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
       ) : (
-        <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+        <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
       )}
       <div className="flex-1 min-w-0">
-        <p className={`text-xs sm:text-sm font-bold ${
+        <p className={`text-sm font-medium ${
           isSignedIn ? 'text-green-800' : 'text-yellow-800'
-        } mb-0.5`}>
+        }`}>
           {isSignedIn
             ? `✅ Đã đăng nhập (${authProvider === 'clerk' ? '🔐 Clerk' : '🔥 Firebase'})`
             : '🔑 Đăng nhập để lưu kết quả'
           }
         </p>
         {!isSignedIn && (
-          <p className="text-xs text-yellow-700">
+          <p className="text-xs text-yellow-700 mt-0.5">
             Kết quả sẽ không được lưu vào Profile nếu bạn không đăng nhập.
           </p>
         )}
       </div>
     </div>
   </div>
-));
+);
 
-AuthNotice.displayName = 'AuthNotice';
-
-const SubmitStatusNotification = memo(({ status }) => {
+const SubmitStatusNotification = ({ status }) => {
   if (!status.show) return null;
 
   const isSuccess = status.success;
   const isLoading = status.message.includes('Đang');
 
   return (
-    <div className={`p-3 sm:p-4 rounded-xl border-2 flex items-center gap-3 animate-in fade-in duration-200 ${
+    <div className={`p-3 rounded-lg border flex items-center gap-2 ${
       isSuccess
-        ? 'bg-green-100 border-green-400'
+        ? 'bg-green-50 border-green-300'
         : isLoading
-        ? 'bg-amber-100 border-amber-400'
-        : 'bg-red-100 border-red-400'
+        ? 'bg-amber-50 border-amber-300'
+        : 'bg-red-50 border-red-300'
     }`}>
       {isSuccess || isLoading ? (
-        <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0" />
+        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
       ) : (
-        <AlertCircle className="w-5 h-5 text-red-700 flex-shrink-0" />
+        <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
       )}
-      <span className={`text-xs sm:text-sm font-bold ${
+      <span className={`text-sm font-medium ${
         isSuccess ? 'text-green-800' : 'text-red-800'
       }`}>
         {status.message}
       </span>
     </div>
   );
-}, (prev, next) => prev.status.show === next.status.show && prev.status.message === next.status.message);
+};
 
-SubmitStatusNotification.displayName = 'SubmitStatusNotification';
-
-const QuestionOption = memo(({ option, index, isSelected, onSelect }) => {
+const QuestionOption = ({ option, index, isSelected, onSelect, questionId }) => {
   const optionLabel = String.fromCharCode(65 + index);
 
   return (
-    <label className={`
-      flex items-start p-4 sm:p-5 rounded-xl cursor-pointer transition-all duration-200 border-2
-      ${isSelected
-        ? 'bg-gradient-to-r from-amber-300 to-yellow-300 border-orange-600 shadow-lg'
-        : 'bg-white border-gray-300 hover:border-orange-400 hover:bg-yellow-50 shadow-sm hover:shadow-md'
-      }
-    `}>
+    <label 
+      htmlFor={`q${questionId}-opt${index}`}
+      className={`
+        group relative flex items-start p-3 rounded-lg cursor-pointer transition-all duration-200 border
+        ${isSelected
+          ? 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-400 shadow-sm'
+          : 'bg-white border-gray-300 hover:border-orange-300 hover:bg-orange-50/50'
+        }
+      `}
+    >
       <div className="flex items-start gap-3 flex-1 min-w-0">
         <div className={`
-          w-7 h-7 rounded-full border-2 flex items-center justify-center font-bold text-xs flex-shrink-0 transition-all mt-0.5
+          relative w-7 h-7 rounded-full border-2 flex items-center justify-center font-semibold text-xs flex-shrink-0 transition-all
           ${isSelected
-            ? 'bg-orange-600 border-orange-700 text-white'
-            : 'border-gray-400 text-gray-600 bg-gray-100'
+            ? 'bg-orange-500 border-orange-600 text-white shadow-sm'
+            : 'border-gray-400 text-gray-600 bg-white group-hover:border-orange-400 group-hover:bg-orange-50'
           }
         `}>
-          {isSelected ? <Check className="w-3.5 h-3.5" /> : optionLabel}
+          {isSelected ? (
+            <Check className="w-4 h-4 stroke-[3]" />
+          ) : (
+            <span>{optionLabel}</span>
+          )}
         </div>
-        <span className="text-sm sm:text-base text-gray-800 break-words pt-0.5">{option}</span>
+
+        <div className="flex-1 min-w-0 pt-0.5">
+          <span className={`
+            text-[15px] leading-relaxed break-words block
+            ${isSelected ? 'text-gray-900 font-medium' : 'text-gray-700'}
+          `}>
+            {option}
+          </span>
+          
+          {isSelected && (
+            <div className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+              <Check className="w-3 h-3" />
+              <span>Đã chọn</span>
+            </div>
+          )}
+        </div>
       </div>
+
       <input
         type="radio"
-        name={`question-option-${index}`}
+        id={`q${questionId}-opt${index}`}
+        name={`question-${questionId}`}
         checked={isSelected}
         onChange={onSelect}
-        className="hidden"
+        className="sr-only"
       />
     </label>
   );
-}, (prev, next) => prev.isSelected === next.isSelected && prev.option === next.option);
+};
 
-QuestionOption.displayName = 'QuestionOption';
-
-const QuestionCard = memo(({
-  question,
-  script,
-  options,
-  isAnswered,
-  selectedAnswer,
-  onAnswerSelect
-}) => {
-  const handleSelect = useCallback((optIndex) => {
-    onAnswerSelect(question.id, optIndex);
-  }, [question.id, onAnswerSelect]);
-
+const QuestionCard = ({ question, script, options, isAnswered, selectedAnswer, onAnswerSelect }) => {
   return (
-    <div className="p-4 sm:p-6 bg-amber-50 rounded-2xl shadow-lg border-2 border-yellow-400 hover:border-orange-500 transition-all duration-300">
-      {/* Script */}
+    <div className="p-4 bg-white rounded-lg border border-gray-200">
       {script && (
-        <div className="mb-5 p-3 sm:p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500 shadow-inner">
-          <p className="text-xs sm:text-sm font-bold text-indigo-800 mb-2 flex items-center gap-2">
+        <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-2 border-blue-400">
+          <p className="text-sm font-medium text-blue-800 mb-1.5 flex items-center gap-1.5">
             <Volume2 className="w-4 h-4" /> Script:
           </p>
-          <p className="text-sm text-gray-800 leading-relaxed italic">{script}</p>
+          <p className="text-[15px] text-gray-700 leading-relaxed italic">{script}</p>
         </div>
       )}
 
-      {/* Question */}
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-5 border-l-4 border-orange-500 pl-3 sm:pl-4 leading-snug">
-        <span className="text-orange-600">Câu {question.id}:</span> {question.question}
-      </h3>
+      <div className="mb-4">
+        <div className="flex items-start gap-2">
+          <h3 className="flex-1 text-base sm:text-lg font-semibold text-gray-900 border-l-2 border-orange-500 pl-3 leading-snug">
+            <span className="text-orange-600">Câu {question.id}:</span> {question.question}
+          </h3>
+          {isAnswered && (
+            <div className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Đã trả lời</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* Options */}
-      <div className="space-y-2 sm:space-y-3 mb-4">
+      <div className="space-y-2.5">
         {options?.map((option, index) => (
           <QuestionOption
-            key={index}
+            key={`${question.id}-${index}`}
+            questionId={question.id}
             option={option}
             index={index}
             isSelected={selectedAnswer === index}
-            onSelect={() => handleSelect(index)}
+            onSelect={() => {
+              console.log('Option clicked:', question.id, index);
+              onAnswerSelect(question.id, index);
+            }}
           />
         ))}
       </div>
 
-      {/* Answer Saved */}
-      {isAnswered && (
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-green-700 bg-green-100 p-2.5 sm:p-3 rounded-lg font-bold border border-green-300">
-          <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-600" />
-          <span>Đã chọn: <span className="text-green-800">({String.fromCharCode(65 + selectedAnswer)})</span></span>
+      {isAnswered && selectedAnswer !== undefined && (
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-600">Lựa chọn của bạn:</span>
+            <span className="font-semibold text-orange-600">
+              ({String.fromCharCode(65 + selectedAnswer)}) {options[selectedAnswer]}
+            </span>
+          </div>
         </div>
       )}
     </div>
   );
-});
-
-QuestionCard.displayName = 'QuestionCard';
-
-const NavigationArrows = memo(({
-  currentIndex,
-  totalQuestions,
-  onPrevious,
-  onNext
-}) => {
-  const handlePrev = useCallback(() => onPrevious(), [onPrevious]);
-  const handleNext = useCallback(() => onNext(), [onNext]);
-
-  return (
-    <div className="flex items-center justify-between gap-2 p-3 bg-white rounded-lg shadow-md border border-gray-200">
-      <button
-        onClick={handlePrev}
-        disabled={currentIndex === 0}
-        className="flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-bold transition-all text-xs sm:text-sm text-amber-800 active:scale-95"
-      >
-        <ChevronLeft className="w-4 h-4 sm:w-5" />
-        <span className="hidden sm:inline">Trước</span>
-      </button>
-
-      <span className="text-center font-bold text-gray-700 text-xs sm:text-base">
-        <span className="text-orange-600 text-lg sm:text-xl">{currentIndex + 1}</span> / {totalQuestions}
-      </span>
-
-      <button
-        onClick={handleNext}
-        disabled={currentIndex === totalQuestions - 1}
-        className="flex items-center gap-1 px-3 py-2 bg-amber-100 hover:bg-amber-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-bold transition-all text-xs sm:text-sm text-amber-800 active:scale-95"
-      >
-        <span className="hidden sm:inline">Sau</span>
-        <ChevronRight className="w-4 h-4 sm:w-5" />
-      </button>
-    </div>
-  );
-});
-
-NavigationArrows.displayName = 'NavigationArrows';
-
-const QuestionNavigation = memo(({
-  questions,
-  answers,
-  currentIndex,
-  onQuestionChange
-}) => {
-  const answersCount = Object.keys(answers).length;
-
-  const handleClick = useCallback((index) => {
-    onQuestionChange(index);
-  }, [onQuestionChange]);
-
-  return (
-    <div className="mb-6 p-3 sm:p-5 bg-gradient-to-r from-amber-50 to-yellow-100 rounded-2xl shadow-lg border-4 border-amber-400/70">
-      <div className="flex items-center justify-between mb-3 gap-2 pb-3 border-b-2 border-amber-300 flex-wrap">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <History className="w-5 h-5 text-amber-600" />
-          <h3 className="text-sm sm:text-base font-bold text-amber-800">Điều hướng</h3>
-        </div>
-        <div className="text-xs sm:text-sm text-gray-700 font-bold bg-amber-200 px-2.5 py-1 rounded-full">
-          <span className="text-amber-700">{answersCount}</span> / {questions.length}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-        {questions.map((q, index) => {
-          const isAnswered = answers[q.id] !== undefined;
-          const isCurrent = currentIndex === index;
-
-          return (
-            <button
-              key={q.id}
-              onClick={() => handleClick(index)}
-              title={isAnswered ? 'Đã trả lời' : 'Chưa trả lời'}
-              className={`
-                px-2.5 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-1
-                ${isCurrent
-                  ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg ring-2 ring-orange-300/50'
-                  : isAnswered
-                  ? 'bg-green-500 text-white hover:bg-green-600 shadow-md'
-                  : 'bg-white text-gray-800 hover:bg-amber-100 border border-gray-300 shadow-sm'
-                }
-              `}
-            >
-              {isAnswered && <Check className="w-3 h-3" />}
-              <span>Câu {index + 1}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-});
-
-QuestionNavigation.displayName = 'QuestionNavigation';
+};
 
 // --- Main Component ---
 
@@ -295,8 +216,6 @@ const QuestionDisplay = ({
   selectedPart,
   selectedExam,
   partData,
-  currentQuestionIndex,
-  onQuestionChange,
   answers,
   onAnswerSelect,
   showResults,
@@ -307,22 +226,14 @@ const QuestionDisplay = ({
   const { user: firebaseUser, authProvider, isSignedIn } = useUnifiedAuth();
   const [submitStatus, setSubmitStatus] = useState({ show: false, success: false, message: '' });
 
-  // Memoized calculations
   const answersCount = useMemo(() => Object.keys(answers).length, [answers]);
-  
   const totalQuestions = useMemo(() => partData?.questions?.length || 0, [partData?.questions?.length]);
-
   const progressPercentage = useMemo(() => {
     return totalQuestions > 0 ? (answersCount / totalQuestions) * 100 : 0;
   }, [answersCount, totalQuestions]);
-
   const isAllAnswered = useMemo(() => {
     return answersCount === totalQuestions && totalQuestions > 0;
   }, [answersCount, totalQuestions]);
-
-  const currentQuestion = useMemo(() => {
-    return partData?.questions?.[currentQuestionIndex] || null;
-  }, [partData?.questions, currentQuestionIndex]);
 
   const score = useMemo(() => {
     if (!partData?.questions) return { correct: 0, total: 0, percentage: 0 };
@@ -341,7 +252,6 @@ const QuestionDisplay = ({
     };
   }, [answers, partData?.questions, totalQuestions]);
 
-  // Get user identifier
   const getUserIdentifier = useCallback(() => {
     if (authProvider === 'clerk' && clerkUser) {
       return {
@@ -363,7 +273,6 @@ const QuestionDisplay = ({
     return null;
   }, [authProvider, clerkUser, firebaseUser]);
 
-  // Handle submit with save
   const handleSubmitWithSave = useCallback(async () => {
     try {
       onSubmit();
@@ -415,7 +324,7 @@ const QuestionDisplay = ({
       if (userIdentifier.clerkId) dataToSave.clerkId = userIdentifier.clerkId;
       if (userIdentifier.firebaseUid) dataToSave.firebaseUid = userIdentifier.firebaseUid;
 
-      const docRef = await addDoc(collection(db, 'userProgress'), dataToSave);
+      await addDoc(collection(db, 'userProgress'), dataToSave);
 
       setSubmitStatus({
         show: true,
@@ -434,84 +343,51 @@ const QuestionDisplay = ({
     }
   }, [isSignedIn, getUserIdentifier, onSubmit, selectedExam, selectedPart, score, answers, testType]);
 
-  // Handlers
-  const handlePrevious = useCallback(() => {
-    onQuestionChange(Math.max(0, currentQuestionIndex - 1));
-  }, [currentQuestionIndex, onQuestionChange]);
-
-  const handleNext = useCallback(() => {
-    onQuestionChange(Math.min(totalQuestions - 1, currentQuestionIndex + 1));
-  }, [currentQuestionIndex, totalQuestions, onQuestionChange]);
-
-  const handleAnswerChange = useCallback((qId, optIndex) => {
-    onAnswerSelect(qId, optIndex);
-  }, [onAnswerSelect]);
-
   if (!partData || showResults || !partData.questions) return null;
 
-  const shouldShowNavigation = selectedPart === 'part1' && testType === 'listening';
-  const shouldShowArrows = shouldShowNavigation;
-  const questionsToRender = shouldShowNavigation
-    ? [partData.questions[currentQuestionIndex]]
-    : partData.questions;
+  console.log('=== QuestionDisplay Render ===');
+  console.log('Current answers:', answers);
+  console.log('Questions:', partData.questions.map(q => q.id));
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50">
-      {/* Static Background Blobs */}
+    <div className="relative min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-4rem] left-[-4rem] w-72 h-72 bg-yellow-200/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-6rem] right-[-6rem] w-80 h-80 bg-orange-200/15 rounded-full blur-3xl" />
+        <div className="absolute top-[-8rem] right-[-8rem] w-96 h-96 bg-orange-200/8 rounded-full blur-3xl" />
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 max-w-4xl mx-auto my-4 sm:my-8 px-3 sm:px-4 space-y-4">
-        {shouldShowNavigation && (
-          <QuestionNavigation
-            questions={partData.questions}
-            answers={answers}
-            currentIndex={currentQuestionIndex}
-            onQuestionChange={onQuestionChange}
-          />
-        )}
-
-        {shouldShowArrows && (
-          <NavigationArrows
-            currentIndex={currentQuestionIndex}
-            totalQuestions={totalQuestions}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-          />
-        )}
-
-        {/* Questions */}
-        <div className="p-3 sm:p-6 bg-white/80 backdrop-blur rounded-2xl sm:rounded-3xl shadow-lg border-3 sm:border-4 border-amber-300/50">
-          <div className="flex items-center gap-2 sm:gap-3 mb-4 pb-3 border-b-2 sm:border-b-4 border-orange-500/80">
-            <h2 className="text-lg sm:text-2xl font-bold text-gray-800">
+      <div className="relative z-10 max-w-4xl mx-auto py-4 px-3 sm:px-4 space-y-3">
+        <div className="p-3 sm:p-4 bg-white/95 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">
               ❓ <span className="text-orange-600">Câu hỏi</span>
             </h2>
-            <span className="text-xs sm:text-sm font-bold px-2.5 py-1 rounded-full border-2 flex-shrink-0 bg-indigo-100 text-indigo-700 border-indigo-300">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
               {testType === 'listening' ? '🎧 Nghe' : '📖 Đọc'}
             </span>
           </div>
 
-          <div className="space-y-6">
-            {questionsToRender.map((q) => (
-              <QuestionCard
-                key={q.id}
-                question={q}
-                script={q.script}
-                options={q.options}
-                isAnswered={answers[q.id] !== undefined}
-                selectedAnswer={answers[q.id]}
-                onAnswerSelect={handleAnswerChange}
-              />
-            ))}
+          <div className="space-y-4">
+            {partData.questions.map((q) => {
+              const selectedAns = answers[q.id];
+              console.log(`Question ${q.id}: selectedAnswer =`, selectedAns);
+              
+              return (
+                <QuestionCard
+                  key={q.id}
+                  question={q}
+                  script={q.script}
+                  options={q.options}
+                  isAnswered={selectedAns !== undefined}
+                  selectedAnswer={selectedAns}
+                  onAnswerSelect={onAnswerSelect}
+                />
+              );
+            })}
           </div>
         </div>
 
-        {/* Submit Section */}
-        <div className="p-4 sm:p-6 bg-white/80 backdrop-blur rounded-2xl sm:rounded-3xl shadow-lg border-3 sm:border-4 border-gray-100/50 space-y-4">
-          <h3 className="text-base sm:text-lg font-bold text-gray-800 border-b pb-2">
+        <div className="p-3 sm:p-4 bg-white/95 rounded-lg border border-gray-200 space-y-3">
+          <h3 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200">
             Tiến độ làm bài
           </h3>
 
@@ -531,17 +407,17 @@ const QuestionDisplay = ({
             onClick={handleSubmitWithSave}
             disabled={!isAllAnswered}
             className={`
-              w-full py-3 sm:py-4 px-4 font-bold rounded-xl transition-all duration-200 transform
-              flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg
+              w-full py-3 px-4 font-semibold rounded-lg transition-all duration-150
+              flex items-center justify-center gap-2 text-base
               ${isAllAnswered
-                ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white hover:shadow-lg shadow-md active:scale-95'
-                : 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 shadow-sm'
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }
             `}
           >
-            <Save className="w-5 h-5 sm:w-6" />
+            <Save className="w-5 h-5" />
             <span>{isSignedIn ? 'NỘP BÀI & LƯU' : 'NỘP BÀI'}</span>
-            {isAllAnswered && <span className="text-xs sm:text-sm">({totalQuestions} câu)</span>}
+            {isAllAnswered && <span className="text-sm">({totalQuestions} câu)</span>}
           </button>
         </div>
       </div>

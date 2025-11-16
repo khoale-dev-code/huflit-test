@@ -136,8 +136,9 @@ const ChatButton = memo(({ onClick }) => (
 
 ChatButton.displayName = 'ChatButton';
 
-// ✅ Part Test Content - Optimized với proper deps
-const PartTestContent = memo(({
+// 🔥 FIX: Part Test Content - BỎ MEMO HOẶC FIX COMPARISON
+// Cách 1: Bỏ memo (đơn giản nhất)
+const PartTestContent = ({
   isSignedIn,
   user,
   selectedExam,
@@ -202,15 +203,43 @@ const PartTestContent = memo(({
     <StatsSection score={score} isSignedIn={isSignedIn} />
     <FullExamPrompt onStartFullExam={onStartFullExam} />
   </div>
+);
+
+PartTestContent.displayName = 'PartTestContent';
+
+// 🔥 NẾU MUỐN GIỮ MEMO, DÙNG CÁCH NÀY:
+/*
+const PartTestContent = memo(({
+  isSignedIn,
+  user,
+  selectedExam,
+  handleExamChange,
+  testType,
+  handleTestTypeChange,
+  selectedPart,
+  handlePartChange,
+  partData,
+  currentQuestionIndex,
+  setCurrentQuestionIndex,
+  answers,
+  handleAnswerSelect,
+  showResults,
+  handleSubmit,
+  handleReset,
+  score,
+  onStartFullExam
+}) => (
+  // ... same JSX ...
 ), (prev, next) => {
+  // ✅ PHẢI CHECK ANSWERS!
   return prev.selectedExam === next.selectedExam &&
     prev.selectedPart === next.selectedPart &&
     prev.currentQuestionIndex === next.currentQuestionIndex &&
     prev.showResults === next.showResults &&
-    prev.isSignedIn === next.isSignedIn;
+    prev.isSignedIn === next.isSignedIn &&
+    prev.answers === next.answers; // ← THIẾU DÒNG NÀY!
 });
-
-PartTestContent.displayName = 'PartTestContent';
+*/
 
 // --- Main App Component ---
 

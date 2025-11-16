@@ -16,7 +16,7 @@ export const GENDER_CATEGORIES = {
 export const ENHANCED_VOICE_SETTINGS = {
   // Professional Males - điều chỉnh để tự nhiên hơn
   Mark: { 
-    pitch: 0.95,
+    pitch: 0.69,
     rate: 1.0,
     volume: 0.85,
     style: "professional",
