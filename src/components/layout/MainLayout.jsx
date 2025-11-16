@@ -13,6 +13,8 @@ const MainLayout = ({
   user,
   onAuthClick,
   onChatClick,
+  onProfileClick,
+  viewMode,
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col">
@@ -26,6 +28,8 @@ const MainLayout = ({
         user={user}
         onAuthClick={onAuthClick}
         onChatClick={onChatClick}
+        onProfileClick={onProfileClick}
+        viewMode={viewMode}
       />
 
       <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8">

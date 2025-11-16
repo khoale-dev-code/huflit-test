@@ -28,7 +28,7 @@ const StatCard = memo(({ icon: Icon, label, value, color }) => {
   };
 
   return (
-    <div className={`rounded-xl p-3 sm:p-4 shadow-sm border-2 transition-shadow hover:shadow-md ${colorMap[color]} text-center`}>
+    <div className={`rounded-xl p-3 sm:p-4 shadow-sm border-2 transition-shadow hover:shadow-md ${colorMap[color]} text-center will-change-auto`}>
       <Icon className="w-5 h-5 sm:w-6 mx-auto mb-1.5 opacity-80" />
       <p className="text-xs text-gray-600 font-semibold uppercase tracking-tight">{label}</p>
       <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">{value}</p>
@@ -84,6 +84,14 @@ const FullExamPrompt = memo(({ onStartFullExam }) => (
 
 FullExamPrompt.displayName = 'FullExamPrompt';
 
+// ✅ Memoized versions của các component để tránh re-render không cần thiết
+const MemoizedHeaderSection = memo(HeaderSection);
+const MemoizedUserProfile = memo(UserProfile);
+const MemoizedPartSelector = memo(PartSelector);
+const MemoizedContentDisplay = memo(ContentDisplay);
+const MemoizedQuestionDisplay = memo(QuestionDisplay);
+const MemoizedResultsDisplay = memo(ResultsDisplay);
+
 // --- PartTestContent được memo hóa ---
 const PartTestContent = memo(({
   isSignedIn,
@@ -106,10 +114,10 @@ const PartTestContent = memo(({
   onStartFullExam
 }) => (
   <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-    <HeaderSection isSignedIn={isSignedIn} user={user} />
-    {isSignedIn && <UserProfile />}
+    <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
+    {isSignedIn && <MemoizedUserProfile />}
     
-    <PartSelector
+    <MemoizedPartSelector
       selectedExam={selectedExam}
       onExamChange={handleExamChange}
       testType={testType}
@@ -118,14 +126,14 @@ const PartTestContent = memo(({
       onPartChange={handlePartChange}
     />
 
-    <ContentDisplay
+    <MemoizedContentDisplay
       partData={partData}
       selectedPart={selectedPart}
       currentQuestionIndex={currentQuestionIndex}
       testType={testType}
     />
 
-    <QuestionDisplay
+    <MemoizedQuestionDisplay
       selectedPart={selectedPart}
       selectedExam={selectedExam}
       partData={partData}
@@ -139,7 +147,7 @@ const PartTestContent = memo(({
     />
 
     {showResults && (
-      <ResultsDisplay
+      <MemoizedResultsDisplay
         score={score}
         partData={partData}
         answers={answers}
@@ -157,6 +165,7 @@ PartTestContent.displayName = 'PartTestContent';
 // --- Main App Component ---
 function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [viewMode, setViewMode] = useState('test'); // 'test', 'profile'
 
   const {
     selectedExam,
@@ -184,6 +193,16 @@ function App() {
 
   const handleAuthOpen = useCallback(() => {
     setShowAuthModal(true);
+  }, []);
+
+  // ✅ Xử lý chuyển đến trang profile
+  const handleViewProfile = useCallback(() => {
+    setViewMode('profile');
+  }, []);
+
+  // ✅ Xử lý quay lại trang test
+  const handleBackToTest = useCallback(() => {
+    setViewMode('test');
   }, []);
 
   const partData = useMemo(() => {
@@ -218,6 +237,21 @@ function App() {
   }, [handleTestTypeChange]);
 
   const renderMainContent = useCallback(() => {
+    // ✅ Kiểm tra viewMode trước
+    if (viewMode === 'profile') {
+      return (
+        <div className="max-w-7xl mx-auto">
+          <button
+            onClick={handleBackToTest}
+            className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold transition-colors"
+          >
+            ← Quay lại
+          </button>
+          <MemoizedUserProfile currentUser={user} />
+        </div>
+      );
+    }
+
     if (practiceType === 'vocabulary') {
       return <VocabularyPractice />;
     }
@@ -268,8 +302,8 @@ function App() {
       />
     );
   }, [
-    practiceType, testType, answers, handleAnswerSelect, handleSubmit,
-    handleTestTypeChange, isSignedIn, user, selectedExam, handleExamChange,
+    viewMode, handleBackToTest, user, practiceType, testType, answers, handleAnswerSelect, 
+    handleSubmit, handleTestTypeChange, isSignedIn, selectedExam, handleExamChange,
     selectedPart, handlePartChange, partData, currentQuestionIndex,
     setCurrentQuestionIndex, showResults, handleReset, score, handleStartFullExam
   ]);
@@ -282,6 +316,8 @@ function App() {
       onPracticeTypeChange={handlePracticeTypeChange}
       user={user}
       onAuthClick={handleAuthOpen}
+      onProfileClick={handleViewProfile}
+      viewMode={viewMode}
     >
       <div className="relative z-10 p-4 sm:p-6">
         <Suspense fallback={<LoadingSpinner />}>

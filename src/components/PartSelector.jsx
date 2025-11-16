@@ -50,14 +50,15 @@ const HeaderSection = memo(() => (
 
 HeaderSection.displayName = 'HeaderSection';
 
-// ✅ Exam selection card
+// ✅ Exam selection card - ĐÃ THÊM Z-INDEX CONDITIONAL
 const ExamSelectionCard = memo(({
   selectedExam,
   isDropdownOpen,
   onToggleDropdown,
   onSelectExam
 }) => (
-  <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-200 border border-orange-200/50">
+  // 💡 CẬP NHẬT: Thêm z-50 khi dropdown mở để nó đè lên TestTypeCard bên cạnh
+  <div className={`bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-200 border border-orange-200/50 ${isDropdownOpen ? 'z-50' : 'z-10'}`}>
     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
       <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg shadow-sm flex-shrink-0">
         <Target className="w-4 h-4 sm:w-5 text-white" />
@@ -81,6 +82,7 @@ const ExamSelectionCard = memo(({
       </button>
       
       {isDropdownOpen && (
+        // Dropdown content cũng cần z-index cao
         <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur border border-orange-200 rounded-xl shadow-lg w-full max-h-56 overflow-y-auto z-50">
           <ul className="p-1 sm:p-2">
             {Object.entries(EXAM_DATA).map(([key, value]) => (
@@ -101,9 +103,10 @@ const ExamSelectionCard = memo(({
 
 ExamSelectionCard.displayName = 'ExamSelectionCard';
 
-// ✅ Test type selection card
+// ✅ Test type selection card - Giữ nguyên nhưng đảm bảo z-index thấp hơn
 const TestTypeCard = memo(({ testType, onTestTypeChange }) => (
-  <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-200 border border-amber-200/50">
+  // 💡 CẬP NHẬT: Thêm z-20 để nó nằm dưới z-50 của dropdown khi cần thiết
+  <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-200 border border-amber-200/50 z-20">
     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
       <div className="p-1.5 sm:p-2 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg shadow-sm flex-shrink-0">
         <Zap className="w-4 h-4 sm:w-5 text-white" />

@@ -192,6 +192,8 @@ export default function Navbar({
   practiceType,
   onPracticeTypeChange,
   onAuthClick,
+  onProfileClick,
+  viewMode,
 }) {
   const { user, isSignedIn, signInWithGoogle, signOut, loading } = useFirebaseAuth();
 
@@ -266,11 +268,12 @@ export default function Navbar({
     setIsOpen(false);
   }, [onTestTypeChange, onPracticeTypeChange]);
 
-  const handleProfileClick = useCallback(() => {
+  // ✅ UPDATED: Gọi onProfileClick từ App
+  const handleProfileClickFromDropdown = useCallback(() => {
+    onProfileClick?.();
     setShowProfileMenu(false);
     setIsOpen(false);
-    if (onAuthClick) onAuthClick();
-  }, [onAuthClick]);
+  }, [onProfileClick]);
 
   const handleSignInAndCloseMenu = async () => {
     const result = await signInWithGoogle();
@@ -317,7 +320,7 @@ export default function Navbar({
                 {showProfileMenu && (
                   <ProfileDropdown
                     user={user}
-                    onProfileClick={handleProfileClick}
+                    onProfileClick={handleProfileClickFromDropdown}
                     onSignOut={handleSignOutAndCloseMenu}
                   />
                 )}
@@ -407,7 +410,7 @@ export default function Navbar({
                     </div>
                   </div>
                   <button
-                    onClick={handleProfileClick}
+                    onClick={handleProfileClickFromDropdown}
                     className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-amber-100 transition-all text-sm font-medium rounded-lg"
                   >
                     <User className="w-5 h-5 text-orange-600 flex-shrink-0" />
