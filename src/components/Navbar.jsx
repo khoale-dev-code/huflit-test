@@ -3,8 +3,7 @@ import { Menu, X, Headphones, BookOpen, BookMarked, Sparkles, User, ChevronDown,
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
-import OnlineStats from '../components/OnlineStats'; // THÊM DÒNG NÀY
-// ✅ CSS Module Import ☝️
+import OnlineStats from '../components/OnlineStats.jsx'; // ✅ Giữ lại nếu dùng component riêng
 
 // ======================================================================
 // Google Logo SVG Component
@@ -194,6 +193,8 @@ export default function Navbar({
   onAuthClick,
   onProfileClick,
   viewMode,
+  onlineCount,   // ✅ NHẬN TỪ MAINLAYOUT
+  totalUsers     // ✅ NHẬN TỪ MAINLAYOUT
 }) {
   const { user, isSignedIn, signInWithGoogle, signOut, loading } = useFirebaseAuth();
 
@@ -268,7 +269,6 @@ export default function Navbar({
     setIsOpen(false);
   }, [onTestTypeChange, onPracticeTypeChange]);
 
-  // ✅ UPDATED: Gọi onProfileClick từ App
   const handleProfileClickFromDropdown = useCallback(() => {
     onProfileClick?.();
     setShowProfileMenu(false);
@@ -308,9 +308,25 @@ export default function Navbar({
             ))}
           </div>
 
-         {/* Right Section - Desktop */}
+          {/* Right Section - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            <OnlineStats /> {/* Thêm dòng này */}
+            {/* HIỂN THỊ ONLINE STATS (Tích hợp trực tiếp hoặc dùng component) */}
+            {onlineCount !== undefined && totalUsers !== undefined && (
+              <div className="flex items-center gap-4 text-xs text-gray-600 font-medium">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-bold text-green-600">{onlineCount}</span>
+                  <span>online</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <span className="font-bold">{totalUsers.toLocaleString()}</span>
+                  <span>tổng</span>
+                </div>
+              </div>
+            )}
+
+            {/* Dùng component nếu muốn */}
+            {/* <OnlineStats /> */}
 
             {isSignedIn && user ? (
               <div className="relative" ref={profileMenuRef}>
