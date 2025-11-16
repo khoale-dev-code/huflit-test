@@ -2,12 +2,13 @@
 import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import {
   Menu, X, Headphones, BookOpen, BookMarked, Sparkles,
-  User, ChevronDown, LogOut, GraduationCap, ChevronRight, Loader2
+  User, ChevronDown, LogOut, GraduationCap, ChevronRight, Loader2,
+  FileCheck // Icon cho "Xem Đáp Án"
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
-import OnlineStats from '../components/OnlineStats.jsx'; // Tự fetch dữ liệu
+import OnlineStats from '../components/OnlineStats.jsx';
 
 // ======================================================================
 // Google Logo SVG Component
@@ -27,7 +28,6 @@ GoogleLogo.displayName = 'GoogleLogo';
 // ======================================================================
 const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
   const IconComponent = item.icon;
-
   if (isMobile) {
     return (
       <button
@@ -57,7 +57,9 @@ const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
             </p>
           </div>
         </div>
-        {!item.isActive && <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500" aria-hidden="true" />}
+        {!item.isActive && (
+          <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-orange-500" aria-hidden="true" />
+        )}
       </button>
     );
   }
@@ -107,7 +109,6 @@ const ProfileButton = React.memo(({ user, onToggle, showProfileMenu }) => {
           </div>
         )}
       </div>
-
       <div className={styles.profileName}>
         <span className={styles.profileNameText}>{displayName}</span>
         <ChevronDown
@@ -144,14 +145,9 @@ const ProfileDropdown = React.memo(({ user, onProfileClick, onSignOut }) => {
             Tài khoản Google
           </span>
         </div>
-        <p className="text-base font-extrabold text-gray-900 truncate max-w-[200px]">
-          {displayName}
-        </p>
-        <p className="text-xs text-gray-500 truncate max-w-[200px] mt-1">
-          {email}
-        </p>
+        <p className="text-base font-extrabold text-gray-900 truncate max-w-[200px]">{displayName}</p>
+        <p className="text-xs text-gray-500 truncate max-w-[200px] mt-1">{email}</p>
       </div>
-
       <div className="py-1 border-t border-gray-100">
         <button
           onClick={onProfileClick}
@@ -200,6 +196,45 @@ const SignInButton = React.memo(({ onSignIn, loading }) => (
 SignInButton.displayName = 'SignInButton';
 
 // ======================================================================
+// AnswersButton Component (HOÀN CHỈNH)
+// ======================================================================
+const AnswersButton = React.memo(({ onClick, isMobile = false }) => {
+  if (isMobile) {
+    return (
+      <button
+        onClick={onClick}
+        className="w-full p-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-between gap-3 group bg-white text-gray-700 hover:bg-purple-50 border border-transparent hover:border-purple-200"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-100 to-pink-100">
+            <FileCheck className="w-5 h-5 text-purple-600" aria-hidden="true" />
+          </div>
+          <div className="flex-1 text-left min-w-0">
+            <p className="text-base font-bold">Xem Đáp Án</p>
+            <p className="text-xs text-gray-500">Chi tiết từng câu</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-purple-500" aria-hidden="true" />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className="relative group px-4 py-2 rounded-lg font-bold text-purple-700 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 hover:from-purple-100 hover:to-pink-100 transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow"
+      aria-label="Xem đáp án chi tiết"
+    >
+      <FileCheck className="w-5 h-5 text-purple-600" aria-hidden="true" />
+      <span className="hidden sm:inline">Đáp Án</span>
+      <span className="sm:hidden">Đáp Án</span>
+      <div className="absolute inset-0 rounded-lg bg-purple-400/10 scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+    </button>
+  );
+});
+AnswersButton.displayName = 'AnswersButton';
+
+// ======================================================================
 // Main Navbar Component
 // ======================================================================
 export default function Navbar({
@@ -208,9 +243,9 @@ export default function Navbar({
   practiceType,
   onPracticeTypeChange,
   onProfileClick,
+  onAnswersClick, // ← Đảm bảo nhận từ App
 }) {
   const { user, isSignedIn, signInWithGoogle, signOut, loading: authLoading } = useFirebaseAuth();
-
   const [isOpen, setIsOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
@@ -256,6 +291,11 @@ export default function Navbar({
     setIsOpen(false);
   }, [onProfileClick]);
 
+  const handleAnswersClick = useCallback(() => {
+    onAnswersClick?.();
+    setIsOpen(false);
+  }, [onAnswersClick]);
+
   const handleSignIn = async () => {
     const result = await signInWithGoogle();
     if (result.success) setIsOpen(false);
@@ -289,15 +329,18 @@ export default function Navbar({
 
           {/* Right Section - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Online Stats – Tự động fetch */}
+            {/* Online Stats */}
             <OnlineStats />
+
+            {/* Nút Xem Đáp Án - Desktop */}
+            <AnswersButton onClick={handleAnswersClick} />
 
             {/* Auth */}
             {isSignedIn && user ? (
               <div className="relative" ref={profileMenuRef}>
                 <ProfileButton
                   user={user}
-                  onToggle={() => setShowProfileMenu(prev => !prev)}
+                  onToggle={() => setShowProfileMenu((prev) => !prev)}
                   showProfileMenu={showProfileMenu}
                 />
                 {showProfileMenu && (
@@ -315,9 +358,9 @@ export default function Navbar({
 
           {/* Mobile Menu Toggle */}
           <button
-            onClick={() => setIsOpen(prev => !prev)}
+            onClick={() => setIsOpen((prev) => !prev)}
             className={styles.mobileMenuBtn}
-            aria-label={isOpen ? "Đóng menu" : "Mở menu"}
+            aria-label={isOpen ? 'Đóng menu' : 'Mở menu'}
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
           >
@@ -365,6 +408,11 @@ export default function Navbar({
               ))}
             </div>
 
+            {/* Nút Xem Đáp Án - Mobile */}
+            <div className="pt-2">
+              <AnswersButton onClick={handleAnswersClick} isMobile />
+            </div>
+
             <hr className="my-4 border-amber-100" />
 
             {/* Mobile Auth */}
@@ -383,7 +431,7 @@ export default function Navbar({
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="-font-bold text-sm truncate">{user.displayName || user.email}</p>
+                      <p className="font-bold text-sm truncate">{user.displayName || user.email}</p>
                       <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
                   </div>
@@ -412,5 +460,4 @@ export default function Navbar({
     </>
   );
 }
-
 Navbar.displayName = 'Navbar';

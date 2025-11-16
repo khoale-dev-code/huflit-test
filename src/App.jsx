@@ -11,13 +11,16 @@ import QuestionDisplay from './components/QuestionDisplay';
 import ResultsDisplay from './components/ResultsDisplay';
 import VocabularyPractice from './components/VocabularyPractice';
 import AuthModal from './components/AuthModal';
-import { useOnlineUsers } from './hooks/useOnlineUsers.js'; // ✅ ĐÃ SỬA: thêm .js
+import { useOnlineUsers } from './hooks/useOnlineUsers.js';
 
-import { Target, Trophy, FileText, Zap, GraduationCap } from 'lucide-react';
+// ✅ Import ExamAnswersPage
+import ExamAnswersPage from './components/ExamAnswersPage.jsx';
 
 // ✅ Lazy load components
 const GrammarReview = lazy(() => import('./components/GrammarReview'));
 const FullExamMode = lazy(() => import('./components/FullExamMode'));
+
+import { Target, Trophy, FileText, Zap, GraduationCap } from 'lucide-react';
 
 // --- StatCard được memo hóa ---
 const StatCard = memo(({ icon: Icon, label, value, color }) => {
@@ -166,7 +169,8 @@ PartTestContent.displayName = 'PartTestContent';
 // --- Main App Component ---
 function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [viewMode, setViewMode] = useState('test'); // 'test', 'profile'
+  const [viewMode, setViewMode] = useState('test'); // 'test', 'profile', 'answers'
+  const [currentPage, setCurrentPage] = useState('main'); // 'main', 'answers'
 
   // ✅ BẮT BUỘC: GỌI HOOK ONLINE USERS Ở CẤP CAO NHẤT
   const { onlineCount, totalUsers } = useOnlineUsers();
@@ -207,6 +211,17 @@ function App() {
     setViewMode('test');
   }, []);
 
+  // ✅ Navigation handlers cho ExamAnswersPage
+  const handleGoToAnswers = useCallback(() => {
+    setCurrentPage('answers');
+    setViewMode('answers');
+  }, []);
+
+  const handleBackToMain = useCallback(() => {
+    setCurrentPage('main');
+    setViewMode('test');
+  }, []);
+
   const partData = useMemo(() => {
     if (practiceType) return null;
     return EXAM_DATA[selectedExam]?.parts?.[selectedPart] || null;
@@ -238,7 +253,34 @@ function App() {
     handleTestTypeChange('full');
   }, [handleTestTypeChange]);
 
+  // ✅ Render navigation bar với nút Answers
+  const renderNavigation = useCallback(() => {
+    return (
+      <div className="mb-6 flex items-center gap-4">
+        <button
+          onClick={handleBackToMain}
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+          style={{ display: currentPage === 'answers' ? 'inline-flex' : 'none' }}
+        >
+          ← Quay lại trang chính
+        </button>
+        
+        <button
+          onClick={handleGoToAnswers}
+          className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition-colors ml-auto"
+          style={{ display: currentPage === 'main' ? 'inline-flex' : 'none' }}
+        >
+          📚 Xem Đáp Án
+        </button>
+      </div>
+    );
+  }, [currentPage, handleBackToMain, handleGoToAnswers]);
+
   const renderMainContent = useCallback(() => {
+    if (currentPage === 'answers') {
+      return <ExamAnswersPage />;
+    }
+
     if (viewMode === 'profile') {
       return (
         <div className="max-w-7xl mx-auto">
@@ -303,7 +345,7 @@ function App() {
       />
     );
   }, [
-    viewMode, handleBackToTest, user, practiceType, testType, answers, handleAnswerSelect, 
+    currentPage, viewMode, handleBackToTest, user, practiceType, testType, answers, handleAnswerSelect, 
     handleSubmit, handleTestTypeChange, isSignedIn, selectedExam, handleExamChange,
     selectedPart, handlePartChange, partData, currentQuestionIndex,
     setCurrentQuestionIndex, showResults, handleReset, score, handleStartFullExam
@@ -321,9 +363,11 @@ function App() {
       viewMode={viewMode}
       // ✅ TRUYỀN DỮ LIỆU ONLINE USERS XUỐNG NAVBAR
       onlineCount={onlineCount}   // ✅ TRUYỀN
-      totalUsers={totalUsers}     // ✅ TRUYỀN
+      totalUsers={totalUsers}   
+      onAnswersClick={handleGoToAnswers}  // ✅ TRUYỀN
     >
       <div className="relative z-10 p-4 sm:p-6">
+        {renderNavigation()}
         <Suspense fallback={<LoadingSpinner />}>
           {renderMainContent()}
         </Suspense>
