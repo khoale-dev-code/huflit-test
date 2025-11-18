@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import { Trophy, Target, CheckCircle, XCircle, RotateCcw, Award, TrendingUp, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
+import { Trophy, Target, CheckCircle, XCircle, RotateCcw, Award, TrendingUp } from 'lucide-react';
+import ExplanationSection from './ExplanationDisplay';
 
 const ResultsDisplay = ({ score, partData, answers, onReset }) => {
-  const [expandedQuestionId, setExpandedQuestionId] = useState(null);
-
   if (!partData) return null;
-
-  const toggleExplanation = (questionId) => {
-    setExpandedQuestionId(expandedQuestionId === questionId ? null : questionId);
-  };
 
   const getPerformanceLevel = (percentage) => {
     if (percentage >= 90) return { label: 'Xuất sắc', color: 'emerald', emoji: '🌟' };
@@ -20,8 +15,6 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
   };
 
   const performance = getPerformanceLevel(score.percentage);
-
-  // Tính số câu sai
   const wrongCount = score.total - score.correct;
 
   return (
@@ -34,7 +27,7 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
       {/* Main Content */}
       <div className="relative z-10 max-w-5xl mx-auto space-y-4">
         
-        {/* Header - Đơn giản hơn */}
+        {/* Header */}
         <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white text-center">
           <Trophy className="w-16 h-16 mx-auto mb-3 text-yellow-200" />
           <h2 className="text-3xl sm:text-4xl font-bold mb-2">KẾT QUẢ BÀI THI</h2>
@@ -72,7 +65,7 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
           </div>
         </div>
 
-        {/* Progress Bar - Gọn hơn */}
+        {/* Progress Bar */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-semibold text-gray-800">Tiến độ hoàn thành</h3>
@@ -95,7 +88,7 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
           </div>
         </div>
 
-        {/* Quick Stats - Tóm tắt nhanh */}
+        {/* Quick Stats */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="text-lg font-semibold text-gray-800 mb-3">Thống kê nhanh</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -116,7 +109,7 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
           </div>
         </div>
 
-        {/* Action Buttons - Đặt trước phần review để dễ thao tác */}
+        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={onReset}
@@ -135,7 +128,7 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
           </button>
         </div>
 
-        {/* Answers Review - Tối ưu logic hiển thị */}
+        {/* Answers Review - Tích hợp ExplanationSection */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
             <h3 className="text-xl font-bold text-gray-900">Chi tiết đáp án</h3>
@@ -144,26 +137,22 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
             </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {partData.questions.map((q) => {
               const isCorrect = answers[q.id] === q.correct;
               const userAnswer = answers[q.id];
-              const isExpanded = expandedQuestionId === q.id;
 
               return (
                 <div
                   key={q.id}
-                  className={`rounded-lg border-2 transition-all ${
+                  className={`rounded-lg border-2 transition-all overflow-hidden ${
                     isCorrect
                       ? 'bg-green-50 border-green-300'
                       : 'bg-red-50 border-red-300'
                   }`}
                 >
-                  {/* Question Header - Click để expand */}
-                  <button
-                    onClick={() => toggleExplanation(q.id)}
-                    className="w-full p-4 text-left hover:bg-white/50 transition-colors rounded-lg"
-                  >
+                  {/* Question Header */}
+                  <div className="p-4">
                     <div className="flex items-start gap-3">
                       {/* Icon */}
                       <div className={`p-1.5 rounded-full flex-shrink-0 ${
@@ -205,36 +194,21 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
                           )}
                         </div>
                       </div>
-
-                      {/* Expand Icon */}
-                      {q.explanation && (
-                        <div className="flex-shrink-0">
-                          {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-gray-400" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-400" />
-                          )}
-                        </div>
-                      )}
                     </div>
-                  </button>
+                  </div>
 
-                  {/* Explanation - Chỉ hiện khi expand */}
-                  {q.explanation && isExpanded && (
-                    <div className="px-4 pb-4">
-                      <div className="p-3 bg-amber-100 border-l-2 border-amber-500 rounded-lg">
-                        <div className="flex items-start gap-2">
-                          <Lightbulb className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-semibold text-amber-900 mb-1">
-                              Giải thích:
-                            </p>
-                            <p className="text-sm text-gray-800 leading-relaxed">
-                              {q.explanation}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                  {/* Explanation Section - Tích hợp component */}
+                  {q.explanation && (
+                    <div className="border-t border-gray-300 px-4 py-3">
+                      <ExplanationSection 
+                        explanation={q.explanation}
+                        question={q.question}
+                        userAnswer={userAnswer}
+                        correctAnswer={q.correct}
+                        isCorrect={isCorrect}
+                        questionId={q.id}
+                        options={q.options}
+                      />
                     </div>
                   )}
                 </div>
@@ -243,7 +217,7 @@ const ResultsDisplay = ({ score, partData, answers, onReset }) => {
           </div>
         </div>
 
-        {/* Motivational Message - Đơn giản hơn */}
+        {/* Motivational Message */}
         <div className={`rounded-xl border-2 p-5 text-center ${
           score.percentage >= 70 
             ? 'bg-green-50 border-green-300' 
