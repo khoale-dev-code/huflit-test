@@ -257,16 +257,21 @@ function App() {
   const renderNavigation = useCallback(() => {
     return (
       <div className="mb-6 flex items-center gap-4">
-        <button
-          onClick={handleBackToMain}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
-          style={{ display: currentPage === 'answers' ? 'inline-flex' : 'none' }}
-        >
-          ← Quay lại trang chính
-        </button>
-        
-      
-      </div>
+  <button
+    onClick={handleBackToMain}
+className="group inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 text-yellow-400 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 shadow-md"    style={{ display: currentPage === 'answers' ? 'inline-flex' : 'none' }}
+  >
+    <svg 
+      className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1" 
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+    </svg>
+    <span className="text-sm sm:text-base">Quay lại trang chính</span>
+  </button>
+</div>
     );
   }, [currentPage, handleBackToMain, handleGoToAnswers]);
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getExamById, getExamParts, getExamQuestions, EXAM_DATA } from '../data/examData';
-
+import { BookOpen, FileText, CheckCircle, Sparkles, ChevronDown, Award, Target } from 'lucide-react';
 const ExamAnswersPage = () => {
   const [selectedExam, setSelectedExam] = useState('exam1');
   const [selectedPart, setSelectedPart] = useState('');
