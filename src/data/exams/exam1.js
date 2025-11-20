@@ -662,142 +662,146 @@
   },
 
   part8: {
-    title: "PART 8: Text Message Chain",
-    description: "10 câu hỏi - Đọc chuỗi tin nhắn, chọn đáp án tốt nhất (A, B, C, D).",
-    type: "reading",
-    text: `Mr. Bach (11:59): Flight delayed in Beijing – arriving Kansai at 12:06 instead of 12:00. Sorry!
-  Mr. Otani (12:00): No problem. I'll confirm the arrival time and pick you up at customs door.
-  Mr. Bach (12:03): Thanks, still in time for our client meeting. Bad weather caused the delay.
-  Mr. Otani (12:15): Sure thing. Parking might be tight, but I'll wait.
-  Mr. Bach (20:15): Landed safely. See you soon!`,
+  title: "PART 8: Text Message Chain",
+  description: "10 câu hỏi - Đọc chuỗi tin nhắn, chọn đáp án tốt nhất (A, B, C, D).",
+  type: "reading",
+  text: `SAM BACH (11:59): My first flight was delayed, so I missed my connection in Beijing.
+  SAM BACH(12:00):So now, I'm going to be on a flight arriving in Kansai at 18:00.
 
-    questions: [
-      {
-        id: 51,
-        question: "What is suggested about Mr. Bach?",
-        options: [
-          "He has been to Kansai more than once.",
-          "He currently works in Beijing.",
-          "He is on a business trip.",
-          "He works for Fly Right Airlines."
-        ],
-        correct: 2,
-        explanation:
-          "Đáp án đúng là **(C) 'He is on a business trip.'** (Anh ấy đang công tác). Từ tin nhắn, chúng ta thấy: Mr. Bach đang bay từ Beijing đến Kansai và nói '**our client meeting**' (cuộc họp với khách hàng). Đây là những dấu hiệu của một chuyến công tác kinh doanh. Hơn nữa, Mr. Otani cũng tham gia cuộc họp này ('**our** client meeting'), ngụ ý họ cùng đi công tác. Phân tích các lựa chọn sai: (A) không có thông tin về số lần tới Kansai trước, (B) anh ấy chỉ **đi qua** Beijing (chuyến bay bị trễ tại đó), không phải làm việc ở đó, (D) không có thông tin anh ấy làm việc cho hãng bay."
-      },
-      {
-        id: 52,
-        question: "At 12:15, what does Mr. Otani mean when he writes, 'Sure thing'?",
-        options: [
-          "He has confirmed the arrival time of a flight.",
-          "He is certain he will be able to find a parking place.",
-          "He agrees to wait at the door near the customs area.",
-          "He knows Mr. Bach must pass through customs."
-        ],
-        correct: 2,
-        explanation:
-          "Đáp án đúng là **(C) 'He agrees to wait at the door near the customs area.'** (Anh ấy đồng ý chờ tại cửa hải quan). 'Sure thing' (chắc chắn, được rồi) là một phản ứng tích cực, đồng ý với yêu cầu hoặc thông báo trước. Trong ngữ cảnh này, nó **phải trả lời cho tin nhắn trước của Mr. Bach** lúc 12:03 nói 'Thanks, still in time for our client meeting' – Mr. Otani đang xác nhận rằng anh ấy sẽ chờ như đã hứa. Mặc dù anh ấy cũng nói về **'Parking might be tight'** (chỗ đậu xe có thể chật chội), điều đó là thông tin phụ, không phải ý chính của 'Sure thing'. Phân tích các lựa chọn sai: (A) anh ấy đã xác nhận lúc 12:00 rồi, (B) anh nói parking tight – nghĩa là không chắc có chỗ, (D) đây không phải ý của 'Sure thing'."
-      },
-      {
-        id: 53,
-        question: "Why was Mr. Bach's flight delayed?",
-        options: [
-          "There was bad weather in Kansai.",
-          "He missed his connection in Beijing.",
-          "The airline changed the departure time.",
-          "He forgot to check in early."
-        ],
-        correct: 0,
-        explanation:
-          "Đáp án đúng là **(A) 'There was bad weather in Kansai.'** – Không, xin sửa lại: đáp án đúng là **có thời tiết xấu** nhưng từ tin nhắn của Mr. Bach lúc 12:03 không chỉ rõ ở **đâu**: 'Bad weather caused the delay' – chỉ nói có thời tiết xấu gây trễ, không nói ở Kansai hay Beijing. Tuy nhiên, vì chuyến bay **xuất phát từ Beijing** và bị trễ, rất có khả năng thời tiết xấu ở **Beijing** (nơi xuất phát), không phải Kansai (nơi đến). Dù vậy, đáp án (A) là chính xác nhất vì nó nói **'There was bad weather'** mà không chỉ rõ vị trí – giống với thông tin từ tin nhắn. Phân tích các lựa chọn sai: (B) không được đề cập, (C) không được đề cập, (D) không được đề cập."
-      },
-      {
-        id: 54,
-        question: "What time is Mr. Bach's new flight expected to arrive?",
-        options: ["11:59", "12:06", "18:00", "20:15"],
-        correct: 1,
-        explanation:
-          "Đáp án đúng là **(B) '12:06'** (12 giờ 6 phút). Mr. Bach nói rõ ràng trong tin nhắn đầu tiên: 'Flight delayed in Beijing – **arriving Kansai at 12:06 instead of 12:00.**' Từ khóa: 'arriving at 12:06' (đến lúc 12:06). Phân tích các lựa chọn sai: (A) '11:59' là thời gian gửi tin nhắn, không phải giờ đến, (C) '18:00' không được đề cập, (D) '20:15' là lúc anh ấy **báo đã hạ cánh**, không phải giờ dự kiến đến."
-      },
-      {
-        id: 55,
-        question: "What does Mr. Otani offer to do for Mr. Bach?",
-        options: [
-          "Drive him to the hotel",
-          "Pick him up at the airport",
-          "Change his flight booking",
-          "Help carry his luggage"
-        ],
-        correct: 1,
-        explanation:
-          "Đáp án đúng là **(B) 'Pick him up at the airport'** (Đón anh ấy tại sân bay). Mr. Otani nói: 'I'll confirm the arrival time and **pick you up at customs door.**' Từ khóa: 'pick you up' (đón bạn) tại 'customs door' (cửa hải quan – khu vực hành khách ra khỏi sân bay sau khi qua hải quan). Phân tích các lựa chọn sai: (A) không đề cập khách sạn, (C) không đề cập thay đổi chuyến bay, (D) không đề cập hành lý."
-      },
-      {
-        id: 56,
-        question: "What can be inferred about the two men?",
-        options: [
-          "They are colleagues attending the same meeting.",
-          "They are family members traveling together.",
-          "They both work for Fly Right Airlines.",
-          "They have never met before."
-        ],
-        correct: 0,
-        explanation:
-          "Đáp án đúng là **(A) 'They are colleagues attending the same meeting.'** (Họ là đồng nghiệp tham dự cùng một cuộc họp). Bằng chứng: Mr. Bach nói '**our** client meeting' (cuộc họp **của chúng ta**) – không phải 'my' (của tôi). Từ 'our' (của chúng ta) chỉ ra rằng cả Mr. Otani cũng tham gia cuộc họp này. Ngoài ra, Mr. Otani sẵn sàng chờ đón Mr. Bach tại sân bay, điều này phổ biến giữa đồng nghiệp đi công tác. Phân tích các lựa chọn sai: (B) họ không phải thành viên gia đình – không có bằng chứng, (C) không có thông tin họ làm việc cho hãng bay, (D) họ rõ ràng **quen nhau** vì họ có số điện thoại của nhau và có kế hoạch gặp mặt."
-      },
-      {
-        id: 57,
-        question: "At 12:06, why does Mr. Bach mention 'still in time for our client meeting'?",
-        options: [
-          "To apologize for missing the meeting",
-          "To confirm he will not be late",
-          "To ask about the meeting location",
-          "To cancel his attendance"
-        ],
-        correct: 1,
-        explanation:
-          "Đáp án đúng là **(B) 'To confirm he will not be late.'** (Để xác nhận anh ấy sẽ không bị muộn). Mặc dù chuyến bay bị trễ 6 phút (từ 12:00 đến 12:06), Mr. Bach **khẳng định** rằng anh ấy vẫn **'still in time'** (vẫn kịp) cho cuộc họp. Điều này biểu thị sự tự tin rằng dù chuyến bay trễ, anh ấy vẫn sẽ kịp giờ họp. Phân tích các lựa chọn sai: (A) anh ấy không xin lỗi về việc bỏ lỡ – anh ấy nói vẫn kịp, (C) anh ấy không hỏi về địa điểm, (D) anh ấy không hủy – anh ấy xác nhận sẽ có mặt."
-      },
-      {
-        id: 58,
-        question: "What does Mr. Otani mean when he writes, 'I'll confirm the arrival time'?",
-        options: [
-          "He plans to check the airline's schedule.",
-          "He will change the meeting time.",
-          "He needs to contact the travel agent.",
-          "He will book another ticket for Mr. Bach."
-        ],
-        correct: 0,
-        explanation:
-          "Đáp án đúng là **(A) 'He plans to check the airline's schedule.'** (Anh ấy lên kế hoạch kiểm tra lịch trình của hãng bay). 'Confirm the arrival time' (xác nhận giờ đến) có nghĩa là **kiểm tra/xác minh** thông tin giờ đến từ hãng bay hoặc hệ thống theo dõi chuyến bay để chắc chắn rằng chuyến bay sẽ đến lúc 12:06 như Mr. Bach nói (hoặc kiểm tra có thay đổi thêm không). Đây là một cách hợp lý để xác bảo thông tin trước khi đi đón. Phân tích các lựa chọn sai: (B) anh ấy không thay đổi giờ họp – anh ấy chỉ đi đón, (C) không có thông tin liên hệ travel agent, (D) không có thông tin book vé khác."
-      },
-      {
-        id: 59,
-        question: "What is implied about Mr. Otani's travel to the airport?",
-        options: [
-          "He expects heavy traffic or limited parking.",
-          "He plans to take public transportation.",
-          "He works at the airport.",
-          "He has never been to Kansai Airport before."
-        ],
-        correct: 0,
-        explanation:
-          "Đáp án đúng là **(A) 'He expects heavy traffic or limited parking.'** (Anh ấy dự kiến lưu lượng giao thông hoặc chỗ đậu xe hạn chế). Mr. Otani nói: '**Parking might be tight, but I'll wait.**' Từ khóa: 'parking might be tight' (chỗ đậu xe có thể chật chội/hạn chế). 'Tight parking' ngụ ý rằng có thể sẽ khó tìm chỗ đậu xe – một dấu hiệu của sân bay bận rộn hoặc lưu lượng giao thông nặng. Tuy nhiên, mặc dù có khó khăn này, Mr. Otani **vẫn hứa sẽ chờ** anh ấy. Phân tích các lựa chọn sai: (B) không có thông tin sử dụng phương tiện công cộng, (C) không có thông tin anh ấy làm việc tại sân bay, (D) không có bằng chứng đây là lần đầu anh ấy tới Kansai."
-      },
-      {
-        id: 60,
-        question: "What does Mr. Bach express in his final message?",
-        options: [
-          "Thanks for the help",
-          "Regret about missing the meeting",
-          "Frustration with the airline",
-          "Request for flight confirmation"
-        ],
-        correct: 0,
-        explanation:
-          "Đáp án đúng là **(A) 'Thanks for the help.'** (Cảm ơn sự giúp đỡ). Tin nhắn cuối cùng của Mr. Bach: '**Landed safely. See you soon!**' Mặc dù anh ấy không nói từ 'thanks' (cảm ơn) một cách rõ ràng, toàn bộ tin nhắn này **thể hiện sự vui mừng và lạc quan** – 'Landed safely' (hạ cánh an toàn) và 'See you soon!' (sắp gặp bạn!). Đây là một cách ngầm **bày tỏ sự biết ơn** vì Mr. Otani đã chờ đón anh ấy. Nó cũng cho thấy anh ấy sẽ đến gặp Mr. Otani ngay. Phân tích các lựa chọn sai: (B) anh ấy không hối tiếc – anh ấy vui mừng, (C) anh ấy không phàn nàn về hãng bay, (D) anh ấy không yêu cầu xác nhận – anh ấy chỉ báo đã hạ cánh."
-      }
-    ]
-  },
+AKIRA OTANI (12:05): OK. Same airline?
+
+SAM BACH (12:06): It's still Fly Right Airlines. It will be later in the day but still in time for our client meeting.
+
+AKIRA OTANI (12:06): I'll confirm the arrival time. Do you have any checked bags?
+
+SAM BACH (12:10): I do. Would you mind meeting me at the door after I go through customs?
+
+AKIRA OTANI (12:15): Sure thing. Parking spots can be hard to find, but now I'll have extra time to drive around and look.
+
+SAM BACH (12:16): Yes, sorry about that. See you then!`,
+
+   questions: [
+    {
+      id: 51,
+      question: "What is suggested about Mr. Bach?",
+      options: [
+        "(A) He has been to Kansai more than once.",
+        "(B) He currently works in Beijing.",
+        "(C) He is on a business trip.",
+        "(D) He works for Fly Right Airlines."
+      ],
+      correct: 2,
+      explanation: "Đáp án đúng là **(C) 'He is on a business trip.'** (Anh ấy đang công tác kinh doanh). Bằng chứng từ tin nhắn: Mr. Bach nói '**our client meeting**' (cuộc họp với khách hàng của chúng ta) khi chỉ giờ đến. Ngoài ra, Mr. Otani sẵn sàng đi đón anh ấy tại sân bay và họ cùng tham dự một cuộc họp, điều này biểu thị họ đang công tác kinh doanh. Phân tích các lựa chọn sai: (A) không có thông tin về số lần tới Kansai, (B) anh ấy chỉ **qua** Beijing vì chuyến bay kết nối, không phải làm việc ở đó, (D) không có bằng chứng anh ấy làm việc cho hãng bay."
+    },
+    {
+      id: 52,
+      question: "At 12:15, what does Mr. Otani mean when he writes, 'Sure thing'?",
+      options: [
+        "(A) He has confirmed the arrival time of a flight.",
+        "(B) He is certain he will be able to find a parking place.",
+        "(C) He agrees to wait at the door near the customs area.",
+        "(D) He knows Mr. Bach must pass through customs."
+      ],
+      correct: 2,
+      explanation: "Đáp án đúng là **(C) 'He agrees to wait at the door near the customs area.'** (Anh ấy đồng ý chờ tại cửa hải quan). 'Sure thing' là phản ứng tích cực để đồng ý. Mr. Otani nói điều này để đáp lại yêu cầu của Mr. Bach lúc 12:10: '**Would you mind meeting me at the door after I go through customs?**' (Bạn có phiền gặp tôi tại cửa sau khi qua hải quan không?). Mặc dù Mr. Otani cũng nói '**Parking spots can be hard to find**', điều đó chỉ là thông tin phụ, không phải ý chính của 'Sure thing'. Phân tích các lựa chọn sai: (A) anh ấy chưa xác nhận giờ đến lúc này, (B) anh ấy nói parking khó tìm – không phải chắc chắn tìm được, (D) không phải ý của 'Sure thing'."
+    },
+    { 
+      id: 53,
+      question: "Why was Mr. Bach's flight delayed?",
+      options: [
+        "(A) There was bad weather in Kansai.",
+        "(B) He missed his connection in Beijing.",
+        "(C) The airline changed the departure time.",
+        "(D) He forgot to check in early."
+      ],
+      correct: 1,
+      explanation: "Đáp án đúng là **(B) 'He missed his connection in Beijing.'** (Anh ấy bỏ lỡ chuyến kết nối ở Beijing). Theo tin nhắn đầu của Mr. Bach: '**My first flight was delayed, so I missed my connection in Beijing. So now, I'm going to be on a flight arriving in Kansai at 18:00.**' Chuyến bay đầu tiên bị trễ khiến anh ấy bỏ lỡ chuyến kết nối, do đó phải đón chuyến bay khác muộn hơn. Phân tích các lựa chọn sai: (A) không đề cập thời tiết, (C) không đề cập thay đổi giờ khởi hành, (D) không có bằng chứng anh ấy không check-in kịp."
+    },
+    {
+      id: 54,
+      question: "What time is Mr. Bach's new flight expected to arrive?",
+      options: [
+        "(A) 11:59",
+        "(B) 12:06",
+        "(C) 18:00",
+        "(D) 20:15"
+      ],
+      correct: 2,
+      explanation: "Đáp án đúng là **(C) '18:00'** (6 giờ chiều). Mr. Bach nói rõ ràng: '**So now, I'm going to be on a flight arriving in Kansai at 18:00.**' Phân tích các lựa chọn sai: (A) 11:59 là lúc tin nhắn đầu gửi, (B) 12:06 là thời gian tin nhắn thứ ba, (D) không được đề cập."
+    },
+    {
+      id: 55,
+      question: "What does Mr. Otani offer to do for Mr. Bach?",
+      options: [
+        "(A) Drive him to the hotel",
+        "(B) Pick him up at the airport",
+        "(C) Change his flight booking",
+        "(D) Help carry his luggage"
+      ],
+      correct: 1,
+      explanation: "Đáp án đúng là **(B) 'Pick him up at the airport'** (Đón anh ấy tại sân bay). Mr. Otani nói: '**I'll confirm the arrival time. Do you have any checked bags?**' sau đó trả lời 'Sure thing' khi Mr. Bach hỏi '**Would you mind meeting me at the door after I go through customs?**' Điều này chỉ ra Mr. Otani sẽ gặp anh ấy tại cửa hải quan ở sân bay. Phân tích các lựa chọn sai: (A) không đề cập khách sạn, (C) không đề cập thay đổi booking, (D) không đề cập hành lý."
+    },
+    {
+      id: 56,
+      question: "What can be inferred about the two men?",
+      options: [
+        "(A) They are colleagues attending the same meeting.",
+        "(B) They are family members traveling together.",
+        "(C) They both work for Fly Right Airlines.",
+        "(D) They have never met before."
+      ],
+      correct: 0,
+      explanation: "Đáp án đúng là **(A) 'They are colleagues attending the same meeting.'** (Họ là đồng nghiệp tham dự cùng một cuộc họp). Bằng chứng: Mr. Bach nói '**our client meeting**' – từ 'our' (của chúng ta) chỉ rằng Mr. Otani cũng tham gia cuộc họp này. Ngoài ra, Mr. Otani sẵn sàng đi đón Mr. Bach tại sân bay, điều này thường xảy ra giữa các đồng nghiệp công tác. Phân tích các lựa chọn sai: (B) không có bằng chứng họ là gia đình, (C) không có bằng chứng họ làm việc cho hãng bay, (D) họ rõ ràng quen nhau vì họ có liên lạc."
+    },
+    {
+      id: 57,
+      question: "At 12:06, why does Mr. Bach mention 'still in time for our client meeting'?",
+      options: [
+        "(A) To apologize for missing the meeting",
+        "(B) To confirm he will not be late",
+        "(C) To ask about the meeting location",
+        "(D) To cancel his attendance"
+      ],
+      correct: 1,
+      explanation: "Đáp án đúng là **(B) 'To confirm he will not be late'** (Để xác nhận anh ấy sẽ không bị muộn). Mặc dù chuyến bay mới sẽ đến lúc 18:00 (muộn hơn giờ dự kiến ban đầu 12:00), Mr. Bach khẳng định rằng anh ấy vẫn **'still in time for our client meeting'** (vẫn kịp giờ họp). Điều này biểu thị sự tự tin rằng dù chuyến bay trễ, anh ấy vẫn sẽ kịp giờ. Phân tích các lựa chọn sai: (A) anh ấy không xin lỗi – anh ấy xác nhận sẽ kịp, (C) không hỏi về địa điểm, (D) không hủy – anh ấy xác nhận sẽ tham dự."
+    },
+    {
+      id: 58,
+      question: "What does Mr. Otani mean when he writes, 'I'll confirm the arrival time'?",
+      options: [
+        "(A) He plans to check the airline's schedule.",
+        "(B) He will change the meeting time.",
+        "(C) He needs to contact the travel agent.",
+        "(D) He will book another ticket for Mr. Bach."
+      ],
+      correct: 0,
+      explanation: "Đáp án đúng là **(A) 'He plans to check the airline's schedule.'** (Anh ấy lên kế hoạch kiểm tra lịch trình của hãng bay). 'Confirm the arrival time' (xác nhận giờ đến) có nghĩa là kiểm tra/xác minh thông tin giờ đến từ hãng bay hoặc hệ thống để chắc chắn chuyến bay sẽ đến đúng lúc 18:00 (hay có thay đổi thêm không). Đây là cách hợp lý để xác bảo thông tin trước khi đi đón. Phân tích các lựa chọn sai: (B) không có bằng chứng thay đổi giờ họp, (C) không đề cập travel agent, (D) không đề cập booking vé khác."
+    },
+    {
+      id: 59,
+      question: "What is implied about Mr. Otani's travel to the airport?",
+      options: [
+        "(A) He expects heavy traffic or limited parking.",
+        "(B) He plans to take public transportation.",
+        "(C) He works at the airport.",
+        "(D) He has never been to Kansai Airport before."
+      ],
+      correct: 0,
+      explanation: "Đáp án đúng là **(A) 'He expects heavy traffic or limited parking.'** (Anh ấy dự kiến lưu lượng giao thông nặng hoặc chỗ đậu xe hạn chế). Mr. Otani nói: '**Parking spots can be hard to find, but now I'll have extra time to drive around and look.**' Từ khóa: 'parking spots can be hard to find' (chỗ đậu xe có thể khó tìm) ngụ ý rằng sân bay bận rộn và lưu lượng giao thông nặng. Phân tích các lựa chọn sai: (B) không có thông tin sử dụng phương tiện công cộng, (C) không có bằng chứng anh ấy làm việc tại sân bay, (D) không có bằng chứng đây là lần đầu."
+    },
+    {
+      id: 60,
+      question: "What does Mr. Bach express in his final message?",
+      options: [
+        "(A) Thanks for the help",
+        "(B) Regret about missing the meeting",
+        "(C) Frustration with the airline",
+        "(D) Request for flight confirmation"
+      ],
+      correct: 0,
+      explanation: "Đáp án đúng là **(A) 'Thanks for the help'** (Cảm ơn sự giúp đỡ). Tin nhắn cuối của Mr. Bach: '**Yes, sorry about that. See you then!**' Mặc dù anh ấy không nói từ 'thanks' rõ ràng, nhưng toàn bộ thông điệp biểu thị: 'Yes' (được) = đồng ý, 'sorry about that' (xin lỗi vì chuyện đó) = xin lỗi vì sự chậm trễ/phiền toái cho Mr. Otani, 'See you then!' (gặp bạn!' = vui mừng sắp gặp. Ngầm trong đó là sự biết ơn vì Mr. Otani sẵn sàng đi đón dù phải chờ lâu hơn. Phân tích các lựa chọn sai: (B) không hối tiếc – anh ấy xác nhận vẫn kịp họp, (C) không phàn nàn về hãng bay, (D) không yêu cầu xác nhận chuyến bay."
+    }
+  ]
+},
   }
   };
