@@ -233,13 +233,18 @@ export const EXAM3_DATA = {
           correct: 1,
           explanation: "Đáp án đúng là (B) 'health' vì đây là danh từ chỉ 'sức khỏe tim mạch', phù hợp sau 'cardiovascular'. Kiến thức ngữ pháp: Danh từ 'health' làm tân ngữ của 'maintaining'; phân biệt tính từ (A), so sánh hơn (C), trạng từ (D) không phù hợp vị trí này."
         },
-        {
-          id: 22,
-          question: "The university offers a variety of elective courses __________ students can choose based on their interests.",
-          options: ["that", "which", "who", "where"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) 'where' vì chỉ ngữ cảnh lựa chọn khóa học (môi trường đại học). Kiến thức ngữ pháp: Đại từ quan hệ 'where' thay thế 'in which' cho nơi chốn trừu tượng; 'that/which' (vật), 'who' (người) không phù hợp với 'courses' làm chủ ngữ ngầm."
-        },
+       {
+        id: 22,
+        question: "The university offers a variety of elective courses __________ students can choose based on their interests.",
+        options: ["that", "where", "who", "what"],
+        correct: 0,
+        explanation:
+          "Chọn **that** vì cần một đại từ quan hệ chỉ *vật* (courses) làm tân ngữ cho động từ 'choose'.\n\n" +
+          "- 'that' → đúng: courses that students can choose\n" +
+          "- 'where' → sai: chỉ nơi chốn\n" +
+          "- 'who' → sai: chỉ người\n" +
+          "- 'what' → sai: không dùng nối mệnh đề như đại từ quan hệ"
+      },
         {
           id: 23,
           question: "Since the pandemic, online learning platforms __________ become increasingly popular among educators.",
@@ -285,9 +290,9 @@ export const EXAM3_DATA = {
         {
           id: 29,
           question: "The yoga class has been postponed __________ next Tuesday due to instructor illness.",
-          options: ["until", "during", "to", "for"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'to' vì 'postponed to + thời gian' chỉ dời đến lúc mới. Kiến thức ngữ pháp: Cấu trúc bị động 'has been + V3' (hiện tại hoàn thành) với 'to + danh từ' chỉ đích đến thời gian; 'until' (đến khi), 'during' (trong), 'for' (trong khoảng) không khớp."
+          options: ["until", "during", "by", "for"],
+          correct: 0,
+          explanation: "**Đáp án đúng:** (A) 'until'\n\nCâu này sử dụng **THÌ HIỆN TẠI HOÀN THÀNH BỊ ĐỘNG** với giới từ **'until'** để chỉ **THỜI ĐIỂM HOÃN LẠI**.\n\n**Cấu trúc:** **'postpone + UNTIL + thời gian'** = hoãn lại ĐẾN KHI (thời điểm trong tương lai)\n\n**Ý nghĩa:**\n- **'Postponed until next Tuesday'** = bị hoãn lại **đến** thứ Ba tuần sau\n- Nghĩa: Lớp học sẽ KHÔNG diễn ra trước thứ Ba, và có thể diễn ra VÀO hoặc SAU thứ Ba\n- → Lớp học bị GÁC LẠI cho đến khi đạt mốc thời gian 'next Tuesday'\n\n**So sánh các đáp án:**\n\n**(A) 'until' → ĐÚNG!**\n- Nghĩa: **ĐẾN KHI** (up to the time when)\n- Dùng để chỉ một hành động kéo dài/trì hoãn CHO ĐẾN một thời điểm\n- \"Postponed **until** Tuesday\" = hoãn **đến** thứ Ba (có thể diễn ra vào hoặc sau thứ Ba)\n\n**(B) 'during' → SAI**\n- Nghĩa: **TRONG SUỐT** (throughout a period)\n- Dùng để chỉ một hành động diễn ra TRONG khoảng thời gian\n- \"During Tuesday\" = suốt ngày thứ Ba → KHÔNG hợp lý với 'postponed'\n\n**(C) 'by' → SAI** (đã thay thế 'to' để rõ ràng hơn)\n- Nghĩa: **TRƯỚC/CHẬM NHẤT** (not later than)\n- Dùng để chỉ DEADLINE (hạn chót)\n- \"Postponed **by** Tuesday\" → Không tự nhiên, 'by' thường dùng với 'complete/finish', không dùng với 'postpone'\n- Ví dụ đúng: \"The report must be submitted **by** Friday.\" ✓\n\n**(D) 'for' → SAI**\n- Nghĩa: **TRONG KHOẢNG** (duration)\n- Dùng để chỉ KHOẢNG THỜI GIAN (for 3 days, for a week)\n- \"Postponed **for** next Tuesday\" → SAI ngữ pháp (phải là 'for + khoảng thời gian', không phải 'for + thời điểm cụ thể')\n- Ví dụ đúng: \"Postponed **for** two weeks.\""
         },
         {
           id: 30,
@@ -362,14 +367,14 @@ University Health Services`,
           explanation: "Đáp án đúng là (B) 'and' vì nối hai hành động song song (lasts and includes). Kiến thức ngữ pháp: Liên từ 'and' nối hai mệnh đề độc lập; 'but' (tương phản), 'or' (lựa chọn), 'so' (kết quả) không phù hợp ngữ cảnh mô tả."
         },
         {
-          id: 35,
-          type: "fill",
-          question: "(35) - Điền từ thích hợp",
-          context: "We encourage departments to promote these events (35) consider group attendance for team-building.",
-          options: ["for", "with", "on", "at"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'for' vì 'for team-building' chỉ mục đích. Kiến thức ngữ pháp: Giới từ 'for + danh từ' chỉ lợi ích; 'with/on/at' không phù hợp với động từ 'promote'."
-        },
+        id: 35,
+        question:
+          "We encourage departments to promote these events ___ consider group attendance for team-building.",
+        options: ["and", "but", "or", "so"],
+        correct: 0,
+        explanation:
+          "Đáp án đúng: (A) and.\nHai hành động 'promote these events' và 'consider group attendance' song song, nên cần liên từ nối hai động từ cùng chức năng."
+      },
         {
           id: 36,
           type: "comprehension",

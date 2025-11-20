@@ -7,62 +7,12 @@ export const EXAM5_DATA = {
       description: "Nghe đoạn hội thoại giữa Anna và Ben về công ty công nghệ. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
       type: "listening",
       script: "Anna: Ben, have you heard about the new AI project our company is launching next quarter?\nBen: Yes, I attended the presentation yesterday. The development team has been working on it for over six months. They're using machine learning algorithms to optimize our customer service operations.\nAnna: That's impressive! I heard we're investing nearly $2 million in this initiative. The CEO believes it will increase our efficiency by at least 40%.\nBen: Absolutely. But we'll need extensive training for all staff members. The HR department is already preparing a comprehensive program that will start next month.\nAnna: Speaking of training, I'm concerned about the cybersecurity aspects. With all this new technology, we need to ensure our data protection measures are robust.\nBen: Good point. The IT security team has assured management that they've implemented multiple layers of protection, including advanced encryption and regular security audits.",
-      questions: [
-        {
-          id: 1,
-          options: [
-            "For one year",
-            "For over six months", 
-            "For three months",
-            "For two years"
-          ],
-          correct: 1,
-          explanation: "Ben nói: 'The development team has been working on it for over six months.' (Đội phát triển đã làm việc trên dự án hơn sáu tháng)."
-        },
-        {
-          id: 2,
-          options: [
-            "$3 million",
-            "$2 million",
-            "$1 million",
-            "$4 million"
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'I heard we're investing nearly $2 million in this initiative.' (Tôi nghe chúng ta đang đầu tư gần 2 triệu đô la cho sáng kiến này)."
-        },
-        {
-          id: 3,
-          options: [
-            "30% efficiency increase",
-            "20% efficiency increase", 
-            "40% efficiency increase",
-            "50% efficiency increase"
-          ],
-          correct: 2,
-          explanation: "Anna nói: 'The CEO believes it will increase our efficiency by at least 40%.' (CEO tin rằng nó sẽ tăng hiệu suất ít nhất 40%)."
-        },
-        {
-          id: 4,
-          options: [
-            "In three months",
-            "Next month", 
-            "Next week",
-            "Next year"
-          ],
-          correct: 1,
-          explanation: "Ben nói: 'The HR department is already preparing a comprehensive program that will start next month.' (Phòng nhân sự đang chuẩn bị chương trình toàn diện sẽ bắt đầu tháng tới)."
-        },
-        {
-          id: 5,
-          options: [
-            "Budget constraints",
-            "Cybersecurity aspects", 
-            "Customer satisfaction",
-            "Staff recruitment"
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'I'm concerned about the cybersecurity aspects.' (Tôi lo ngại về các khía cạnh an ninh mạng)."
-        }
+     questions: [
+        { id: 1, options: ["For one year", "For over six months", "For three months", "For two years"], correct: 1, explanation: "Ben nói rõ luôn: 'đội phát triển đã làm hơn 6 tháng rồi' → chọn ngay B nha các em, đừng lạc sang năm!" },
+        { id: 2, options: ["$3 million", "$2 million", "$1 million", "$4 million"], correct: 1, explanation: "Anna nói 'nearly $2 million' = gần 2 triệu đô → chính xác là B, đừng chọn 3 hay 4 triệu nhé!" },
+        { id: 3, options: ["30%", "20%", "40%", "50%"], correct: 2, explanation: "Anna nói 'tăng hiệu suất ít nhất 40%' → C là đáp án ngon lành luôn!" },
+        { id: 4, options: ["In three months", "Next month", "Next week", "Next year"], correct: 1, explanation: "Ben nói chương trình đào tạo 'sẽ bắt đầu tháng tới' → B chính xác 100%!" },
+        { id: 5, options: ["Budget constraints", "Cybersecurity aspects", "Customer satisfaction", "Staff recruitment"], correct: 1, explanation: "Anna lo lắng về 'an ninh mạng' = cybersecurity → B là đáp án duy nhất đúng!" }
       ]
     },
     part2: {
@@ -71,133 +21,108 @@ export const EXAM5_DATA = {
       type: "listening", 
       script: "Manager: Good morning team. Let's start with the quarterly financial report. Sarah, could you begin?\nSarah: Thank you, Tom. Our revenue increased by 15% this quarter, primarily due to successful product launches in the Asian market. However, operating costs rose by 8% because of higher raw material prices.\nTom: Interesting. Mike, what's the marketing team's analysis of these numbers?\nMike: We've seen excellent response to our digital campaigns. Social media engagement is up 60%, and website traffic has grown by 45%. The new influencer partnerships are performing particularly well.\nSarah: That's encouraging. On the operational side, we've reduced production time by 20% through automation. But we're facing challenges with supply chain delays from our European suppliers.\nTom: Understood. Lisa, any updates from the R&D department?\nLisa: Yes, we're making good progress on the new eco-friendly product line. We expect to complete testing by the end of next month and begin production in Q3.\nTom: Excellent work everyone. Let's focus on addressing the supply chain issues in our next meeting.",
       questions: [
-        {
-          id: 6,
-          question: "What was the revenue increase this quarter?",
-          options: [
-            "20%",
-            "15%", 
-            "8%",
-            "45%"
-          ],
-          correct: 1,
-          explanation: "Sarah nói: 'Our revenue increased by 15% this quarter.' (Doanh thu của chúng tôi tăng 15% trong quý này)."
-        },
-        {
-          id: 7,
-          question: "Why did operating costs increase?",
-          options: [
-            "Increased staff salaries",
-            "New equipment purchases", 
-            "Higher raw material prices",
-            "Higher marketing expenses"
-          ],
-          correct: 2,
-          explanation: "Sarah nói: 'Operating costs rose by 8% because of higher raw material prices.' (Chi phí vận hành tăng 8% do giá nguyên vật liệu cao hơn)."
-        },
-        {
-          id: 8,
-          question: "How much has social media engagement increased?",
-          options: [
-            "75%",
-            "60%", 
-            "45%",
-            "90%"
-          ],
-          correct: 1,
-          explanation: "Mike nói: 'Social media engagement is up 60%.' (Tương tác mạng xã hội tăng 60%)."
-        },
-        {
-          id: 9,
-          question: "What operational improvement was mentioned?",
-          options: [
-            "Improved product quality",
-            "Increased customer satisfaction", 
-            "Reduced production time by 20%",
-            "Reduced staff turnover"
-          ],
-          correct: 2,
-          explanation: "Sarah nói: 'We've reduced production time by 20% through automation.' (Chúng tôi đã giảm thời gian sản xuất 20% thông qua tự động hóa)."
-        },
-        {
-          id: 10,
-          question: "When does R&D expect to begin production of the new product line?",
-          options: [
-            "Q2", 
-            "Next month",
-            "Q3",
-            "Next year"
-          ],
-          correct: 2,
-          explanation: "Lisa nói: 'We expect to begin production in Q3.' (Chúng tôi dự kiến bắt đầu sản xuất vào quý 3)."
-        }
-      ]
+       { 
+  id: 6,
+  question: "What was the revenue increase this quarter?",
+  options: ["20%", "15%", "8%", "45%"],
+  correct: 1,
+  explanation: "Sarah nói rất rõ: 'Our revenue increased by 15% this quarter.' → Con số 15% được nhắc trực tiếp, nên B là đúng."
+},
+{
+  id: 7,
+  question: "Why did operating costs increase?",
+  options: ["Increased staff salaries", "New equipment purchases", "Higher raw material prices", "Higher marketing expenses"],
+  correct: 2,
+  explanation: "Sarah giải thích chi phí vận hành tăng vì 'higher raw material prices' (giá nguyên liệu thô tăng). Đây là lý do duy nhất được nêu rõ trong đoạn nghe."
+},
+{
+  id: 8,
+  question: "How much has social media engagement increased?",
+  options: ["75%", "60%", "45%", "90%"],
+  correct: 1,
+  explanation: "Mike nói: “Social media engagement is up 60%.” Đây là số liệu cụ thể duy nhất được nhắc tới → chọn 60%."
+},
+{
+  id: 9,
+  question: "What operational improvement was mentioned?",
+  options: ["Improved product quality", "Increased customer satisfaction", "Reduced production time by 20%", "Reduced staff turnover"],
+  correct: 2,
+  explanation: "Sarah cho biết họ đã 'reduced production time by 20%'. Đây là cải thiện về vận hành (operations) nên C là đáp án chính xác."
+},
+{
+  id: 10,
+  question: "When does R&D expect to begin production of the new product line?",
+  options: ["Q2", "Next month", "Q3", "Next year"],
+  correct: 2,
+  explanation: "Lisa nói họ sẽ hoàn tất thử nghiệm vào cuối tháng tới và 'begin production in Q3'. Vậy thời điểm bắt đầu sản xuất là Quý 3 → chọn C."
+}
+]
     },
     part3: {
       title: "PART 3: Monologue",
       description: "5 câu hỏi - Một bài thuyết trình về công nghệ blockchain. Nghe và chọn đáp án tốt nhất (A, B, C, D).",
       type: "listening",
       script: "Professor: Good afternoon, students. Today we're discussing blockchain technology and its business applications. Blockchain is essentially a decentralized digital ledger that records transactions across multiple computers. This technology offers three key benefits: enhanced security through cryptography, increased transparency as all participants can view transactions, and reduced costs by eliminating intermediaries. Major corporations like IBM and Walmart are already using blockchain for supply chain management. For instance, Walmart reduced food traceability time from seven days to just 2.2 seconds using blockchain. However, challenges remain, including scalability issues and regulatory uncertainty. As future business leaders, understanding this technology will be crucial for your careers. The potential applications extend beyond cryptocurrency to areas like smart contracts, voting systems, and digital identity verification.",
-      questions: [
+       questions: [
         {
           id: 11,
           question: "What is blockchain described as?",
           options: [
-            "A type of cryptocurrency", 
+            "A type of cryptocurrency",
             "A centralized database",
             "A decentralized digital ledger",
             "A financial intermediary"
           ],
           correct: 2,
-          explanation: "Professor: 'Blockchain is essentially a decentralized digital ledger.' (Blockchain về cơ bản là một sổ cái kỹ thuật số phi tập trung)."
+          explanation: "Giáo sư nói: 'Blockchain is essentially a decentralized digital ledger' (Blockchain về cơ bản là một sổ cái kỹ thuật số phi tập trung). Đây là định nghĩa chính xác được giáo sư đưa ra ngay từ đầu bài thuyết trình. Một blockchain hoạt động độc lập, không cần sự kiểm soát của một tổ chức tập trung. Nó ghi lại các giao dịch trên nhiều máy tính khác nhau, tạo ra tính minh bạch và bảo mật cao."
         },
         {
           id: 12,
           question: "How many key benefits of blockchain are mentioned?",
           options: [
             "Four",
-            "Three", 
+            "Three",
             "Two",
             "Five"
           ],
           correct: 1,
-          explanation: "Professor: 'This technology offers three key benefits.' (Công nghệ này mang lại ba lợi ích chính)."
+          explanation: "Giáo sư rõ ràng nói: 'This technology offers three key benefits' (Công nghệ này mang lại ba lợi ích chính). Ba lợi ích được liệt kê là: (1) Enhanced security through cryptography - bảo mật nâng cao thông qua mã hóa, (2) Increased transparency as all participants can view transactions - tính minh bạch tăng lên khi tất cả người tham gia có thể xem các giao dịch, và (3) Reduced costs by eliminating intermediaries - giảm chi phí bằng cách loại bỏ các trung gian."
         },
         {
           id: 13,
           question: "Which company was mentioned as using blockchain for supply chain?",
           options: [
             "Google",
-            "Microsoft", 
+            "Microsoft",
             "IBM",
             "Amazon"
           ],
           correct: 2,
-          explanation: "Professor: 'Major corporations like IBM and Walmart are already using blockchain for supply chain management.' (Các tập đoàn lớn như IBM và Walmart đang sử dụng blockchain cho quản lý chuỗi cung ứng)."
+          explanation: "Giáo sư nói: 'Major corporations like IBM and Walmart are already using blockchain for supply chain management' (Các tập đoàn lớn như IBM và Walmart đang sử dụng blockchain cho quản lý chuỗi cung ứng). Cả IBM và Walmart đều được đề cập, nhưng trong các lựa chọn, chỉ có IBM xuất hiện. Điều này cho thấy các công ty lớn đang áp dụng blockchain để cải thiện hiệu quả và độ tin cậy trong hoạt động chuỗi cung ứng của họ."
         },
         {
           id: 14,
           question: "How much did Walmart reduce food traceability time?",
           options: [
             "From 3 days to 10 minutes",
-            "From 7 days to 2.2 seconds", 
+            "From 7 days to 2.2 seconds",
             "From 5 days to 1 hour",
             "From 10 days to 5 seconds"
           ],
           correct: 1,
-          explanation: "Professor: 'Walmart reduced food traceability time from seven days to just 2.2 seconds using blockchain.' (Walmart giảm thời gian truy xuất nguồn gốc thực phẩm từ bảy ngày xuống chỉ 2.2 giây bằng blockchain)."
+          explanation: "Giáo sư đưa ra con số cụ thể: 'Walmart reduced food traceability time from seven days to just 2.2 seconds using blockchain' (Walmart giảm thời gian truy xuất nguồn gốc thực phẩm từ bảy ngày xuống chỉ 2.2 giây bằng blockchain). Đây là một ví dụ thực tế chứng minh sức mạnh của blockchain - quá trình truy xuất nguồn gốc thực phẩm được tăng tốc độ một cách đáng kể, từ một tuần còn lại chỉ 2.2 giây, điều này rất quan trọng đối với an toàn thực phẩm."
         },
         {
           id: 15,
           question: "What challenge was NOT mentioned about blockchain?",
           options: [
             "Technical complexity",
-            "Regulatory uncertainty", 
+            "Regulatory uncertainty",
             "Scalability issues",
             "High energy consumption"
           ],
           correct: 0,
-          explanation: "Professor chỉ đề cập 'scalability issues and regulatory uncertainty' (vấn đề khả năng mở rộng và sự không chắc chắn về quy định), không nói đến 'technical complexity' (độ phức tạp kỹ thuật)."
+          explanation: "Giáo sư chỉ đề cập hai thách thức: 'However, challenges remain, including scalability issues and regulatory uncertainty' (Tuy nhiên, những thách thức vẫn còn tồn tại, bao gồm vấn đề khả năng mở rộng và sự không chắc chắn về quy định). Các thách thức được nhắc đến là scalability issues (vấn đề khả năng mở rộng) và regulatory uncertainty (sự không chắc chắn về quy định). Giáo sư không đề cập đến 'technical complexity' (độ phức tạp kỹ thuật) hay 'high energy consumption' (tiêu thụ năng lượng cao). Đáp án A - Technical complexity không được nhắc đến trong bài thuyết trình."
         }
       ]
     },
@@ -212,60 +137,60 @@ export const EXAM5_DATA = {
           question: "What position is Emma applying for?",
           options: [
             "Marketing Director",
-            "Social Media Manager", 
+            "Social Media Manager",
             "Growth Marketing Manager",
             "Digital Marketing Specialist"
           ],
           correct: 2,
-          explanation: "Emma nói: 'Learn more about the Growth Marketing Manager position.' (Tìm hiểu thêm về vị trí Quản lý Marketing Tăng trưởng)."
+          explanation: "Emma rõ ràng nói: 'I'm excited to be here and learn more about the Growth Marketing Manager position' (Tôi rất vui mừng ở đây và muốn tìm hiểu thêm về vị trí Quản lý Marketing Tăng trưởng). Đây là lần đầu tiên vị trí được nhắc đến trong cuộc phỏng vấn, cho thấy Emma đang phỏng vấn cho một vị trí tập trung vào chiến lược tăng trưởng kinh doanh. Vị trí này khác với các chức vụ khác như Marketing Director (Giám đốc Marketing) hay Social Media Manager (Quản lý Phương tiện Xã hội)."
         },
         {
           id: 17,
           question: "How much did Emma increase online engagement in her previous campaign?",
           options: [
             "175%",
-            "125%", 
+            "125%",
             "150%",
             "100%"
           ],
           correct: 2,
-          explanation: "Emma nói: 'Increased our online engagement by 150% over six months.' (Tăng tương tác trực tuyến 150% trong sáu tháng)."
+          explanation: "Emma nói một cách rõ ràng: 'I developed a comprehensive social media strategy that increased our online engagement by 150% over six months' (Tôi đã phát triển một chiến lược phương tiện xã hội toàn diện tăng tương tác trực tuyến 150% trong sáu tháng). Con số 150% cho thấy kết quả rất ấn tượng từ chiến dịch của cô ấy - tương tác tăng gấp 2.5 lần. Đây là một thành tích đáng chú ý trong lĩnh vực tiếp thị kỹ thuật số."
         },
         {
           id: 18,
           question: "How does Emma stay updated with marketing trends?",
           options: [
             "By following competitors",
-            "Only through online courses", 
+            "Only through online courses",
             "Through conferences, webinars, and professional groups",
             "By reading books"
           ],
           correct: 2,
-          explanation: "Emma nói: 'I regularly attend industry conferences, participate in webinars, and I'm part of several professional marketing groups.' (Tôi thường xuyên tham dự hội nghị ngành, tham gia hội thảo trực tuyến, và là thành viên của nhiều nhóm marketing chuyên nghiệp)."
+          explanation: "Emma giải thích chi tiết về phương pháp học tập của cô ấy: 'I regularly attend industry conferences, participate in webinars, and I'm part of several professional marketing groups. I also believe in continuous learning through online courses' (Tôi thường xuyên tham dự hội nghị ngành, tham gia hội thảo trực tuyến, và là thành viên của nhiều nhóm marketing chuyên nghiệp. Tôi cũng tin vào học tập liên tục thông qua các khóa học trực tuyến). Emma sử dụng một cách tiếp cận đa chiều để cập nhật kiến thức, bao gồm các sự kiện trực tiếp, hội thảo trực tuyến, cộng đồng chuyên nghiệp, và khóa học online."
         },
         {
           id: 19,
           question: "What would be Emma's first step in international market expansion?",
           options: [
             "Setting up local offices",
-            "Developing advertising campaigns", 
+            "Developing advertising campaigns",
             "Conducting thorough market research",
             "Hiring local staff"
           ],
           correct: 2,
-          explanation: "Emma nói: 'I would begin with thorough market research to understand cultural nuances.' (Tôi sẽ bắt đầu với nghiên cứu thị trường kỹ lưỡng để hiểu các sắc thái văn hóa)."
+          explanation: "Emma trả lời: 'I would begin with thorough market research to understand cultural nuances, then develop localized content strategies while maintaining our core brand identity' (Tôi sẽ bắt đầu với nghiên cứu thị trường kỹ lưỡng để hiểu các sắc thái văn hóa, sau đó phát triển các chiến lược nội dung được bản địa hóa trong khi duy trì nhận dạng thương hiệu cốt lõi). Cô ấy làm rõ rằng bước đầu tiên là nghiên cứu, chứ không phải thiết lập văn phòng hoặc tuyển dụng nhân viên. Điều này cho thấy một cách tiếp cận chiến lược có tính kế hoạch tốt."
         },
         {
           id: 20,
           question: "What advanced metric does Emma consider for campaign success?",
           options: [
             "Email open rates",
-            "Website traffic volume", 
+            "Website traffic volume",
             "Customer lifetime value",
             "Number of social media followers"
           ],
           correct: 2,
-          explanation: "Emma nói: 'Beyond clicks and conversions, I look at customer lifetime value.' (Ngoài số nhấp chuột và chuyển đổi, tôi xem xét giá trị trọn đời của khách hàng)."
+          explanation: "Emma nói: 'Beyond clicks and conversions, I look at customer lifetime value, brand sentiment analysis, and the quality of engagement. Sustainable growth requires understanding the long-term impact on brand perception' (Ngoài số nhấp chuột và chuyển đổi, tôi xem xét giá trị trọn đời của khách hàng, phân tích cảm tính thương hiệu, và chất lượng của tương tác. Tăng trưởng bền vững yêu cầu hiểu biết về tác động dài hạn đối với nhận thức thương hiệu). Emma không chỉ nhìn vào các số liệu cơ bản như lượt nhấp và chuyển đổi, mà còn xem xét giá trị trọn đời của khách hàng (CLV), đây là một chỉ số tiên tiến cho thấy sự hiểu biết sâu sắc về marketing hiệu suất cao."
         }
       ]
     },

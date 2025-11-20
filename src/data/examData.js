@@ -12,6 +12,9 @@ import { EXAM9_DATA } from './exams/exam9';
 import { EXAM10_DATA } from './exams/exam10';
 import { EXAM11_DATA } from './exams/exam11';
 import { EXAM12_DATA } from './exams/exam12';
+import { EXAM13_DATA } from './exams/exam13';
+import { EXAM14_DATA } from './exams/exam14';
+import { EXAM15_DATA } from './exams/exam15';
 
 export const EXAM_DATA = {
   exam1: EXAM1_DATA,
@@ -26,6 +29,9 @@ export const EXAM_DATA = {
   exam10: EXAM10_DATA,
   exam11: EXAM11_DATA,
   exam12: EXAM12_DATA,
+  exam13: EXAM13_DATA,
+  exam14: EXAM14_DATA,
+  exam15: EXAM15_DATA,
  // Khi thêm exam mới:
   // import { EXAM4_DATA } from './exams/exam4';
   // exam4: EXAM4_DATA,

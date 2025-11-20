@@ -274,7 +274,7 @@ export const EXAM6_DATA = {
         }
       ]
     },
-    part5: {
+     part5: {
       title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
       description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
       type: "reading",
@@ -289,7 +289,7 @@ export const EXAM6_DATA = {
             "Implementing"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) 'Implemented' vì đây là quá khứ phân từ trong cấu trúc bị động 'has been + V3' (đã được triển khai). Kiến thức ngữ pháp: Thì hiện tại hoàn thành thụ động 'has been implemented'."
+          explanation: "📝 Cấu trúc bị động thì hiện tại hoàn thành: HAS BEEN + V3 (past participle). 'Implemented' là dạng quá khứ phân từ của 'implement'. Câu này dịch: 'Hệ thống phần mềm mới ĐÃ ĐƯỢC triển khai để...'"
         },
         {
           id: 22,
@@ -301,7 +301,7 @@ export const EXAM6_DATA = {
             "Anyone"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'Those who' vì đây là đại từ quan hệ số nhiều thay thế cho danh từ người trong mệnh đề chủ ngữ. Kiến thức ngữ pháp: Đại từ quan hệ 'Those who' + động từ số nhiều."
+          explanation: "👥 'Those who' là đại từ quan hệ số nhiều đúng ngữ pháp. Cấu trúc: THOSE WHO + VERB = những người mà... Câu đầy đủ: 'Những người THAM GIA buổi tập huấn ĐÃ thu được kỹ năng quý giá...'"
         },
         {
           id: 23,
@@ -313,7 +313,7 @@ export const EXAM6_DATA = {
             "unless"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'since' vì nó chỉ mốc thời gian bắt đầu hành động với thì hiện tại hoàn thành tiếp diễn. Kiến thức ngữ pháp: 'Since' + mốc thời gian + present perfect continuous."
+          explanation: "⏰ 'Since' + mốc thời gian đi với thì hiện tại hoàn thành tiếp diễn (has been working). 'Since' ở đây có nghĩa 'kể từ khi'. Các từ nối khác không phù hợp: whereas (trong khi), although (mặc dù), unless (trừ khi)."
         },
         {
           id: 24,
@@ -325,7 +325,7 @@ export const EXAM6_DATA = {
             "validity"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'valid' vì đây là tính từ bổ nghĩa cho danh từ 'identification documents'. Kiến thức ngữ pháp: Tính từ đứng trước danh từ để mô tả (valid documents = giấy tờ hợp lệ)."
+          explanation: "📄 Tính từ 'valid' (hợp lệ) bổ nghĩa cho danh từ 'identification documents'. Vị trí này cần tính từ, không phải trạng từ (validly), động từ (validate), hay danh từ (validity)."
         },
         {
           id: 25,
@@ -337,7 +337,7 @@ export const EXAM6_DATA = {
             "effectively"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'effective' vì đây là tính từ bổ nghĩa cho danh từ 'communication'. Kiến thức ngữ pháp: Tính từ 'effective' (hiệu quả) đứng trước danh từ."
+          explanation: "💬 Tương tự câu trên, chúng ta cần tính từ 'effective' (hiệu quả) để bổ nghĩa cho danh từ 'communication'. 'Effective communication' = giao tiếp hiệu quả - cụm từ rất phổ biến trong môi trường công sở."
         },
         {
           id: 26,
@@ -349,7 +349,7 @@ export const EXAM6_DATA = {
             "sharing"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) 'share' vì đây là động từ nguyên thể sau 'to' trong cấu trúc 'be encouraged to + V'. Kiến thức ngữ pháp: 'to + V nguyên thể' sau động từ khuyến khích."
+          explanation: "🧠 Cấu trúc: be encouraged TO + V (nguyên thể). 'To share' là đúng ngữ pháp. Các dạng khác: shared (quá khứ), shares (số ít hiện tại), sharing (V-ing) đều không phù hợp sau 'to'."
         },
         {
           id: 27,
@@ -361,7 +361,7 @@ export const EXAM6_DATA = {
             "Although"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'After' vì nó chỉ thứ tự thời gian và đi với V-ing. Kiến thức ngữ pháp: 'After + V-ing' để diễn tả hành động xảy ra sau."
+          explanation: "🔄 'After + V-ing' diễn tả hành động xảy ra sau. Ngữ cảnh: SAU KHI nhận phản hồi, đội ngũ đã cải tiến. Các từ khác: unless (trừ khi), despite (mặc dù), although (mặc dù) không hợp lý về nghĩa."
         },
         {
           id: 28,
@@ -373,7 +373,7 @@ export const EXAM6_DATA = {
             "accuracy"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) 'accurately' vì đây là trạng từ bổ nghĩa cho động từ 'analyze'. Kiến thức ngữ pháp: Trạng từ 'accurately' (một cách chính xác) bổ nghĩa động từ."
+          explanation: "🔍 Chúng ta cần trạng từ 'accurately' (một cách chính xác) để bổ nghĩa cho động từ 'analyze'. Cấu trúc: VERB + ADVERB. Các từ khác là danh từ (accurateness, accuracy) hoặc tính từ (accurate) không thể bổ nghĩa cho động từ."
         },
         {
           id: 29,
@@ -385,22 +385,23 @@ export const EXAM6_DATA = {
             "reschedule"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) 'rescheduled' vì đây là dạng quá khứ phân từ trong thì hiện tại hoàn thành thụ động (has been + V3). Kiến thức ngữ pháp: Cấu trúc bị động 'has been rescheduled'."
+          explanation: "📅 Cấu trúc bị động thì hiện tại hoàn thành: HAS BEEN + V3. 'Rescheduled' là quá khứ phân từ của 'reschedule' (dời lịch). Câu này dịch: 'Hội nghị đã ĐƯỢC dời sang thứ Ba tuần sau.'"
         },
         {
           id: 30,
           question: "The supervisor emphasized that attention to detail and creativity are essential qualities for maintaining high _______.",
           options: [
-          "standards",
-          "expenses",
-          "schedules",
-          "locations"
+            "standards",
+            "expenses",
+            "schedules",
+            "locations"
           ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) 'standards' vì nó chỉ 'tiêu chuẩn cao', phù hợp với ngữ cảnh chất lượng công việc. Kiến thức từ vựng: 'High standards' (tiêu chuẩn cao) là cụm từ cố định trong quản lý chất lượng."
+          explanation: "⭐ 'High standards' là collocation (cụm từ cố định) có nghĩa 'tiêu chuẩn cao'. Các từ khác không tạo thành cụm có nghĩa: high expenses (chi phí cao - không hợp lý), high schedules (lịch trình cao - vô nghĩa), high locations (địa điểm cao - vô nghĩa)."
         }
       ]
     },
+
     part6: {
       title: "PART 6: Cloze Text (Email/Announcement)",
       description: "10 câu hỏi - Điền từ/cụm vào văn bản email. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
@@ -440,7 +441,7 @@ Chief Operating Officer`,
             "Discussed"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'Implemented' vì ngữ cảnh 'program aims to enhance... will be implemented' (chương trình sẽ được triển khai). Kiến thức ngữ pháp: Động từ bị động 'will be implemented'."
+          explanation: "🏢 'Implemented' (được triển khai) phù hợp nhất vì đây là sáng kiến chiến lược sẽ được thực hiện trong quý 4. Các từ khác: postponed (hoãn), initiated (khởi xướng), discussed (thảo luận) không phù hợp với ngữ cảnh triển khai kế hoạch."
         },
         {
           id: 32,
@@ -454,7 +455,7 @@ Chief Operating Officer`,
             "Reduce"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'Strengthen' vì đây là động từ nguyên thể sau 'and' trong cấu trúc song song (strengthen our competitiveness - tăng cường khả năng cạnh tranh). Kiến thức ngữ pháp: Cấu trúc song song động từ."
+          explanation: "💪 Cấu trúc song song: enhance... and strengthen... Cả hai động từ đều mang nghĩa tích cực. 'Strengthen our competitiveness' = tăng cường khả năng cạnh tranh. Các từ khác mang nghĩa tiêu cực, không phù hợp với mục tiêu của chương trình."
         },
         {
           id: 33,
@@ -468,7 +469,7 @@ Chief Operating Officer`,
             "Eliminate"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'Complement' vì ngữ cảnh 'solutions to complement infrastructure' (giải pháp để bổ sung cơ sở hạ tầng). Kiến thức từ vựng: Động từ 'complement' = làm cho hoàn thiện."
+          explanation: "🔄 'Complement' (bổ sung, làm hoàn thiện) phù hợp nhất vì giải pháp công nghệ mới được chọn để làm việc cùng với cơ sở hạ tầng hiện có, không phải để thay thế hoàn toàn. Các từ khác: ignore (bỏ qua), replace (thay thế), eliminate (loại bỏ) quá cực đoan."
         },
         {
           id: 34,
@@ -482,7 +483,7 @@ Chief Operating Officer`,
             "Manage"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'Managing' vì 'responsible for + V-ing' (chịu trách nhiệm về việc quản lý). Kiến thức ngữ pháp: Cấu trúc 'responsible for + N/V-ing'."
+          explanation: "👨‍💼 Cấu trúc: responsible for + V-ing. 'Managing' là đúng ngữ pháp. Câu này dịch: 'Mỗi trưởng bộ phận chịu trách nhiệm QUẢN LÝ quá trình chuyển đổi...'"
         },
         {
           id: 35,
@@ -496,7 +497,7 @@ Chief Operating Officer`,
             "Provider"
           ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) 'Providing' vì 'committed to + V-ing' (cam kết cung cấp). Kiến thức ngữ pháp: Cấu trúc 'be committed to + V-ing'."
+          explanation: "🤝 Cấu trúc: committed to + V-ing. 'Providing' là đúng ngữ pháp. 'Committed to providing' = cam kết cung cấp. Đây là cụm từ thông dụng trong văn viết công sở."
         },
         {
           id: 36,
@@ -510,7 +511,7 @@ Chief Operating Officer`,
             "Worked"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'Work' vì 'how to + V nguyên thể' (cách làm việc). Kiến thức ngữ pháp: Cấu trúc 'how to + V nguyên thể'."
+          explanation: "💻 Cấu trúc: how to + V (nguyên thể). 'Work' là đúng ngữ pháp. 'How to work effectively with' = cách làm việc hiệu quả với..."
         },
         {
           id: 37,
@@ -524,7 +525,7 @@ Chief Operating Officer`,
             "Hesitated"
           ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) 'Hesitate' vì 'don't hesitate to + V nguyên thể' (đừng ngần ngại). Kiến thức ngữ pháp: Cấu trúc quen thuộc 'don't hesitate to'."
+          explanation: "📞 Cụm từ cố định: 'don't hesitate to' + V = đừng ngần ngại làm gì. Đây là cách diễn đạt lịch sự, khuyến khích mọi người liên hệ khi cần hỗ trợ."
         },
         {
           id: 38,
@@ -537,7 +538,7 @@ Chief Operating Officer`,
             "To reduce the company's budget"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì email nêu 'aims to modernize our internal systems and streamline processes' (nhằm hiện đại hóa hệ thống và hợp lý hóa quy trình). Kiến thức đọc hiểu: Xác định mục đích chính từ câu mở đầu."
+          explanation: "🎯 Email nêu rõ mục tiêu chính: 'modernize our internal systems and streamline processes' (hiện đại hóa hệ thống và hợp lý hóa quy trình). Các đáp án khác không được đề cập trong email."
         },
         {
           id: 39,
@@ -550,7 +551,7 @@ Chief Operating Officer`,
             "December 31"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì email nêu 'All feedback should be submitted to the Operations Team by December 15' (Tất cả phản hồi phải được gửi vào ngày 15 tháng 12). Kiến thức đọc hiểu: Xác định ngày hạn chót từ email."
+          explanation: "📅 Thông tin cụ thể: 'All feedback should be submitted to the Operations Team by December 15.' Từ 'by' quan trọng - có nghĩa 'trước hoặc vào ngày'."
         },
         {
           id: 40,
@@ -563,10 +564,11 @@ Chief Operating Officer`,
             "The HR team"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì email nêu 'Each department head is responsible for managing the transition smoothly' (Mỗi trưởng bộ phận chịu trách nhiệm quản lý quá trình chuyển đổi). Kiến thức đọc hiểu: Xác định người chịu trách nhiệm từ email."
+          explanation: "👑 Email chỉ định rõ: 'Each department head is responsible for managing the transition smoothly within their teams.' Đây là thông tin trực tiếp, không cần suy luận."
         }
       ]
     },
+
     part7: {
       title: "PART 7: Multiple Texts (Job Posting + Application)",
       description: "10 câu hỏi - Đọc tin tuyển dụng và đơn ứng tuyển, chọn đáp án tốt nhất (A, B, C, D).",
@@ -654,7 +656,7 @@ m.smith@email.com
             "Five years"
           ],
           correct: 3,
-          explanation: "Đáp án đúng là (D) vì job posting nêu '5+ years of experience in data analysis' (5+ năm kinh nghiệm phân tích dữ liệu). Kiến thức đọc hiểu: Trích dẫn yêu cầu trực tiếp từ job posting."
+          explanation: "📊 Job posting ghi rõ: '5+ years of experience' - dấu '+' có nghĩa 'trở lên', vậy mức tối thiểu là 5 năm. Michael có 7 năm, vượt yêu cầu."
         },
         {
           id: 42,
@@ -666,7 +668,7 @@ m.smith@email.com
             "Five years of data analysis experience"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Preferred Qualifications' liệt kê 'Experience with machine learning' (Kinh nghiệm với machine learning). Kiến thức đọc hiểu: Phân biệt giữa required và preferred qualifications."
+          explanation: "⭐ Phần 'Preferred Qualifications' liệt kê 'Experience with machine learning' - đây là điểm cộng, không phải yêu cầu bắt buộc. Michael có điểm này nhờ 'advanced training in machine learning'."
         },
         {
           id: 43,
@@ -678,7 +680,7 @@ m.smith@email.com
             "Five years"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) vì application nêu 'With seven years of experience in data analysis' (Với bảy năm kinh nghiệm phân tích dữ liệu). Kiến thức đọc hiểu: Xác định thông tin từ email ứng tuyển."
+          explanation: "🎯 Michael viết rõ: 'With seven years of experience in data analysis' - 7 năm kinh nghiệm, vượt yêu cầu tối thiểu 5 năm của công ty."
         },
         {
           id: 44,
@@ -690,7 +692,7 @@ m.smith@email.com
             "Bachelor's degree in Mathematics"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì application nêu 'I hold a Master's degree in Statistics' (Tôi có bằng Thạc sĩ về Thống kê). Kiến thức đọc hiểu: Trích dẫn trực tiếp từ email ứng tuyển."
+          explanation: "🎓 Michael nêu rõ: 'I hold a Master's degree in Statistics' - bằng Thạc sĩ Thống kê. Đây cũng là preferred qualification trong job posting."
         },
         {
           id: 45,
@@ -702,7 +704,7 @@ m.smith@email.com
             "Java"
           ],
           correct: 3,
-          explanation: "Đáp án đúng là (D) vì application nêu 'I am proficient in SQL, Python, and R' (Tôi thành thạo SQL, Python, và R), nhưng không đề cập Java. Kiến thức suy luận: Xác định kỹ năng không được đề cập."
+          explanation: "💻 Michael liệt kê: 'proficient in SQL, Python, and R' - nhưng không đề cập Java. Job posting yêu cầu SQL, Python, Tableau - Michael đáp ứng đủ và còn biết thêm R."
         },
         {
           id: 46,
@@ -714,7 +716,7 @@ m.smith@email.com
             "$75,000 - $95,000"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) vì job posting nêu 'Salary: $85,000 - $105,000 per year' (Mức lương: $85,000 - $105,000 mỗi năm). Kiến thức đọc hiểu: Trích dẫn trực tiếp từ job posting."
+          explanation: "💰 Thông tin lương được ghi rõ: '$85,000 - $105,000 per year'. Các em cần đọc kỹ thông tin số trong bài đọc."
         },
         {
           id: 47,
@@ -726,7 +728,7 @@ m.smith@email.com
             "Project management"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì application nêu 'My key strengths include... a proven track record of mentoring junior team members' (Mentoring các thành viên đội trẻ). Kiến thức đọc hiểu: Xác định thông tin từ application."
+          explanation: "🌟 Michael tự giới thiệu: 'a proven track record of mentoring junior team members' - kinh nghiệm hướng dẫn nhân viên trẻ. Đây cũng là một trong các key responsibilities trong job posting."
         },
         {
           id: 48,
@@ -738,7 +740,7 @@ m.smith@email.com
             "Call the company directly"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì job posting nêu 'Submit your resume, cover letter, and portfolio to careers@techvision.com' (Gửi CV, thư xin việc, và portfolio). Kiến thức đọc hiểu: Xác định hướng dẫn ứng tuyển."
+          explanation: "📧 Hướng dẫn ứng tuyển rõ ràng: 'Submit your resume, cover letter, and portfolio to careers@techvision.com'. Michael đã làm đúng theo hướng dẫn này."
         },
         {
           id: 49,
@@ -750,7 +752,7 @@ m.smith@email.com
             "TechVision Solutions"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) vì application nêu 'In my current position at DataCorp Analytics' (Ở vị trí hiện tại tại DataCorp Analytics). Kiến thức đọc hiểu: Xác định nơi làm việc hiện tại từ email."
+          explanation: "🏢 Michael viết: 'In my current position at DataCorp Analytics' - hiện đang làm tại DataCorp Analytics. TechVision Solutions là nơi ông đang ứng tuyển."
         },
         {
           id: 50,
@@ -762,10 +764,11 @@ m.smith@email.com
             "Advanced SQL training"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì application nêu 'I have recently completed advanced training in machine learning through a recognized online platform' (Đã hoàn thành đào tạo nâng cao về machine learning). Kiến thức đọc hiểu: Xác định thông tin training gần đây."
+          explanation: "🚀 Michael đề cập: 'recently completed advanced training in machine learning' - đào tạo nâng cao về machine learning. Đây là điểm cộng so với preferred qualifications."
         }
       ]
     },
+
     part8: {
       title: "PART 8: Social Media Exchange",
       description: "10 câu hỏi - Đọc chuỗi trao đổi trên mạng xã hội, chọn đáp án tốt nhất (A, B, C, D).",
@@ -800,7 +803,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "A job opportunity"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Emma nói 'I saw your recent post about the new product launch' (Tôi thấy bài đăng gần đây của bạn về ra mắt sản phẩm). Kiến thức đọc hiểu: Xác định lý do liên hệ."
+          explanation: "📱 Emma nói ngay trong tin nhắn đầu: 'I saw your recent post about the new product launch.' Bài đăng về ra mắt sản phẩm là lý do trực tiếp khiến Emma liên hệ."
         },
         {
           id: 52,
@@ -812,7 +815,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "2:15 PM"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) vì Tom nêu 'How about Wednesday at 3 PM at Central Café?' (Thứ Tư lúc 3 giờ chiều tại Central Café?). Kiến thức đọc hiểu: Xác định thời gian cuộc gặp."
+          explanation: "🕒 Tom đề xuất: 'How about Wednesday at 3 PM at Central Café?' và Emma đồng ý. Thời gian rõ ràng là 3:00 PM."
         },
         {
           id: 53,
@@ -824,7 +827,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "Tom's office"
           ],
           correct: 2,
-          explanation: "Đáp án đúng là (C) vì Tom nói 'How about Wednesday at 3 PM at Central Café?' (tại Central Café). Kiến thức đọc hiểu: Xác định địa điểm gặp mặt."
+          explanation: "☕ Địa điểm được Tom đề xuất: 'at Central Café'. Đây là cuộc gặp mặt trực tiếp tại quán cà phê, không phải meeting online hay tại văn phòng."
         },
         {
           id: 54,
@@ -836,7 +839,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "She forgot about the meeting"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Emma nói 'I'm running about 15 minutes late due to traffic' (Tôi muộn khoảng 15 phút vì giao thông). Kiến thức đọc hiểu: Xác định lý do muộn."
+          explanation: "🚗 Emma thông báo trực tiếp: 'I'm running about 15 minutes late due to traffic.' Lý do là tắc đường, không phải các lý do khác."
         },
         {
           id: 55,
@@ -848,7 +851,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "Market analysis data"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Emma nói 'I'll bring some preliminary ideas for our partnership proposal' (Tôi sẽ mang một số ý tưởng ban đầu cho đề xuất kỳ hạn). Kiến thức đọc hiểu: Xác định những gì Emma mang theo."
+          explanation: "💡 Emma nói: 'I'll bring some preliminary ideas for our partnership proposal.' Đây là ý tưởng ban đầu, chưa phải bài thuyết trình chi tiết (sẽ chuẩn bị cho meeting sau)."
         },
         {
           id: 56,
@@ -860,7 +863,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "He said he had to reschedule"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Tom nói 'No problem at all! I'll grab us a table' (Không vấn đề gì cả! Tôi sẽ lấy cho chúng ta một bàn). Kiến thức đọc hiểu: Xác định phản ứng của Tom."
+          explanation: "😊 Tom phản hồi rất tích cực: 'No problem at all! I'll grab us a table and order some coffee.' Ông không những không phiền mà còn chủ động chuẩn bị."
         },
         {
           id: 57,
@@ -872,7 +875,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "They were not realistic"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Tom nói 'Your ideas were innovative and align well with our vision' (Các ý tưởng của bạn sáng tạo và phù hợp với tầm nhìn của chúng tôi). Kiến thức đọc hiểu: Xác định phản hồi của Tom."
+          explanation: "🌟 Tom khen ngợi: 'Your ideas were innovative and align well with our vision.' Phản hồi rất tích cực, dẫn đến việc ông muốn tổ chức meeting tiếp theo với ban lãnh đạo."
         },
         {
           id: 58,
@@ -884,7 +887,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "Monday"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Tom nói 'I'd like to schedule a follow-up meeting with our executive team next week. Would Friday work for you?' (Liệu thứ Sáu có thích hợp không?). Kiến thức đọc hiểu: Xác định ngày gặp mặt tiếp theo."
+          explanation: "📅 Tom đề xuất: 'Would Friday work for you?' và Emma trả lời 'Friday works great.' Vậy meeting tiếp theo được sắp xếp vào thứ Sáu."
         },
         {
           id: 59,
@@ -896,7 +899,7 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "Product samples"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì Emma nói 'I'll prepare a detailed presentation for the executive team' (Tôi sẽ chuẩn bị một bài thuyết trình chi tiết cho đội lãnh đạo). Kiến thức đọc hiểu: Xác định sự chuẩn bị của Emma."
+          explanation: "🎤 Emma nói: 'I'll prepare a detailed presentation for the executive team.' Bài thuyết trình chi tiết này khác với 'preliminary ideas' mà cô mang đến meeting đầu tiên."
         },
         {
           id: 60,
@@ -908,9 +911,9 @@ Tom (16:15): Perfect! I'll send you the meeting details by end of day. Excited a
             "They are long-time competitors"
           ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì toàn bộ trao đổi liên quan đến 'collaboration opportunities' và 'partnership proposal' (cơ hội hợp tác và đề xuất kỳ hạn), cho thấy quan hệ chuyên nghiệp. Kiến thức suy luận: Xác định bản chất mối quan hệ từ nội dung cuộc trò chuyện."
+          explanation: "🤝 Từ ngữ cảnh: Emma thấy bài đăng của Tom → đề xuất hợp tác → meeting bàn về partnership → planning follow-up với executive team. Rõ ràng đây là hai chuyên gia đang khám phá cơ hội hợp tác kinh doanh."
         }
       ]
     }
-  }
+  },
 };

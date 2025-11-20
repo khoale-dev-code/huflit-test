@@ -25,122 +25,171 @@ const ExplanationSection = ({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  // Hàm xử lý formatting text với **bold** thành HTML elements
+  const renderFormattedText = (text) => {
+    if (!text) return null;
+    
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    
+    return parts.map((part, idx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const boldText = part.slice(2, -2);
+        return (
+          <span 
+            key={idx} 
+            className="font-bold bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 px-2 py-0.5 rounded-lg inline-block mx-0.5 shadow-sm border border-blue-200/60 text-blue-900"
+          >
+            {boldText}
+          </span>
+        );
+      }
+      return <span key={idx}>{part}</span>;
+    });
+  };
+
   if (!explanation) return null;
 
-  const keyPoints = explanation.split('\n').filter(line => line.trim().length > 0);
-
   return (
-    <div className="w-full my-4">
-      {/* Modern Collapsible Header với Glass Effect */}
+    <div className="w-full my-6">
+      {/* Header Button - Glass Morphism Design */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`w-full text-left transition-all duration-500 ease-out rounded-2xl p-4 backdrop-blur-sm ${
-          isExpanded 
+        className={`
+          w-full text-left transition-all duration-500 ease-out 
+          rounded-2xl p-5 backdrop-blur-md
+          ${isExpanded 
             ? isCorrect 
-              ? 'bg-gradient-to-r from-emerald-50/90 to-teal-50/90 shadow-lg shadow-emerald-100/50 scale-[1.01]' 
-              : 'bg-gradient-to-r from-amber-50/90 to-orange-50/90 shadow-lg shadow-amber-100/50 scale-[1.01]'
-            : 'bg-white/60 hover:bg-gray-50/80 shadow-sm hover:shadow-md border border-gray-100'
-        }`}
+              ? 'bg-gradient-to-br from-emerald-50/95 via-teal-50/95 to-cyan-50/95 shadow-xl shadow-emerald-200/60 scale-[1.02] border-2 border-emerald-200/50' 
+              : 'bg-gradient-to-br from-orange-50/95 via-amber-50/95 to-yellow-50/95 shadow-xl shadow-amber-200/60 scale-[1.02] border-2 border-amber-200/50'
+            : 'bg-white/80 hover:bg-gradient-to-br hover:from-gray-50 hover:to-slate-50 shadow-md hover:shadow-lg border-2 border-gray-100 hover:border-gray-200'
+          }
+        `}
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            {/* Animated Icon với Gradient Background */}
-            <div className={`relative p-3 rounded-xl flex-shrink-0 transition-all duration-500 ${
-              isCorrect 
-                ? 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-500' 
-                : 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-400'
-            } ${isExpanded ? 'scale-110 rotate-12' : 'scale-100 rotate-0'}`}>
+            {/* Icon Container với Animation */}
+            <div className={`
+              relative p-3.5 rounded-xl flex-shrink-0 transition-all duration-500
+              ${isCorrect 
+                ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500' 
+                : 'bg-gradient-to-br from-orange-400 via-amber-500 to-yellow-500'
+              }
+              ${isExpanded ? 'scale-110 rotate-12 shadow-lg' : 'scale-100 rotate-0 shadow-md'}
+            `}>
               {isCorrect ? (
                 <Sparkles className={`w-6 h-6 text-white transition-all duration-500 ${isExpanded ? 'animate-pulse' : ''}`} />
               ) : (
-                <Zap className="w-6 h-6 text-white" />
+                <Zap className={`w-6 h-6 text-white ${isExpanded ? 'animate-bounce' : ''}`} />
               )}
               {/* Glow Effect */}
-              <div className={`absolute inset-0 rounded-xl blur-md opacity-50 ${
-                isCorrect ? 'bg-emerald-400' : 'bg-amber-400'
-              }`} style={{ zIndex: -1 }}></div>
+              <div 
+                className={`absolute inset-0 rounded-xl blur-lg opacity-40 -z-10 ${
+                  isCorrect ? 'bg-emerald-400' : 'bg-amber-400'
+                }`}
+              />
             </div>
             
+            {/* Text Content */}
             <div className="flex-1 min-w-0">
-              <p className={`font-bold text-base transition-colors mb-1 ${
-                isCorrect 
-                  ? 'text-emerald-700' 
-                  : 'text-amber-700'
-              }`}>
-                {isCorrect ? '✨ Giải thích chi tiết' : '⚡ Phân tích lỗi'}
+              <p className={`
+                font-bold text-lg transition-colors mb-1.5
+                ${isCorrect ? 'text-emerald-700' : 'text-amber-700'}
+              `}>
+                {isCorrect ? '✨ Giải thích chi tiết' : '⚡ Phân tích lỗi & Hướng dẫn'}
               </p>
-              <p className="text-xs text-gray-500 truncate">
-                {isExpanded ? 'Thu gọn nội dung' : 'Xem giải thích và phân tích'}
+              <p className="text-xs text-gray-500 truncate font-medium">
+                {isExpanded ? '👆 Nhấn để thu gọn nội dung' : '👇 Nhấn để xem giải thích đầy đủ'}
               </p>
             </div>
           </div>
           
-          <div className={`p-2 rounded-full transition-all duration-300 ${
-            isExpanded ? 'bg-white/50 rotate-180' : 'bg-gray-100'
-          }`}>
-            <ChevronDown className="w-5 h-5 text-gray-600" />
+          {/* Chevron Icon */}
+          <div className={`
+            p-2.5 rounded-xl transition-all duration-300
+            ${isExpanded 
+              ? 'bg-white/60 rotate-180 shadow-inner' 
+              : 'bg-gray-100/80 shadow-sm hover:bg-gray-200/80'
+            }
+          `}>
+            <ChevronDown className="w-5 h-5 text-gray-700" />
           </div>
         </div>
       </button>
 
-      {/* Expanded Content với Animation mượt mà */}
-      <div className={`overflow-hidden transition-all duration-500 ease-out ${
-        isExpanded ? 'max-h-[3000px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
-      }`}>
-        <div className="space-y-4">
+      {/* Expanded Content với Smooth Animation */}
+      <div className={`
+        overflow-hidden transition-all duration-700 ease-in-out
+        ${isExpanded ? 'max-h-[5000px] opacity-100 mt-5' : 'max-h-0 opacity-0 mt-0'}
+      `}>
+        <div className="space-y-5">
           
-          {/* Answer Comparison Card - Redesigned */}
-          <div className={`rounded-2xl border-2 overflow-hidden backdrop-blur-sm transition-all duration-500 ${
-            isCorrect
-              ? 'bg-white/80 border-emerald-200 shadow-lg shadow-emerald-100/50'
-              : 'bg-white/80 border-red-200 shadow-lg shadow-red-100/50'
-          }`}>
-            {/* Header với Gradient */}
-            <div className={`px-5 py-3 ${
-              isCorrect
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                : 'bg-gradient-to-r from-red-500 to-orange-500'
-            }`}>
-              <h4 className="font-bold text-sm text-white flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                {isCorrect ? 'Câu trả lời chính xác' : 'So sánh đáp án'}
+          {/* ========== ANSWER COMPARISON CARD ========== */}
+          <div className={`
+            rounded-2xl border-2 overflow-hidden backdrop-blur-sm 
+            transition-all duration-500 shadow-xl
+            ${isCorrect
+              ? 'bg-gradient-to-br from-white/90 to-emerald-50/30 border-emerald-300 shadow-emerald-200/50'
+              : 'bg-gradient-to-br from-white/90 to-red-50/30 border-red-300 shadow-red-200/50'
+            }
+          `}>
+            {/* Header */}
+            <div className={`
+              px-6 py-4
+              ${isCorrect
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500'
+                : 'bg-gradient-to-r from-red-500 via-orange-500 to-amber-500'
+              }
+            `}>
+              <h4 className="font-bold text-base text-white flex items-center gap-2.5">
+                <AlertCircle className="w-5 h-5" />
+                {isCorrect ? '🎯 Câu trả lời chính xác' : '📊 So sánh đáp án'}
               </h4>
             </div>
             
-            <div className="p-5 space-y-3">
+            <div className="p-6 space-y-4">
               {/* Your Answer */}
-              <div className={`rounded-xl p-4 border-l-4 transition-all duration-300 hover:scale-[1.02] ${
-                isCorrect
-                  ? 'bg-emerald-50/50 border-emerald-500 hover:shadow-md'
-                  : 'bg-red-50/50 border-red-500 hover:shadow-md'
-              }`}>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs shadow-sm ${
-                    isCorrect
+              <div className={`
+                rounded-xl p-5 border-l-4 transition-all duration-300 
+                hover:scale-[1.01] hover:shadow-lg
+                ${isCorrect
+                  ? 'bg-emerald-50/70 border-emerald-500'
+                  : 'bg-red-50/70 border-red-500'
+                }
+              `}>
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className={`
+                    flex items-center gap-2 px-3.5 py-1.5 rounded-full 
+                    font-bold text-sm shadow-md
+                    ${isCorrect
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
                       : 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
-                  }`}>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    }
+                  `}>
+                    <CheckCircle2 className="w-4 h-4" />
                     {userAnswer !== undefined ? String.fromCharCode(65 + userAnswer) : 'N/A'}
                   </div>
-                  <span className="text-xs text-gray-600 font-semibold">Câu trả lời của bạn</span>
+                  <span className="text-sm text-gray-700 font-bold">
+                    Câu trả lời của bạn
+                  </span>
                 </div>
-                <p className="text-sm font-medium text-gray-800 leading-relaxed pl-1">
+                <p className="text-sm font-medium text-gray-800 leading-relaxed pl-2">
                   {selectedAnswerText}
                 </p>
               </div>
 
-              {/* Correct Answer */}
+              {/* Correct Answer (only show if incorrect) */}
               {!isCorrect && (
-                <div className="rounded-xl p-4 border-l-4 bg-green-50/50 border-green-500 transition-all duration-300 hover:scale-[1.02] hover:shadow-md">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm">
-                      <Sparkles className="w-3.5 h-3.5" />
+                <div className="rounded-xl p-5 border-l-4 bg-green-50/70 border-green-500 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md">
+                      <Sparkles className="w-4 h-4" />
                       {String.fromCharCode(65 + correctAnswer)}
                     </div>
-                    <span className="text-xs text-green-700 font-semibold">Đáp án chính xác</span>
+                    <span className="text-sm text-green-700 font-bold">
+                      ✅ Đáp án chính xác
+                    </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-800 leading-relaxed pl-1">
+                  <p className="text-sm font-medium text-gray-800 leading-relaxed pl-2">
                     {correctAnswerText}
                   </p>
                 </div>
@@ -148,98 +197,83 @@ const ExplanationSection = ({
             </div>
           </div>
 
-          {/* Main Explanation Card */}
-          <div className={`rounded-2xl border-2 overflow-hidden backdrop-blur-sm shadow-lg transition-all duration-500 ${
-            isCorrect
-              ? 'bg-white/80 border-emerald-200 shadow-emerald-100/50'
-              : 'bg-white/80 border-amber-200 shadow-amber-100/50'
-          }`}>
-            <div className={`px-5 py-3 ${
-              isCorrect
-                ? 'bg-gradient-to-r from-emerald-100 to-teal-100'
-                : 'bg-gradient-to-r from-amber-100 to-orange-100'
-            }`}>
-              <div className="flex items-center gap-2">
+          {/* ========== MAIN EXPLANATION CARD ========== */}
+          <div className={`
+            rounded-2xl border-2 overflow-hidden backdrop-blur-sm 
+            shadow-xl transition-all duration-500
+            ${isCorrect
+              ? 'bg-gradient-to-br from-white/90 to-emerald-50/30 border-emerald-300 shadow-emerald-200/50'
+              : 'bg-gradient-to-br from-white/90 to-amber-50/30 border-amber-300 shadow-amber-200/50'
+            }
+          `}>
+            <div className={`
+              px-6 py-4
+              ${isCorrect
+                ? 'bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100'
+                : 'bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100'
+              }
+            `}>
+              <div className="flex items-center gap-2.5">
                 <Brain className={`w-5 h-5 ${
                   isCorrect ? 'text-emerald-600' : 'text-amber-600'
                 }`} />
-                <h4 className={`font-bold text-sm ${
+                <h4 className={`font-bold text-base ${
                   isCorrect ? 'text-emerald-900' : 'text-amber-900'
                 }`}>
-                  💡 Giải thích chi tiết
+                  💡 Giải thích chi tiết từ giảng viên
                 </h4>
               </div>
             </div>
-            <div className="p-5">
-              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap break-words">
-                {explanation}
-              </p>
+            <div className="p-6">
+              <div className="text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words space-y-3">
+                {renderFormattedText(explanation)}
+              </div>
             </div>
           </div>
 
-          {/* Key Points Card */}
-          {keyPoints.length > 1 && (
-            <div className="rounded-2xl border-2 bg-white/80 border-blue-200 overflow-hidden backdrop-blur-sm shadow-lg shadow-blue-100/50 transition-all duration-500">
-              <div className="px-5 py-3 bg-gradient-to-r from-blue-100 to-cyan-100">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-blue-600" />
-                  <h4 className="font-bold text-sm text-blue-900">
-                    📌 Điểm quan trọng cần nhớ
-                  </h4>
-                </div>
-              </div>
-              <div className="p-5">
-                <ul className="space-y-3">
-                  {keyPoints.slice(0, 5).map((point, idx) => (
-                    <li key={idx} className="text-sm text-gray-700 flex gap-3 items-start group hover:translate-x-1 transition-transform duration-200">
-                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-xs flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform">
-                        {idx + 1}
-                      </span>
-                      <span className="leading-relaxed flex-1">{point.trim()}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Tips Card */}
-          <div className="rounded-2xl border-2 bg-white/80 border-purple-200 overflow-hidden backdrop-blur-sm shadow-lg shadow-purple-100/50 transition-all duration-500">
-            <div className="px-5 py-3 bg-gradient-to-r from-purple-100 to-pink-100">
-              <div className="flex items-center gap-2">
+          {/* ========== TIPS CARD ========== */}
+          <div className="rounded-2xl border-2 bg-gradient-to-br from-white/90 to-purple-50/30 border-purple-300 overflow-hidden backdrop-blur-sm shadow-xl shadow-purple-200/50 transition-all duration-500 hover:scale-[1.01]">
+            <div className="px-6 py-4 bg-gradient-to-r from-purple-100 via-pink-100 to-fuchsia-100">
+              <div className="flex items-center gap-2.5">
                 <Target className="w-5 h-5 text-purple-600" />
-                <h4 className="font-bold text-sm text-purple-900">
-                  💪 Lời khuyên từ hệ thống
+                <h4 className="font-bold text-base text-purple-900">
+                  💪 Lời khuyên học tập
                 </h4>
               </div>
             </div>
-            <div className="p-5">
-              <p className="text-sm text-gray-700 leading-relaxed">
+            <div className="p-6">
+              <p className="text-[15px] text-gray-800 leading-relaxed font-medium">
                 {isCorrect 
-                  ? '✅ Xuất sắc! Hãy tiếp tục luyện tập các câu tương tự để củng cố kiến thức và ghi nhớ lâu dài hơn.'
-                  : '🎯 Đừng lo lắng! Hãy xem lại phần lý thuyết và thử làm thêm các bài tập tương tự để nắm vững kiến thức này.'}
+                  ? '🎉    Bạn đã nắm vững kiến thức này. Hãy tiếp tục luyện tập các câu tương tự để củng cố và ghi nhớ lâu dài hơn. Đừng quên ôn tập định kỳ để kiến thức luôn được duy trì!'
+                  : '🎯    Mỗi sai lầm là một bài học quý giá. Hãy xem lại phần lý thuyết liên quan, ghi chú những điểm quan trọng, và thử làm thêm 3-5 bài tập tương tự để nắm vững kiến thức này. Bạn sẽ tiến bộ nhanh chóng!'}
               </p>
             </div>
           </div>
 
-          {/* Copy Button - Modern Design */}
+          {/* ========== COPY BUTTON ========== */}
           <button
             onClick={copyToClipboard}
-            className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-md ${
-              isCopied
-                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-200'
-                : 'bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 hover:shadow-lg'
-            }`}
+            className={`
+              w-full flex items-center justify-center gap-3 
+              py-4 px-6 rounded-2xl font-bold text-base
+              transition-all duration-300 transform 
+              hover:scale-[1.02] active:scale-95 
+              shadow-lg hover:shadow-xl
+              ${isCopied
+                ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white shadow-green-300'
+                : 'bg-gradient-to-r from-white to-gray-50 border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:shadow-gray-300'
+              }
+            `}
           >
             {isCopied ? (
               <>
                 <Check className="w-5 h-5 animate-bounce" />
-                <span>Đã sao chép thành công!</span>
+                <span>✅ Đã sao chép thành công!</span>
               </>
             ) : (
               <>
                 <Copy className="w-5 h-5" />
-                <span>Sao chép toàn bộ giải thích</span>
+                <span>📋 Sao chép toàn bộ giải thích</span>
               </>
             )}
           </button>

@@ -1,12 +1,12 @@
 // ==================== ENHANCED VOICE CONFIGURATION ====================
 
 export const GENDER_CATEGORIES = {
-  FEMALE: ['Woman', 'Sarah', 'Anna', 'Client 2', 'Sales Associate', 'Older Woman', 
-           'Student B', 'Student 2', 'Counselor', 'Emma', 'Lisa', 'Doctor Chen'],
-  MALE: ['Man', 'Mark', 'Dr.Chen','Ben', 'Client 1', 'Professor', 'John', 'Mike', 'Waiter', 
+  FEMALE: ['Woman', 'Sarah', 'Anna','Linda', 'Client 2', 'Sales Associate', 'Older Woman', 
+           'Student B', 'Student 2', 'Counselor', 'Emma','Trang','Jennifer' ,'Lisa', 'Doctor Chen'],
+  MALE: ['Man','Kevin', 'Mark', 'Dr.Chen','Ben', 'Client 1', 'Professor', 'John', 'Mike', 'Waiter', 
          'Customer', 'Manager', 'HR Rep', 'Interviewer 1', 'Interviewer 2', 
          'Candidate', 'Professor A', 'Student 1', 'Student', 'Parent', 
-         'Travel Agent', 'Narrator', 'Smith', 'Tom'],
+         'Travel Agent', 'Narrator', 'Smith', 'Tom','Peter','Alex','Training','HR'],
   NEUTRAL: ['Narrator', 'System', 'AI Assistant']
 };
 
@@ -17,6 +17,78 @@ export const ENHANCED_VOICE_SETTINGS = {
   // Professional Males - điều chỉnh để tự nhiên hơn
   Mark: { 
     pitch: 0.69,
+    rate: 1.0,
+    volume: 0.85,
+    style: "professional",
+    emotion: "confident",
+    speechPattern: "articulate",
+    pauseFrequency: "medium",
+    emphasis: "moderate",
+    voice_name: "standard_male_1",
+    timbre_modifier: "warm"
+  },   
+  Alex: { 
+    pitch: 0.69,
+    rate: 1.0,
+    volume: 0.85,
+    style: "professional",
+    emotion: "confident",
+    speechPattern: "articulate",
+    pauseFrequency: "medium",
+    emphasis: "moderate",
+    voice_name: "standard_male_1",
+    timbre_modifier: "warm"
+  }, 
+  HR: { 
+    pitch: 0.32,
+    rate: 1.0,
+    volume: 0.85,
+    style: "professional",
+    emotion: "confident",
+    speechPattern: "articulate",
+    pauseFrequency: "medium",
+    emphasis: "moderate",
+    voice_name: "standard_male_1",
+    timbre_modifier: "warm"
+  }, 
+  Training: { 
+    pitch: 0.79,
+    rate: 1.0,
+    volume: 0.85,
+    style: "professional",
+    emotion: "confident",
+    speechPattern: "articulate",
+    pauseFrequency: "medium",
+    emphasis: "moderate",
+    voice_name: "standard_male_1",
+    timbre_modifier: "warm"
+  }, 
+  Tom: { 
+    pitch: 0.66,
+    rate: 1.0,
+    volume: 0.55,
+    style: "professional",
+    emotion: "confident",
+    speechPattern: "articulate",
+    pauseFrequency: "medium",
+    emphasis: "moderate",
+    voice_name: "standard_male_1",
+    timbre_modifier: "warm"
+  }, 
+  Peter: { 
+    pitch: 0.69,
+    rate: 0.33,
+    volume: 0.95,
+    style: "professional",
+    emotion: "confident",
+    speechPattern: "articulate",
+    pauseFrequency: "low",
+    emphasis: "appropriate",
+    voice_name: "deep",
+    timbre_modifier: "warm"
+  }, 
+  Kevin: { 
+    pitch: 0.59,
     rate: 1.0,
     volume: 0.85,
     style: "professional",
@@ -84,8 +156,29 @@ export const ENHANCED_VOICE_SETTINGS = {
     pauseFrequency: "low",
     emphasis: "light"
   },
+  Trang: { 
+    pitch: 1.35,
+    rate: 0.65,
+    volume: 0.88,
+    style: "cheerful",
+    emotion: "friendly",
+    speechPattern: "flowing",
+    pauseFrequency: "sarcastic",
+    emphasis: "light"
+  },
 
   Emma: { 
+    pitch: 1.35,
+    rate: 0.85,
+    volume: 0.92,
+    style: "calm",
+    emotion: "reassuring",
+    speechPattern: "measured",
+    pauseFrequency: "medium",
+    emphasis: "subtle",
+    break_after: 0.8
+  }, 
+  Jennifer: { 
     pitch: 1.35,
     rate: 0.85,
     volume: 0.92,
@@ -98,6 +191,16 @@ export const ENHANCED_VOICE_SETTINGS = {
   },
 
   Anna: { 
+    pitch: 1.42,
+    rate: 0.88,
+    volume: 0.9,
+    style: "enthusiastic",
+    emotion: "energetic",
+    speechPattern: "expressive",
+    pauseFrequency: "low",
+    emphasis: "dynamic"
+  },
+  Linda: { 
     pitch: 1.42,
     rate: 0.88,
     volume: 0.9,
@@ -661,7 +764,8 @@ export const SPEAKER_ICONS = {
   Waiter: '👨‍🍳',
   Customer: '🛒',
   'Sales Associate': '🛍️',
-  
+  HR: '🏢',
+  Training: '🎓',
   // Healthcare/Counseling
   Counselor: '🧑‍⚕️',
 
@@ -674,11 +778,17 @@ export const SPEAKER_ICONS = {
   Sarah: '👩',
   Anna: '👩',
   Ben: '👨',
+  Alex: '👨',
   Mike: '👨',
+  Kevin: '👨',
   John: '👨',
   Tom: '🧑‍🎓',
+  Peter: '🧑‍🎓',
   Emma: '👩',
+  Trang: '👩',
   Lisa: '👩',
+  Jennifer: '👩',
+  Linda: '👩',
   'Older Woman': '👵',
   Parent: '👪',
   

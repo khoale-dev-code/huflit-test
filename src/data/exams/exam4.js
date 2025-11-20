@@ -221,192 +221,262 @@ export const EXAM4_DATA = {
       ]
     },
     // Reading Parts
-    part5: {
-      title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
-      description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
-      type: "reading",
-      questions: [
-        {
-          id: 21,
-          question: "Global warming poses significant threats to coastal communities, __________ rising sea levels and extreme weather events.",
-          options: ["such as", "despite", "unless", "although"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'such as' vì chỉ ví dụ (e.g.). Kiến thức ngữ pháp: Cụm 'such as + danh từ' liệt kê ví dụ; 'despite/unless/although' chỉ nhượng bộ/điều kiện, không phù hợp ngữ cảnh môi trường."
-        },
-        {
-          id: 22,
-          question: "The nonprofit organization __________ volunteers to clean up polluted beaches every weekend.",
-          options: ["rely on", "relies on", "relied on", "relying on"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'relies on' vì chủ ngữ số ít 'organization' yêu cầu ngôi thứ ba. Kiến thức ngữ pháp: Thì hiện tại đơn 'relies' cho thói quen xã hội; phrasal verb 'rely on + danh từ' chỉ phụ thuộc."
-        },
-        {
-          id: 23,
-          question: "Since implementing recycling programs, the city __________ reduced its waste by 25%.",
-          options: ["have", "has", "had", "having"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'has' vì chủ ngữ số ít 'city'. Kiến thức ngữ pháp: Hiện tại hoàn thành 'has + V3' với 'since + mốc' chỉ thay đổi từ quá khứ đến nay; 'have' (số nhiều), 'had' (quá khứ), 'having' (V-ing) không khớp."
-        },
-        {
-          id: 24,
-          question: "Social media campaigns have raised awareness about environmental issues __________ engaging young audiences.",
-          options: ["by", "with", "on", "at"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'by' vì chỉ phương tiện. Kiến thức ngữ pháp: 'By + V-ing' chỉ cách thức; 'with/on/at' không phù hợp với 'engaging' làm gerund."
-        },
-        {
-          id: 25,
-          question: "The report highlights the need for immediate action to __________ biodiversity loss.",
-          options: ["prevent", "prevents", "prevented", "preventing"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'prevent' vì nguyên thể sau 'to'. Kiến thức ngữ pháp: 'To + V nguyên thể' chỉ mục đích sau 'need for'; thì tương lai ngầm."
-        },
-        {
-          id: 26,
-          question: "Community gardens not only provide fresh produce but also foster social __________ among neighbors.",
-          options: ["interact", "interaction", "interactive", "interacting"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'interaction' vì danh từ. Kiến thức ngữ pháp: Danh từ 'interaction' sau 'social'; 'not only... but also' nối hai mệnh đề song song."
-        },
-        {
-          id: 27,
-          question: "Unless governments enforce stricter regulations, deforestation will continue __________ an alarming rate.",
-          options: ["at", "in", "on", "with"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'at' vì 'at + danh từ tốc độ'. Kiến thức ngữ pháp: 'Unless + clause' chỉ điều kiện; 'at an alarming rate' là cụm chuẩn."
-        },
-        {
-          id: 28,
-          question: "Activists are __________ petitions to urge policymakers to address climate inequality.",
-          options: ["circulate", "circulates", "circulated", "circulating"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) 'circulating' vì tiếp diễn. Kiến thức ngữ pháp: Hiện tại tiếp diễn 'are + V-ing' chỉ hành động đang diễn ra xã hội."
-        },
-        {
-          id: 29,
-          question: "The sustainable development goals aim __________ eradicating poverty while protecting the environment.",
-          options: ["at", "for", "in", "on"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'at' vì 'aim at + V-ing'. Kiến thức ngữ pháp: 'Aim at + gerund' chỉ mục tiêu; 'while + clause' chỉ đồng thời."
-        },
-        {
-          id: 30,
-          question: "Renewable energy sources, __________ solar and wind power, are key to mitigating climate change.",
-          options: ["such as", "despite", "unless", "although"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'such as' vì ví dụ. Kiến thức ngữ pháp: 'Such as + danh từ' liệt kê; mệnh đề chính sau dấu phẩy."
-        }
-      ]
-    },
-    part6: {
-  title: "PART 6: Cloze Text (Email/Announcement)",
-  description: "10 câu hỏi - Điền từ/cụm vào văn bản email về chiến dịch môi trường xã hội. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+  part5: {
+  title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
+  description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
   type: "reading",
-  text: `To: Community Members
-From: Emma Rodriguez, Environmental Advocate  
-Subject: Join Our Urban Greening Initiative
-
-
-Dear Neighbors,
-
-We are launching the Urban Greening Initiative to combat climate change effects in our city. This community-driven project (31) planting trees and creating green spaces in underserved areas, promoting both environmental health and social cohesion.
-
-The kickoff event is on April 10 at Central Park, starting at 10 a.m. (34) volunteers will receive tools and guidance; no experience necessary. By participating, you'll help (32) air quality and provide shade for vulnerable populations.
-
-Future activities include workshops (35) sustainable gardening on April 17 and a neighborhood forum on eco-justice on April 24. These sessions aim to (33) residents with knowledge for long-term impact.
-
-To sign up, visit our website or reply to this email. Together, we can build a greener, more equitable society.
-
-Best regards,
-
-Emma Rodriguez
-Environmental Advocate
-GreenCity Network`,
   questions: [
     {
-      id: 31,
-      type: "fill",
-      question: "(31) - Điền từ thích hợp",
-      context: "This community-driven project (31) planting trees...",
-      options: ["involves", "avoids", "delays", "ignores"],
+      id: 21,
+      question:
+        "Global warming poses significant threats to coastal communities, __________ rising sea levels and extreme weather events.",
+      options: ["such as", "despite", "unless", "although"],
       correct: 0,
-      explanation: "Đáp án đúng là (A) 'involves' vì nghĩa 'bao gồm'. Kiến thức ngữ pháp: Động từ 'involves + V-ing' chỉ thành phần; thì hiện tại đơn cho mô tả dự án."
+      explanation:
+        "Đáp án đúng là (A) 'such as'. Cụm 'such as + danh từ' dùng để đưa ra ví dụ minh họa. Câu đang liệt kê các mối đe dọa (rising sea levels, extreme weather events). Các từ còn lại đều mang nghĩa đối lập hoặc điều kiện, không phù hợp."
     },
     {
-      id: 32,
-      type: "fill",
-      question: "(32) - Điền từ thích hợp",
-      context: "By participating, you'll help (32) air quality...",
-      options: ["worsen", "improve", "maintain", "ignore"],
+      id: 22,
+      question:
+        "The nonprofit organization __________ volunteers to clean up polluted beaches every weekend.",
+      options: ["rely on", "relies on", "relied on", "relying on"],
       correct: 1,
-      explanation: "Đáp án đúng là (B) 'improve' vì nghĩa 'cải thiện'. Kiến thức ngữ pháp: 'Help + V nguyên thể' chỉ hỗ trợ; 'by + V-ing' chỉ phương tiện xã hội-môi trường."
+      explanation:
+        "Đáp án đúng là (B) 'relies on' vì chủ ngữ 'organization' là danh từ số ít → động từ phải chia ngôi thứ ba số ít. Thì hiện tại đơn dùng để mô tả hoạt động thường xuyên. 'Rely on' là cụm động từ chỉ sự phụ thuộc."
     },
     {
-      id: 33,
-      type: "fill",
-      question: "(33) - Điền từ thích hợp",
-      context: "These sessions aim to (33) residents with knowledge...",
-      options: ["deprive", "burden", "equip", "confuse"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) 'equip' vì nghĩa 'trang bị'. Kiến thức ngữ pháp: 'Equip + tân ngữ + with + danh từ' chỉ cung cấp; thì hiện tại đơn cho mục tiêu."
+      id: 23,
+      question:
+        "Since implementing recycling programs, the city __________ reduced its waste by 25%.",
+      options: ["have", "has", "had", "having"],
+      correct: 1,
+      explanation:
+        "Đáp án đúng là (B) 'has'. Chủ ngữ 'city' là số ít nên dùng 'has'. Câu có 'since + V-ing' hàm ý hành động bắt đầu trong quá khứ và tiếp tục đến hiện tại → dùng thì hiện tại hoàn thành 'has + V3'."
     },
     {
-      id: 34,
-      type: "fill",
-      question: "(34) - Điền từ thích hợp",
-      context: "The kickoff event is on April 10 at Central Park, starting at 10 a.m. (34) volunteers will receive tools...",
-      options: ["however", "besides", "therefore", "and"],
+      id: 24,
+      question:
+        "Social media campaigns have raised awareness about environmental issues __________ engaging young audiences.",
+      options: ["by", "with", "on", "at"],
+      correct: 0,
+      explanation:
+        "Đáp án đúng là (A) 'by'. Cấu trúc 'by + V-ing' diễn tả cách thức thực hiện hành động. Ý câu: các chiến dịch mạng xã hội nâng cao nhận thức *bằng cách* thu hút giới trẻ. Các giới từ còn lại không mang nghĩa chỉ phương tiện."
+    },
+    {
+      id: 25,
+      question:
+        "The report highlights the need for immediate action to __________ biodiversity loss.",
+      options: ["prevent", "prevents", "prevented", "preventing"],
+      correct: 0,
+      explanation:
+        "Đáp án là (A) 'prevent'. Sau 'to' là động từ nguyên thể không chia. Câu mang nghĩa: cần hành động để ngăn chặn sự suy giảm đa dạng sinh học."
+    },
+    {
+      id: 26,
+      question:
+        "Community gardens not only provide fresh produce but also foster social __________ among neighbors.",
+      options: ["interact", "interaction", "interactive", "interacting"],
+      correct: 1,
+      explanation:
+        "Đáp án là (B) 'interaction'. Sau tính từ 'social' cần một danh từ. Cụm 'social interaction' (sự tương tác xã hội) là một collocation chuẩn. Các từ còn lại không đúng dạng từ."
+    },
+    {
+      id: 27,
+      question:
+        "Unless governments enforce stricter regulations, deforestation will continue __________ an alarming rate.",
+      options: ["at", "in", "on", "with"],
+      correct: 0,
+      explanation:
+        "Đáp án đúng là (A) 'at'. Cụm cố định 'at + rate' (ở mức độ/tốc độ). 'At an alarming rate' là một collocation rất phổ biến trong môi trường – dễ gây nhầm nếu không quen. 'Unless' mang nghĩa 'trừ khi', mở đầu mệnh đề điều kiện."
+    },
+    {
+      id: 28,
+      question:
+        "Activists are __________ petitions to urge policymakers to address climate inequality.",
+      options: ["circulate", "circulates", "circulated", "circulating"],
       correct: 3,
-      explanation: "Đáp án đúng là (D) 'and' vì nối thông tin. Kiến thức ngữ pháp: Liên từ 'and' nối mệnh đề thời gian; phù hợp mô tả sự kiện."
+      explanation:
+        "Đáp án đúng là (D) 'circulating'. Dạng tiếp diễn 'are + V-ing' diễn tả hành động đang diễn ra trong hiện tại. Các nhà hoạt động đang thu thập/chia sẻ đơn kiến nghị."
     },
     {
-      id: 35,
-      type: "fill",
-      question: "(35) - Điền từ thích hợp",
-      context: "Future activities include workshops (35) sustainable gardening...",
-      options: ["at", "with", "on", "for"],
-      correct: 2,
-      explanation: "Đáp án đúng là (C) 'on' vì chủ đề. Kiến thức ngữ pháp: 'On + danh từ' chỉ nội dung hội thảo; 'include + danh từ' liệt kê."
-    },
-    {
-      id: 36,
-      type: "comprehension",
-      question: "(36) - The initiative focuses on __________.",
-      options: ["Planting trees and green spaces", "Building factories", "Reducing volunteers", "No focus"],
+      id: 29,
+      question:
+        "The sustainable development goals aim __________ eradicating poverty while protecting the environment.",
+      options: ["at", "for", "in", "on"],
       correct: 0,
-      explanation: "Đáp án đúng là (A) vì 'planting trees and creating green spaces' (trồng cây và tạo không gian xanh). Kiến thức đọc hiểu: Mục tiêu từ phần mở đầu."
+      explanation:
+        "Đáp án là (A) 'at'. Cấu trúc 'aim at + V-ing' diễn tả mục tiêu của một hành động/chính sách. 'Eradicating poverty' là danh động từ V-ing đóng vai trò tân ngữ."
     },
     {
-      id: 37,
-      type: "comprehension",
-      question: "(37) - When is the kickoff event?",
-      options: ["March 10", "April 10", "May 10", "Not specified"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'on April 10' (ngày 10/4). Kiến thức đọc hiểu: Ngày từ lịch sự kiện."
+      id: 30,
+      question:
+        "Renewable energy sources, __________ solar and wind power, are key to mitigating climate change.",
+      options: ["such as", "despite", "unless", "although"],
+      correct: 0,
+      explanation:
+        "Đáp án là (A) 'such as'. Câu dùng để *liệt kê ví dụ* cho 'renewable energy sources'. Dấu phẩy trước 'such as' giúp tách phần ví dụ (solar, wind power) khỏi mệnh đề chính."
+    }
+  ]
+},
+        part6: {
+      title: "PART 6: Cloze Text (Email/Announcement)",
+      description: "10 câu hỏi - Điền từ/cụm vào văn bản email về chiến dịch môi trường xã hội. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+      type: "reading",
+      text: `To: Community Members
+    From: Emma Rodriguez, Environmental Advocate  
+    Subject: Join Our Urban Greening Initiative
+
+
+    Dear Neighbors,
+
+    We are launching the Urban Greening Initiative to combat climate change effects in our city. This community-driven project (31) planting trees and creating green spaces in underserved areas, promoting both environmental health and social cohesion.
+
+    The kickoff event is on April 10 at Central Park, starting at 10 a.m. (34) volunteers will receive tools and guidance; no experience necessary. By participating, you'll help (32) air quality and provide shade for vulnerable populations.
+
+    Future activities include workshops (35) sustainable gardening on April 17 and a neighborhood forum on eco-justice on April 24. These sessions aim to (33) residents with knowledge for long-term impact.
+
+    To sign up, visit our website or reply to this email. Together, we can build a greener, more equitable society.
+
+    Best regards,
+
+    Emma Rodriguez
+    Environmental Advocate
+    GreenCity Network`,
+      "questions": [
+    {
+      "id": 31,
+      "type": "fill",
+      "question": "(31) - Điền từ thích hợp",
+      "context": "This community-driven project (31) planting trees...",
+      "options": [
+        "involves",
+        "avoids",
+        "delays",
+        "ignores"
+      ],
+      "correct": 0,
+      "explanation": "Đáp án đúng là **(A) 'involves'** (bao gồm). Ngữ pháp yêu cầu một động từ ở thì Hiện tại Đơn (vì chủ ngữ là 'project' số ít) và phải đi với Gerund ('planting'). 'Involves' có nghĩa là 'bao gồm, có liên quan', rất phù hợp để mô tả các hoạt động của một dự án. Các từ khác ('avoids' - tránh, 'delays' - trì hoãn, 'ignores' - phớt lờ) mang nghĩa tiêu cực và không hợp ngữ cảnh."
     },
     {
-      id: 38,
-      type: "comprehension",
-      question: "(38) - What is required for volunteers?",
-      options: ["Experience", "Tools and guidance", "Payment", "Nothing"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'receive tools and guidance; no experience necessary' (nhận công cụ và hướng dẫn; không cần kinh nghiệm). Kiến thức đọc hiểu: Hỗ trợ từ mô tả."
+      "id": 32,
+      "type": "fill",
+      "question": "(32) - Điền từ thích hợp",
+      "context": "By participating, you'll help (32) air quality...",
+      "options": [
+        "worsen",
+        "improve",
+        "maintain",
+        "ignore"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) 'improve'** (cải thiện). Mục tiêu của việc trồng cây và tạo không gian xanh là **cải thiện** chất lượng không khí ('air quality'). Cấu trúc 'help + V nguyên mẫu' (giúp làm gì) được sử dụng. Các từ khác ('worsen' - làm tồi tệ hơn, 'ignore' - phớt lờ) trái nghĩa, còn 'maintain' (duy trì) không thể hiện tác động tích cực của việc trồng cây."
     },
     {
-      id: 39,
-      type: "comprehension",
-      question: "(39) - What is the workshop on April 17?",
-      options: ["Eco-justice", "Sustainable gardening", "Air quality", "Tree planting"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'workshops on sustainable gardening on April 17' (hội thảo về làm vườn bền vững ngày 17/4). Kiến thức đọc hiểu: Lịch hoạt động."
+      "id": 33,
+      "type": "fill",
+      "question": "(33) - Điền từ thích hợp",
+      "context": "These sessions aim to (33) residents with knowledge...",
+      "options": [
+        "deprive",
+        "burden",
+        "equip",
+        "confuse"
+      ],
+      "correct": 2,
+      "explanation": "Đáp án đúng là **(C) 'equip'** (trang bị). Cấu trúc **'equip somebody with something'** (trang bị cho ai cái gì) là một collocation (kết hợp từ) cố định. Ở đây, mục tiêu là trang bị cho cư dân ('residents') **kiến thức** ('knowledge') để tạo ra tác động lâu dài. Các từ còn lại ('deprive' - tước đoạt, 'burden' - gây gánh nặng, 'confuse' - gây bối rối) đều mang nghĩa tiêu cực và sai cấu trúc."
     },
     {
-      id: 40,
-      type: "comprehension",
-      question: "(40) - How to sign up?",
-      options: ["In person only", "Visit website or reply email", "No signup", "By phone"],
-      correct: 1,
-      explanation: "Đáp án đúng là (B) vì 'visit our website or reply to this email' (truy cập website hoặc trả lời email). Kiến thức đọc hiểu: Phương thức từ kết thúc."
+      "id": 34,
+      "type": "fill",
+      "question": "(34) - Điền từ thích hợp",
+      "context": "The kickoff event is on April 10 at Central Park, starting at 10 a.m. (34) volunteers will receive tools...",
+      "options": [
+        "however",
+        "besides",
+        "therefore",
+        "and"
+      ],
+      "correct": 3,
+      "explanation": "Đáp án đúng là **(D) 'and'** (và). Trong ngữ cảnh này, dấu chấm câu (period) trước khoảng trống đã được sử dụng như một phép nối đơn giản để giới thiệu mệnh đề tiếp theo, cung cấp thêm thông tin về sự kiện. Liên từ **'And'** là lựa chọn tự nhiên và trung lập nhất để thêm thông tin rằng 'tình nguyện viên sẽ nhận dụng cụ'. Các từ nối khác ('however' - tuy nhiên, 'therefore' - do đó) chỉ mối quan hệ tương phản hoặc nguyên nhân-kết quả và không phù hợp."
+    },
+    {
+      "id": 35,
+      "type": "fill",
+      "question": "(35) - Điền từ thích hợp",
+      "context": "Future activities include workshops (35) sustainable gardening...",
+      "options": [
+        "at",
+        "with",
+        "on",
+        "for"
+      ],
+      "correct": 2,
+      "explanation": "Đáp án đúng là **(C) 'on'** (về, về chủ đề). Giới từ **'on'** thường được dùng để chỉ **chủ đề** của một buổi hội thảo, bài giảng, hoặc cuộc thảo luận. 'Workshops **on** sustainable gardening' có nghĩa là 'các buổi hội thảo về chủ đề làm vườn bền vững'."
+    },
+    {
+      "id": 36,
+      "type": "comprehension",
+      "question": "(36) - The initiative focuses on __________.",
+      "options": [
+        "Planting trees and green spaces",
+        "Building factories",
+        "Reducing volunteers",
+        "No focus"
+      ],
+      "correct": 0,
+      "explanation": "Đáp án đúng là **(A) Planting trees and green spaces**. Câu đầu tiên của đoạn 2 nêu rõ: 'This community-driven project involves **planting trees and creating green spaces** in underserved areas...'"
+    },
+    {
+      "id": 37,
+      "type": "comprehension",
+      "question": "(37) - When is the kickoff event?",
+      "options": [
+        "March 10",
+        "April 10",
+        "May 10",
+        "Not specified"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) April 10**. Câu đầu tiên của đoạn 3 thông báo: 'The kickoff event is **on April 10** at Central Park...'"
+    },
+    {
+      "id": 38,
+      "type": "comprehension",
+      "question": "(38) - What is required for volunteers?",
+      "options": [
+        "Experience",
+        "Tools and guidance",
+        "Payment",
+        "Nothing"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Tools and guidance**. Đoạn 3 nói: 'volunteers will **receive tools and guidance; no experience necessary**.' Điều này ngụ ý rằng họ cần nhận công cụ và hướng dẫn (chứ không phải tự mang theo) và không cần kinh nghiệm."
+    },
+    {
+      "id": 39,
+      "type": "comprehension",
+      "question": "(39) - What is the workshop on April 17?",
+      "options": [
+        "Eco-justice",
+        "Sustainable gardening",
+        "Air quality",
+        "Tree planting"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Sustainable gardening**. Đoạn 4 liệt kê: 'Future activities include workshops **on sustainable gardening on April 17**...'"
+    },
+    {
+      "id": 40,
+      "type": "comprehension",
+      "question": "(40) - How to sign up?",
+      "options": [
+        "In person only",
+        "Visit website or reply email",
+        "No signup",
+        "By phone"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Visit website or reply email**. Câu cuối cùng của đoạn 4 hướng dẫn: 'To sign up, **visit our website or reply to this email**.'"
     }
   ]
 },
@@ -449,78 +519,128 @@ GreenCity Network`,
   Social Worker, Community Aid
   713-555-2345
   456 Equity St, Houston, TX 77002`,
-      questions: [
-        {
-          id: 41,
-          question: "What does the advertisement focus on?",
-          options: ["Economic growth", "Environmental racism and inequality", "Travel advocacy", "No focus"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'tackle environmental racism and inequality' (xử lý phân biệt chủng tộc môi trường và bất bình đẳng). Kiến thức đọc hiểu: Mục tiêu từ tiêu đề."
-        },
-        {
-          id: 42,
-          question: "How did Mr. Miller learn about EcoJustice?",
-          options: ["From a friend", "From Green Living magazine", "From TV", "From email"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'I read your ad in the Green Living magazine' (Tôi đọc quảng cáo trên tạp chí Green Living). Kiến thức suy luận: Nguồn từ email."
-        },
-        {
-          id: 43,
-          question: "What is Mr. Miller's job?",
-          options: ["Lawyer", "Social worker", "Teacher", "Doctor"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'a social worker' (nhân viên xã hội). Kiến thức đọc hiểu: Nghề từ chữ ký."
-        },
-        {
-          id: 44,
-          question: "What does Mr. Miller want to volunteer for?",
-          options: ["Donations only", "Community training workshops", "Policy lobbying", "Youth protests"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'volunteer for your community training workshops' (tình nguyện cho hội thảo đào tạo cộng đồng). Kiến thức đọc hiểu: Yêu cầu cụ thể."
-        },
-        {
-          id: 45,
-          question: "What is Mr. Miller's neighborhood affected by?",
-          options: ["Clean air", "Industrial pollution", "Green spaces", "No issues"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'low-income neighborhood hit hard by industrial pollution' (khu thu nhập thấp bị ảnh hưởng nặng bởi ô nhiễm công nghiệp). Kiến thức đọc hiểu: Ngữ cảnh cá nhân."
-        },
-        {
-          id: 46,
-          question: "How many hours can Mr. Miller commit monthly?",
-          options: ["5 hours", "10 hours", "20 hours", "Full-time"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'commit 10 hours monthly' (cam kết 10 giờ hàng tháng). Kiến thức đọc hiểu: Thời gian từ cam kết."
-        },
-        {
-          id: 47,
-          question: "When is Mr. Miller available?",
-          options: ["Weekdays", "Weekends", "Evenings only", "Not available"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'available weekends' (có sẵn cuối tuần). Kiến thức đọc hiểu: Lịch từ email."
-        },
-        {
-          id: 48,
-          question: "What else interests Mr. Miller?",
-          options: ["Donating money", "Youth programs", "Legal training only", "No other"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'interested in youth programs for my after-school group' (quan tâm chương trình thanh niên cho nhóm sau giờ học). Kiến thức đọc hiểu: Lợi ích bổ sung."
-        },
-        {
-          id: 49,
-          question: "What has EcoJustice achieved?",
-          options: ["No wins", "Policy wins in 5 cities", "Closed factories", "Reduced donations"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Successfully lobbied for clean air standards in 5 cities' (vận động thành công tiêu chuẩn không khí sạch ở 5 thành phố). Kiến thức đọc hiểu: Tác động từ quảng cáo."
-        },
-        {
-          id: 50,
-          question: "How to get involved per the ad?",
-          options: ["Email only", "Donate or volunteer at ecojustice.org", "In person", "No way"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Donate or volunteer at ecojustice.org' (quyên góp hoặc tình nguyện tại ecojustice.org). Kiến thức đọc hiểu: Lời kêu gọi hành động."
-        }
-      ]
+     "questions": [
+    {
+      "id": 41,
+      "question": "What does the advertisement focus on?",
+      "options": [
+        "Economic growth",
+        "Environmental racism and inequality",
+        "Travel advocacy",
+        "No focus"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Environmental racism and inequality**. Câu đầu tiên trong nội dung quảng cáo nêu rõ mục tiêu: 'EcoJustice Network empowers communities to tackle **environmental racism and inequality**.' (Mạng lưới EcoJustice trao quyền cho cộng đồng để giải quyết vấn nạn phân biệt chủng tộc và bất bình đẳng môi trường)."
+    },
+    {
+      "id": 42,
+      "question": "How did Mr. Miller learn about EcoJustice?",
+      "options": [
+        "From a friend",
+        "From Green Living magazine",
+        "From TV",
+        "From email"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) From Green Living magazine**. Trong email, John Miller nói: 'I read your ad in the **Green Living magazine**'. Đây là thông tin quan trọng nối giữa hai văn bản (ad và email)."
+    },
+    {
+      "id": 43,
+      "question": "What is Mr. Miller's job?",
+      "options": [
+        "Lawyer",
+        "Social worker",
+        "Teacher",
+        "Doctor"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Social worker**. Thông tin được tìm thấy trong phần mở đầu thư ('work as a **social worker**') và phần chữ ký ('Social Worker, Community Aid')."
+    },
+    {
+      "id": 44,
+      "question": "What does Mr. Miller want to volunteer for?",
+      "options": [
+        "Donations only",
+        "Community training workshops",
+        "Policy lobbying",
+        "Youth protests"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Community training workshops**. John Miller viết: 'I'd like to volunteer for your **community training workshops** to empower residents.' (Tôi muốn tình nguyện tham gia hội thảo đào tạo cộng đồng của các bạn...). Mặc dù EcoJustice làm nhiều việc, đây là yêu cầu tình nguyện cụ thể của anh ấy."
+    },
+    {
+      "id": 45,
+      "question": "What is Mr. Miller's neighborhood affected by?",
+      "options": [
+        "Clean air",
+        "Industrial pollution",
+        "Green spaces",
+        "No issues"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Industrial pollution**. John Miller mô tả khu vực mình làm việc là: 'a low-income neighborhood **hit hard by industrial pollution**.' (một khu thu nhập thấp bị ảnh hưởng nặng nề bởi ô nhiễm công nghiệp)."
+    },
+    {
+      "id": 46,
+      "question": "How many hours can Mr. Miller commit monthly?",
+      "options": [
+        "5 hours",
+        "10 hours",
+        "20 hours",
+        "Full-time"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) 10 hours**. John Miller cam kết thời gian: 'I can **commit 10 hours monthly**.'"
+    },
+    {
+      "id": 47,
+      "question": "When is Mr. Miller available?",
+      "options": [
+        "Weekdays",
+        "Weekends",
+        "Evenings only",
+        "Not available"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Weekends**. Anh ấy nói: 'I'm **available weekends**'."
+    },
+    {
+      "id": 48,
+      "question": "What else interests Mr. Miller?",
+      "options": [
+        "Donating money",
+        "Youth programs",
+        "Legal training only",
+        "No other"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Youth programs**. Sau khi đề cập đến hội thảo, anh ấy nói thêm: 'Also, interested in **youth programs** for my after-school group.'."
+    },
+    {
+      "id": 49,
+      "question": "What has EcoJustice achieved?",
+      "options": [
+        "No wins",
+        "Policy wins in 5 cities",
+        "Closed factories",
+        "Reduced donations"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Policy wins in 5 cities**. Phần 'Our Impact' trong quảng cáo liệt kê thành tích số 1 là: 'Successfully lobbied for clean air standards in **5 cities**' (Vận động thành công tiêu chuẩn không khí sạch ở 5 thành phố)."
+    },
+    {
+      "id": 50,
+      "question": "How to get involved per the ad?",
+      "options": [
+        "Email only",
+        "Donate or volunteer at ecojustice.org",
+        "In person",
+        "No way"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Donate or volunteer at ecojustice.org**. Phần cuối của quảng cáo là lời kêu gọi hành động: 'Donate or **volunteer at ecojustice.org**.' (Quyên góp hoặc tình nguyện tại ecojustice.org)."
+    }
+  ]
     },
     part8: {
       title: "PART 8: Text Message Chain",
@@ -532,78 +652,128 @@ GreenCity Network`,
   Doctor Chen (10:20): Approve. Schedule after lunch. Promote on community board.
   Tom (15:30): Setup done. Attendance looks high—over 100 RSVPs!
   Doctor Chen (15:35): Excellent. Let's ensure inclusive discussions for all voices.`,
-      questions: [
-        {
-          id: 51,
-          question: "What is the event?",
-          options: ["Party", "Eco-forum", "Wedding", "No event"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'eco-forum setup' (thiết lập diễn đàn sinh thái). Kiến thức suy luận: Chủ đề từ tin nhắn đầu."
-        },
-        {
-          id: 52,
-          question: "What themes to focus on?",
-          options: ["Profit", "Diversity—equity in sustainability", "Sports", "Food"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Focus on diversity themes—equity in sustainability' (Tập trung chủ đề đa dạng—công bằng trong bền vững). Kiến thức đọc hiểu: Hướng dẫn thiết kế."
-        },
-        {
-          id: 53,
-          question: "What does the youth group want?",
-          options: ["Banners", "A slot for anti-plastic talk", "Lunch", "No slot"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'youth group wants a slot for their anti-plastic talk' (nhóm thanh niên muốn khe thời gian cho bài nói chống nhựa). Kiến thức đọc hiểu: Yêu cầu bổ sung."
-        },
-        {
-          id: 54,
-          question: "When to schedule the talk?",
-          options: ["Morning", "After lunch", "Evening", "No schedule"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Schedule after lunch' (Lập lịch sau bữa trưa). Kiến thức đọc hiểu: Thời gian từ phê duyệt."
-        },
-        {
-          id: 55,
-          question: "Where to promote?",
-          options: ["TV", "Community board", "Radio", "No promotion"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Promote on community board' (Quảng bá trên bảng cộng đồng). Kiến thức đọc hiểu: Phương tiện xã hội."
-        },
-        {
-          id: 56,
-          question: "What is done by 15:30?",
-          options: ["Nothing", "Setup done", "Talk started", "Banners removed"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Setup done' (Thiết lập hoàn tất). Kiến thức suy luận: Cập nhật tiến độ."
-        },
-        {
-          id: 57,
-          question: "How many RSVPs?",
-          options: ["Under 50", "Over 100", "Exactly 100", "None"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Attendance looks high—over 100 RSVPs' (Sự tham dự cao—hơn 100 đăng ký). Kiến thức đọc hiểu: Số lượng từ báo cáo."
-        },
-        {
-          id: 58,
-          question: "What to ensure in discussions?",
-          options: ["Exclusion", "Inclusive for all voices", "Short talks", "No discussions"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'ensure inclusive discussions for all voices' (đảm bảo thảo luận bao quát cho mọi tiếng nói). Kiến thức đọc hiểu: Mục tiêu cuối."
-        },
-        {
-          id: 59,
-          question: "What is the response to setup?",
-          options: ["Poor", "Excellent", "Delayed", "Canceled"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Excellent' (Tuyệt vời). Kiến thức suy luận: Phản hồi tích cực."
-        },
-        {
-          id: 60,
-          question: "What does the youth talk address?",
-          options: ["Pro-plastic", "Anti-plastic", "Banners", "Lunch"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'anti-plastic talk' (bài nói chống nhựa). Kiến thức đọc hiểu: Chủ đề từ yêu cầu."
-        }
-      ]
+      "questions": [
+    {
+      "id": 51,
+      "question": "What is the event?",
+      "options": [
+        "Party",
+        "Eco-forum",
+        "Wedding",
+        "No event"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Eco-forum**. Tom hỏi: 'ready for the **eco-forum setup**?' (sẵn sàng cho việc thiết lập diễn đàn sinh thái chưa?). Đây là từ khóa xác định loại sự kiện."
+    },
+    {
+      "id": 52,
+      "question": "What themes to focus on?",
+      "options": [
+        "Profit",
+        "Diversity—equity in sustainability",
+        "Sports",
+        "Food"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Diversity—equity in sustainability**. Doctor Chen hướng dẫn: 'Focus on **diversity themes—equity in sustainability**.' (Tập trung vào chủ đề đa dạng—công bằng trong bền vững). Đây là chỉ đạo về nội dung."
+    },
+    {
+      "id": 53,
+      "question": "What does the youth group want?",
+      "options": [
+        "Banners",
+        "A slot for anti-plastic talk",
+        "Lunch",
+        "No slot"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) A slot for anti-plastic talk**. Tom thông báo: 'youth group wants a **slot for their anti-plastic talk**.' ('slot' ở đây là 'khe thời gian')."
+    },
+    {
+      "id": 54,
+      "question": "When to schedule the talk?",
+      "options": [
+        "Morning",
+        "After lunch",
+        "Evening",
+        "No schedule"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) After lunch**. Doctor Chen trả lời yêu cầu của Tom: 'Schedule **after lunch**.' (Lập lịch sau bữa trưa)."
+    },
+    {
+      "id": 55,
+      "question": "Where to promote?",
+      "options": [
+        "TV",
+        "Community board",
+        "Radio",
+        "No promotion"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Community board**. Doctor Chen chỉ thị: 'Promote on **community board**.' (Quảng bá trên bảng cộng đồng)."
+    },
+    {
+      "id": 56,
+      "question": "What is done by 15:30?",
+      "options": [
+        "Nothing",
+        "Setup done",
+        "Talk started",
+        "Banners removed"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Setup done**. Tom gửi cập nhật vào 15:30: '**Setup done**.' (Thiết lập đã hoàn tất)."
+    },
+    {
+      "id": 57,
+      "question": "How many RSVPs?",
+      "options": [
+        "Under 50",
+        "Over 100",
+        "Exactly 100",
+        "None"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Over 100**. Tom báo cáo: 'Attendance looks high—**over 100 RSVPs**!' (Hơn 100 người đã đăng ký xác nhận tham dự)."
+    },
+    {
+      "id": 58,
+      "question": "What to ensure in discussions?",
+      "options": [
+        "Exclusion",
+        "Inclusive for all voices",
+        "Short talks",
+        "No discussions"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Inclusive for all voices**. Doctor Chen dặn dò: 'Let's ensure **inclusive discussions for all voices**.' (Hãy đảm bảo các cuộc thảo luận bao quát cho mọi tiếng nói). Đây là mục tiêu quan trọng về mặt công bằng xã hội."
+    },
+    {
+      "id": 59,
+      "question": "What is the response to setup?",
+      "options": [
+        "Poor",
+        "Excellent",
+        "Delayed",
+        "Canceled"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Excellent**. Khi Tom báo cáo setup đã xong và có nhiều RSVP, Doctor Chen phản hồi: '**Excellent**.' (Tuyệt vời), thể hiện sự hài lòng với tiến độ."
+    },
+    {
+      "id": 60,
+      "question": "What does the youth talk address?",
+      "options": [
+        "Pro-plastic",
+        "Anti-plastic",
+        "Banners",
+        "Lunch"
+      ],
+      "correct": 1,
+      "explanation": "Đáp án đúng là **(B) Anti-plastic**. Tom đề cập đến: 'slot for their **anti-plastic talk**.' (khe thời gian cho bài nói chống nhựa)."
+    }
+  ]
     }
   }
 };
