@@ -165,9 +165,9 @@ export const ENHANCED_VOICE_SETTINGS = {
 
   // Professional Females - thêm sắc thái
   Sarah: { 
-    pitch: 1.45,
-    rate: 0.95,
-    volume: 0.88,
+    pitch: 1.25,
+    rate: 0.55,
+    volume: 0.68,
     style: "cheerful",
     emotion: "friendly",
     speechPattern: "flowing",
