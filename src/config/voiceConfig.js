@@ -6,7 +6,7 @@ export const GENDER_CATEGORIES = {
   MALE: ['Man','Kevin', 'Mark', 'Dr.Chen','Ben', 'Client 1', 'Professor', 'John', 'Mike', 'Waiter', 
          'Customer', 'Manager', 'HR Rep', 'Interviewer 1', 'Interviewer 2', 
          'Candidate', 'Professor A', 'Student 1', 'Student', 'Parent', 
-         'Travel Agent', 'Narrator', 'Smith', 'Tom','Peter','Alex','Training','HR'],
+         'Travel Agent', 'Narrator','Dr. Harrison', 'Smith', 'Tom','Peter','Alex','Training','HR','Professor Mitchell',],
   NEUTRAL: ['Narrator', 'System', 'AI Assistant']
 };
 
@@ -114,16 +114,34 @@ export const ENHANCED_VOICE_SETTINGS = {
   },
 
   Ben: { 
-    pitch: 0.92,
-    rate: 1.15,
-    volume: 0.88,
-    style: "confident",
-    emotion: "assertive",
-    speechPattern: "direct",
+    pitch: 1.12,
+    rate: 0.35,
+    volume: 1.58,
+    pauseFrequency: "low",
+    emotional: "friendly",
+    style: "approachable",},
+
+'Doctor Chen': { 
+    pitch: 1.22,
+    rate: 0.3,
+    volume: 0.79,
+    style: "professional",
+    emotion: "caring",
+    speechPattern: "measured",
     pauseFrequency: "medium",
     emphasis: "clear"
   },
-'Doctor Chen': { 
+  'Professor Mitchell': { 
+    pitch: 1.0,
+    rate: 0.88,
+    volume: 0.89,
+    style: "professional",
+    emotion: "caring",
+    speechPattern: "measured",
+    pauseFrequency: "medium",
+    emphasis: "clear"
+  },  
+  'Dr. Harrison': { 
     pitch: 1.32,
     rate: 0.88,
     volume: 0.89,
@@ -235,9 +253,9 @@ export const ENHANCED_VOICE_SETTINGS = {
   },
 
   'Professor A': { 
-    pitch: 1.02,
-    rate: 0.85,
-    volume: 0.85,
+    pitch: 0.92,
+    rate: 0.05,
+    volume: 1.85,
     style: "authoritative",
     emotion: "wise",
     speechPattern: "deliberate",
@@ -314,9 +332,9 @@ export const ENHANCED_VOICE_SETTINGS = {
 
   // Professional Roles
   Manager: { 
-    pitch: 0.92,
-    rate: 0.95,
-    volume: 0.88,
+    pitch: 0.62,
+    rate: 0.65,
+    volume: 1.58,
     style: "directive",
     emotion: "decisive",
     speechPattern: "commanding",
@@ -742,63 +760,133 @@ export const SPEAKER_THEMES = ENHANCED_SPEAKER_THEMES;
  * Icon emoji cho từng speaker - FIXED: Sử dụng string thay vì object
  */
 export const SPEAKER_ICONS = {
-  // Professional
+  // ===== PROFESSIONAL / CORPORATE =====
   'Travel Agent': '✈️',
   'Client 1': '👨‍💼',
   'Client 2': '👩‍💼',
   Manager: '💼',
   'HR Rep': '👔',
-  'Interviewer 1': '💼',
-  'Interviewer 2': '💼',
+  'Interviewer 1': '🎤',
+  'Interviewer 2': '📋',
   Candidate: '📝',
+  CEO: '👑',
+  CFO: '💰',
+  'Executive A': '🏢',
+  'Executive B': '📊',
   
-  // Academic
+  // ===== ACADEMIC / RESEARCH =====
   Professor: '👨‍🏫',
   'Professor A': '👨‍🏫',
+  'Professor Mitchell': '🔬',
+  'Dr. Harrison': '🧬',
+  'Dr. Rodriguez': '🧠',
+  'Dr. James Chen': '📐',
+  'Dr. Martinez': '📈',
+  'Dr. Patel': '🔍',
+  'Dr. Elena Rodriguez': '🧬',
+  'Dr. James Chen': '📊',
+  'Dr. Margaret Whitmore': '📚',
   'Student 1': '🧑‍🎓',
   'Student 2': '👩‍🎓',
-  'Student B': '🧑‍🎓',
-  Student: '🧑‍🎓',
+  'Student B': '🎓',
+  Student: '📖',
+  'Academic Presenter': '🎓',
+  Researcher: '🔬',
   
-  // Service
+  // ===== SERVICE / RETAIL =====
   Waiter: '👨‍🍳',
   Customer: '🛒',
   'Sales Associate': '🛍️',
+  'Sales Representative': '💳',
+  Bartender: '🍹',
+  'Restaurant Staff': '🍽️',
+  
+  // ===== HEALTHCARE / COUNSELING =====
+  Counselor: '🧑‍⚕️',
+  'Doctor Chen': '👩‍⚕️',
+  Doctor: '⚕️',
+  Nurse: '🩺',
+  Therapist: '🧘',
+  'Health Professional': '💊',
+  
+  // ===== GOVERNMENT / INSTITUTIONAL =====
+  'HR Director': '🏛️',
   HR: '🏢',
   Training: '🎓',
-  // Healthcare/Counseling
-  Counselor: '🧑‍⚕️',
-
-  'Doctor Chen':'👩‍⚕️',
-    
+  Administrator: '📋',
+  Officer: '🕵️',
+  Official: '⚖️',
   
+  // ===== BUSINESS / FINANCE =====
+  'Marketing Director': '📢',
+  'Business Owner': '🏪',
+  Consultant: '💡',
+  Analyst: '📊',
+  Accountant: '💹',
+  Entrepreneur: '🚀',
   
-  // General
+  // ===== MEDIA / JOURNALISM =====
+  'Editor-in-Chief': '📰',
+  Journalist: '📡',
+  Presenter: '🎙️',
+  
+  // ===== GENERAL PEOPLE (Diverse) =====
   Mark: '🧑‍🔬',
-  Sarah: '👩',
-  Anna: '👩',
+  Sarah: '👩‍💻',
+  Anna: '👩‍🎨',
   Ben: '👨',
-  Alex: '👨',
-  Mike: '👨',
-  Kevin: '👨',
-  John: '👨',
+  Alex: '🧑‍🏫',
+  Mike: '👨‍💻',
+  Kevin: '🧑‍🔧',
+  John: '👨‍⚖️',
   Tom: '🧑‍🎓',
-  Peter: '🧑‍🎓',
-  Emma: '👩',
-  Trang: '👩',
-  Lisa: '👩',
-  Jennifer: '👩',
-  Linda: '👩',
+  Peter: '👨‍🎓',
+  Emma: '👩‍🎤',
+  Trang: '👩‍🌾',
+  Lisa: '👩‍⚕️',
+  Jennifer: '👩‍🏫',
+  Linda: '👩‍💼',
+  Jody: '👩‍💻',
+  'Jody Annesly': '👩‍💼',
+  Angela: '👩‍🎓',
+  'Uncle Robertson': '👨‍🏫',
+  Natalie: '👩‍💼',
+  'Natalie Obi': '👩‍💼',
+  
+  // ===== FAMILY ROLES =====
+  Mother: '👩',
+  Father: '👨',
+  Sister: '👧',
+  Brother: '👦',
+  Aunt: '👩‍🦰',
+  Uncle: '👨‍🦱',
+  Grandmother: '👵',
+  Grandfather: '👴',
   'Older Woman': '👵',
+  'Older Man': '👴',
   Parent: '👪',
+  Family: '👨‍👩‍👧‍👦',
+  Girlfriend: '💕',
+  Boyfriend: '💍',
   
-  // Special
+  // ===== SPECIAL ROLES =====
   Narrator: '📖',
+  Speaker: '🎙️',
+  Host: '🎬',
+  Guest: '🎭',
+  Participant: '👥',
+  Team: '👨‍👩‍👦',
+  Group: '👫',
   
-  // Default
+  // ===== DIALOGUE PARTICIPANTS (Generic) =====
+  'Person A': '🧑',
+  'Person B': '👤',
+  'Man': '👨',
+  'Woman': '👩',
+  
+  // ===== DEFAULT =====
   default: '👤'
 };
-
 /**
  * Emotional icon variants - tách riêng để sử dụng khi cần
  */
