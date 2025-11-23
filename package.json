@@ -3,8 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://khoale-dev-code.github.io/huflit-test/",
-
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -20,8 +18,7 @@
     "firebase:deploy": "firebase deploy",
     "firebase:console": "start https://console.firebase.google.com/project/huflit-test-4ce25/overview",
     "firebase:hosting": "firebase open hosting",
-    "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.53.8",
