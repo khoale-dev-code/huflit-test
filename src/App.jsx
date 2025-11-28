@@ -12,17 +12,17 @@ import ResultsDisplay from './components/ResultsDisplay';
 import VocabularyPractice from './components/VocabularyPractice';
 import AuthModal from './components/AuthModal';
 import { useOnlineUsers } from './hooks/useOnlineUsers.js';
-
-// ✅ Import ExamAnswersPage
 import ExamAnswersPage from './components/ExamAnswersPage.jsx';
 
 // ✅ Lazy load components
 const GrammarReview = lazy(() => import('./components/GrammarReview'));
 const FullExamMode = lazy(() => import('./components/FullExamMode'));
 
-import { Target, Trophy, FileText, Zap, GraduationCap } from 'lucide-react';
+import { Target, Trophy, FileText, Zap, GraduationCap, ArrowLeft } from 'lucide-react';
 
-// --- StatCard được memo hóa ---
+// ========================================
+// StatCard (Mobile Optimized)
+// ========================================
 const StatCard = memo(({ icon: Icon, label, value, color }) => {
   const colorMap = {
     orange: 'border-orange-300 text-orange-700 bg-orange-50',
@@ -32,17 +32,19 @@ const StatCard = memo(({ icon: Icon, label, value, color }) => {
   };
 
   return (
-    <div className={`rounded-xl p-3 sm:p-4 shadow-sm border-2 transition-shadow hover:shadow-md ${colorMap[color]} text-center will-change-auto`}>
-      <Icon className="w-5 h-5 sm:w-6 mx-auto mb-1.5 opacity-80" />
-      <p className="text-xs text-gray-600 font-semibold uppercase tracking-tight">{label}</p>
-      <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">{value}</p>
+    <div className={`rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 shadow-sm border-2 transition-shadow hover:shadow-md ${colorMap[color]} text-center will-change-auto`}>
+      <Icon className="w-4 h-4 sm:w-5 md:w-6 mx-auto mb-1 opacity-80" />
+      <p className="text-xs font-semibold uppercase tracking-tight text-gray-600">{label}</p>
+      <p className="text-base sm:text-lg md:text-2xl font-bold text-gray-900 mt-0.5">{value}</p>
     </div>
   );
 });
 
 StatCard.displayName = 'StatCard';
 
-// --- StatsSection được memo hóa ---
+// ========================================
+// StatsSection (Mobile Optimized)
+// ========================================
 const StatsSection = memo(({ score, isSignedIn }) => {
   if (!isSignedIn || score.total === 0) return null;
 
@@ -58,37 +60,59 @@ const StatsSection = memo(({ score, isSignedIn }) => {
 
 StatsSection.displayName = 'StatsSection';
 
-// --- FullExamPrompt được memo hóa ---
+// ========================================
+// FullExamPrompt (Mobile Optimized)
+// ========================================
 const FullExamPrompt = memo(({ onStartFullExam }) => (
-  <section className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-      <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        <div className="p-3 sm:p-4 rounded-full bg-amber-100 border border-amber-300">
-          <GraduationCap className="w-6 h-6 sm:w-8 text-amber-700" />
-        </div>
-        <h3 className="text-lg sm:text-2xl font-bold text-gray-800">
+  <section className="bg-white rounded-lg sm:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6">
+      <div className="p-2.5 sm:p-3 md:p-4 rounded-full bg-amber-100 border border-amber-300 flex-shrink-0">
+        <GraduationCap className="w-5 h-5 sm:w-6 md:w-8 text-amber-700" />
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <h3 className="text-base sm:text-lg md:text-2xl font-bold text-gray-800 mb-1.5 sm:mb-2">
           Thi Thử <span className="text-amber-600">Toàn Phần</span>
         </h3>
-      </div>
-
-      <div className="flex-1 min-w-0 w-full sm:w-auto">
-        <p className="text-gray-600 mb-3 sm:mb-4 text-xs sm:text-sm leading-relaxed">
+        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-2 sm:mb-3">
           Thi mô phỏng 60 câu với timer chuẩn
         </p>
-        <button
-          onClick={onStartFullExam}
-          className="w-full sm:w-auto px-5 sm:px-8 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 text-sm sm:text-base"
-        >
-          Bắt đầu ngay
-        </button>
       </div>
+
+      <button
+        onClick={onStartFullExam}
+        className="w-full sm:w-auto px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg sm:rounded-lg font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 text-xs sm:text-sm md:text-base whitespace-nowrap"
+      >
+        Bắt đầu
+      </button>
     </div>
   </section>
 ));
 
 FullExamPrompt.displayName = 'FullExamPrompt';
 
-// ✅ Memoized versions của các component để tránh re-render không cần thiết
+// ========================================
+// BackButton (Mobile Optimized)
+// ========================================
+const BackButton = memo(({ onClick, show = true }) => {
+  if (!show) return null;
+  
+  return (
+    <button
+      onClick={onClick}
+      className="group inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-700 hover:to-blue-700 text-yellow-400 rounded-lg sm:rounded-lg md:rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 shadow-md text-xs sm:text-sm md:text-base"
+    >
+      <ArrowLeft className="w-3.5 h-3.5 sm:w-4 md:w-5 transition-transform duration-300 group-hover:-translate-x-1" />
+      <span>Quay lại</span>
+    </button>
+  );
+});
+
+BackButton.displayName = 'BackButton';
+
+// ========================================
+// Memoized Components
+// ========================================
 const MemoizedHeaderSection = memo(HeaderSection);
 const MemoizedUserProfile = memo(UserProfile);
 const MemoizedPartSelector = memo(PartSelector);
@@ -96,7 +120,9 @@ const MemoizedContentDisplay = memo(ContentDisplay);
 const MemoizedQuestionDisplay = memo(QuestionDisplay);
 const MemoizedResultsDisplay = memo(ResultsDisplay);
 
-// --- PartTestContent được memo hóa ---
+// ========================================
+// PartTestContent (Mobile Optimized)
+// ========================================
 const PartTestContent = memo(({
   isSignedIn,
   user,
@@ -117,7 +143,7 @@ const PartTestContent = memo(({
   score,
   onStartFullExam
 }) => (
-  <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+  <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
     <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
     {isSignedIn && <MemoizedUserProfile />}
     
@@ -166,13 +192,15 @@ const PartTestContent = memo(({
 
 PartTestContent.displayName = 'PartTestContent';
 
-// --- Main App Component ---
+// ========================================
+// Main App Component
+// ========================================
 function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [viewMode, setViewMode] = useState('test'); // 'test', 'profile', 'answers'
   const [currentPage, setCurrentPage] = useState('main'); // 'main', 'answers'
 
-  // ✅ BẮT BUỘC: GỌI HOOK ONLINE USERS Ở CẤP CAO NHẤT
+  // ✅ Hook online users
   const { onlineCount, totalUsers } = useOnlineUsers();
 
   const {
@@ -211,7 +239,6 @@ function App() {
     setViewMode('test');
   }, []);
 
-  // ✅ Navigation handlers cho ExamAnswersPage
   const handleGoToAnswers = useCallback(() => {
     setCurrentPage('answers');
     setViewMode('answers');
@@ -253,28 +280,19 @@ function App() {
     handleTestTypeChange('full');
   }, [handleTestTypeChange]);
 
-  // ✅ Render navigation bar với nút Answers
+  // ✅ Render navigation
   const renderNavigation = useCallback(() => {
     return (
-      <div className="mb-6 flex items-center gap-4">
-  <button
-    onClick={handleBackToMain}
-className="group inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-600 text-yellow-400 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 shadow-md"    style={{ display: currentPage === 'answers' ? 'inline-flex' : 'none' }}
-  >
-    <svg 
-      className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1" 
-      fill="none" 
-      stroke="currentColor" 
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-    </svg>
-    <span className="text-sm sm:text-base">Quay lại trang chính</span>
-  </button>
-</div>
+      <div className="mb-3 sm:mb-4 md:mb-6">
+        <BackButton 
+          onClick={handleBackToMain}
+          show={currentPage === 'answers'}
+        />
+      </div>
     );
-  }, [currentPage, handleBackToMain, handleGoToAnswers]);
+  }, [currentPage, handleBackToMain]);
 
+  // ✅ Render main content
   const renderMainContent = useCallback(() => {
     if (currentPage === 'answers') {
       return <ExamAnswersPage />;
@@ -282,13 +300,8 @@ className="group inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-
 
     if (viewMode === 'profile') {
       return (
-        <div className="max-w-7xl mx-auto">
-          <button
-            onClick={handleBackToTest}
-            className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold transition-colors"
-          >
-            ← Quay lại
-          </button>
+        <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
+          <BackButton onClick={handleBackToTest} show={true} />
           <MemoizedUserProfile currentUser={user} />
         </div>
       );
@@ -360,12 +373,11 @@ className="group inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-
       onAuthClick={handleAuthOpen}
       onProfileClick={handleViewProfile}
       viewMode={viewMode}
-      // ✅ TRUYỀN DỮ LIỆU ONLINE USERS XUỐNG NAVBAR
-      onlineCount={onlineCount}   // ✅ TRUYỀN
-      totalUsers={totalUsers}   
-      onAnswersClick={handleGoToAnswers}  // ✅ TRUYỀN
+      onlineCount={onlineCount}
+      totalUsers={totalUsers}
+      onAnswersClick={handleGoToAnswers}
     >
-      <div className="relative z-10 p-4 sm:p-6">
+      <div className="relative z-10 p-2 sm:p-4 md:p-6">
         {renderNavigation()}
         <Suspense fallback={<LoadingSpinner />}>
           {renderMainContent()}

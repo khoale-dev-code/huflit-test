@@ -8,7 +8,7 @@ const DropdownItem = memo(({ children, isActive, onClick }) => (
   <li>
     <button
       onClick={onClick}
-      className={`inline-flex items-center w-full px-3 py-2.5 rounded-lg transition-colors duration-200 text-sm md:text-base text-left ${
+      className={`inline-flex items-center w-full px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors duration-200 text-xs sm:text-sm md:text-base text-left ${
         isActive 
           ? 'bg-orange-500 text-white font-semibold shadow-md' 
           : 'text-gray-700 hover:bg-orange-100 hover:text-orange-800 font-medium'
@@ -21,7 +21,7 @@ const DropdownItem = memo(({ children, isActive, onClick }) => (
 
 DropdownItem.displayName = 'DropdownItem';
 
-// ✅ Static background - Loại bỏ animation
+// ✅ Static Background
 const OptimizedBackground = () => (
   <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
     <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-200/15 rounded-full blur-3xl" />
@@ -29,19 +29,19 @@ const OptimizedBackground = () => (
   </div>
 );
 
-// ✅ Header component - Tách riêng để tránh re-render
+// ✅ Header Component (Compact Mobile)
 const HeaderSection = memo(() => (
-  <div className="mb-8 sm:mb-10 md:mb-12">
-    <div className="flex items-center gap-3 sm:gap-4 mb-3">
-      <div className="p-2.5 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg flex-shrink-0">
-        <BookOpen className="w-6 h-6 sm:w-7 md:w-8 text-white" />
+  <div className="mb-3 sm:mb-6 md:mb-8">
+    <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-2">
+      <div className="p-1 sm:p-2 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0">
+        <BookOpen className="w-4 h-4 sm:w-5 md:w-6 text-white" />
       </div>
       <div className="min-w-0">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-orange-700 to-amber-600 truncate">
-          Trắc Nghiệm Tiếng Anh
+        <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-orange-700 to-amber-600 truncate">
+          Trắc Nghiệm
         </h1>
-        <p className="text-amber-700/80 text-xs sm:text-sm mt-1 font-medium">
-          Luyện tập thông minh, chọn lọc chuyên sâu
+        <p className="text-amber-700/80 text-xs sm:text-sm font-medium leading-tight">
+          Luyện tập
         </p>
       </div>
     </div>
@@ -50,41 +50,39 @@ const HeaderSection = memo(() => (
 
 HeaderSection.displayName = 'HeaderSection';
 
-// ✅ Exam selection card - ĐÃ THÊM Z-INDEX CONDITIONAL
+// ✅ Exam Selection Card (Compact)
 const ExamSelectionCard = memo(({
   selectedExam,
   isDropdownOpen,
   onToggleDropdown,
   onSelectExam
 }) => (
-  // 💡 CẬP NHẬT: Thêm z-50 khi dropdown mở để nó đè lên TestTypeCard bên cạnh
-  <div className={`bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-200 border border-orange-200/50 ${isDropdownOpen ? 'z-50' : 'z-10'}`}>
-    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-      <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg shadow-sm flex-shrink-0">
-        <Target className="w-4 h-4 sm:w-5 text-white" />
+  <div className={`bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-orange-200/50 ${isDropdownOpen ? 'z-50' : 'z-10'}`}>
+    <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
+      <div className="p-0.75 sm:p-1 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg shadow-sm flex-shrink-0">
+        <Target className="w-3 h-3 sm:w-3.5 text-white" />
       </div>
-      <label className="text-xs sm:text-sm font-bold text-amber-800 tracking-wide uppercase">
-        Bộ Đề Thi
+      <label className="text-xs font-bold text-amber-800 tracking-wide uppercase">
+        Bộ Đề
       </label>
     </div>
     
     <div className="relative w-full">
       <button
         onClick={onToggleDropdown}
-        className="w-full flex items-center justify-between bg-white/50 backdrop-blur border-2 border-orange-300 hover:border-orange-400 focus:ring-4 focus:ring-orange-100 font-semibold rounded-xl px-4 py-2.5 sm:px-5 sm:py-3 focus:outline-none transition-all duration-200 text-sm sm:text-base"
+        className="w-full flex items-center justify-between bg-white/50 backdrop-blur border-2 border-orange-300 hover:border-orange-400 focus:ring-4 focus:ring-orange-100 font-semibold rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none transition-all duration-200 text-xs sm:text-sm"
       >
-        <span className="truncate">
-          {selectedExam ? EXAM_DATA[selectedExam]?.title : '-- Chọn Exam --'}
+        <span className="truncate text-xs sm:text-sm">
+          {selectedExam ? EXAM_DATA[selectedExam]?.title : '-- Chọn --'}
         </span>
-        <ChevronDown className={`w-4 h-4 ml-2 flex-shrink-0 transition-transform duration-200 ${
+        <ChevronDown className={`w-3 h-3 sm:w-3.5 ml-1.5 flex-shrink-0 transition-transform duration-200 ${
           isDropdownOpen ? 'rotate-180 text-orange-600' : 'text-amber-600'
         }`} />
       </button>
       
       {isDropdownOpen && (
-        // Dropdown content cũng cần z-index cao
-        <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur border border-orange-200 rounded-xl shadow-lg w-full max-h-56 overflow-y-auto z-50">
-          <ul className="p-1 sm:p-2">
+        <div className="absolute top-full left-0 mt-1.5 bg-white/95 backdrop-blur border border-orange-200 rounded-lg shadow-lg w-full max-h-40 overflow-y-auto z-50">
+          <ul className="p-0.5 sm:p-1">
             {Object.entries(EXAM_DATA).map(([key, value]) => (
               <DropdownItem 
                 key={key}
@@ -103,35 +101,35 @@ const ExamSelectionCard = memo(({
 
 ExamSelectionCard.displayName = 'ExamSelectionCard';
 
-// ✅ Test type selection card - Giữ nguyên nhưng đảm bảo z-index thấp hơn
+// ✅ Test Type Card (Compact)
 const TestTypeCard = memo(({ testType, onTestTypeChange }) => (
-  // 💡 CẬP NHẬT: Thêm z-20 để nó nằm dưới z-50 của dropdown khi cần thiết
-  <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md hover:shadow-lg transition-shadow duration-200 border border-amber-200/50 z-20">
-    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-      <div className="p-1.5 sm:p-2 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg shadow-sm flex-shrink-0">
-        <Zap className="w-4 h-4 sm:w-5 text-white" />
+  <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-amber-200/50 z-20">
+    <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
+      <div className="p-0.75 sm:p-1 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg shadow-sm flex-shrink-0">
+        <Zap className="w-3 h-3 sm:w-3.5 text-white" />
       </div>
-      <label className="text-xs sm:text-sm font-bold text-amber-800 tracking-wide uppercase">
-        Loại Bài Thi
+      <label className="text-xs font-bold text-amber-800 tracking-wide uppercase">
+        Loại Bài
       </label>
     </div>
-    <div className="flex gap-2 sm:gap-3">
+    <div className="flex gap-1.5 sm:gap-2">
       {['listening', 'reading'].map(type => (
         <button
           key={type}
           onClick={() => onTestTypeChange(type)}
-          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 ${
+          className={`flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-lg font-semibold text-xs transition-all duration-200 ${
             testType === type
               ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md border-2 border-orange-500'
               : 'bg-white/60 text-amber-700 border-2 border-amber-200 hover:border-orange-300 hover:bg-orange-50/40'
           }`}
         >
           {type === 'listening' ? (
-            <Headphones className="w-4 h-4 sm:w-5" />
+            <Headphones className="w-3 h-3 sm:w-3.5" />
           ) : (
-            <BookOpen className="w-4 h-4 sm:w-5" />
+            <BookOpen className="w-3 h-3 sm:w-3.5" />
           )}
-          <span>{type === 'listening' ? 'Nghe' : 'Đọc'}</span>
+          <span className="hidden sm:inline">{type === 'listening' ? 'Nghe' : 'Đọc'}</span>
+          <span className="inline sm:hidden">{type === 'listening' ? 'N' : 'Đ'}</span>
         </button>
       ))}
     </div>
@@ -140,7 +138,7 @@ const TestTypeCard = memo(({ testType, onTestTypeChange }) => (
 
 TestTypeCard.displayName = 'TestTypeCard';
 
-// ✅ Part button component - Memoized
+// ✅ Part Button (Compact)
 const PartButton = memo(({
   partKey,
   info,
@@ -149,38 +147,38 @@ const PartButton = memo(({
 }) => (
   <button
     onClick={onClick}
-    className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-200 border-2 overflow-hidden text-left shadow-sm hover:shadow-md ${
+    className={`p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl transition-all duration-200 border-2 overflow-hidden text-left shadow-sm hover:shadow-md ${
       isActive
         ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white border-orange-600 shadow-md'
         : 'bg-white/80 text-amber-900 border-amber-200/50 hover:border-orange-400'
     }`}
   >
-    <div className="flex items-start justify-between mb-1 sm:mb-2">
-      <span className={`text-xl sm:text-2xl md:text-3xl font-extrabold ${
+    <div className="flex items-start justify-between mb-0.5">
+      <span className={`text-base sm:text-xl md:text-2xl font-extrabold ${
         isActive ? 'text-white' : 'text-orange-600'
       }`}>
         {partKey.replace(/part(\d+)/i, 'P$1')}
       </span>
-      <Award className={`w-3.5 h-3.5 sm:w-4 mt-0.5 flex-shrink-0 ${
+      <Award className={`w-2.5 h-2.5 sm:w-3 md:w-3.5 mt-0.5 flex-shrink-0 ${
         isActive ? 'text-yellow-200' : 'text-amber-500'
       }`} />
     </div>
-    <h4 className={`text-xs font-bold mb-2 line-clamp-2 ${
+    <h4 className={`text-xs font-bold mb-1 line-clamp-1 ${
       isActive ? 'text-orange-100' : 'text-amber-800'
     }`}>
       {info.title}
     </h4>
-    <div className={`pt-2 border-t text-xs font-semibold ${
+    <div className={`pt-0.5 border-t text-xs font-semibold ${
       isActive ? 'border-orange-400/30 text-orange-100' : 'border-amber-200 text-amber-700'
     }`}>
-      {info.questions} câu
+      {info.questions}c
     </div>
   </button>
 ), (prev, next) => prev.isActive === next.isActive && prev.info.questions === next.info.questions);
 
 PartButton.displayName = 'PartButton';
 
-// ✅ Part grid component
+// ✅ Parts Grid (Compact)
 const PartsGrid = memo(({
   availableParts,
   partInfoMap,
@@ -189,17 +187,17 @@ const PartsGrid = memo(({
 }) => {
   if (availableParts.length === 0) {
     return (
-      <div className="text-center py-8 sm:py-10 bg-white/80 backdrop-blur rounded-2xl border-2 border-dashed border-amber-300 shadow-inner">
-        <BookOpen className="w-8 h-8 sm:w-10 text-amber-300 mx-auto mb-2" />
-        <p className="text-sm sm:text-base text-amber-700 font-medium">
-          Vui lòng chọn Exam để xem các Part
+      <div className="text-center py-3 sm:py-4 md:py-6 bg-white/80 backdrop-blur rounded-lg border-2 border-dashed border-amber-300 shadow-inner">
+        <BookOpen className="w-5 h-5 sm:w-6 text-amber-300 mx-auto mb-1" />
+        <p className="text-xs text-amber-700 font-medium">
+          Chọn Exam
         </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-2">
       {availableParts.map(partKey => (
         <PartButton
           key={partKey}
@@ -218,67 +216,68 @@ const PartsGrid = memo(({
 
 PartsGrid.displayName = 'PartsGrid';
 
-// ✅ Part details card
+// ✅ Part Details Card (Compact)
 const PartDetailsCard = memo(({ partData, testType }) => {
   if (!partData) return null;
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-amber-200/50">
-      <div className={`px-4 sm:px-6 md:px-8 py-5 sm:py-7 ${
+    <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-2xl overflow-hidden shadow-lg border border-amber-200/50">
+      <div className={`px-2.5 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5 ${
         testType === 'listening'
           ? 'bg-gradient-to-r from-orange-500 to-amber-600'
           : 'bg-gradient-to-r from-amber-500 to-yellow-600'
       }`}>
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="p-2.5 bg-white/20 backdrop-blur rounded-lg border border-white/30 flex-shrink-0">
+        <div className="flex items-start gap-2 sm:gap-2.5">
+          <div className="p-1.5 sm:p-2 bg-white/20 backdrop-blur rounded-lg border border-white/30 flex-shrink-0">
             {testType === 'listening' ? (
-              <Headphones className="w-5 h-5 sm:w-6 text-white" />
+              <Headphones className="w-3.5 h-3.5 sm:w-4 md:w-5 text-white" />
             ) : (
-              <BookOpen className="w-5 h-5 sm:w-6 text-white" />
+              <BookOpen className="w-3.5 h-3.5 sm:w-4 md:w-5 text-white" />
             )}
           </div>
           <div className="min-w-0">
-            <span className="text-xs font-bold text-white/80 uppercase block mb-0.5">
-              Chi tiết Part
+            <span className="text-xs font-bold text-white/80 uppercase block mb-0.25">
+              Chi tiết
             </span>
-            <h3 className="text-xl sm:text-2xl font-black text-white mb-1">
+            <h3 className="text-sm sm:text-lg md:text-xl font-black text-white line-clamp-1">
               {partData.title}
             </h3>
-            <p className="text-white/90 text-xs sm:text-sm leading-relaxed line-clamp-2">
+            <p className="text-white/90 text-xs leading-tight line-clamp-1">
               {partData.description}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-8">
-        <h4 className="text-sm sm:text-base font-bold text-amber-800 mb-3 sm:mb-4 border-b border-amber-200 pb-2">
-          Thống kê cơ bản
+      <div className="p-2.5 sm:p-4 md:p-6">
+        <h4 className="text-xs font-bold text-amber-800 mb-2 border-b border-amber-200 pb-1.5">
+          Thống kê
         </h4>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
-          <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-l-4 border-orange-500 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow duration-200">
-            <p className="text-xs font-bold text-orange-600 mb-1 uppercase">Tổng Câu</p>
-            <p className="text-2xl sm:text-3xl font-bold text-orange-800">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+          <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-l-4 border-orange-500 rounded-lg p-2 sm:p-2.5 md:p-3 hover:shadow-md transition-shadow duration-200">
+            <p className="text-xs font-bold text-orange-600 mb-0.5 uppercase">Câu</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-orange-800">
               {partData.questions?.length || 0}
             </p>
           </div>
           
-          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow duration-200">
-            <p className="text-xs font-bold text-amber-600 mb-1 uppercase">Loại Bài</p>
-            <div className="flex items-center gap-1 text-xs sm:text-sm font-bold text-amber-800">
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-lg p-2 sm:p-2.5 md:p-3 hover:shadow-md transition-shadow duration-200">
+            <p className="text-xs font-bold text-amber-600 mb-0.5 uppercase">Loại</p>
+            <div className="flex items-center gap-0.5 text-xs sm:text-sm font-bold text-amber-800">
               {testType === 'listening' ? (
-                <Headphones className="w-4 h-4" />
+                <Headphones className="w-3 h-3 sm:w-3.5" />
               ) : (
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-3 h-3 sm:w-3.5" />
               )}
-              {testType === 'listening' ? 'Nghe' : 'Đọc'}
+              <span className="hidden sm:inline">{testType === 'listening' ? 'Nghe' : 'Đọc'}</span>
+              <span className="inline sm:hidden">{testType === 'listening' ? 'N' : 'Đ'}</span>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-l-4 border-yellow-500 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow duration-200">
-            <p className="text-xs font-bold text-yellow-600 mb-1 uppercase">Điểm/Câu</p>
-            <p className="text-lg sm:text-xl font-bold text-yellow-800">
+          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border-l-4 border-yellow-500 rounded-lg p-2 sm:p-2.5 md:p-3 hover:shadow-md transition-shadow duration-200">
+            <p className="text-xs font-bold text-yellow-600 mb-0.5 uppercase">Điểm/C</p>
+            <p className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-800">
               {testType === 'listening' ? '~5' : '~2.5'}
             </p>
           </div>
@@ -302,10 +301,8 @@ const PartSelector = React.memo(({
 }) => {
   const [isExamDropdownOpen, setIsExamDropdownOpen] = useState(false);
 
-  // ✅ Get exam data safely
   const examData = useMemo(() => EXAM_DATA[selectedExam], [selectedExam]);
 
-  // ✅ Optimized partInfoMap - efficient filtering with for loop
   const partInfoMap = useMemo(() => {
     if (!examData?.parts) return {};
     
@@ -325,19 +322,16 @@ const PartSelector = React.memo(({
     return map;
   }, [examData, testType]);
 
-  // ✅ Available parts - cached
   const availableParts = useMemo(
     () => Object.keys(partInfoMap),
     [partInfoMap]
   );
 
-  // ✅ Current part data
   const partData = useMemo(
     () => examData?.parts?.[selectedPart] || null,
     [examData, selectedPart]
   );
 
-  // ✅ Memoized callbacks
   const handleExamChange = useCallback((examKey) => {
     onExamChange({ target: { value: examKey } });
     setIsExamDropdownOpen(false);
@@ -356,16 +350,16 @@ const PartSelector = React.memo(({
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4 sm:p-6 md:p-8 lg:p-12 relative overflow-hidden">
+    <div className="w-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-2 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden">
       <OptimizedBackground />
 
-      <div className="relative max-w-7xl mx-auto z-10">
+      <div className="relative max-w-7xl mx-auto z-10 pb-2 sm:pb-3">
         <HeaderSection />
         
-        <hr className="border-orange-200/50 mb-6 sm:mb-8" />
+        <hr className="border-orange-200/50 mb-2.5 sm:mb-4 md:mb-6" />
 
         {/* Selection Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
           <ExamSelectionCard
             selectedExam={selectedExam}
             isDropdownOpen={isExamDropdownOpen}
@@ -380,16 +374,16 @@ const PartSelector = React.memo(({
 
         {/* Part Selection */}
         {selectedExam && (
-          <div className="mb-8 sm:mb-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg shadow-sm flex-shrink-0">
-                  <ListChecks className="w-4 h-4 sm:w-5 text-white" />
+          <div className="mb-3 sm:mb-4 md:mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="p-0.75 sm:p-1 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg shadow-sm flex-shrink-0">
+                  <ListChecks className="w-3 h-3 sm:w-3.5 md:w-4 text-white" />
                 </div>
-                <h2 className="text-lg sm:text-2xl font-bold text-amber-900">Chọn Part Luyện Tập</h2>
+                <h2 className="text-sm sm:text-base md:text-lg font-bold text-amber-900">Chọn Part</h2>
               </div>
-              <span className="text-xs sm:text-sm font-bold text-orange-700 px-3 py-1.5 bg-orange-100/80 rounded-full border border-orange-300 w-fit">
-                {availableParts.length} Part Có Sẵn
+              <span className="text-xs font-bold text-orange-700 px-2 py-0.5 bg-orange-100/80 rounded-full border border-orange-300 w-fit whitespace-nowrap">
+                {availableParts.length} Part
               </span>
             </div>
 

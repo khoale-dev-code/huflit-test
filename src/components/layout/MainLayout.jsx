@@ -15,14 +15,14 @@ const MainLayout = ({
   onChatClick,
   onProfileClick,
   viewMode,
-  onlineCount,   // ✅ NHẬN TỪ APP
+  onlineCount,    // ✅ NHẬN TỪ APP
   totalUsers,     // ✅ NHẬN TỪ APP
-  onAnswersClick  // ✅ THÊM DÒNG NÀY
+  onAnswersClick  // ✅ NHẬN TỪ APP
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col">
       
-      
+      {/* Navbar */}
       <Navbar
         testType={testType}
         onTestTypeChange={onTestTypeChange}
@@ -33,16 +33,23 @@ const MainLayout = ({
         onChatClick={onChatClick}
         onProfileClick={onProfileClick}
         viewMode={viewMode}
-        onlineCount={onlineCount}   // ✅ TRUYỀN VÀO NAVBAR
-        totalUsers={totalUsers}
-        onAnswersClick={onAnswersClick}  // ✅ THÊM DÒNG NÀY
+        onlineCount={onlineCount}      // ✅ TRUYỀN VÀO NAVBAR
+        totalUsers={totalUsers}        // ✅ TRUYỀN VÀO NAVBAR
+        onAnswersClick={onAnswersClick} // ✅ TRUYỀN VÀO NAVBAR
       />
 
+      {/* Main Content */}
       <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8">
         {children}
       </main>
 
-      <Footer />
+      {/* Footer - TRUYỀN PROPS XUỐNG */}
+      <Footer 
+        onlineCount={onlineCount}  // ✅ TRUYỀN VÀO FOOTER
+        totalUsers={totalUsers}    // ✅ TRUYỀN VÀO FOOTER
+      />
+      
+      {/* Scroll To Top Button */}
       <ScrollToTopButton />
     </div>
   );

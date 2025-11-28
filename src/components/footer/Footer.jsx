@@ -20,51 +20,62 @@ import {
   UserCircle,
   AlertCircle,
   Sparkles,
-  Zap
+  Zap,
+  Activity
 } from 'lucide-react';
 import logoImage from '../../assets/logo.png';
 
-// --- GLOBAL STYLES & KEYFRAMES (REQUIRED FOR ANIMATIONS) ---
+// --- GLOBAL STYLES & KEYFRAMES ---
 const GlobalStyles = () => (
-    <style dangerouslySetInnerHTML={{__html: `
-        /* Custom Animations required by the component for a richer experience */
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+  <style dangerouslySetInnerHTML={{__html: `
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
 
-        @keyframes blob {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-        .animate-blob { animation: blob 7s infinite cubic-bezier(0.6, -0.28, 0.735, 0.045); }
+    @keyframes blob {
+      0% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+    .animate-blob { animation: blob 7s infinite cubic-bezier(0.6, -0.28, 0.735, 0.045); }
 
-        @keyframes float {
-            0% { transform: translateY(0px) translateX(0px); }
-            50% { transform: translateY(-10px) translateX(5px); }
-            100% { transform: translateY(0px) translateX(0px); }
-        }
+    @keyframes float {
+      0% { transform: translateY(0px) translateX(0px); }
+      50% { transform: translateY(-10px) translateX(5px); }
+      100% { transform: translateY(0px) translateX(0px); }
+    }
 
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .animate-gradient {
-            background-size: 200% 200%;
-            animation: gradient 5s ease infinite;
-        }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .animate-gradient {
+      background-size: 200% 200%;
+      animation: gradient 5s ease infinite;
+    }
+    .animation-delay-2000 { animation-delay: 2s; }
+    .animation-delay-4000 { animation-delay: 4s; }
 
-        /* Ensure smooth scrolling for the scroll-to-top button */
-        html { scroll-behavior: smooth; }
-    `}} />
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .animate-pulse-dot {
+      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    html { scroll-behavior: smooth; }
+  `}} />
 );
-
+<img
+  src={logoImage}
+  alt="HUFLIT Logo"
+  className="h-16 w-16 rounded-full object-cover"
+/>
 // --- UTILITY COMPONENTS ---
 const LinkItem = ({ icon: Icon, label, href, description, delay = 0 }) => (
   <a
@@ -110,22 +121,46 @@ const StatCard = ({ icon: Icon, number, label, delay = 0 }) => (
   </div>
 );
 
-// --- ANIMATED BACKGROUND COMPONENT ---
+const OnlineUsersDisplay = ({ onlineCount = 0, totalUsers = 0 }) => (
+  <div className="flex flex-col sm:flex-row items-center gap-4 justify-center mb-8 animate-fade-in">
+    <div className="group relative">
+      <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition duration-300"></div>
+      <div className="relative flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-300 shadow-md hover:shadow-xl transition-all duration-300">
+        <div className="relative flex items-center justify-center">
+          <Activity className="w-6 h-6 text-green-600 group-hover:scale-110 transition-transform" />
+          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-2xl font-black text-green-700 leading-none">{onlineCount}</span>
+          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Online Now</span>
+        </div>
+      </div>
+    </div>
+
+    <div className="hidden sm:block h-12 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+
+    <div className="group relative">
+      <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition duration-300"></div>
+      <div className="relative flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-300 shadow-md hover:shadow-xl transition-all duration-300">
+        <Users className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />
+        <div className="flex flex-col">
+          <span className="text-2xl font-black text-blue-700 leading-none">{totalUsers}</span>
+          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total Users</span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const AnimatedBackground = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Animated Blob 1 */}
     <div className="absolute w-96 h-96 bg-gradient-to-r from-amber-300 to-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 top-0 -left-48 animate-blob"></div>
-
-    {/* Animated Blob 2 */}
     <div className="absolute w-96 h-96 bg-gradient-to-r from-orange-300 to-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 top-40 right-0 animate-blob animation-delay-2000"></div>
-
-    {/* Animated Blob 3 */}
     <div className="absolute w-96 h-96 bg-gradient-to-r from-amber-200 to-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-15 -bottom-32 left-1/3 animate-blob animation-delay-4000"></div>
-
-    {/* Gradient Mesh */}
     <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-50/30 to-transparent"></div>
-
-    {/* Animated Particles */}
     {[...Array(6)].map((_, i) => (
       <div
         key={i}
@@ -140,7 +175,6 @@ const AnimatedBackground = () => (
   </div>
 );
 
-// --- SCROLL INDICATOR ---
 const ScrollIndicator = () => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -164,22 +198,20 @@ const ScrollIndicator = () => {
   );
 };
 
-// --- MAIN APPLICATION COMPONENT ---
-const App = () => {
+// --- MAIN FOOTER COMPONENT ---
+const Footer = ({ onlineCount = 0, totalUsers = 0 }) => {
   const currentYear = new Date().getFullYear();
   const [showTopButton, setShowTopButton] = useState(false);
   const [email, setEmail] = useState('');
   const [emailStatus, setEmailStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Scroll listener
   useEffect(() => {
     const handleScroll = () => setShowTopButton(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Newsletter handler
   const handleNewsletterSubmit = async () => {
     if (!email) {
       setEmailStatus({ type: 'error', message: 'Vui lòng nhập email' });
@@ -193,9 +225,7 @@ const App = () => {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call for the newsletter signup
-      await new Promise(resolve => setTimeout(resolve, 800)); 
-
+      await new Promise(resolve => setTimeout(resolve, 800));
       setEmailStatus({ type: 'success', message: '✓ Đăng ký thành công! Cảm ơn bạn.' });
       setEmail('');
       setTimeout(() => setEmailStatus({ type: '', message: '' }), 4000);
@@ -206,12 +236,10 @@ const App = () => {
     }
   };
 
-  // Scroll to top
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Data
   const resources = [
     { icon: BookOpen, label: 'Thư viện đề thi', href: '#', description: '500+ bài tập chất lượng' },
     { icon: FileText, label: 'Tài liệu học tập', href: '#', description: 'Tài liệu miễn phí' },
@@ -247,28 +275,21 @@ const App = () => {
     <>
       <GlobalStyles />
       <footer className="bg-white text-gray-900 font-sans relative">
-        {/* Main Content */}
         <div className="relative bg-gradient-to-b from-white via-amber-50/50 to-white border-t-2 border-amber-200 overflow-hidden">
           <AnimatedBackground />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 z-10">
-
             {/* Brand Section */}
             <div className="mb-16 text-center">
               <div className="inline-flex items-center justify-center mb-6 animate-fade-in">
                 <div className="relative">
-                  {/* Glow Effect */}
                   <div className="absolute -inset-4 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full blur-lg opacity-30 animate-pulse"></div>
-
-                  {/* Logo Container */}
                   <div className="relative p-2 bg-white rounded-full shadow-2xl ring-4 ring-amber-500/50 transition-transform duration-500 hover:scale-110 hover:ring-amber-600">
-                    <img
-                      src={logoImage}
-                      alt="HUFLIT Logo"
-                      className="h-16 w-16 rounded-full object-cover"
-                    />
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                    <BookOpen className="w-8 h-8 text-white" />
+                  </div>                  
                   </div>
-                </div>
+                </div>  
               </div>
 
               <h2 className="text-3xl lg:text-5xl font-black text-gray-900 mb-4 animate-fade-in leading-tight">
@@ -278,17 +299,17 @@ const App = () => {
                 </span>
               </h2>
 
-              <p className="text-gray-600 text-sm lg:text-base max-w-2xl mx-auto leading-relaxed animate-fade-in">
+              <p className="text-gray-600 text-sm lg:text-base max-w-2xl mx-auto leading-relaxed animate-fade-in mb-8">
                 Nền tảng luyện thi hàng đầu giúp bạn chinh phục các kỳ thi ngôn ngữ và chuyên ngành với độ chính xác cao nhất.
               </p>
+
+              <OnlineUsersDisplay onlineCount={onlineCount} totalUsers={totalUsers} />
             </div>
 
-            {/* Decorative Divider */}
             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto mb-12 rounded-full"></div>
 
             {/* Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-
               {/* Resources Section */}
               <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
                 <div className="flex items-center gap-2 mb-4">
@@ -338,7 +359,7 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Newsletter - Spans 2 columns on large screens */}
+              {/* Newsletter */}
               <div className="lg:col-span-2 space-y-6 animate-fade-in" style={{ animationDelay: '300ms' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-5 h-5 text-amber-600" />
@@ -348,11 +369,9 @@ const App = () => {
                 </div>
 
                 <div className="relative group">
-                  {/* Animated Gradient Border */}
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse"></div>
 
                   <div className="relative bg-white rounded-2xl border-2 border-amber-200 p-6 lg:p-8 shadow-xl hover:shadow-2xl transition-all duration-300">
-                    {/* Header */}
                     <div className="flex items-start gap-3 mb-6">
                       <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg">
                         <ShieldCheck className="w-6 h-6 text-amber-700" />
@@ -363,7 +382,6 @@ const App = () => {
                       </div>
                     </div>
 
-                    {/* Newsletter Input */}
                     <div className="space-y-4">
                       <div className="flex flex-col sm:flex-row gap-2">
                         <input
@@ -394,7 +412,6 @@ const App = () => {
                         </button>
                       </div>
 
-                      {/* Status Message */}
                       {emailStatus.message && (
                         <div
                           className={`flex items-center gap-2 text-sm px-3 py-3 rounded-lg animate-fade-in ${
@@ -433,14 +450,12 @@ const App = () => {
 
         {/* Bottom Bar */}
         <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-t-2 border-amber-500 overflow-hidden">
-          {/* Background pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-gradient-to-b from-amber-500/50 to-transparent"></div>
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 z-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-
               {/* Copyright */}
               <div className="text-center md:text-left animate-fade-in">
                 <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
@@ -495,4 +510,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Footer;
