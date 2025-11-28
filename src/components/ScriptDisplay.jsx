@@ -6,7 +6,7 @@ import { useTextToSpeech } from './hooks/useTextToSpeech';
 import { getSpeakerColor, getSpeakerIcon, getSpeakerTTSOptions, copyScriptToClipboard, scrollToElement } from './utils/scriptUtils';
 import VoiceMetricsBadge from './VoiceMetricsBadge';
 
-// ✅ Optimized Background - Removed animations
+// ✅ Optimized Background
 const OptimizedBackground = memo(() => (
   <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
     <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-200/15 rounded-full blur-3xl" />
@@ -17,54 +17,54 @@ const OptimizedBackground = memo(() => (
 
 OptimizedBackground.displayName = 'OptimizedBackground';
 
-// ✅ Error State Component
+// ✅ Error State (Mobile Optimized)
 const ErrorState = memo(({ error, onRetry }) => (
-  <div className="relative z-10 bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-3xl p-8 text-center shadow-lg w-full max-w-3xl mx-auto backdrop-blur-sm" role="alert">
-    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-      <Zap className="w-8 h-8 text-white" />
+  <div className="relative z-10 bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-lg sm:rounded-3xl p-4 sm:p-8 text-center shadow-lg w-full max-w-3xl mx-auto backdrop-blur-sm" role="alert">
+    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-lg">
+      <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
     </div>
-    <h4 className="text-xl font-bold text-red-800 mb-3">TTS Service Error</h4>
-    <p className="text-sm text-red-700 mb-6">{error}</p>
+    <h4 className="text-base sm:text-xl font-bold text-red-800 mb-2 sm:mb-3">TTS Error</h4>
+    <p className="text-xs sm:text-sm text-red-700 mb-3 sm:mb-6">{error}</p>
     <button 
       onClick={onRetry} 
-      className="inline-flex items-center gap-3 text-sm bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold py-3 px-8 rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95"
+      className="inline-flex items-center gap-2 sm:gap-3 text-xs sm:text-sm bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-8 rounded-lg sm:rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95"
     >
-      <RefreshCw className="w-4 h-4" /> Retry Loading Voices
+      <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Retry
     </button>
   </div>
 ));
 
 ErrorState.displayName = 'ErrorState';
 
-// ✅ Loading State Component
+// ✅ Loading State (Mobile Optimized)
 const LoadingState = memo(() => (
-  <div className="relative z-10 w-full bg-gradient-to-br from-white to-amber-50 rounded-3xl shadow-lg border-2 border-amber-200 overflow-hidden max-w-3xl mx-auto backdrop-blur-sm">
-    <div className="p-12 flex flex-col items-center justify-center">
-      <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
+  <div className="relative z-10 w-full bg-gradient-to-br from-white to-amber-50 rounded-lg sm:rounded-3xl shadow-lg border-2 border-amber-200 overflow-hidden max-w-3xl mx-auto backdrop-blur-sm">
+    <div className="p-6 sm:p-12 flex flex-col items-center justify-center">
+      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg sm:rounded-2xl flex items-center justify-center shadow-lg">
+        <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-spin" />
       </div>
-      <p className="text-center text-lg text-amber-800 font-semibold mt-4">Loading AI Voices...</p>
-      <p className="text-center text-sm text-amber-600 mt-2">Preparing the best voice experience</p>
+      <p className="text-center text-base sm:text-lg text-amber-800 font-semibold mt-2 sm:mt-4">Loading Voices...</p>
+      <p className="text-center text-xs sm:text-sm text-amber-600 mt-1 sm:mt-2">Preparing voice</p>
     </div>
   </div>
 ));
 
 LoadingState.displayName = 'LoadingState';
 
-// ✅ Empty State Component
+// ✅ Empty State (Mobile Optimized)
 const EmptyState = memo(() => (
-  <div className="relative z-10 bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-amber-300 rounded-3xl p-8 text-center shadow-lg w-full max-w-3xl mx-auto backdrop-blur-sm" role="alert">
-    <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-      <FileText className="w-8 h-8 text-white" />
+  <div className="relative z-10 bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-amber-300 rounded-lg sm:rounded-3xl p-4 sm:p-8 text-center shadow-lg w-full max-w-3xl mx-auto backdrop-blur-sm" role="alert">
+    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-lg sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-lg">
+      <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
     </div>
-    <p className="text-xl font-bold text-amber-800">Script Not Available</p>
-    <p className="text-sm text-amber-700 mt-2">Please check the script source</p>
+    <p className="text-base sm:text-xl font-bold text-amber-800">No Script</p>
+    <p className="text-xs sm:text-sm text-amber-700 mt-1 sm:mt-2">Check source</p>
   </div>
 ));
 
 EmptyState.displayName = 'EmptyState';
 
-// ✅ Controls Grid - Memoized
+// ✅ Controls Grid (Mobile Optimized)
 const ControlsGrid = memo(({ 
   isScriptPlaying, 
   isPaused, 
@@ -75,50 +75,52 @@ const ControlsGrid = memo(({
   onToggleSettings,
   onCopy 
 }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
     <button
       onClick={onPlayScript}
       disabled={allVoicesLength === 0}
-      className="group relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-2xl p-3 sm:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 overflow-hidden active:scale-95"
+      className="group relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden active:scale-95 text-xs sm:text-sm"
     >
       <div className="absolute inset-0 bg-white/20 -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
-      {isScriptPlaying ? (isPaused ? <Play className="w-4 h-4 sm:w-5" /> : <Pause className="w-4 h-4 sm:w-5" />) : <Play className="w-4 h-4 sm:w-5" />}
-      <span className="text-xs sm:text-sm">{isScriptPlaying ? (isPaused ? 'RESUME' : 'PAUSE') : 'PLAY ALL'}</span>
+      {isScriptPlaying ? (isPaused ? <Play className="w-3.5 h-3.5 sm:w-4" /> : <Pause className="w-3.5 h-3.5 sm:w-4" />) : <Play className="w-3.5 h-3.5 sm:w-4" />}
+      <span className="hidden sm:inline">{isScriptPlaying ? (isPaused ? 'RESUME' : 'PAUSE') : 'PLAY'}</span>
+      <span className="inline sm:hidden">{isScriptPlaying ? (isPaused ? 'R' : 'P') : 'Play'}</span>
     </button>
 
     {isScriptPlaying && (
       <button
         onClick={onStop}
-        className="bg-white border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold rounded-2xl p-3 sm:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95"
+        className="bg-white border-2 border-red-300 text-red-600 hover:bg-red-50 font-bold rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 text-xs sm:text-sm"
       >
-        <X className="w-4 h-4 sm:w-5" />
-        <span className="text-xs sm:text-sm">STOP</span>
+        <X className="w-3.5 h-3.5 sm:w-4" />
+        <span className="hidden sm:inline">STOP</span>
       </button>
     )}
 
     <button
       onClick={onToggleSettings}
-      className={`bg-white border-2 font-bold rounded-2xl p-3 sm:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 ${
+      className={`bg-white border-2 font-bold rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 text-xs sm:text-sm ${
         showSettings ? 'border-amber-400 text-amber-600 bg-amber-50' : 'border-amber-200 text-gray-600 hover:border-amber-400'
       }`}
     >
-      <Sliders className="w-4 h-4 sm:w-5" />
-      <span className="text-xs sm:text-sm">SETTINGS</span>
+      <Sliders className="w-3.5 h-3.5 sm:w-4" />
+      <span className="hidden sm:inline">SETTINGS</span>
+      <span className="inline sm:hidden">⚙</span>
     </button>
 
     <button
       onClick={onCopy}
-      className="bg-white border-2 border-amber-200 text-gray-600 hover:border-amber-400 hover:text-amber-600 font-bold rounded-2xl p-3 sm:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95"
+      className="bg-white border-2 border-amber-200 text-gray-600 hover:border-amber-400 hover:text-amber-600 font-bold rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 text-xs sm:text-sm"
     >
-      <Copy className="w-4 h-4 sm:w-5" />
-      <span className="text-xs sm:text-sm">COPY</span>
+      <Copy className="w-3.5 h-3.5 sm:w-4" />
+      <span className="hidden sm:inline">COPY</span>
     </button>
   </div>
 ));
 
 ControlsGrid.displayName = 'ControlsGrid';
 
-// ✅ Settings Panel - Memoized
+// ✅ Settings Panel (Mobile Optimized)
 const SettingsPanel = memo(({ 
   optimizedSettings, 
   autoOptimize,
@@ -129,36 +131,34 @@ const SettingsPanel = memo(({
   onAutoOptimizeChange,
   onToggleMetrics
 }) => (
-  <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-5 sm:p-6 space-y-4 backdrop-blur-sm">
-    <div className="flex items-center justify-between gap-4 flex-wrap">
-      <h4 className="text-base sm:text-lg font-bold text-amber-800">Voice Settings</h4>
-      <div className="flex items-center gap-3">
+  <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg sm:rounded-2xl p-3 sm:p-5 md:p-6 space-y-3 sm:space-y-4 backdrop-blur-sm">
+    <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
+      <h4 className="text-sm sm:text-lg font-bold text-amber-800">Voice</h4>
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={onToggleMetrics}
-          className="flex items-center gap-2 px-3 py-2 bg-white border-2 border-amber-300 rounded-lg text-amber-700 font-semibold text-sm hover:bg-amber-50 transition-colors active:scale-95"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 bg-white border-2 border-amber-300 rounded-lg text-amber-700 font-semibold text-xs hover:bg-amber-50 transition-colors active:scale-95"
         >
-          <Star className="w-4 h-4" />
-          <span className="hidden sm:inline">Metrics</span>
+          <Star className="w-3.5 h-3.5 sm:w-4" />
         </button>
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={autoOptimize}
             onChange={onAutoOptimizeChange}
             className="sr-only"
           />
-          <div className={`w-11 h-6 rounded-full transition-colors ${autoOptimize ? 'bg-amber-500' : 'bg-gray-300'}`} />
-          <div className={`absolute left-1 w-4 h-4 bg-white rounded-full transition-transform ${autoOptimize ? 'translate-x-5' : ''}`} style={{position: 'relative'}} />
+          <div className={`w-9 h-5 sm:w-11 sm:h-6 rounded-full transition-colors ${autoOptimize ? 'bg-amber-500' : 'bg-gray-300'}`} />
           <span className="text-xs sm:text-sm font-semibold text-amber-800">Auto</span>
         </label>
       </div>
     </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div className="space-y-2">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+      <div className="space-y-1.5 sm:space-y-2">
         <label className="text-xs sm:text-sm font-bold text-amber-700 flex justify-between">
-          <span>Speed: {(optimizedSettings.rate * 100).toFixed(0)}%</span>
-          {autoOptimize && <span className="text-xs text-amber-500">Auto</span>}
+          <span>Speed</span>
+          <span>{(optimizedSettings.rate * 100).toFixed(0)}%</span>
         </label>
         <input
           type="range"
@@ -171,10 +171,10 @@ const SettingsPanel = memo(({
           className="w-full h-2 bg-gradient-to-r from-amber-200 to-orange-300 rounded-lg cursor-pointer disabled:cursor-not-allowed accent-amber-500"
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1.5 sm:space-y-2">
         <label className="text-xs sm:text-sm font-bold text-amber-700 flex justify-between">
-          <span>Pitch: {(optimizedSettings.pitch * 100).toFixed(0)}%</span>
-          {autoOptimize && <span className="text-xs text-amber-500">Auto</span>}
+          <span>Pitch</span>
+          <span>{(optimizedSettings.pitch * 100).toFixed(0)}%</span>
         </label>
         <input
           type="range"
@@ -187,10 +187,10 @@ const SettingsPanel = memo(({
           className="w-full h-2 bg-gradient-to-r from-amber-200 to-orange-300 rounded-lg cursor-pointer disabled:cursor-not-allowed accent-amber-500"
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1.5 sm:space-y-2">
         <label className="text-xs sm:text-sm font-bold text-amber-700 flex justify-between">
-          <span>Volume: {(optimizedSettings.volume * 100).toFixed(0)}%</span>
-          {autoOptimize && <span className="text-xs text-amber-500">Auto</span>}
+          <span>Vol</span>
+          <span>{(optimizedSettings.volume * 100).toFixed(0)}%</span>
         </label>
         <input
           type="range"
@@ -209,23 +209,23 @@ const SettingsPanel = memo(({
 
 SettingsPanel.displayName = 'SettingsPanel';
 
-// ✅ Search Bar - Memoized
+// ✅ Search Bar (Mobile Optimized)
 const SearchBar = memo(({ searchTerm, onSearchChange }) => (
   <div className="relative group">
-    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 transition-colors group-hover:text-amber-600" />
+    <Search className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-amber-500 transition-colors group-hover:text-amber-600" />
     <input
       type="text"
-      placeholder="Search in script..."
+      placeholder="Search..."
       value={searchTerm}
       onChange={onSearchChange}
-      className="w-full pl-12 pr-12 py-3 rounded-2xl border-2 border-amber-200 focus:border-amber-400 outline-none text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 focus:bg-white focus:shadow-lg"
+      className="w-full pl-9 sm:pl-12 pr-9 sm:pr-12 py-2 sm:py-3 rounded-lg sm:rounded-2xl border-2 border-amber-200 focus:border-amber-400 outline-none text-xs sm:text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 focus:bg-white focus:shadow-lg"
     />
     {searchTerm && (
       <button
         onClick={() => onSearchChange({ target: { value: '' } })}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-amber-600 transition-colors active:scale-95"
+        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-amber-600 transition-colors active:scale-95"
       >
-        <X className="w-5 h-5" />
+        <X className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
     )}
   </div>
@@ -233,7 +233,7 @@ const SearchBar = memo(({ searchTerm, onSearchChange }) => (
 
 SearchBar.displayName = 'SearchBar';
 
-// ✅ Conversation Item - Memoized
+// ✅ Conversation Item (Mobile Optimized)
 const ConversationItem = memo(({ 
   conv, 
   index, 
@@ -242,7 +242,7 @@ const ConversationItem = memo(({
 }) => (
   <div
     id={`conv-${index}`}
-    className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer group hover:shadow-lg active:scale-95 ${
+    className={`p-2.5 sm:p-4 rounded-lg sm:rounded-2xl border-2 transition-all duration-200 cursor-pointer group hover:shadow-lg active:scale-95 ${
       isPlaying
         ? 'ring-4 ring-amber-400 border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-lg scale-[1.01]'
         : `${getSpeakerColor(conv.speaker)} hover:border-amber-300`
@@ -252,13 +252,13 @@ const ConversationItem = memo(({
     tabIndex={0}
     onKeyDown={(e) => e.key === 'Enter' && onPlay(index)}
   >
-    <div className="flex items-start gap-3">
-      <div className="text-2xl flex-shrink-0 transition-transform group-hover:scale-110">
+    <div className="flex items-start gap-2 sm:gap-3">
+      <div className="text-lg sm:text-2xl flex-shrink-0 transition-transform group-hover:scale-110">
         {getSpeakerIcon(conv.speaker)}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <p className="font-bold text-sm text-gray-800 bg-white/80 px-2.5 py-1 rounded-full border border-amber-200">
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 flex-wrap">
+          <p className="font-bold text-xs sm:text-sm text-gray-800 bg-white/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-amber-200 truncate">
             {conv.speaker}
           </p>
           <button
@@ -266,12 +266,12 @@ const ConversationItem = memo(({
               e.stopPropagation();
               onPlay(index);
             }}
-            className="p-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-full flex-shrink-0 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-md hover:shadow-lg active:scale-90"
+            className="p-1 sm:p-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-full flex-shrink-0 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-md hover:shadow-lg active:scale-90"
           >
-            <Play className="w-3.5 h-3.5" />
+            <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
         </div>
-        <p className="text-gray-700 leading-relaxed text-sm break-words">
+        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm break-words">
           {conv.text}
         </p>
       </div>
@@ -281,13 +281,13 @@ const ConversationItem = memo(({
 
 ConversationItem.displayName = 'ConversationItem';
 
-// ✅ Script Content Area - Memoized
+// ✅ Script Content Area (Mobile Optimized)
 const ScriptContent = memo(({ 
   filteredConversations, 
   currentPlayingIndex,
   onPlayConversation 
 }) => (
-  <div className="p-4 sm:p-6 space-y-3 max-h-[600px] overflow-y-auto bg-gradient-to-br from-amber-50/50 to-orange-50/30 rounded-2xl border-2 border-amber-200 backdrop-blur-sm scrollbar-thin">
+  <div className="p-2.5 sm:p-4 md:p-6 space-y-2 sm:space-y-3 max-h-[500px] sm:max-h-[600px] overflow-y-auto bg-gradient-to-br from-amber-50/50 to-orange-50/30 rounded-lg sm:rounded-2xl border-2 border-amber-200 backdrop-blur-sm scrollbar-thin">
     {filteredConversations.map((conv, index) => (
       <ConversationItem
         key={`${conv.speaker}-${index}`}
@@ -302,7 +302,7 @@ const ScriptContent = memo(({
 
 ScriptContent.displayName = 'ScriptContent';
 
-// ✅ Header - Memoized
+// ✅ Header (Mobile Optimized)
 const ScriptHeader = memo(({ 
   isExpanded, 
   onToggleExpand, 
@@ -314,36 +314,35 @@ const ScriptHeader = memo(({
 }) => (
   <button
     onClick={onToggleExpand}
-    className="w-full flex items-center justify-between p-5 sm:p-6 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:via-orange-700 hover:to-amber-800 transition-all duration-300 group relative overflow-hidden"
+    className="w-full flex items-center justify-between p-3 sm:p-5 md:p-6 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:via-orange-700 hover:to-amber-800 transition-all duration-300 group relative overflow-hidden"
     aria-expanded={isExpanded}
   >
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
     
-    <div className="flex items-center gap-3 relative z-10 min-w-0">
-      <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30 shadow-lg flex-shrink-0">
-        <FileText className="w-6 h-6 sm:w-7 text-white" />
+    <div className="flex items-center gap-2 sm:gap-3 relative z-10 min-w-0">
+      <div className="p-1.5 sm:p-2.5 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-2xl border border-white/30 shadow-lg flex-shrink-0">
+        <FileText className="w-5 h-5 sm:w-6 md:w-7 text-white" />
       </div>
       <div className="text-left min-w-0">
-        <h3 className="text-lg sm:text-2xl font-bold text-white truncate">Script & Transcript</h3>
-        <div className="flex items-center gap-2 text-amber-100 text-xs sm:text-sm flex-wrap">
-          <span className="bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm truncate">{partTitle}</span>
-          <span className="hidden sm:inline">{parsedScriptLength} lines</span>
-          <span className="hidden sm:inline">•</span>
-          <span className="hidden sm:inline">{speakersLength} speakers</span>
+        <h3 className="text-sm sm:text-xl md:text-2xl font-bold text-white truncate">Script</h3>
+        <div className="flex items-center gap-1 sm:gap-2 text-amber-100 text-xs flex-wrap">
+          <span className="bg-white/20 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full backdrop-blur-sm truncate">{partTitle}</span>
+          <span className="hidden sm:inline text-amber-200">•</span>
+          <span className="hidden sm:inline text-xs">{parsedScriptLength} lines</span>
         </div>
       </div>
     </div>
-    <div className="flex items-center gap-2 relative z-10 flex-shrink-0">
+    <div className="flex items-center gap-1 sm:gap-2 relative z-10 flex-shrink-0">
       {isScriptPlaying && (
-        <div className="flex items-center gap-1.5 bg-white/20 px-2.5 py-1 rounded-full backdrop-blur-sm">
+        <div className="flex items-center gap-1 bg-white/20 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full backdrop-blur-sm">
           <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
           <span className="text-xs text-green-100 font-bold">{playingTime}</span>
         </div>
       )}
-      <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+      <div className="p-1.5 sm:p-2 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl border border-white/30">
         {isExpanded ? 
-          <ChevronUp className="w-5 h-5 text-white transition-transform" /> : 
-          <ChevronDown className="w-5 h-5 text-white transition-transform" />
+          <ChevronUp className="w-4 h-4 sm:w-5 text-white transition-transform" /> : 
+          <ChevronDown className="w-4 h-4 sm:w-5 text-white transition-transform" />
         }
       </div>
     </div>
@@ -358,7 +357,6 @@ const ScriptDisplay = ({
   partTitle = "Script",
   showByDefault = true
 }) => {
-  // ==================== STATE ====================
   const [isExpanded, setIsExpanded] = useState(showByDefault);
   const [highlightedSpeaker, setHighlightedSpeaker] = useState(null);
   const [isScriptPlaying, setIsScriptPlaying] = useState(false);
@@ -369,11 +367,9 @@ const ScriptDisplay = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [autoOptimize, setAutoOptimize] = useState(true);
   const [showMetrics, setShowMetrics] = useState(false);
-  const [activeTab, setActiveTab] = useState('script');
 
   const contentScrollRef = useRef(null);
 
-  // ==================== HOOKS ====================
   const {
     allVoices,
     getSpeakerVoice,
@@ -406,7 +402,6 @@ const ScriptDisplay = ({
     isScriptPlaying
   });
 
-  // ==================== MEMOIZED VALUES ====================
   const filteredConversations = useMemo(() => {
     return parsedScript.filter(conv => {
       const speakerMatch = !highlightedSpeaker || conv.speaker === highlightedSpeaker;
@@ -421,21 +416,23 @@ const ScriptDisplay = ({
     return autoOptimize ? autoOptimizeSettings() : { rate: playbackRate, pitch: playbackPitch, volume: playbackVolume };
   }, [autoOptimize, autoOptimizeSettings, playbackRate, playbackPitch, playbackVolume]);
 
-  // ==================== AUTO-SCROLL ====================
   useEffect(() => {
     if (autoOptimize && currentPlayingIndex !== -1) {
       scrollToElement(`conv-${currentPlayingIndex}`, true);
     }
   }, [currentPlayingIndex, autoOptimize]);
 
-  // ==================== CALLBACKS ====================
   const handlePlayScript = useCallback(async () => {
     if (!synthRef.current || allVoices.length === 0) return;
 
     if (isScriptPlaying) {
       if (isPaused) {
-        resumeScript();
-        setIsScriptPlaying(true);
+        try {
+          resumeScript();
+          setIsScriptPlaying(true);
+        } catch (error) {
+          console.warn('⚠️ Resume error:', error);
+        }
       } else {
         pauseScript();
         setIsScriptPlaying(false);
@@ -458,24 +455,40 @@ const ScriptDisplay = ({
     if (hasQueue) {
       setIsScriptPlaying(true);
       setCurrentPlayingIndex(-1);
-      speakNextInQueue();
+      
+      setTimeout(() => {
+        try {
+          speakNextInQueue();
+        } catch (error) {
+          console.warn('⚠️ Speak error:', error);
+        }
+      }, 100);
     }
   }, [filteredConversations, isScriptPlaying, isPaused, allVoices.length, pauseScript, resumeScript, queueConversations, speakNextInQueue, synthRef, setCurrentPlayingIndex, autoOptimize, optimizeConversations, performanceLevel, speakers, warmupVoices, optimizedSettings]);
 
   const handlePlayConversation = useCallback((index) => {
     if (!synthRef.current || allVoices.length === 0) return;
 
-    stopScript();
-
-    const conv = filteredConversations[index];
-    if (conv) {
-      queueConversations(
-        [conv],
-        (speaker) => getSpeakerTTSOptions(speaker, optimizedSettings.rate, optimizedSettings.volume),
-        false
-      );
-      setCurrentPlayingIndex(index);
-      speakNextInQueue();
+    try {
+      stopScript();
+      const conv = filteredConversations[index];
+      if (conv) {
+        setTimeout(() => {
+          try {
+            queueConversations(
+              [conv],
+              (speaker) => getSpeakerTTSOptions(speaker, optimizedSettings.rate, optimizedSettings.volume),
+              false
+            );
+            setCurrentPlayingIndex(index);
+            setTimeout(() => speakNextInQueue(), 50);
+          } catch (error) {
+            console.warn('⚠️ Queue error:', error);
+          }
+        }, 100);
+      }
+    } catch (error) {
+      console.warn('⚠️ Play error:', error);
     }
   }, [filteredConversations, optimizedSettings, queueConversations, speakNextInQueue, stopScript, synthRef, allVoices.length, setCurrentPlayingIndex]);
 
@@ -484,29 +497,24 @@ const ScriptDisplay = ({
   }, [filteredConversations]);
 
   const handleStop = useCallback(() => {
-    stopScript();
+    try {
+      stopScript();
+    } catch (error) {
+      console.warn('⚠️ Stop error:', error);
+    }
     setIsScriptPlaying(false);
   }, [stopScript]);
 
-  // ==================== RENDER ====================
-  if (voicesError) {
-    return <ErrorState error={voicesError} onRetry={reloadVoices} />;
-  }
-
-  if (allVoices.length === 0) {
-    return <LoadingState />;
-  }
-
-  if (!script) {
-    return <EmptyState />;
-  }
+  if (voicesError) return <ErrorState error={voicesError} onRetry={reloadVoices} />;
+  if (allVoices.length === 0) return <LoadingState />;
+  if (!script) return <EmptyState />;
 
   return (
-    <div className="relative w-full space-y-4 max-w-6xl mx-auto px-3 sm:px-4">
+    <div className="relative w-full space-y-2.5 sm:space-y-4 max-w-6xl mx-auto px-2 sm:px-3 md:px-4">
       <OptimizedBackground />
       
       {showMetrics && (
-        <Suspense fallback={<div className="h-20 bg-amber-100 rounded-lg animate-pulse" />}>
+        <Suspense fallback={<div className="h-16 sm:h-20 bg-amber-100 rounded-lg animate-pulse" />}>
           <VoiceMetricsBadge
             voiceMetrics={getVoiceMetrics()}
             ttsMetrics={getTTSMetrics()}
@@ -516,7 +524,7 @@ const ScriptDisplay = ({
         </Suspense>
       )}
 
-      <div className="relative z-10 bg-white/90 backdrop-blur-lg rounded-3xl shadow-lg border-2 border-amber-200 overflow-hidden transition-all duration-300 hover:shadow-xl" role="region" aria-label={`${partTitle} Script`}>
+      <div className="relative z-10 bg-white/90 backdrop-blur-lg rounded-lg sm:rounded-2xl md:rounded-3xl shadow-lg border-2 border-amber-200 overflow-hidden transition-all duration-300 hover:shadow-xl" role="region" aria-label={`${partTitle} Script`}>
         
         <ScriptHeader
           isExpanded={isExpanded}
@@ -529,32 +537,8 @@ const ScriptDisplay = ({
         />
 
         {isExpanded && (
-          <div className="space-y-4 p-4 sm:p-6">
+          <div className="space-y-2.5 sm:space-y-4 p-3 sm:p-4 md:p-6">
             
-            {/* Tab Navigation */}
-            <div className="flex border-b-2 border-amber-200 overflow-x-auto">
-              <button
-                onClick={() => setActiveTab('script')}
-                className={`px-4 py-2.5 font-semibold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === 'script' 
-                    ? 'border-amber-500 text-amber-700' 
-                    : 'border-transparent text-gray-500 hover:text-amber-600'
-                }`}
-              >
-                Script
-              </button>
-              <button
-                onClick={() => setActiveTab('speakers')}
-                className={`px-4 py-2.5 font-semibold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === 'speakers' 
-                    ? 'border-amber-500 text-amber-700' 
-                    : 'border-transparent text-gray-500 hover:text-amber-600'
-                }`}
-              >
-                Speakers ({speakers.length})
-              </button>
-            </div>
-
             <ControlsGrid
               isScriptPlaying={isScriptPlaying}
               isPaused={isPaused}

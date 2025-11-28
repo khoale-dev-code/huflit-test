@@ -3,12 +3,11 @@ import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react'
 import {
   Menu, X, Headphones, BookOpen, BookMarked, Sparkles,
   User, ChevronDown, LogOut, GraduationCap, ChevronRight, Loader2,
-  FileCheck // Icon cho "Xem Đáp Án"
+  FileCheck
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
-import OnlineStats from '../components/OnlineStats.jsx';
 
 // ======================================================================
 // Google Logo SVG Component
@@ -196,7 +195,7 @@ const SignInButton = React.memo(({ onSignIn, loading }) => (
 SignInButton.displayName = 'SignInButton';
 
 // ======================================================================
-// AnswersButton Component (HOÀN CHỈNH)
+// AnswersButton Component
 // ======================================================================
 const AnswersButton = React.memo(({ onClick, isMobile = false }) => {
   if (isMobile) {
@@ -243,7 +242,7 @@ export default function Navbar({
   practiceType,
   onPracticeTypeChange,
   onProfileClick,
-  onAnswersClick, // ← Đảm bảo nhận từ App
+  onAnswersClick,
 }) {
   const { user, isSignedIn, signInWithGoogle, signOut, loading: authLoading } = useFirebaseAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -329,9 +328,6 @@ export default function Navbar({
 
           {/* Right Section - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Online Stats */}
-            <OnlineStats />
-
             {/* Nút Xem Đáp Án - Desktop */}
             <AnswersButton onClick={handleAnswersClick} />
 

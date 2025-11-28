@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useUnifiedAuth } from '../hooks/useUnifiedAuth';
 
-// --- Components (NO MEMO) ---
+// ✅ COMPONENTS OPTIMIZED FOR MOBILE
 
 const ProgressBar = ({ percentage }) => (
   <div className="bg-gray-200 rounded-lg h-2 overflow-hidden">
@@ -20,17 +20,17 @@ const StatusBadge = ({ isAnswered, answersCount, totalQuestions }) => {
   const isAllAnswered = answersCount === totalQuestions && totalQuestions > 0;
 
   return (
-    <div className="flex items-center justify-between text-sm font-medium gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm font-medium">
       <span className="text-gray-700">
-        Đã trả lời: <span className="text-orange-600">{answersCount}</span> / {totalQuestions}
+        Đã trả lời: <span className="text-orange-600 font-bold">{answersCount}</span> / {totalQuestions}
       </span>
       {isAllAnswered ? (
-        <span className="text-green-600 font-medium flex items-center gap-1 text-sm">
-          <CheckCircle className="w-4 h-4" /> Hoàn thành
+        <span className="text-green-600 font-medium flex items-center gap-1 text-xs">
+          <CheckCircle className="w-3.5 h-3.5" /> Hoàn thành
         </span>
       ) : (
-        <span className="text-red-500 text-sm flex items-center gap-1">
-          <AlertCircle className="w-4 h-4" /> Còn {totalQuestions - answersCount}
+        <span className="text-red-500 text-xs flex items-center gap-1">
+          <AlertCircle className="w-3.5 h-3.5" /> Còn {totalQuestions - answersCount}
         </span>
       )}
     </div>
@@ -38,29 +38,29 @@ const StatusBadge = ({ isAnswered, answersCount, totalQuestions }) => {
 };
 
 const AuthNotice = ({ isSignedIn, authProvider }) => (
-  <div className={`p-3 border rounded-lg ${
+  <div className={`p-2 sm:p-3 border rounded-lg text-xs sm:text-sm ${
     isSignedIn
       ? 'bg-green-50 border-green-300'
       : 'bg-yellow-50 border-yellow-300'
   }`}>
     <div className="flex items-start gap-2">
       {isSignedIn ? (
-        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+        <CheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" />
       ) : (
-        <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+        <AlertCircle className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0 mt-0.5" />
       )}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium ${
+        <p className={`font-medium ${
           isSignedIn ? 'text-green-800' : 'text-yellow-800'
         }`}>
           {isSignedIn
-            ? `✅ Đã đăng nhập (${authProvider === 'clerk' ? '🔐 Clerk' : '🔥 Firebase'})`
-            : '🔑 Đăng nhập để lưu kết quả'
+            ? `✅ Đã đăng nhập (${authProvider === 'clerk' ? 'Clerk' : 'Firebase'})`
+            : '🔑 Đăng nhập để lưu'
           }
         </p>
         {!isSignedIn && (
           <p className="text-xs text-yellow-700 mt-0.5">
-            Kết quả sẽ không được lưu vào Profile nếu bạn không đăng nhập.
+            Kết quả sẽ không được lưu nếu không đăng nhập.
           </p>
         )}
       </div>
@@ -75,7 +75,7 @@ const SubmitStatusNotification = ({ status }) => {
   const isLoading = status.message.includes('Đang');
 
   return (
-    <div className={`p-3 rounded-lg border flex items-center gap-2 ${
+    <div className={`p-2.5 rounded-lg border flex items-center gap-2 text-xs sm:text-sm ${
       isSuccess
         ? 'bg-green-50 border-green-300'
         : isLoading
@@ -83,11 +83,11 @@ const SubmitStatusNotification = ({ status }) => {
         : 'bg-red-50 border-red-300'
     }`}>
       {isSuccess || isLoading ? (
-        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+        <CheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
       ) : (
-        <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+        <AlertCircle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
       )}
-      <span className={`text-sm font-medium ${
+      <span className={`font-medium ${
         isSuccess ? 'text-green-800' : 'text-red-800'
       }`}>
         {status.message}
@@ -103,40 +103,40 @@ const QuestionOption = ({ option, index, isSelected, onSelect, questionId }) => 
     <label 
       htmlFor={`q${questionId}-opt${index}`}
       className={`
-        group relative flex items-start p-3 rounded-lg cursor-pointer transition-all duration-200 border
+        group relative flex items-start p-2.5 sm:p-3 rounded-lg cursor-pointer transition-all duration-200 border text-sm
         ${isSelected
           ? 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-400 shadow-sm'
           : 'bg-white border-gray-300 hover:border-orange-300 hover:bg-orange-50/50'
         }
       `}
     >
-      <div className="flex items-start gap-3 flex-1 min-w-0">
+      <div className="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
         <div className={`
-          relative w-7 h-7 rounded-full border-2 flex items-center justify-center font-semibold text-xs flex-shrink-0 transition-all
+          relative w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center font-semibold text-xs flex-shrink-0 transition-all
           ${isSelected
             ? 'bg-orange-500 border-orange-600 text-white shadow-sm'
             : 'border-gray-400 text-gray-600 bg-white group-hover:border-orange-400 group-hover:bg-orange-50'
           }
         `}>
           {isSelected ? (
-            <Check className="w-4 h-4 stroke-[3]" />
+            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3]" />
           ) : (
-            <span>{optionLabel}</span>
+            <span className="text-xs">{optionLabel}</span>
           )}
         </div>
 
         <div className="flex-1 min-w-0 pt-0.5">
           <span className={`
-            text-[15px] leading-relaxed break-words block
+            text-sm sm:text-[15px] leading-relaxed break-words block
             ${isSelected ? 'text-gray-900 font-medium' : 'text-gray-700'}
           `}>
             {option}
           </span>
           
           {isSelected && (
-            <div className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
-              <Check className="w-3 h-3" />
-              <span>Đã chọn</span>
+            <div className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+              <Check className="w-2.5 h-2.5" />
+              <span>Chọn</span>
             </div>
           )}
         </div>
@@ -156,31 +156,31 @@ const QuestionOption = ({ option, index, isSelected, onSelect, questionId }) => 
 
 const QuestionCard = ({ question, script, options, isAnswered, selectedAnswer, onAnswerSelect }) => {
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-200">
+    <div className="p-2.5 sm:p-4 bg-white rounded-lg border border-gray-200">
       {script && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-2 border-blue-400">
-          <p className="text-sm font-medium text-blue-800 mb-1.5 flex items-center gap-1.5">
-            <Volume2 className="w-4 h-4" /> Script:
+        <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-blue-50 rounded-lg border-l-2 border-blue-400">
+          <p className="text-xs sm:text-sm font-medium text-blue-800 mb-1.5 flex items-center gap-1.5">
+            <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Script:
           </p>
-          <p className="text-[15px] text-gray-700 leading-relaxed italic">{script}</p>
+          <p className="text-sm sm:text-[15px] text-gray-700 leading-relaxed italic">{script}</p>
         </div>
       )}
 
-      <div className="mb-4">
+      <div className="mb-3 sm:mb-4">
         <div className="flex items-start gap-2">
-          <h3 className="flex-1 text-base sm:text-lg font-semibold text-gray-900 border-l-2 border-orange-500 pl-3 leading-snug">
+          <h3 className="flex-1 text-sm sm:text-lg font-semibold text-gray-900 border-l-2 border-orange-500 pl-2 sm:pl-3 leading-snug">
             <span className="text-orange-600">Câu {question.id}:</span> {question.question}
           </h3>
           {isAnswered && (
-            <div className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200">
-              <CheckCircle className="w-3.5 h-3.5" />
+            <div className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200 whitespace-nowrap">
+              <CheckCircle className="w-3 h-3" />
               <span className="hidden sm:inline">Đã trả lời</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2 sm:space-y-2.5">
         {options?.map((option, index) => (
           <QuestionOption
             key={`${question.id}-${index}`}
@@ -189,7 +189,6 @@ const QuestionCard = ({ question, script, options, isAnswered, selectedAnswer, o
             index={index}
             isSelected={selectedAnswer === index}
             onSelect={() => {
-              console.log('Option clicked:', question.id, index);
               onAnswerSelect(question.id, index);
             }}
           />
@@ -197,10 +196,10 @@ const QuestionCard = ({ question, script, options, isAnswered, selectedAnswer, o
       </div>
 
       {isAnswered && selectedAnswer !== undefined && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600">Lựa chọn của bạn:</span>
-            <span className="font-semibold text-orange-600">
+        <div className="mt-2.5 sm:mt-3 pt-2.5 sm:pt-3 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
+            <span className="text-gray-600">Lựa chọn:</span>
+            <span className="font-semibold text-orange-600 break-all">
               ({String.fromCharCode(65 + selectedAnswer)}) {options[selectedAnswer]}
             </span>
           </div>
@@ -281,7 +280,7 @@ const QuestionDisplay = ({
         setSubmitStatus({
           show: true,
           success: false,
-          message: '⚠️ Vui lòng đăng nhập để lưu kết quả'
+          message: '⚠️ Vui lòng đăng nhập để lưu'
         });
         setTimeout(() => setSubmitStatus({ show: false, success: false, message: '' }), 4000);
         return;
@@ -301,7 +300,7 @@ const QuestionDisplay = ({
       setSubmitStatus({
         show: true,
         success: false,
-        message: '⏳ Đang lưu kết quả...'
+        message: '⏳ Đang lưu...'
       });
 
       const dataToSave = {
@@ -345,31 +344,27 @@ const QuestionDisplay = ({
 
   if (!partData || showResults || !partData.questions) return null;
 
-  console.log('=== QuestionDisplay Render ===');
-  console.log('Current answers:', answers);
-  console.log('Questions:', partData.questions.map(q => q.id));
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-8rem] right-[-8rem] w-96 h-96 bg-orange-200/8 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto py-4 px-3 sm:px-4 space-y-3">
-        <div className="p-3 sm:p-4 bg-white/95 rounded-lg border border-gray-200">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-800">
+      <div className="relative z-10 max-w-4xl mx-auto py-2 sm:py-4 px-2 sm:px-4 space-y-2 sm:space-y-3">
+        {/* Questions Section */}
+        <div className="p-2.5 sm:p-4 bg-white/95 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2 mb-2.5 sm:mb-3 pb-2 border-b border-gray-200">
+            <h2 className="text-sm sm:text-lg font-semibold text-gray-800">
               ❓ <span className="text-orange-600">Câu hỏi</span>
             </h2>
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
-              {testType === 'listening' ? '🎧 Nghe' : '📖 Đọc'}
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 whitespace-nowrap">
+              {testType === 'listening' ? '🎧' : '📖'} {testType === 'listening' ? 'Nghe' : 'Đọc'}
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2.5 sm:space-y-4">
             {partData.questions.map((q) => {
               const selectedAns = answers[q.id];
-              console.log(`Question ${q.id}: selectedAnswer =`, selectedAns);
               
               return (
                 <QuestionCard
@@ -386,9 +381,10 @@ const QuestionDisplay = ({
           </div>
         </div>
 
-        <div className="p-3 sm:p-4 bg-white/95 rounded-lg border border-gray-200 space-y-3">
-          <h3 className="text-base font-semibold text-gray-800 pb-2 border-b border-gray-200">
-            Tiến độ làm bài
+        {/* Progress Section */}
+        <div className="p-2.5 sm:p-4 bg-white/95 rounded-lg border border-gray-200 space-y-2.5 sm:space-y-3">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-800 pb-2 border-b border-gray-200">
+            Tiến độ
           </h3>
 
           <ProgressBar percentage={progressPercentage} />
@@ -407,17 +403,17 @@ const QuestionDisplay = ({
             onClick={handleSubmitWithSave}
             disabled={!isAllAnswered}
             className={`
-              w-full py-3 px-4 font-semibold rounded-lg transition-all duration-150
-              flex items-center justify-center gap-2 text-base
+              w-full py-2.5 sm:py-3 px-3 sm:px-4 font-semibold rounded-lg transition-all duration-150
+              flex items-center justify-center gap-2 text-sm sm:text-base
               ${isAllAnswered
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600'
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 active:scale-95'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }
             `}
           >
-            <Save className="w-5 h-5" />
-            <span>{isSignedIn ? 'NỘP BÀI & LƯU' : 'NỘP BÀI'}</span>
-            {isAllAnswered && <span className="text-sm">({totalQuestions} câu)</span>}
+            <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>{isSignedIn ? 'NỘP & LƯU' : 'NỘP'}</span>
+            {isAllAnswered && <span className="text-xs sm:text-sm">({totalQuestions})</span>}
           </button>
         </div>
       </div>
