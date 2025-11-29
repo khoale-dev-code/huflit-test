@@ -114,9 +114,9 @@ export const ENHANCED_VOICE_SETTINGS = {
   },
 
   Ben: { 
-    pitch: 1.12,
+    pitch: 1.002,
     rate: 0.35,
-    volume: 1.58,
+    volume: 1.30,
     pauseFrequency: "low",
     emotional: "friendly",
     style: "approachable",},
