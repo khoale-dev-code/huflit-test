@@ -1,6 +1,60 @@
 import React, { useState } from 'react';
 import { getExamById, getExamParts, getExamQuestions, EXAM_DATA } from '../data/examData';
-import { BookOpen, FileText, CheckCircle, Sparkles, ChevronDown, Award, Target } from 'lucide-react';
+import { BookOpen, FileText, CheckCircle, Sparkles, ChevronDown, Award, Target, ChevronUp } from 'lucide-react';
+
+// Component riêng để hiển thị explanation với expand/collapse
+const ExplanationSection = ({ explanation }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  if (!explanation) return null;
+
+  // Kiểm tra độ dài text để quyết định có hiển thị nút expand không
+  const isLongText = explanation.length > 250;
+  const previewLength = 250;
+  
+  const displayText = isExpanded || !isLongText 
+    ? explanation 
+    : explanation.substring(0, previewLength) + '...';
+
+  return (
+    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-3 sm:p-4 md:p-5 lg:p-6 border-t-2 border-blue-100">
+      <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
+        <div className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 bg-blue-100 rounded-lg sm:rounded-xl flex-shrink-0">
+          <Sparkles className="w-4 h-4 sm:w-5 md:w-5 lg:w-6 text-blue-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs sm:text-sm md:text-base font-bold text-blue-900 mb-1.5 sm:mb-2 md:mb-3">
+            💡 Giải Thích Chi Tiết
+          </h4>
+          
+          <p className="text-xs sm:text-sm md:text-base text-blue-800 leading-relaxed break-words whitespace-pre-wrap">
+            {displayText}
+          </p>
+          
+          {/* Nút expand/collapse chỉ hiển thị khi text dài */}
+          {isLongText && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-2.5 sm:mt-3 md:mt-4 flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold text-xs sm:text-sm transition-colors duration-200 hover:bg-blue-100/50 px-2 py-1 rounded"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  <span>Thu gọn</span>
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  <span>Xem thêm</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ExamAnswersPage = () => {
   const [selectedExam, setSelectedExam] = useState('exam1');
@@ -15,7 +69,7 @@ const ExamAnswersPage = () => {
   }, [selectedExam]);
 
   return (
-    <div className="w-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+    <div className="w-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 min-h-screen">
       {/* Header (Mobile Optimized) */}
       <div className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-white shadow-lg sm:shadow-2xl">
         {/* Decorative Pattern */}
@@ -199,22 +253,8 @@ const ExamAnswersPage = () => {
                     ))}
                   </div>
 
-                  {/* Explanation */}
-                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-3 sm:p-4 md:p-5 lg:p-6 border-t-2 border-blue-100">
-                    <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
-                      <div className="p-1.5 sm:p-2 md:p-2.5 lg:p-3 bg-blue-100 rounded-lg sm:rounded-xl flex-shrink-0">
-                        <Sparkles className="w-4 h-4 sm:w-5 md:w-5 lg:w-6 text-blue-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs sm:text-sm md:text-base font-bold text-blue-900 mb-1.5 sm:mb-2 md:mb-3">
-                          💡 Giải Thích Chi Tiết
-                        </h4>
-                        <p className="text-xs sm:text-sm md:text-base text-blue-800 leading-relaxed break-words line-clamp-3 sm:line-clamp-none">
-                          {q.explanation}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Explanation - FIX: Dùng component riêng */}
+                  <ExplanationSection explanation={q.explanation} />
                 </div>
               ))}
             </div>

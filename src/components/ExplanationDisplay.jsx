@@ -15,9 +15,17 @@ const ExplanationSection = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isExplanationExpanded, setIsExplanationExpanded] = useState(false);
 
   const selectedAnswerText = options[userAnswer] || 'Chưa chọn';
   const correctAnswerText = options[correctAnswer] || 'N/A';
+
+  // Kiểm tra xem explanation có dài không (> 300 ký tự)
+  const isLongExplanation = explanation && explanation.length > 300;
+  const previewLength = 300;
+  const displayedExplanation = isExplanationExpanded || !isLongExplanation 
+    ? explanation 
+    : explanation?.substring(0, previewLength) + '...';
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(explanation);
@@ -118,7 +126,7 @@ const ExplanationSection = ({
       {/* Expanded Content (Mobile Optimized) */}
       <div className={`
         overflow-hidden transition-all duration-700 ease-in-out
-        ${isExpanded ? 'max-h-[8000px] opacity-100 mt-2 sm:mt-3 md:mt-5' : 'max-h-0 opacity-0 mt-0'}
+        ${isExpanded ? 'max-h-[12000px] opacity-100 mt-2 sm:mt-3 md:mt-5' : 'max-h-0 opacity-0 mt-0'}
       `}>
         <div className="space-y-2.5 sm:space-y-3 md:space-y-5">
           
@@ -171,7 +179,7 @@ const ExplanationSection = ({
                     Câu trả lời của bạn
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2 line-clamp-3">
+                <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2">
                   {selectedAnswerText}
                 </p>
               </div>
@@ -188,7 +196,7 @@ const ExplanationSection = ({
                       ✅ Đáp án chính xác
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2 line-clamp-3">
+                  <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2">
                     {correctAnswerText}
                   </p>
                 </div>
@@ -212,21 +220,54 @@ const ExplanationSection = ({
                 : 'bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100'
               }
             `}>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Brain className={`w-4 h-4 sm:w-5 flex-shrink-0 ${
-                  isCorrect ? 'text-emerald-600' : 'text-amber-600'
-                }`} />
-                <h4 className={`font-bold text-xs sm:text-sm md:text-base ${
-                  isCorrect ? 'text-emerald-900' : 'text-amber-900'
-                } line-clamp-1`}>
-                  💡 Giải thích chi tiết
-                </h4>
+              <div className="flex items-center gap-1.5 sm:gap-2 justify-between">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <Brain className={`w-4 h-4 sm:w-5 flex-shrink-0 ${
+                    isCorrect ? 'text-emerald-600' : 'text-amber-600'
+                  }`} />
+                  <h4 className={`font-bold text-xs sm:text-sm md:text-base ${
+                    isCorrect ? 'text-emerald-900' : 'text-amber-900'
+                  } truncate`}>
+                    💡 Giải thích chi tiết
+                  </h4>
+                </div>
+                {/* Badge hiển thị số ký tự nếu text dài */}
+                {isLongExplanation && (
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0 ${
+                    isCorrect 
+                      ? 'bg-emerald-200 text-emerald-800' 
+                      : 'bg-amber-200 text-amber-800'
+                  }`}>
+                    {explanation.length} ký tự
+                  </span>
+                )}
               </div>
             </div>
+
             <div className="p-3 sm:p-4 md:p-6">
               <div className="text-gray-800 text-xs sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words space-y-2 sm:space-y-3">
-                {renderFormattedText(explanation)}
+                {renderFormattedText(displayedExplanation)}
               </div>
+
+              {/* Nút expand/collapse cho explanation nếu text dài */}
+              {isLongExplanation && (
+                <button
+                  onClick={() => setIsExplanationExpanded(!isExplanationExpanded)}
+                  className="mt-3 sm:mt-4 md:mt-5 flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-xs sm:text-sm transition-colors duration-200 hover:bg-blue-50 px-3 py-2 rounded-lg"
+                >
+                  {isExplanationExpanded ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      <span>Thu gọn giải thích</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      <span>Xem toàn bộ giải thích</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -272,7 +313,7 @@ const ExplanationSection = ({
             ) : (
               <>
                 <Copy className="w-3.5 h-3.5 sm:w-4 md:w-5" />
-                <span>📋 Sao chép</span>
+                <span>📋 Sao chép giải thích</span>
               </>
             )}
           </button>
