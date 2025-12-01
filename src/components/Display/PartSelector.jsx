@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState, memo } from 'react';
 import { ChevronDown, BookOpen, Headphones, Zap, Target, Award, ListChecks } from 'lucide-react';
-import { EXAM_DATA } from '../data/examData';
+import { EXAM_DATA } from '../../data/examData';
 
 // --- Memoized Sub-Components ---
 

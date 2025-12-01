@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getExamById, getExamParts, getExamQuestions, EXAM_DATA } from '../data/examData';
+import { getExamById, getExamParts, getExamQuestions, EXAM_DATA } from '../../data/examData';
 import { BookOpen, FileText, CheckCircle, Sparkles, ChevronDown, Award, Target, ChevronUp } from 'lucide-react';
 
 // Component riêng để hiển thị explanation với expand/collapse

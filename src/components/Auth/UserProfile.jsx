@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { User, Trophy, TrendingUp, BookOpen, Clock, Target, Award, Calendar, Flame, Star, Activity, BarChart3, Zap } from 'lucide-react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { useUserProgress } from '../hooks/useUserProgress'; // ✅ ADDED
-import styles from './styles/UserProfile.module.css';
+import { db } from '../../config/firebase';
+import { useUserProgress } from '../../hooks/useUserProgress'; // ✅ ADDED
+import styles from '../styles/UserProfile.module.css';
 
 export default function UserProfile({ currentUser: currentUserProp }) {
   // ✅ FIX 1: Get currentUser from hook if prop not provided

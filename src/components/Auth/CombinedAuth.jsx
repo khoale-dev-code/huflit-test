@@ -1,8 +1,8 @@
 import React from 'react';
 import ClerkAuth from './ClerkAuth';
 import FirebaseAuthButtons from './FirebaseAuthButtons';
-import { useClerkAuthentication } from '../hooks/useClerkAuth';
-import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
+import { useClerkAuthentication } from '../../hooks/useClerkAuth';
+import { useFirebaseAuth } from '../../hooks/useFirebaseAuth';
 
 export default function CombinedAuth() {
   const clerkAuth = useClerkAuthentication();

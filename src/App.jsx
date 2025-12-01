@@ -4,19 +4,19 @@ import { useAppState } from './hooks/useAppState';
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 import HeaderSection from './components/sections/HeaderSection';
-import UserProfile from './components/UserProfile';
-import PartSelector from './components/PartSelector';
-import ContentDisplay from './components/ContentDisplay';
-import QuestionDisplay from './components/QuestionDisplay';
-import ResultsDisplay from './components/ResultsDisplay';
-import VocabularyPractice from './components/VocabularyPractice';
-import AuthModal from './components/AuthModal';
+import UserProfile from './components/Auth/UserProfile.jsx';
+import PartSelector from './components/Display/PartSelector.jsx';
+import ContentDisplay from './components/Display/ContentDisplay';
+import QuestionDisplay from './components/Display/QuestionDisplay.jsx';
+import ResultsDisplay from './components/Display/ResultsDisplay.jsx';
+import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
+import AuthModal from './components/Auth/AuthModal.jsx';
 import { useOnlineUsers } from './hooks/useOnlineUsers.js';
-import ExamAnswersPage from './components/ExamAnswersPage.jsx';
+import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 
 // ✅ Lazy load components
-const GrammarReview = lazy(() => import('./components/GrammarReview'));
-const FullExamMode = lazy(() => import('./components/FullExamMode'));
+const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
+const FullExamMode = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
 
 import { Target, Trophy, FileText, Zap, GraduationCap, ArrowLeft } from 'lucide-react';
 

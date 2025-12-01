@@ -22,10 +22,10 @@ import {
   Check,
   Loader2
 } from 'lucide-react';
-import './styles/GrammarTopicPage.css';
+import '../styles/GrammarTopicPage.css';
 
 // Lazy load components for better performance
-const ConfettiEffect = lazy(() => import('./ConfettiEffect'));
+const ConfettiEffect = lazy(() => import('../ConfettiEffect'));
 
 // Memoized sub-components
 const ProgressBar = memo(({ percentage }) => (
@@ -569,27 +569,7 @@ const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) =>
           </div>
         </div>
 
-        {/* Motivational Footer */}
-        <div className="motivational-footer">
-          <h3 className="text-3xl font-bold mb-3 flex items-center justify-center gap-3">
-            <Trophy className="w-10 h-10" />
-            Keep Learning! Tiếp Tục Học!
-            <Sparkles className="w-10 h-10" />
-          </h3>
-          <p className="text-xl mb-4">
-            You're doing amazing! Every lesson brings you closer to fluency! 🚀
-          </p>
-          <div className="footer-stats">
-            <span className="footer-stat-item">
-              <Star className="w-5 h-5" />
-              {Object.values(completedLessonsState).filter(Boolean).length} Lessons Completed
-            </span>
-            <span className="footer-stat-item">
-              <Zap className="w-5 h-5" />
-              {currentStreak} Day Streak
-            </span>
-          </div>
-        </div>
+       
       </div>
     </div>
   );

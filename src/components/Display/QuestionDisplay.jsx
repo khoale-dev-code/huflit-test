@@ -2,8 +2,8 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { Save, CheckCircle, AlertCircle, Volume2, Check } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { useUnifiedAuth } from '../hooks/useUnifiedAuth';
+import { db } from '../../config/firebase';
+import { useUnifiedAuth } from '../../hooks/useUnifiedAuth';
 
 // ========================================
 // SUB-COMPONENT: Progress Bar

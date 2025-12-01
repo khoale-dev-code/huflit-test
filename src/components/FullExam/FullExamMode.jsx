@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Eye, EyeOff, Target, TrendingUp, Award, FileText, ChevronDown } from 'lucide-react';
 import ContentDisplay from './ContentDisplay';
-import { EXAM_DATA, getExamById } from '../data/examData';
-import { useUserProgress } from '../hooks/useUserProgress';
-import { useAutoSaveProgress } from '../hooks/useAutoSaveProgress';
+import { EXAM_DATA, getExamById } from '../../data/examData';
+import { useUserProgress } from '../../hooks/useUserProgress';
+import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
 import './styles/FullExamMode.css';
 
 // Constants

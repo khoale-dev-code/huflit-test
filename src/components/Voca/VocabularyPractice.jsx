@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Volume2, ChevronRight, ChevronLeft, RotateCcw, BookOpen, Brain, Zap, Settings, Download, Share2, BarChart3, Trash2, Copy, Check, X } from 'lucide-react';
-import { useSpeech } from '../components/hooks/useSpeech';
-import { vocabularyData } from '../data/vocabularyData';
+import { useSpeech } from '../hooks/useSpeech';
+import { vocabularyData } from '../../data/vocabularyData';
 
 export default function VocabularyPractice() {
   const { speak, sentenceId, playingId, rate, setRate, pitch, setPitch } = useSpeech();
