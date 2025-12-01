@@ -3,272 +3,275 @@ export const EXAM7_DATA = {
   description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT.",
   parts: {
     part1: {
-      title: "PART 1: Short Conversations",
-      description: "Nghe đoạn hội thoại giữa Emma và Tom về kỳ nghỉ. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
-      type: "listening",
-      script: "Tom: Hey Emma! I heard you just got back from your trip to South Korea. How was it?\nEmma: It was fantastic, Tom! I stayed there for three weeks exploring Seoul and Busan. I really wanted to try all the street food, especially the famous Korean fried chicken and tteokbokki. But honestly, most of it was too spicy for me, so I ended up eating at restaurants with milder options instead.\nTom: Oh, that's too bad. What about your visit to Thailand last summer? I remember you mentioned planning to go there.\nEmma: Yes! I absolutely loved Bangkok and Chiang Mai. The only regret I have is that I went during the rainy season. Many people told me that the best time to visit Thailand is during the cool season from November to February when the weather is perfect for outdoor activities.\nTom: Makes sense. How did you find getting around in Bangkok? I've heard the traffic can be crazy.\nEmma: Well, I'd say it was moderately easy to navigate. The BTS and MRT systems are quite efficient once you understand the routes. However, I wouldn't describe it as 'very easy' – you definitely need to plan your journeys carefully and allow extra time.",
-      questions: [
-        {
-          id: 1,
-          options: [
-            "She found most food too spicy for her taste.",
-            "She bought many Korean snacks to take home.",
-            "She didn't like any Korean food at all.",
-            "She ate street food every single day."
-          ],
-          correct: 0,
-          explanation: "Emma nói: 'Most of it was too spicy for me, so I ended up eating at restaurants with milder options instead.' (Hầu hết món ăn quá cay đối với tôi, nên tôi ăn ở nhà hàng với lựa chọn nhẹ hơn)."
-        },
-        {
-          id: 2,
-          options: [
-            "She stayed for two weeks.",
-            "She stayed for several months.",
-            "She stayed for three weeks.",
-            "She stayed for one month."
-          ],
-          correct: 2,
-          explanation: "Emma nói: 'I stayed there for three weeks exploring Seoul and Busan.' (Tôi ở đó ba tuần khám phá Seoul và Busan)."
-        },
-        {
-          id: 3,
-          options: [
-            "She ate at restaurants with milder food options.",
-            "She didn't eat anything because of allergies.",
-            "She only ate international fast food chains.",
-            "She cooked all her meals at the hotel."
-          ],
-          correct: 0,
-          explanation: "Emma nói: 'I ended up eating at restaurants with milder options instead.' (Tôi ăn ở nhà hàng với lựa chọn nhẹ hơn thay thế)."
-        },
-        {
-          id: 4,
-          options: [
-            "People recommended visiting during summer.",
-            "People suggested the rainy season is best.",
-            "People advised visiting during the cool season.",
-            "Nobody gave her any travel advice."
-          ],
-          correct: 2,
-          explanation: "Emma nói: 'Many people told me that the best time to visit Thailand is during the cool season from November to February.' (Nhiều người nói thời điểm tốt nhất để đi Thái Lan là mùa mát từ tháng 11 đến tháng 2)."
-        },
-        {
-          id: 5,
-          options: [
-            "She found it very difficult to get around.",
-            "She found it moderately easy to navigate.",
-            "She found it impossible without a tour guide.",
-            "She thought it was extremely easy to navigate."
-          ],
-          correct: 1,
-          explanation: "Emma nói: 'I'd say it was moderately easy to navigate. The BTS and MRT systems are quite efficient.' (Tôi sẽ nói nó khá dễ di chuyển. Hệ thống BTS và MRT khá hiệu quả)."
-        }
-      ]
+  title: "PART 1: Short Conversations",
+  description: "Nghe đoạn hội thoại giữa Emma và Tom về kỳ nghỉ. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
+  type: "listening",
+  script: "Tom: Hey Emma! I heard you just got back from your trip to South Korea. How was it?\n\nEmma: It was fantastic, Tom! I stayed there for three weeks exploring Seoul and Busan. The cities were amazing and so modern. I really wanted to try all the street food, especially the famous Korean fried chicken and tteokbokki that everyone raves about. But honestly, most of it was too spicy for me. I have a pretty low tolerance for spicy food, so I ended up eating at restaurants with milder options instead. I found some great Korean barbecue places and bibimbap restaurants that weren't too hot.\n\nTom: Oh, that's too bad you couldn't enjoy all the street food. But at least you found some good alternatives! What about your visit to Thailand last summer? I remember you mentioned planning to go there for quite a while.\n\nEmma: Yes! I absolutely loved Bangkok and Chiang Mai. The culture, the temples, the people – everything was wonderful. The only regret I have is that I went during the rainy season. It rained almost every afternoon, which limited some of our outdoor activities. Many people told me that the best time to visit Thailand is during the cool season from November to February when the weather is perfect for outdoor activities and sightseeing. I wish I had known that before booking my trip.\n\nTom: That's good advice for next time. How did you find getting around in Bangkok? I've heard the traffic can be crazy and quite overwhelming for tourists.\n\nEmma: Well, I'd say it was moderately easy to navigate. The BTS and MRT systems are quite efficient once you understand the routes and figure out which lines go where. The trains are clean, air-conditioned, and relatively affordable. However, I wouldn't describe it as 'very easy' – you definitely need to plan your journeys carefully, study the map beforehand, and allow extra time during rush hours when the trains can get extremely crowded.",
+  questions: [
+    {
+      id: 1,
+      options: [
+        "She found most food too spicy for her taste.",
+        "She bought many Korean snacks to take home.",
+        "She didn't like any Korean food at all.",
+        "She ate street food every single day."
+      ],
+      correct: 0,
+      explanation: "Emma nói: 'Most of it was too spicy for me, so I ended up eating at restaurants with milder options instead.' (Hầu hết món ăn quá cay đối với tôi, nên tôi ăn ở nhà hàng với lựa chọn nhẹ hơn)."
     },
-    part2: {
-      title: "PART 2: Longer Conversation",
-      description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại một cuộc họp. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-      type: "listening",
-      script: "Narrator: At the office meeting room.\nManager: Good morning, everyone. Let's start our team meeting. First, what would you like to drink?\nAnna: I'll have a green tea, please.\nBen: Same for me, a green tea.\nLisa: I'd also like a green tea, thank you.\nManager: Alright, that's three green teas.\nAnna: Lisa, I noticed you skipped breakfast this morning. Are you feeling okay?\nLisa: I'm fine, thanks. I actually had a big dinner last night, and I've been trying to practice intermittent fasting lately, so I'm skipping breakfast on purpose.\nBen: Speaking of changes, did you hear that Doctor Chen left his position at the hospital? What's he up to now?\nAnna: He still runs his private clinic, but now he's also teaching medical students at the university downtown. He's mentoring the next generation of doctors.\nLisa: That's wonderful! By the way, my mother and your aunt Maria are planning to visit us for dinner this weekend. Yes, your mother's sister will be joining us too.\nBen: For Michael's graduation, what should we give him?\nAnna: Cash would be practical.\nLisa: Maybe a nice watch?\nBen: How about a new laptop?\nAnna: Those are all good ideas. Let's discuss it more tonight.",
-      questions: [
-        {
-          id: 6,
-          question: "How many people ordered green tea?",
-          options: [
-            "Two",
-            "Four",
-            "Three",
-            "One"
-          ],
-          correct: 2,
-          explanation: "Manager nói: 'That's three green teas.' (Đó là ba trà xanh.) Anna, Ben, và Lisa đều gọi green tea."
-        },
-        {
-          id: 7,
-          question: "Why didn't Lisa eat breakfast?",
-          options: [
-            "She's practicing intermittent fasting.",
-            "She doesn't like breakfast food.",
-            "She was running late for work.",
-            "The cafeteria was closed."
-          ],
-          correct: 0,
-          explanation: "Lisa nói: 'I've been trying to practice intermittent fasting lately, so I'm skipping breakfast on purpose.' (Tôi đang thực hành nhịn ăn gián đoạn gần đây, nên tôi cố tình bỏ bữa sáng)."
-        },
-        {
-          id: 8,
-          question: "What does Doctor Chen do now?",
-          options: [
-            "He only works at his private clinic.",
-            "He teaches medical students at the university.",
-            "He retired from medicine completely.",
-            "He works full-time at the hospital."
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'He still runs his private clinic, but now he's also teaching medical students at the university downtown.' (Ông vẫn điều hành phòng khám riêng, nhưng giờ còn dạy sinh viên y khoa ở trường đại học)."
-        },
-        {
-          id: 9,
-          question: "Who is coming to dinner this weekend?",
-          options: [
-            "Ben's mother and his aunt.",
-            "Lisa's sister and her mother-in-law.",
-            "Lisa's mother and Ben's aunt Maria.",
-            "Ben's grandmother and his cousin."
-          ],
-          correct: 2,
-          explanation: "Lisa nói: 'My mother and your aunt Maria are planning to visit us for dinner this weekend.' (Mẹ tôi và dì Maria của anh dự định đến ăn tối cuối tuần này)."
-        },
-        {
-          id: 10,
-          question: "What will they give Michael for his graduation?",
-          options: [
-            "Cash",
-            "They haven't decided yet.",
-            "A watch",
-            "A laptop"
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'Those are all good ideas. Let's discuss it more tonight.' (Đó đều là ý tưởng hay. Hãy thảo luận thêm tối nay.) Họ đã đề xuất tiền, đồng hồ và laptop nhưng chưa quyết định."
-        }
-      ]
+    {
+      id: 2,
+      options: [
+        "She stayed for two weeks.",
+        "She stayed for several months.",
+        "She stayed for three weeks.",
+        "She stayed for one month."
+      ],
+      correct: 2,
+      explanation: "Emma nói: 'I stayed there for three weeks exploring Seoul and Busan.' (Tôi ở đó ba tuần khám phá Seoul và Busan)."
     },
-    part3: {
-      title: "PART 3: Monologue",
-      description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-      type: "listening",
-      script: "Counselor: Good afternoon, students. Welcome to this career counseling session. The quality of this program is satisfactory for most participants, though we're always striving to improve. I've just received your career assessment results – the majority of you scored between 75-80, which indicates a solid understanding of your strengths and interests. Please remember that if you fail to submit your career plan by the deadline your counselor has given you, you'll receive an incomplete grade for this course. No extensions will be granted unless you provide proper documentation. Jessica was an outstanding student here last semester; she achieved top marks but unfortunately learned a difficult lesson about time management when she missed one critical deadline. On a different note, the new cafe on campus has an excellent menu with healthy options, delicious coffee, and plenty of choices for students with dietary restrictions – definitely worth checking out during your break.",
-      questions: [
-        { 
-          id: 11, 
-          question: "The program is described as __________.", 
-          options: [
-            "(A) perfect",
-            "(B) disappointing", 
-            "(C) satisfactory",
-            "(D) outstanding"
-          ], 
-          correct: 2,
-          explanation: "Counselor: 'The quality of this program is satisfactory for most participants.' (Chất lượng chương trình này thỏa đáng cho hầu hết người tham gia)."
-        },
-        { 
-          id: 12, 
-          question: "The counselor has just __________.", 
-          options: [
-            "(A) started a new job",
-            "(B) finished teaching a class",
-            "(C) received the career assessment results",
-            "(D) scheduled individual meetings"
-          ], 
-          correct: 2,
-          explanation: "Counselor: 'I've just received your career assessment results.' (Tôi vừa nhận kết quả đánh giá nghề nghiệp của các bạn)."
-        },
-        { 
-          id: 13, 
-          question: "If students miss the deadline, they __________.", 
-          options: [
-            "(A) can request a one-week extension",
-            "(B) will receive partial credit",
-            "(C) will receive an incomplete grade",
-            "(D) must retake the entire course"
-          ], 
-          correct: 2,
-          explanation: "Counselor: 'If you fail to submit your career plan by the deadline, you'll receive an incomplete grade.' (Nếu bạn không nộp kế hoạch nghề nghiệp đúng hạn, bạn sẽ nhận điểm chưa hoàn thành)."
-        },
-        { 
-          id: 14, 
-          question: "Jessica was __________.", 
-          options: [
-            "(A) a new transfer student",
-            "(B) an outstanding student last semester",
-            "(C) expelled from the program",
-            "(D) a career counselor assistant"
-          ], 
-          correct: 1,
-          explanation: "Counselor: 'Jessica was an outstanding student here last semester; she achieved top marks.' (Jessica là sinh viên xuất sắc ở đây kỳ trước; cô ấy đạt điểm cao nhất)."
-        },
-        { 
-          id: 15, 
-          question: "The new cafe on campus __________.", 
-          options: [
-            "(A) only serves coffee",
-            "(B) is too expensive for students",
-            "(C) has limited menu options",
-            "(D) has excellent menu with healthy options"
-          ], 
-          correct: 3,
-          explanation: "Counselor: 'The new cafe on campus has an excellent menu with healthy options, delicious coffee, and plenty of choices.' (Quán cà phê mới trong kампus có thực đơn xuất sắc với lựa chọn lành mạnh, cà phê ngon và nhiều sự lựa chọn)."
-        }
-      ]
+    {
+      id: 3,
+      options: [
+        "She ate at restaurants with milder food options.",
+        "She didn't eat anything because of allergies.",
+        "She only ate international fast food chains.",
+        "She cooked all her meals at the hotel."
+      ],
+      correct: 0,
+      explanation: "Emma nói: 'I ended up eating at restaurants with milder options instead.' (Tôi ăn ở nhà hàng với lựa chọn nhẹ hơn thay thế)."
     },
-    part4: {
-      title: "PART 4: Extended Conversation",
-      description: "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-      type: "listening",
-      script: "Client 1: Hello, I'd like to return these headphones, please. They were a gift from my colleague for my work anniversary.\nSales Associate: Certainly, when were they purchased?\nClient 1: About three weeks ago, I believe.\nSales Associate: Is there something wrong with the product?\nClient 1: No, they work fine. They're just not the style I prefer. Unfortunately, I don't have the receipt – my colleague probably threw it away after wrapping them. However, all the original packaging and tags are intact.\nSales Associate: I understand, but our store policy requires a receipt for cash refunds. Without it, I'm unable to process a full monetary return.\nClient 1: But look, everything is here! The box, the warranty card, even the price tag!\nSales Associate: I apologize for the inconvenience. To help resolve this situation, I can offer you a store credit for the full amount instead. Alternatively, you could check with your colleague to see if they have the credit card statement showing the purchase.",
-      questions: [
-        { 
-          id: 16, 
-          question: "The headphones were __________.", 
-          options: [
-            "(A) a wedding gift",
-            "(B) purchased by the customer himself",
-            "(C) a work anniversary gift",
-            "(D) bought during a sale"
-          ], 
-          correct: 2,
-          explanation: "Client 1: 'They were a gift from my colleague for my work anniversary.' (Chúng là quà từ đồng nghiệp cho kỷ niệm công tác của tôi)."
-        },
-        { 
-          id: 17, 
-          question: "The headphones were purchased __________.", 
-          options: [
-            "(A) yesterday",
-            "(B) one month ago",
-            "(C) about three weeks ago",
-            "(D) six months ago"
-          ], 
-          correct: 2,
-          explanation: "Client 1: 'About three weeks ago, I believe.' (Khoảng ba tuần trước, tôi nghĩ vậy)."
-        },
-        { 
-          id: 18, 
-          question: "When requesting a refund, the customer __________.", 
-          options: [
-            "(A) brought the receipt but lost the box",
-            "(B) had both receipt and packaging",
-            "(C) didn't have the receipt",
-            "(D) refused to show any proof of purchase"
-          ], 
-          correct: 2,
-          explanation: "Client 1: 'Unfortunately, I don't have the receipt – my colleague probably threw it away.' (Thật không may, tôi không có biên lai – đồng nghiệp tôi có thể đã vứt nó đi)."
-        },
-        { 
-          id: 19, 
-          question: "The sales associate couldn't give a cash refund because __________.", 
-          options: [
-            "(A) the headphones were damaged",
-            "(B) the customer was rude",
-            "(C) it's against her personal preference",
-            "(D) store policy requires a receipt"
-          ], 
-          correct: 3,
-          explanation: "Sales Associate: 'Our store policy requires a receipt for cash refunds. Without it, I'm unable to process a full monetary return.' (Chính sách cửa hàng yêu cầu biên lai cho hoàn tiền mặt)."
-        },
-        { 
-          id: 20, 
-          question: "The sales associate tries to __________.", 
-          options: [
-            "(A) refuse any solution",
-            "(B) offer an alternative solution",
-            "(C) argue with the customer",
-            "(D) call security"
-          ], 
-          correct: 1,
-          explanation: "Sales Associate: 'To help resolve this situation, I can offer you a store credit for the full amount instead.' (Để giúp giải quyết tình huống này, tôi có thể cấp tín dụng cửa hàng với số tiền đầy đủ thay thế)."
-        }
-      ]
+    {
+      id: 4,
+      options: [
+        "People recommended visiting during summer.",
+        "People suggested the rainy season is best.",
+        "People advised visiting during the cool season.",
+        "Nobody gave her any travel advice."
+      ],
+      correct: 2,
+      explanation: "Emma nói: 'Many people told me that the best time to visit Thailand is during the cool season from November to February.' (Nhiều người nói thời điểm tốt nhất để đi Thái Lan là mùa mát từ tháng 11 đến tháng 2)."
     },
+    {
+      id: 5,
+      options: [
+        "She found it very difficult to get around.",
+        "She found it moderately easy to navigate.",
+        "She found it impossible without a tour guide.",
+        "She thought it was extremely easy to navigate."
+      ],
+      correct: 1,
+      explanation: "Emma nói: 'I'd say it was moderately easy to navigate. The BTS and MRT systems are quite efficient.' (Tôi sẽ nói nó khá dễ di chuyển. Hệ thống BTS và MRT khá hiệu quả)."
+    }
+  ]
+},
+
+part2: {
+  title: "PART 2: Longer Conversation",
+  description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại một cuộc họp. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Narrator: At the office meeting room.\n\nManager: Good morning, everyone. Thank you for coming to our team meeting today. Let's start our discussion. But first, what would you like to drink? We have coffee, tea, or water available.\n\nAnna: I'll have a green tea, please. I need something refreshing this morning.\n\nBen: Same for me, a green tea would be perfect.\n\nLisa: I'd also like a green tea, thank you. It's my favorite.\n\nManager: Alright, that's three green teas. I'll have someone bring them in shortly.\n\nAnna: Lisa, I noticed you skipped breakfast this morning when we were in the cafeteria. Are you feeling okay? You're usually the first one to grab something to eat.\n\nLisa: I'm fine, thanks for asking. I actually had a big dinner last night with my family, and I've been trying to practice intermittent fasting lately. It's supposed to have health benefits, so I'm skipping breakfast on purpose as part of my eating schedule. I'll eat lunch later though.\n\nBen: That's interesting! Speaking of changes, did you hear that Doctor Chen left his position at the hospital? I saw him last week and he mentioned he's doing something different now. What's he up to?\n\nAnna: Oh yes, I heard about that! He still runs his private clinic on the weekends, but now he's also teaching medical students at the university downtown during the weekdays. He told me he's really enjoying mentoring the next generation of doctors. It's quite a career shift for him.\n\nLisa: That's wonderful! He was always such a great doctor and teacher. By the way, I wanted to let you know that my mother and your aunt Maria are planning to visit us for dinner this weekend. Yes, your mother's sister will be joining us too. It should be a nice family gathering.\n\nBen: Oh, that reminds me – for Michael's graduation next month, what should we give him as a gift? We need to decide soon so we have time to order or purchase it.\n\nAnna: I think cash would be practical. He can use it for whatever he needs.\n\nLisa: Maybe a nice watch? Something he can keep and remember this milestone.\n\nBen: How about a new laptop? He'll need one for graduate school.\n\nAnna: Those are all good ideas. Let's discuss it more tonight when we have more time to think about what would be most meaningful for him.",
+  questions: [
+    {
+      id: 6,
+      question: "How many people ordered green tea?",
+      options: [
+        "Two",
+        "Four",
+        "Three",
+        "One"
+      ],
+      correct: 2,
+      explanation: "Manager nói: 'That's three green teas.' (Đó là ba trà xanh.) Anna, Ben, và Lisa đều gọi green tea."
+    },
+    {
+      id: 7,
+      question: "Why didn't Lisa eat breakfast?",
+      options: [
+        "She's practicing intermittent fasting.",
+        "She doesn't like breakfast food.",
+        "She was running late for work.",
+        "The cafeteria was closed."
+      ],
+      correct: 0,
+      explanation: "Lisa nói: 'I've been trying to practice intermittent fasting lately, so I'm skipping breakfast on purpose.' (Tôi đang thực hành nhịn ăn gián đoạn gần đây, nên tôi cố tình bỏ bữa sáng)."
+    },
+    {
+      id: 8,
+      question: "What does Doctor Chen do now?",
+      options: [
+        "He only works at his private clinic.",
+        "He teaches medical students at the university.",
+        "He retired from medicine completely.",
+        "He works full-time at the hospital."
+      ],
+      correct: 1,
+      explanation: "Anna nói: 'He still runs his private clinic, but now he's also teaching medical students at the university downtown.' (Ông vẫn điều hành phòng khám riêng, nhưng giờ còn dạy sinh viên y khoa ở trường đại học)."
+    },
+    {
+      id: 9,
+      question: "Who is coming to dinner this weekend?",
+      options: [
+        "Ben's mother and his aunt.",
+        "Lisa's sister and her mother-in-law.",
+        "Lisa's mother and Ben's aunt Maria.",
+        "Ben's grandmother and his cousin."
+      ],
+      correct: 2,
+      explanation: "Lisa nói: 'My mother and your aunt Maria are planning to visit us for dinner this weekend.' (Mẹ tôi và dì Maria của anh dự định đến ăn tối cuối tuần này)."
+    },
+    {
+      id: 10,
+      question: "What will they give Michael for his graduation?",
+      options: [
+        "Cash",
+        "They haven't decided yet.",
+        "A watch",
+        "A laptop"
+      ],
+      correct: 1,
+      explanation: "Anna nói: 'Those are all good ideas. Let's discuss it more tonight.' (Đó đều là ý tưởng hay. Hãy thảo luận thêm tối nay.) Họ đã đề xuất tiền, đồng hồ và laptop nhưng chưa quyết định."
+    }
+  ]
+},
+
+part3: {
+  title: "PART 3: Monologue",
+  description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Counselor: Good afternoon, students. Welcome to this career counseling session. I'm Ms. Rodriguez, and I'll be your career advisor for this semester.\n\nLet me start by talking about our program. The quality of this program is satisfactory for most participants, though we're always striving to improve and make it even better for future students. We value your feedback and use it to enhance our services.\n\nI've just received your career assessment results from the evaluation you completed last week – and I'm pleased to say that the majority of you scored between 75-80 points out of 100, which indicates a solid understanding of your strengths, interests, and potential career paths. This is a good foundation to build upon as we move forward.\n\nHowever, I need to emphasize something very important about deadlines in this program. Please remember that if you fail to submit your career plan by the deadline your counselor has given you, you'll receive an incomplete grade for this course. This is a firm policy, and no extensions will be granted unless you provide proper documentation such as a medical certificate or official letter explaining your circumstances.\n\nLet me share an example to illustrate why we take deadlines so seriously. Jessica was an outstanding student here last semester. She participated actively in all our sessions, achieved top marks on her assessments, and showed tremendous potential. But unfortunately, she learned a difficult lesson about time management when she missed one critical deadline for her final career plan submission. Despite her excellent work throughout the semester, that incomplete grade affected her overall record. So please, I encourage all of you to take these deadlines seriously and plan your time wisely.\n\nOn a different note, I know some of you will want to grab something to eat or drink between sessions. The new cafe on campus just opened last month, and it has an excellent menu with healthy options, delicious coffee, and plenty of choices for students with dietary restrictions – whether you're vegetarian, vegan, or have food allergies. It's definitely worth checking out during your break.",
+  questions: [
+    { 
+      id: 11, 
+      question: "The program is described as __________.", 
+      options: [
+        "(A) perfect",
+        "(B) disappointing", 
+        "(C) satisfactory",
+        "(D) outstanding"
+      ], 
+      correct: 2,
+      explanation: "Counselor: 'The quality of this program is satisfactory for most participants.' (Chất lượng chương trình này thỏa đáng cho hầu hết người tham gia)."
+    },
+    { 
+      id: 12, 
+      question: "The counselor has just __________.", 
+      options: [
+        "(A) started a new job",
+        "(B) finished teaching a class",
+        "(C) received the career assessment results",
+        "(D) scheduled individual meetings"
+      ], 
+      correct: 2,
+      explanation: "Counselor: 'I've just received your career assessment results.' (Tôi vừa nhận kết quả đánh giá nghề nghiệp của các bạn)."
+    },
+    { 
+      id: 13, 
+      question: "If students miss the deadline, they __________.", 
+      options: [
+        "(A) can request a one-week extension",
+        "(B) will receive partial credit",
+        "(C) will receive an incomplete grade",
+        "(D) must retake the entire course"
+      ], 
+      correct: 2,
+      explanation: "Counselor: 'If you fail to submit your career plan by the deadline, you'll receive an incomplete grade.' (Nếu bạn không nộp kế hoạch nghề nghiệp đúng hạn, bạn sẽ nhận điểm chưa hoàn thành)."
+    },
+    { 
+      id: 14, 
+      question: "Jessica was __________.", 
+      options: [
+        "(A) a new transfer student",
+        "(B) an outstanding student last semester",
+        "(C) expelled from the program",
+        "(D) a career counselor assistant"
+      ], 
+      correct: 1,
+      explanation: "Counselor: 'Jessica was an outstanding student here last semester; she achieved top marks.' (Jessica là sinh viên xuất sắc ở đây kỳ trước; cô ấy đạt điểm cao nhất)."
+    },
+    { 
+      id: 15, 
+      question: "The new cafe on campus __________.", 
+      options: [
+        "(A) only serves coffee",
+        "(B) is too expensive for students",
+        "(C) has limited menu options",
+        "(D) has excellent menu with healthy options"
+      ], 
+      correct: 3,
+      explanation: "Counselor: 'The new cafe on campus has an excellent menu with healthy options, delicious coffee, and plenty of choices.' (Quán cà phê mới trong campus có thực đơn xuất sắc với lựa chọn lành mạnh, cà phê ngon và nhiều sự lựa chọn)."
+    }
+  ]
+},
+
+part4: {
+  title: "PART 4: Extended Conversation",
+  description: "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Client 1: Hello, I'd like to return these headphones, please. They were a gift from my colleague for my work anniversary last month.\n\nSales Associate: Certainly, I'd be happy to help you with that. When were they purchased exactly?\n\nClient 1: About three weeks ago, I believe. Maybe around the middle of last month.\n\nSales Associate: I see. Is there something wrong with the product? Are they defective or not working properly?\n\nClient 1: No, they work fine actually. The sound quality is good and there are no technical issues. They're just not the style I prefer. I usually like over-ear headphones, but these are in-ear ones. Unfortunately, I don't have the receipt with me – my colleague probably threw it away after wrapping them as a gift. However, all the original packaging and tags are intact. You can see the box is unopened and all the accessories are still sealed.\n\nSales Associate: I understand your situation, and I appreciate you bringing everything back in good condition. However, our store policy requires a receipt for cash refunds. Without the original receipt, I'm unable to process a full monetary return to your credit card or give you cash back. The policy is quite strict about this.\n\nClient 1: But look, everything is here! The box is perfect, the warranty card is included, even the price tag from your store is still attached! Doesn't that prove I bought it here?\n\nSales Associate: I completely understand your frustration, and I can see that you've taken good care of everything. However, the packaging and tags alone aren't sufficient proof of purchase according to our system. I apologize for the inconvenience. To help resolve this situation and find a solution that works for you, I can offer you a store credit for the full amount instead of a cash refund. That way, you can use it to purchase something else you'd prefer – perhaps those over-ear headphones you mentioned. Alternatively, you could check with your colleague to see if they still have the credit card statement showing the purchase, and then we could process a proper refund.",
+  questions: [
+    { 
+      id: 16, 
+      question: "The headphones were __________.", 
+      options: [
+        "(A) a wedding gift",
+        "(B) purchased by the customer himself",
+        "(C) a work anniversary gift",
+        "(D) bought during a sale"
+      ], 
+      correct: 2,
+      explanation: "Client 1: 'They were a gift from my colleague for my work anniversary.' (Chúng là quà từ đồng nghiệp cho kỷ niệm công tác của tôi)."
+    },
+    { 
+      id: 17, 
+      question: "The headphones were purchased __________.", 
+      options: [
+        "(A) yesterday",
+        "(B) one month ago",
+        "(C) about three weeks ago",
+        "(D) six months ago"
+      ], 
+      correct: 2,
+      explanation: "Client 1: 'About three weeks ago, I believe.' (Khoảng ba tuần trước, tôi nghĩ vậy)."
+    },
+    { 
+      id: 18, 
+      question: "When requesting a refund, the customer __________.", 
+      options: [
+        "(A) brought the receipt but lost the box",
+        "(B) had both receipt and packaging",
+        "(C) didn't have the receipt",
+        "(D) refused to show any proof of purchase"
+      ], 
+      correct: 2,
+      explanation: "Client 1: 'Unfortunately, I don't have the receipt – my colleague probably threw it away.' (Thật không may, tôi không có biên lai – đồng nghiệp tôi có thể đã vứt nó đi)."
+    },
+    { 
+      id: 19, 
+      question: "The sales associate couldn't give a cash refund because __________.", 
+      options: [
+        "(A) the headphones were damaged",
+        "(B) the customer was rude",
+        "(C) it's against her personal preference",
+        "(D) store policy requires a receipt"
+      ], 
+      correct: 3,
+      explanation: "Sales Associate: 'Our store policy requires a receipt for cash refunds. Without it, I'm unable to process a full monetary return.' (Chính sách cửa hàng yêu cầu biên lai cho hoàn tiền mặt)."
+    },
+    { 
+      id: 20, 
+      question: "The sales associate tries to __________.", 
+      options: [
+        "(A) refuse any solution",
+        "(B) offer an alternative solution",
+        "(C) argue with the customer",
+        "(D) call security"
+      ], 
+      correct: 1,
+      explanation: "Sales Associate: 'To help resolve this situation, I can offer you a store credit for the full amount instead.' (Để giúp giải quyết tình huống này, tôi có thể cấp tín dụng cửa hàng với số tiền đầy đủ thay thế)."
+    }
+  ]
+},
     part5: {
       title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
       description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",

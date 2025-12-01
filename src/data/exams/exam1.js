@@ -4,276 +4,250 @@
         parts: {
           // Listening Parts - Part 1 cập nhật: 1 hội thoại chung cho 5 câu hỏi
       part1: {
-    title: "PART 1: Short Conversations",
-    description:
-      "Nghe đoạn hội thoại giữa Mark và Sarah về chuyến đi. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
-    type: "listening",
-    script:
-      "Mark: Welcome back, Sarah! How was your recent trip to Taiwan?\nSarah: It was amazing, Mark. I spent about one month exploring the whole island. I went to the night markets in Taipei hoping to buy a lot of clothes and souvenirs, but I didn't buy anything because I found the prices too high. I just window-shopped the whole time.\nMark: Ah, that's rough. I know that feeling. What about your trip to Japan? I remember you were there for a week last year.\nSarah: I loved Tokyo! I wish I could've gone in a different season, though. I heard from a lot of people that you really need to visit in the spring to see the cherry blossoms at their peak.\nMark: Good point. How did you manage getting around in such a huge city? Was Tokyo easy to navigate?\nSarah: Hmm, I found it was a little bit easy to get around. The subway system is vast, but once you memorize a few key lines, it works well. But I certainly wouldn't call it 'very easy'—it still required a bit of effort!",
-    questions: [
-      {
-        id: 1,
-        options: [
-          "She didn't buy anything because it wasn't beautiful.",
-          "She didn't buy anything because she found prices too high.",
-          "She bought a lot of things because they're really cheap.",
-          "She bought nothing because she did not have time."
-        ],
-        correct: 1,
-        explanation:
-          "Sarah nói: 'I didn't buy anything because I found the prices too high.' Từ khóa: 'didn't buy anything' → không mua gì. Lý do: 'prices too high' → giá quá cao. Các lựa chọn khác sai vì không đề cập đến giá đẹp/xấu, không liên quan thời gian hoặc số lượng mua."
-      },
-      {
-        id: 2,
-        options: [
-          "She spent one month there.",
-          "She spent seven months there.",
-          "She spent one week there.",
-          "She spent several times there."
-        ],
-        correct: 0,
-        explanation:
-          "Sarah nói: 'I spent about one month exploring the whole island.' Từ khóa: 'one month'. Không có chi tiết nào về 7 tháng hoặc 1 tuần. 'Exploring the whole island' cho thấy thời gian dài nên phù hợp với một tháng."
-      },
-      {
-        id: 3,
-        options: [
-          "She didn't buy anything in Taipei.",
-          "She bought many things in Taipei.",
-          "She bought a few things in Taipei.",
-          "She bought a souvenir in Taipei."
-        ],
-        correct: 0,
-        explanation:
-          "Sarah nói: 'I didn't buy anything… I just window-shopped the whole time.' 'Window-shopped' nghĩa là chỉ xem chứ không mua. Vì vậy chắc chắn không có bất kỳ món đồ nào được mua, loại toàn bộ các lựa chọn còn lại."
-      },
-      {
-        id: 4,
-        options: [
-          "People told her to visit in the summer.",
-          "People didn't tell her to visit in the spring.",
-          "People told her to visit in the spring.",
-          "People told her to visit in the autumn."
-        ],
-        correct: 2,
-        explanation:
-          "Sarah nói: 'I heard from a lot of people that you really need to visit in the spring to see the cherry blossoms at their peak.' Từ khóa: 'visit in the spring' → mùa xuân. Không nhắc đến mùa hè hay mùa thu. 'Cherry blossoms at their peak' (hoa anh đào ở độ nở tối đa) là lý do người ta khuyên nên đi vào mùa xuân."
-      },
-      {
-        id: 5,
-        options: [
-          "She found that Tokyo was very easy to get around.",
-          "She found that Tokyo was not easy to get around.",
-          "She found that Tokyo was a little bit easy to get around.",
-          "She found that Tokyo was too busy to get around."
-        ],
-        correct: 2,
-        explanation:
-          "Sarah nói: 'I found it was a little bit easy to get around… but I certainly wouldn't call it very easy—it still required a bit of effort!' Từ khóa: 'a little bit easy' → hơi dễ. Đây là một mức độ cân bằng giữa dễ và khó. Cô ấy không nói nó 'very easy' (rất dễ) cũng không nói 'not easy' (không dễ). Cô ấy giải thích thêm rằng mạng lưới tàu điện ngầm rộng lớn (vast), nhưng khi bạn ghi nhớ vài tuyến chính thì nó hoạt động tốt. Không có câu nào nói Tokyo quá bận để di chuyển."
-      }
-    ]
-  },
-    part2: {
-    title: "PART 2: Longer Conversation",
-    description:
-      "5 câu hỏi - Một đoạn hội thoại dài giữa ba người ở quán cà phê. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-    type: "listening",
-    script:
-      "Narrator: At the cafe.\nWaiter: Good afternoon! Are you ready to order drinks?\nMike: Yes, I'll have an orange juice.\nSarah: Me too, please.\nJohn: And one for me as well.\nWaiter: That's three orange juices.\nMike: Sarah, why aren't you ordering food?\nSarah: I'm not hungry right now; I had a late lunch and I'm trying to eat lighter these days.\nJohn: By the way, I heard Uncle Robertson quit his restaurant job. What's he doing now?\nMike: He owns his own business still, but now he works with young players coaching soccer in Orlando.\nSarah: That's exciting! Speaking of family, Mom and Aunt Lisa – your sister-in-law – are coming over for lunch tomorrow. Yes, my sister and your aunt will join us.\nMike: For Emily's birthday, what gift?\nJohn: Money is practical.\nSarah: Or clothes.\nMike: A hat might be fun.\nJohn: We can't decide yet; let's think more.",
-    questions: [
-      {
-        id: 6,
-        question: "How many people want orange juice?",
-        options: ["Two", "Three", "Four", "Five"],
-        correct: 1,
-        explanation:
-          "Phục vụ xác nhận: 'That's three orange juices.' Trước đó, cả ba người — Mike, Sarah và John — đều gọi orange juice. Mike nói 'I'll have an orange juice', Sarah nói 'Me too, please' (tôi cũng vậy), và John nói 'And one for me as well' (tôi cũng muốn một cái). Vậy tổng cộng có **3 người** muốn orange juice. Các đáp án khác không chính xác."
-      },
-      {
-        id: 7,
-        question: "Why doesn't the woman want anything to eat?",
-        options: [
-          "Because she's not hungry.",
-          "Because she doesn't feel well.",
-          "Because she's on a diet.",
-          "Because the food is not good enough."
-        ],
-        correct: 0,
-        explanation:
-          "Sarah giải thích rõ ràng: 'I'm not hungry right now; I had a late lunch and I'm trying to eat lighter these days.' Lý do chính là **'I'm not hungry right now'** (tôi không đói bây giờ). Cô ấy có thêm lý do phụ là cô vừa ăn trưa muộn và đang cố gắng ăn nhẹ hơn, nhưng không đói là lý do cơ bản. Không có thông tin cho thấy cô ấy bị bệnh hoặc chê phẩm chất đồ ăn."
-      },
-      {
-        id: 8,
-        question: "What does Robertson do now?",
-        options: [
-          "He owns a restaurant.",
-          "He works in Orlando.",
-          "He coaches soccer with young players.",
-          "He works in a restaurant."
-        ],
-        correct: 2,
-        explanation:
-          "Mike nói: 'He owns his own business still, but now he **works with young players coaching soccer in Orlando**.' Công việc hiện tại của Robertson là **huấn luyện (coaching) bóng đá với các cầu thủ trẻ**. Mặc dù nó diễn ra ở Orlando, nhưng Orlando chỉ là nơi địa lý, không phải mô tả chính xác công việc. Các đáp án về 'restaurant' không còn đúng nữa vì anh ấy đã bỏ công việc ở nhà hàng."
-      },
-      {
-        id: 9,
-        question: "Who's coming to lunch tomorrow?",
-        options: [
-          "The man's mother-in-law and his sister.",
-          "The man's mother and his sister-in-law.",
-          "The man's mother-in-law and her sister.",
-          "The man's sister-in-law and his sister."
-        ],
-        correct: 1,
-        explanation:
-          "Sarah nói: 'Mom and Aunt Lisa – your sister-in-law – are coming over for lunch tomorrow.' Người nói là Sarah, người nói chuyện với Mike (người đàn ông). Như vậy: **Mom (mẹ của Mike)** và **Aunt Lisa (chị/em dâu của Mike)** sẽ đến. Cách diễn đạt chính xác là: 'the man's mother and his sister-in-law' (mẹ của anh ấy và chị/em dâu của anh ấy). Không có thông tin về chị gái ruột hoặc mẹ vợ của Mike."
-      },
-      {
-        id: 10,
-        question: "What are they going to give Emily for her birthday?",
-        options: ["Money", "Clothes", "A hat", "They can't decide yet."],
-        correct: 3,
-        explanation:
-          "Ba người đề xuất ba ý tưởng khác nhau: John gợi ý 'Money is practical', Sarah đề xuất 'Or clothes', Mike nói 'A hat might be fun'. Tuy nhiên, kết thúc cuộc hội thoại, John nói: 'We can't decide yet; let's think more' (chúng ta vẫn chưa quyết định được; hãy suy nghĩ thêm). Điều này cho thấy họ **chưa thống nhất một quyết định cuối cùng**. Các đáp án A, B, C chỉ là những gợi ý được đề xuất, nhưng không phải là quyết định chắc chắn."
-      }
-    ]
-  },
-    part3: {
-    title: "PART 3: Monologue",
-    description:
-      "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-    type: "listening",
-    script:
-      "Professor: Good afternoon, everyone. Welcome to this English class. It's acceptable for intermediate learners, though we aim higher. I have just received the results of your diagnostic test – most of you got around 6.5, which is a good start. Remember, if you miss a deadline your tutor has set for homework, you will be given a zero; no excuses without documentation. Angela was an intelligent kid in class last term; she excelled but learned the hard way about deadlines. On another note, the restaurant in the main street has a good menu, nice food, and lots of options for vegetarians – all correct choices if you're dining out after class.",
-    questions: [
-      {
-        id: 11,
-        question: "The class is __________.",
-        options: ["(A) good enough", "(B) acceptable", "(C) awful", "(D) success"],
-        correct: 1,
-        explanation:
-          "Giáo sư nói: 'It's acceptable for intermediate learners, though we aim higher.' Từ khóa chính là **'acceptable'** (chấp nhận được, tạm ổn). Đây là mô tả mức độ hiện tại của lớp học. Giáo sư không nói lớp 'awful' (tệ) hay 'success' (thành công) - những từ quá cực đoan. 'Good enough' không chính xác vì giáo sư muốn hướng tới mục tiêu cao hơn ('though we aim higher')."
-      },
-      {
-        id: 12,
-        question: "I have just _________.",
-        options: [
-          "(A) done a master's",
-          "(B) got the result of my English test",
-          "(C) got 6.5",
-          "(D) get"
-        ],
-        correct: 1,
-        explanation:
-          "Giáo sư nói: 'I have just received the results of your diagnostic test.' Hành động vừa hoàn thành là **'received the results'** (nhận được kết quả bài kiểm tra). Lưu ý cấu trúc 'have just + past participle' dùng để nói về hành động vừa xảy ra. Đáp án (C) 'got 6.5' chỉ là thông tin kết quả điểm số, không phải hành động giáo sư vừa làm. Đáp án (A) không liên quan. Đáp án (D) 'get' sai ngữ pháp vì không phù hợp với cấu trúc 'have just'."
-      },
-      {
-        id: 13,
-        question: "If miss a deadline your tutor has set, you __________.",
-        options: [
-          "(A) will be given a zero",
-          "(B) will get 50% of your marks",
-          "(C) will be fined",
-          "(D) will get all marks"
-        ],
-        correct: 0,
-        explanation:
-          "Giáo sư phát biểu rõ ràng: 'If you miss a deadline your tutor has set for homework, you **will be given a zero**; no excuses without documentation.' Đây là một quy định cứng nhắc - bỏ deadline = điểm 0 (không ngoại lệ trừ khi có giấy tờ chứng minh). Các đáp án khác hoàn toàn không có cơ sở trong bài nói: không ai nói về trừ 50% điểm, không phạt tiền, cũng không được full điểm. Đáp án (A) phản ánh chính xác quy định học thuật."
-      },
-      {
-        id: 14,
-        question: "Angela was __________.",
-        options: ["(A) an intelligent kid in class", "(B) a bit bored at her school", "(C) an AI", "(D) already"],
-        correct: 0,
-        explanation:
-          "Giáo sư nói: 'Angela was **an intelligent kid in class last term; she excelled but learned the hard way about deadlines.**' Lưu ý động từ 'was' (quá khứ) cho thấy đây là mô tả tình huống trong quá khứ. Angela là một học sinh **thông minh và xuất sắc** (excelled = nổi bật, thể hiện tốt). Tuy nhiên, cô ấy cũng 'learned the hard way' - nghĩa là phải chịu hậu quả vì không đúng deadline. Các đáp án khác hoàn toàn không chính xác: (B) không nói cô bị chán nản, (C) không liên quan AI, (D) 'already' là từ vô nghĩa trong ngữ cảnh này."
-      },
-      {
-        id: 15,
-        question: "The restaurant in the main street __________.",
-        options: [
-          "(A) has a good menu",
-          "(B) has nice food",
-          "(C) has a lots of option for vegetarians",
-          "(D) all correct"
-        ],
-        correct: 3,
-        explanation:
-          "Giáo sư mô tả nhà hàng chi tiết: 'the restaurant in the main street **has a good menu, nice food, and lots of options for vegetarians**.' Cả ba yếu tố được liệt kê rõ ràng được nối bằng 'and': (A) good menu ✓, (B) nice food ✓, (C) lots of options for vegetarians ✓. Vì tất cả ba mô tả đều đúng, câu trả lời chính xác là **(D) all correct** (tất cả đều đúng). Đây là dạng câu hỏi kiểm tra khả năng chú ý để lấy toàn bộ thông tin từ bài nói."
-      }
-    ]
-  },
+  title: "PART 1: Short Conversations",
+  description: "Nghe đoạn hội thoại giữa Mark và Sarah về chuyến đi. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
+  type: "listening",
+  script: "Mark: Welcome back, Sarah! How was your recent trip to Taiwan?\n\nSarah: It was amazing, Mark. I spent about one month exploring the whole island from north to south. The scenery was absolutely breathtaking. I went to the night markets in Taipei hoping to buy a lot of clothes and souvenirs for my family and friends back home, but I didn't buy anything because I found the prices too high compared to what I expected. Everything seemed overpriced, especially in the touristy areas. I just window-shopped the whole time, taking photos and enjoying the atmosphere instead.\n\nMark: Ah, that's rough. I know that feeling when you're excited to shop but the prices just don't match your budget. What about your trip to Japan? I remember you were there for a week last year, right?\n\nSarah: Oh yes! I loved Tokyo! The city is so vibrant and full of energy. I wish I could've gone in a different season, though. I heard from a lot of people that you really need to visit in the spring to see the cherry blossoms at their peak. They say it's absolutely magical when the sakura trees are in full bloom. Maybe I'll plan another trip next spring.\n\nMark: Good point. The cherry blossom season is definitely iconic. How did you manage getting around in such a huge city? Was Tokyo easy to navigate? I've heard mixed reviews about the transportation system there.\n\nSarah: Hmm, I found it was a little bit easy to get around, you know. The subway system is vast and quite complex at first glance, but once you memorize a few key lines and understand the color coding system, it works well enough. But I certainly wouldn't call it 'very easy' or super convenient—it still required a bit of effort and some patience, especially during rush hour when the trains are packed!",
+  questions: [
+    {
+      id: 1,
+      options: [
+        "She didn't buy anything because it wasn't beautiful.",
+        "She didn't buy anything because she found prices too high.",
+        "She bought a lot of things because they're really cheap.",
+        "She bought nothing because she did not have time."
+      ],
+      correct: 1,
+      explanation: "Sarah nói: 'I didn't buy anything because I found the prices too high.' Từ khóa: 'didn't buy anything' → không mua gì. Lý do: 'prices too high' → giá quá cao. Các lựa chọn khác sai vì không đề cập đến giá đẹp/xấu, không liên quan thời gian hoặc số lượng mua."
+    },
+    {
+      id: 2,
+      options: [
+        "She spent one month there.",
+        "She spent seven months there.",
+        "She spent one week there.",
+        "She spent several times there."
+      ],
+      correct: 0,
+      explanation: "Sarah nói: 'I spent about one month exploring the whole island.' Từ khóa: 'one month'. Không có chi tiết nào về 7 tháng hoặc 1 tuần. 'Exploring the whole island' cho thấy thời gian dài nên phù hợp với một tháng."
+    },
+    {
+      id: 3,
+      options: [
+        "She didn't buy anything in Taipei.",
+        "She bought many things in Taipei.",
+        "She bought a few things in Taipei.",
+        "She bought a souvenir in Taipei."
+      ],
+      correct: 0,
+      explanation: "Sarah nói: 'I didn't buy anything… I just window-shopped the whole time.' 'Window-shopped' nghĩa là chỉ xem chứ không mua. Vì vậy chắc chắn không có bất kỳ món đồ nào được mua, loại toàn bộ các lựa chọn còn lại."
+    },
+    {
+      id: 4,
+      options: [
+        "People told her to visit in the summer.",
+        "People didn't tell her to visit in the spring.",
+        "People told her to visit in the spring.",
+        "People told her to visit in the autumn."
+      ],
+      correct: 2,
+      explanation: "Sarah nói: 'I heard from a lot of people that you really need to visit in the spring to see the cherry blossoms at their peak.' Từ khóa: 'visit in the spring' → mùa xuân. Không nhắc đến mùa hè hay mùa thu. 'Cherry blossoms at their peak' (hoa anh đào ở độ nở tối đa) là lý do người ta khuyên nên đi vào mùa xuân."
+    },
+    {
+      id: 5,
+      options: [
+        "She found that Tokyo was very easy to get around.",
+        "She found that Tokyo was not easy to get around.",
+        "She found that Tokyo was a little bit easy to get around.",
+        "She found that Tokyo was too busy to get around."
+      ],
+      correct: 2,
+      explanation: "Sarah nói: 'I found it was a little bit easy to get around… but I certainly wouldn't call it very easy—it still required a bit of effort!' Từ khóa: 'a little bit easy' → hơi dễ. Đây là một mức độ cân bằng giữa dễ và khó. Cô ấy không nói nó 'very easy' (rất dễ) cũng không nói 'not easy' (không dễ). Cô ấy giải thích thêm rằng mạng lưới tàu điện ngầm rộng lớn (vast), nhưng khi bạn ghi nhớ vài tuyến chính thì nó hoạt động tốt. Không có câu nào nói Tokyo quá bận để di chuyển."
+    }
+  ]
+},
 
-  part4: {
-    title: "PART 4: Extended Conversation",
-    description:
-      "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-    type: "listening",
-    script:
-      "Customer: Hi, I'd like to return this tie, please. It was a birthday present from my girlfriend.\nSales Associate: Sure, when was it bought?\nCustomer: A few weeks ago.\nSales Associate: Any problem with it?\nCustomer: No, just not my style. I didn't bring the receipt – she must have tossed it. But the store tag is still on.\nSales Associate: I see, but without the receipt, I can't process a full refund. Our policy requires proof that it was shopped in this store.\nCustomer: Come on, the tag proves it!\nSales Associate: To calm the man down, I can give store credit instead. Or check your credit card for the transaction details.",
-    questions: [
-      {
-        id: 16,
-        question: "The tie __________.",
-        options: [
-          "(A) was a birthday present",
-          "(B) was a Christmas present",
-          "(C) was a gift of a boyfriend",
-          "(D) all correct"
-        ],
-        correct: 0,
-        explanation:
-          "Khách hàng nói rõ ràng: 'It was a **birthday present from my girlfriend**.' Từ khóa chính: 'birthday present' (quà sinh nhật). Bài nói hoàn toàn không đề cập đến Giáng sinh (Christmas) hay quà từ bạn trai (boyfriend). Đáp án (C) sai vì giáo sư là nữ ('my girlfriend'). Vì vậy chỉ có đáp án **(A)** là chính xác duy nhất."
-      },
-      {
-        id: 17,
-        question: "The tie was purchased ___________.",
-        options: ["(A) last week", "(B) a few weeks ago", "(C) two weeks ago", "(D) two years ago"],
-        correct: 1,
-        explanation:
-          "Khách hàng trả lời câu hỏi của nhân viên: 'A **few weeks ago**.' Từ khóa: 'a few weeks' (vài tuần). Lưu ý rằng 'a few' có nghĩa là khoảng 3-5 tuần, không chỉ định số lượng cụ thể. Đáp án (A) 'last week' quá gần, (C) 'two weeks ago' quá cụ thể khi khách chỉ nói 'a few', (D) 'two years ago' hoàn toàn không phù hợp. Đáp án **(B)** là chính xác nhất vì nó khớp trực tiếp với lời nói của khách hàng."
-      },
-      {
-        id: 18,
-        question: "When asking for refunding, the man __________.",
-        options: [
-          "(A) had a receipt",
-          "(B) left his receipt at home",
-          "(C) didn't have receipt",
-          "(D) don't receipt"
-        ],
-        correct: 2,
-        explanation:
-          "Khách nói: 'I didn't bring the receipt – **she must have tossed it**.' Phần quan trọng: 'tossed it' (vứt nó đi) cho thấy biên lai đã bị **vứt bỏ hoàn toàn**, không phải để quên ở nhà. Anh ta nói 'I didn't bring' nghĩa là anh ta không có nó. Đáp án (A) sai hoàn toàn - anh ta không có biên lai. Đáp án (B) sai - biên lai bị vứt đi rồi, không phải ở nhà. Đáp án (D) sai ngữ pháp. Đáp án **(C)** 'didn't have receipt' là chính xác nhất (dù ngữ pháp cần thêm 'a': 'didn't have a receipt')."
-      },
-      {
-        id: 19,
-        question: "She (the shop assistant) didn't agree to pay back money because __________.",
-        options: [
-          "(A) she didn't believe in the man",
-          "(B) the man couldn't prove that the tie was shopped in her store",
-          "(C) she has no right to do so",
-          "(D) she hadn't believed"
-        ],
-        correct: 1,
-        explanation:
-          "Nhân viên giải thích: 'I can't process a full refund. **Our policy requires proof that it was shopped in this store.**' Lý do chính là **thiếu bằng chứng** - không có biên lai để chứng minh rằng áo cravat được mua tại cửa hàng này. Đáp án (A) sai - không phải vấn đề tin tưởng, mà là chính sách cửa hàng. Đáp án (C) sai - cô ấy hoàn toàn có quyền, nhưng không thể vì chính sách. Đáp án (D) sai ngữ pháp và không chính xác. Đáp án **(B)** chính xác - 'couldn't prove' (không thể chứng minh) khớp với lý do 'proof required'."
-      },
-      {
-        id: 20,
-        question: "The shop assistant tries to __________.",
-        options: [
-          "(A) make the man angry",
-          "(B) calm the man down",
-          "(C) bother the man",
-          "(D) make the man happy"
-        ],
-        correct: 1,
-        explanation:
-          "Nhân viên nói: 'To **calm the man down**, I can give store credit instead.' Từ khóa rõ ràng: 'calm the man down' (làm dịu bớt sự bực tức của khách). Cô ấy nhận thấy khách hàng bắt đầu phản ứng ('Come on, the tag proves it!') nên cô ấy chủ động đề xuất giải pháp thay thế (store credit hoặc kiểm tra giao dịch trên thẻ tín dụng) để hạ nhiệt tình huống. Đáp án (A), (C) sai vì cô ấy không muốn làm khách giận hay bực tức. Đáp án (D) chỉ là kết quả phụ, không phải mục đích chính. Đáp án **(B)** là chính xác."
-      }
-    ]
-  },
+part2: {
+  title: "PART 2: Longer Conversation",
+  description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người ở quán cà phê. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Narrator: At the cafe in downtown.\n\nWaiter: Good afternoon, everyone! Welcome to our cafe. Are you ready to order drinks, or would you like a few more minutes to look at the menu?\n\nMike: Yes, we're ready. I'll have an orange juice, please. Make it freshly squeezed if possible.\n\nSarah: Me too, please. Orange juice sounds perfect for this weather.\n\nJohn: And one for me as well. I love fresh orange juice.\n\nWaiter: Excellent choice! That's three orange juices coming right up. They're freshly made. Should I bring them out first while you decide on food?\n\nMike: Yes, please. By the way Sarah, why aren't you ordering any food? The sandwiches here look really good.\n\nSarah: Thanks, but I'm not hungry right now. I had a late lunch around 2 PM and I'm trying to eat lighter these days. I'm working on being more mindful about my eating habits. Maybe I'll have something small later if I get hungry.\n\nJohn: That makes sense. By the way, I heard Uncle Robertson quit his restaurant job recently. Do you know what's he doing now? I hope he found something good.\n\nMike: Oh yes! He owns his own business still, but now he works with young players coaching soccer in Orlando. He's really passionate about it. He says it's much more fulfilling than working in the restaurant industry. He gets to inspire kids and help them develop their skills.\n\nSarah: That's exciting! He always loved sports. Speaking of family news, Mom and Aunt Lisa – your sister-in-law – are coming over for lunch tomorrow at our place. Yes, my sister and your aunt will join us for a nice family gathering.\n\nMike: Oh, that reminds me! For Emily's birthday next week, what gift should we get? We need to decide soon.\n\nJohn: I think money is practical. She's at that age where she can use it for whatever she wants.\n\nSarah: Or clothes might be nice. She mentioned needing some new outfits for school.\n\nMike: What about a hat? She likes fashion accessories. A stylish hat might be fun and unique.\n\nJohn: All good ideas, but we can't decide yet. Let's think more about it and maybe ask her subtly what she'd prefer. We want to make sure she really likes it.",
+  questions: [
+    {
+      id: 6,
+      question: "How many people want orange juice?",
+      options: ["Two", "Three", "Four", "Five"],
+      correct: 1,
+      explanation: "Phục vụ xác nhận: 'That's three orange juices.' Trước đó, cả ba người — Mike, Sarah và John — đều gọi orange juice. Mike nói 'I'll have an orange juice', Sarah nói 'Me too, please' (tôi cũng vậy), và John nói 'And one for me as well' (tôi cũng muốn một cái). Vậy tổng cộng có **3 người** muốn orange juice. Các đáp án khác không chính xác."
+    },
+    {
+      id: 7,
+      question: "Why doesn't the woman want anything to eat?",
+      options: [
+        "Because she's not hungry.",
+        "Because she doesn't feel well.",
+        "Because she's on a diet.",
+        "Because the food is not good enough."
+      ],
+      correct: 0,
+      explanation: "Sarah giải thích rõ ràng: 'I'm not hungry right now; I had a late lunch and I'm trying to eat lighter these days.' Lý do chính là **'I'm not hungry right now'** (tôi không đói bây giờ). Cô ấy có thêm lý do phụ là cô vừa ăn trưa muộn và đang cố gắng ăn nhẹ hơn, nhưng không đói là lý do cơ bản. Không có thông tin cho thấy cô ấy bị bệnh hoặc chê phẩm chất đồ ăn."
+    },
+    {
+      id: 8,
+      question: "What does Robertson do now?",
+      options: [
+        "He owns a restaurant.",
+        "He works in Orlando.",
+        "He coaches soccer with young players.",
+        "He works in a restaurant."
+      ],
+      correct: 2,
+      explanation: "Mike nói: 'He owns his own business still, but now he **works with young players coaching soccer in Orlando**.' Công việc hiện tại của Robertson là **huấn luyện (coaching) bóng đá với các cầu thủ trẻ**. Mặc dù nó diễn ra ở Orlando, nhưng Orlando chỉ là nơi địa lý, không phải mô tả chính xác công việc. Các đáp án về 'restaurant' không còn đúng nữa vì anh ấy đã bỏ công việc ở nhà hàng."
+    },
+    {
+      id: 9,
+      question: "Who's coming to lunch tomorrow?",
+      options: [
+        "The man's mother-in-law and his sister.",
+        "The man's mother and his sister-in-law.",
+        "The man's mother-in-law and her sister.",
+        "The man's sister-in-law and his sister."
+      ],
+      correct: 1,
+      explanation: "Sarah nói: 'Mom and Aunt Lisa – your sister-in-law – are coming over for lunch tomorrow.' Người nói là Sarah, người nói chuyện với Mike (người đàn ông). Như vậy: **Mom (mẹ của Mike)** và **Aunt Lisa (chị/em dâu của Mike)** sẽ đến. Cách diễn đạt chính xác là: 'the man's mother and his sister-in-law' (mẹ của anh ấy và chị/em dâu của anh ấy). Không có thông tin về chị gái ruột hoặc mẹ vợ của Mike."
+    },
+    {
+      id: 10,
+      question: "What are they going to give Emily for her birthday?",
+      options: ["Money", "Clothes", "A hat", "They can't decide yet."],
+      correct: 3,
+      explanation: "Ba người đề xuất ba ý tưởng khác nhau: John gợi ý 'Money is practical', Sarah đề xuất 'Or clothes', Mike nói 'A hat might be fun'. Tuy nhiên, kết thúc cuộc hội thoại, John nói: 'We can't decide yet; let's think more' (chúng ta vẫn chưa quyết định được; hãy suy nghĩ thêm). Điều này cho thấy họ **chưa thống nhất một quyết định cuối cùng**. Các đáp án A, B, C chỉ là những gợi ý được đề xuất, nhưng không phải là quyết định chắc chắn."
+    }
+  ]
+},
+
+part3: {
+  title: "PART 3: Monologue",
+  description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Professor: Good afternoon, everyone. Welcome to this English class for intermediate and advanced learners. I'm Professor Williams, and I'll be your instructor this semester.\n\nNow, let me be clear about the level of this class. It's acceptable for intermediate learners, though we aim higher and expect significant progress by the end of term. I have just received the results of your diagnostic test that you took last week – and I must say, most of you got around 6.5 out of 10, which is actually a good start. It shows you have a solid foundation to build upon.\n\nHowever, I need to emphasize something very important about deadlines. Remember this carefully: if you miss a deadline your tutor has set for homework assignments or projects, you will be given a zero on that assignment. No excuses will be accepted without proper documentation such as a doctor's note or official letter. This is university policy and I must enforce it strictly.\n\nLet me share a story to illustrate this. Angela was an intelligent kid in class last term. She was bright, participated actively, and excelled in most areas. But she learned the hard way about deadlines when she missed submitting her final essay on time without documentation. Despite her excellent work throughout the semester, that zero significantly impacted her final grade. So please, take deadlines seriously.\n\nOn another note, I know some of you will want to grab food after class. The restaurant in the main street near campus has a good menu with reasonable prices, nice food that's quite tasty, and lots of options for vegetarians if any of you follow that diet – all correct choices if you're dining out after class. They also have good coffee if you need to study afterwards.\n\nNow, let's begin today's lesson on advanced grammar structures.",
+  questions: [
+    {
+      id: 11,
+      question: "The class is __________.",
+      options: ["(A) good enough", "(B) acceptable", "(C) awful", "(D) success"],
+      correct: 1,
+      explanation: "Giáo sư nói: 'It's acceptable for intermediate learners, though we aim higher.' Từ khóa chính là **'acceptable'** (chấp nhận được, tạm ổn). Đây là mô tả mức độ hiện tại của lớp học. Giáo sư không nói lớp 'awful' (tệ) hay 'success' (thành công) - những từ quá cực đoan. 'Good enough' không chính xác vì giáo sư muốn hướng tới mục tiêu cao hơn ('though we aim higher')."
+    },
+    {
+      id: 12,
+      question: "I have just _________.",
+      options: [
+        "(A) done a master's",
+        "(B) got the result of my English test",
+        "(C) got 6.5",
+        "(D) get"
+      ],
+      correct: 1,
+      explanation: "Giáo sư nói: 'I have just received the results of your diagnostic test.' Hành động vừa hoàn thành là **'received the results'** (nhận được kết quả bài kiểm tra). Lưu ý cấu trúc 'have just + past participle' dùng để nói về hành động vừa xảy ra. Đáp án (C) 'got 6.5' chỉ là thông tin kết quả điểm số, không phải hành động giáo sư vừa làm. Đáp án (A) không liên quan. Đáp án (D) 'get' sai ngữ pháp vì không phù hợp với cấu trúc 'have just'."
+    },
+    {
+      id: 13,
+      question: "If miss a deadline your tutor has set, you __________.",
+      options: [
+        "(A) will be given a zero",
+        "(B) will get 50% of your marks",
+        "(C) will be fined",
+        "(D) will get all marks"
+      ],
+      correct: 0,
+      explanation: "Giáo sư phát biểu rõ ràng: 'If you miss a deadline your tutor has set for homework, you **will be given a zero**; no excuses without documentation.' Đây là một quy định cứng nhắc - bỏ deadline = điểm 0 (không ngoại lệ trừ khi có giấy tờ chứng minh). Các đáp án khác hoàn toàn không có cơ sở trong bài nói: không ai nói về trừ 50% điểm, không phạt tiền, cũng không được full điểm. Đáp án (A) phản ánh chính xác quy định học thuật."
+    },
+    {
+      id: 14,
+      question: "Angela was __________.",
+      options: ["(A) an intelligent kid in class", "(B) a bit bored at her school", "(C) an AI", "(D) already"],
+      correct: 0,
+      explanation: "Giáo sư nói: 'Angela was **an intelligent kid in class last term; she excelled but learned the hard way about deadlines.**' Lưu ý động từ 'was' (quá khứ) cho thấy đây là mô tả tình huống trong quá khứ. Angela là một học sinh **thông minh và xuất sắc** (excelled = nổi bật, thể hiện tốt). Tuy nhiên, cô ấy cũng 'learned the hard way' - nghĩa là phải chịu hậu quả vì không đúng deadline. Các đáp án khác hoàn toàn không chính xác: (B) không nói cô bị chán nản, (C) không liên quan AI, (D) 'already' là từ vô nghĩa trong ngữ cảnh này."
+    },
+    {
+      id: 15,
+      question: "The restaurant in the main street __________.",
+      options: [
+        "(A) has a good menu",
+        "(B) has nice food",
+        "(C) has a lots of option for vegetarians",
+        "(D) all correct"
+      ],
+      correct: 3,
+      explanation: "Giáo sư mô tả nhà hàng chi tiết: 'the restaurant in the main street **has a good menu, nice food, and lots of options for vegetarians**.' Cả ba yếu tố được liệt kê rõ ràng được nối bằng 'and': (A) good menu ✓, (B) nice food ✓, (C) lots of options for vegetarians ✓. Vì tất cả ba mô tả đều đúng, câu trả lời chính xác là **(D) all correct** (tất cả đều đúng). Đây là dạng câu hỏi kiểm tra khả năng chú ý để lấy toàn bộ thông tin từ bài nói."
+    }
+  ]
+},
+
+part4: {
+  title: "PART 4: Extended Conversation",
+  description: "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Customer: Hi there, I'd like to return this tie, please. It was a birthday present from my girlfriend last month, but it's just not really my style.\n\nSales Associate: Of course, I can help you with that. Sure, when exactly was it bought? Do you remember the date?\n\nCustomer: It was purchased a few weeks ago. I'm not exactly sure of the date, but it was sometime in early November.\n\nSales Associate: I see. Is there any problem with the tie itself? Any defects or quality issues?\n\nCustomer: No, no problems at all. The tie is in perfect condition. It's just not my style, you know? I prefer more conservative patterns. I didn't bring the receipt with me today – she must have tossed it after wrapping the gift. But look, the store tag is still on it, right here. That should prove it came from this store.\n\nSales Associate: I understand your situation. I see the tag, but unfortunately, without the receipt, I can't process a full refund to your original payment method. Our store policy requires proof of purchase that shows it was shopped in this store with transaction details. The tag alone isn't sufficient because tags can sometimes be from other locations or moved between items.\n\nCustomer: Come on, the tag clearly proves it came from here! Look at your store name right on it. Why would I make this up?\n\nSales Associate: I completely believe you, sir, and I want to help. Let me explain our options. To calm the man down and find a solution, I can give you store credit for the full amount instead of cash. That way you can choose something else you like. Or alternatively, if you check your girlfriend's credit card statement for the transaction details, I can look it up in our system and process a proper refund.\n\nCustomer: Hmm, store credit might work. I did see some nice shirts here. How long is the store credit valid for?\n\nSales Associate: Store credit is valid for one full year from today, so you'll have plenty of time to find something you like. Would that work for you?\n\nCustomer: Yes, I think that's fair. Let's do the store credit then. Thank you for being understanding.",
+  questions: [
+    {
+      id: 16,
+      question: "The tie __________.",
+      options: [
+        "(A) was a birthday present",
+        "(B) was a Christmas present",
+        "(C) was a gift of a boyfriend",
+        "(D) all correct"
+      ],
+      correct: 0,
+      explanation: "Khách hàng nói rõ ràng: 'It was a **birthday present from my girlfriend**.' Từ khóa chính: 'birthday present' (quà sinh nhật). Bài nói hoàn toàn không đề cập đến Giáng sinh (Christmas) hay quà từ bạn trai (boyfriend). Đáp án (C) sai vì giáo sư là nữ ('my girlfriend'). Vì vậy chỉ có đáp án **(A)** là chính xác duy nhất."
+    },
+    {
+      id: 17,
+      question: "The tie was purchased ___________.",
+      options: ["(A) last week", "(B) a few weeks ago", "(C) two weeks ago", "(D) two years ago"],
+      correct: 1,
+      explanation: "Khách hàng trả lời câu hỏi của nhân viên: 'A **few weeks ago**.' Từ khóa: 'a few weeks' (vài tuần). Lưu ý rằng 'a few' có nghĩa là khoảng 3-5 tuần, không chỉ định số lượng cụ thể. Đáp án (A) 'last week' quá gần, (C) 'two weeks ago' quá cụ thể khi khách chỉ nói 'a few', (D) 'two years ago' hoàn toàn không phù hợp. Đáp án **(B)** là chính xác nhất vì nó khớp trực tiếp với lời nói của khách hàng."
+    },
+    {
+      id: 18,
+      question: "When asking for refunding, the man __________.",
+      options: [
+        "(A) had a receipt",
+        "(B) left his receipt at home",
+        "(C) didn't have receipt",
+        "(D) don't receipt"
+      ],
+      correct: 2,
+      explanation: "Khách nói: 'I didn't bring the receipt – **she must have tossed it**.' Phần quan trọng: 'tossed it' (vứt nó đi) cho thấy biên lai đã bị **vứt bỏ hoàn toàn**, không phải để quên ở nhà. Anh ta nói 'I didn't bring' nghĩa là anh ta không có nó. Đáp án (A) sai hoàn toàn - anh ta không có biên lai. Đáp án (B) sai - biên lai bị vứt đi rồi, không phải ở nhà. Đáp án (D) sai ngữ pháp. Đáp án **(C)** 'didn't have receipt' là chính xác nhất (dù ngữ pháp cần thêm 'a': 'didn't have a receipt')."
+    },
+    {
+      id: 19,
+      question: "She (the shop assistant) didn't agree to pay back money because __________.",
+      options: [
+        "(A) she didn't believe in the man",
+        "(B) the man couldn't prove that the tie was shopped in her store",
+        "(C) she has no right to do so",
+        "(D) she hadn't believed"
+      ],
+      correct: 1,
+      explanation: "Nhân viên giải thích: 'I can't process a full refund. **Our policy requires proof that it was shopped in this store.**' Lý do chính là **thiếu bằng chứng** - không có biên lai để chứng minh rằng áo cravat được mua tại cửa hàng này. Đáp án (A) sai - không phải vấn đề tin tưởng, mà là chính sách cửa hàng. Đáp án (C) sai - cô ấy hoàn toàn có quyền, nhưng không thể vì chính sách. Đáp án (D) sai ngữ pháp và không chính xác. Đáp án **(B)** chính xác - 'couldn't prove' (không thể chứng minh) khớp với lý do 'proof required'."
+    },
+    {
+      id: 20,
+      question: "The shop assistant tries to __________.",
+      options: [
+        "(A) make the man angry",
+        "(B) calm the man down",
+        "(C) bother the man",
+        "(D) make the man happy"
+      ],
+      correct: 1,
+      explanation: "Nhân viên nói: 'To **calm the man down**, I can give store credit instead.' Từ khóa rõ ràng: 'calm the man down' (làm dịu bớt sự bực tức của khách). Cô ấy nhận thấy khách hàng bắt đầu phản ứng ('Come on, the tag proves it!') nên cô ấy chủ động đề xuất giải pháp thay thế (store credit hoặc kiểm tra giao dịch trên thẻ tín dụng) để hạ nhiệt tình huống. Đáp án (A), (C) sai vì cô ấy không muốn làm khách giận hay bực tức. Đáp án (D) chỉ là kết quả phụ, không phải mục đích chính. Đáp án **(B)** là chính xác."
+    }
+  ]
+},
       part5: {
     title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
     description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",

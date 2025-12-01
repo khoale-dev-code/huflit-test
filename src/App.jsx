@@ -142,53 +142,108 @@ const PartTestContent = memo(({
   handleReset,
   score,
   onStartFullExam
-}) => (
-  <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
-    <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
-    {isSignedIn && <MemoizedUserProfile />}
-    
-    <MemoizedPartSelector
-      selectedExam={selectedExam}
-      onExamChange={handleExamChange}
-      testType={testType}
-      onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
-      selectedPart={selectedPart}
-      onPartChange={handlePartChange}
-    />
+}) => {
+  // ✅ Kiểm tra xem có phải là Part 6, 7, 8 không
+  const isSplitLayoutPart = testType === 'reading' && 
+    (selectedPart === 'part6' || selectedPart === 'part7' || selectedPart === 'part8');
 
-    <MemoizedContentDisplay
-      partData={partData}
-      selectedPart={selectedPart}
-      currentQuestionIndex={currentQuestionIndex}
-      testType={testType}
-    />
-
-    <MemoizedQuestionDisplay
-      selectedPart={selectedPart}
-      selectedExam={selectedExam}
-      partData={partData}
-      currentQuestionIndex={currentQuestionIndex}
-      onQuestionChange={setCurrentQuestionIndex}
-      answers={answers}
-      onAnswerSelect={handleAnswerSelect}
-      showResults={showResults}
-      onSubmit={handleSubmit}
-      testType={testType}
-    />
-
-    {showResults && (
-      <MemoizedResultsDisplay
-        score={score}
-        partData={partData}
-        answers={answers}
-        onReset={handleReset}
+  return (
+    <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
+      {/* ===== HEADER SECTION ===== */}
+      <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
+      
+      {/* ===== USER PROFILE (if signed in) ===== */}
+      {isSignedIn && <MemoizedUserProfile />}
+      
+      {/* ===== PART SELECTOR ===== */}
+      <MemoizedPartSelector
+        selectedExam={selectedExam}
+        onExamChange={handleExamChange}
+        testType={testType}
+        onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
+        selectedPart={selectedPart}
+        onPartChange={handlePartChange}
       />
-    )}
 
-    <StatsSection score={score} isSignedIn={isSignedIn} />
-    <FullExamPrompt onStartFullExam={onStartFullExam} />
-  </div>
-));
+      {/* ========================================
+          LAYOUT CHIA ĐÔI CHO READING PART 6, 7, 8
+          ======================================== */}
+      {isSplitLayoutPart ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          
+          {/* ===== CỘT TRÁI: VĂN BẢN ===== */}
+          <div className="order-1 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+            <MemoizedContentDisplay
+              partData={partData}
+              selectedPart={selectedPart}
+              currentQuestionIndex={currentQuestionIndex}
+              testType={testType}
+            />
+          </div>
+          
+          {/* ===== CỘT PHẢI: CÂU HỎI ===== */}
+          <div className="order-2">
+            <MemoizedQuestionDisplay
+              selectedPart={selectedPart}
+              selectedExam={selectedExam}
+              partData={partData}
+              currentQuestionIndex={currentQuestionIndex}
+              onQuestionChange={setCurrentQuestionIndex}
+              answers={answers}
+              onAnswerSelect={handleAnswerSelect}
+              showResults={showResults}
+              onSubmit={handleSubmit}
+              testType={testType}
+            />
+          </div>
+        </div>
+      ) : (
+        /* ========================================
+           LAYOUT THÔNG THƯỜNG (LISTENING & READING PART 1-5)
+           ======================================== */
+        <>
+          {/* ===== VĂN BẢN / SCRIPT ===== */}
+          <MemoizedContentDisplay
+            partData={partData}
+            selectedPart={selectedPart}
+            currentQuestionIndex={currentQuestionIndex}
+            testType={testType}
+          />
+
+          {/* ===== CÂU HỎI ===== */}
+          <MemoizedQuestionDisplay
+            selectedPart={selectedPart}
+            selectedExam={selectedExam}
+            partData={partData}
+            currentQuestionIndex={currentQuestionIndex}
+            onQuestionChange={setCurrentQuestionIndex}
+            answers={answers}
+            onAnswerSelect={handleAnswerSelect}
+            showResults={showResults}
+            onSubmit={handleSubmit}
+            testType={testType}
+          />
+        </>
+      )}
+
+      {/* ===== RESULTS DISPLAY (after submit) ===== */}
+      {showResults && (
+        <MemoizedResultsDisplay
+          score={score}
+          partData={partData}
+          answers={answers}
+          onReset={handleReset}
+        />
+      )}
+
+      {/* ===== STATS SECTION ===== */}
+      <StatsSection score={score} isSignedIn={isSignedIn} />
+      
+      {/* ===== FULL EXAM PROMPT ===== */}
+      <FullExamPrompt onStartFullExam={onStartFullExam} />
+    </div>
+  );
+});
 
 PartTestContent.displayName = 'PartTestContent';
 
@@ -196,6 +251,7 @@ PartTestContent.displayName = 'PartTestContent';
 // Main App Component
 // ========================================
 function App() {
+  // ===== STATE MANAGEMENT =====
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [viewMode, setViewMode] = useState('test'); // 'test', 'profile', 'answers'
   const [currentPage, setCurrentPage] = useState('main'); // 'main', 'answers'
@@ -203,6 +259,7 @@ function App() {
   // ✅ Hook online users
   const { onlineCount, totalUsers } = useOnlineUsers();
 
+  // ✅ App state từ custom hook
   const {
     selectedExam,
     testType,
@@ -223,6 +280,7 @@ function App() {
     user,
   } = useAppState();
 
+  // ===== EVENT HANDLERS =====
   const handleAuthClose = useCallback(() => {
     setShowAuthModal(false);
   }, []);
@@ -249,11 +307,19 @@ function App() {
     setViewMode('test');
   }, []);
 
+  const handleStartFullExam = useCallback(() => {
+    handleTestTypeChange('full');
+  }, [handleTestTypeChange]);
+
+  // ===== COMPUTED VALUES =====
+  
+  // Lấy dữ liệu part hiện tại
   const partData = useMemo(() => {
     if (practiceType) return null;
     return EXAM_DATA[selectedExam]?.parts?.[selectedPart] || null;
   }, [practiceType, selectedExam, selectedPart]);
 
+  // Tính điểm số
   const score = useMemo(() => {
     if (practiceType || !partData?.questions) {
       return { correct: 0, total: 0, percentage: 0 };
@@ -276,11 +342,9 @@ function App() {
     };
   }, [practiceType, partData, answers]);
 
-  const handleStartFullExam = useCallback(() => {
-    handleTestTypeChange('full');
-  }, [handleTestTypeChange]);
-
-  // ✅ Render navigation
+  // ===== RENDER HELPERS =====
+  
+  // Render navigation (Back button)
   const renderNavigation = useCallback(() => {
     return (
       <div className="mb-3 sm:mb-4 md:mb-6">
@@ -292,12 +356,14 @@ function App() {
     );
   }, [currentPage, handleBackToMain]);
 
-  // ✅ Render main content
+  // Render main content based on view mode
   const renderMainContent = useCallback(() => {
+    // ===== EXAM ANSWERS PAGE =====
     if (currentPage === 'answers') {
       return <ExamAnswersPage />;
     }
 
+    // ===== USER PROFILE VIEW =====
     if (viewMode === 'profile') {
       return (
         <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
@@ -307,10 +373,12 @@ function App() {
       );
     }
 
+    // ===== VOCABULARY PRACTICE =====
     if (practiceType === 'vocabulary') {
       return <VocabularyPractice />;
     }
 
+    // ===== GRAMMAR REVIEW =====
     if (practiceType === 'grammar') {
       return (
         <Suspense fallback={<LoadingSpinner />}>
@@ -323,6 +391,7 @@ function App() {
       );
     }
 
+    // ===== FULL EXAM MODE =====
     if (testType === 'full') {
       return (
         <Suspense fallback={<LoadingSpinner />}>
@@ -334,6 +403,7 @@ function App() {
       );
     }
 
+    // ===== PART TEST MODE (DEFAULT) =====
     return (
       <PartTestContent
         isSignedIn={isSignedIn}
@@ -357,12 +427,31 @@ function App() {
       />
     );
   }, [
-    currentPage, viewMode, handleBackToTest, user, practiceType, testType, answers, handleAnswerSelect, 
-    handleSubmit, handleTestTypeChange, isSignedIn, selectedExam, handleExamChange,
-    selectedPart, handlePartChange, partData, currentQuestionIndex,
-    setCurrentQuestionIndex, showResults, handleReset, score, handleStartFullExam
+    currentPage, 
+    viewMode, 
+    handleBackToTest, 
+    user, 
+    practiceType, 
+    testType, 
+    answers, 
+    handleAnswerSelect, 
+    handleSubmit, 
+    handleTestTypeChange, 
+    isSignedIn, 
+    selectedExam, 
+    handleExamChange,
+    selectedPart, 
+    handlePartChange, 
+    partData, 
+    currentQuestionIndex,
+    setCurrentQuestionIndex, 
+    showResults, 
+    handleReset, 
+    score, 
+    handleStartFullExam
   ]);
 
+  // ===== MAIN RENDER =====
   return (
     <MainLayout
       testType={testType}
@@ -378,10 +467,15 @@ function App() {
       onAnswersClick={handleGoToAnswers}
     >
       <div className="relative z-10 p-2 sm:p-4 md:p-6">
+        {/* Navigation (Back button when needed) */}
         {renderNavigation()}
+        
+        {/* Main Content with Suspense */}
         <Suspense fallback={<LoadingSpinner />}>
           {renderMainContent()}
         </Suspense>
+        
+        {/* Auth Modal */}
         {showAuthModal && <AuthModal onClose={handleAuthClose} />}
       </div>
     </MainLayout>
