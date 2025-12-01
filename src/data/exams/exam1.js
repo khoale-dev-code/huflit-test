@@ -469,42 +469,42 @@ part4: {
   },
 
       part7: {
-    title: "PART 7: Multiple Texts (Advertisement + Email)",
-    description: "10 câu hỏi - Đọc quảng cáo và email, chọn đáp án tốt nhất (A, B, C, D).",
-    type: "reading",
-    text: `**Business Audio Pro Advertisement**
+  title: "PART 7: Multiple Texts (Advertisement + Email)",
+  description: "10 câu hỏi - Đọc quảng cáo và email, chọn đáp án tốt nhất (A, B, C, D).",
+  type: "reading",
+  text: `http://www.businessaudiopro.com
 
-  Enhance Your Company's Image with a Professionally Recorded Telephone Greeting
+**Business Audio Pro**
 
-  A professional, personalized voicemail message creates an excellent first impression. Business Audio Pro meets your specifications to record a customized telephone greeting within three business days!
+Enhance Your Company's Image with a Professionally Recorded Telephone Greeting
 
-  **Services We Offer:**
-  1. **Professional Voice Talent for Voicemail Messages** – We have numerous male and female voice actors with a wide range of tones, accents, and dialects. Visit businessaudiopro.com to hear examples of what each actor sounds like and choose the one that best suits your needs.
+A professional, personalized voicemail message creates an excellent first impression. Business Audio Pro meets your specifications to record a customized telephone greeting within three business days!
 
-  2. **On-Hold Messages** – We also create professional on-hold messages with pleasant music to enhance your customers' experience.
+**Services We Offer:**
 
-  3. **Customized Script Writing** – Our experienced script writers can help you craft a personalized message that represents you and your business.
+1. **Professional Voice Talent for Voicemail Messages** – We have numerous male and female voice actors with a wide range of tones, accents, and dialects. Visit businessaudiopro.com to hear examples of what each actor sounds like and choose the one that best suits your needs.
 
-  4. **Multilingual Voice Production** – For those with a multilingual customer base, we offer services in a wide range of languages.
+2. **On-Hold Messages** – We also create professional on-hold messages with pleasant music to enhance your customers' experience.
 
-  Send us an e-mail (inquiry@businessaudiopro.com) with your contact information and your specific needs. A representative will call you within 24 hours to discuss your project and provide a price estimate.
+3. **Customized Script Writing** – Our experienced script writers can help you craft a personalized message that represents you and your business.
 
-  ---
+4. **Multilingual Voice Production** – For those with a multilingual customer base, we offer services in a wide range of languages.
 
-  **Email Message**
+Send us an e-mail (inquiry@businessaudiopro.com) with your contact information and your specific needs. A representative will call you within 24 hours to discuss your project and provide a price estimate.
 
-  **To:** inquiry@businessaudiopro.com  
-  **From:** j.annesly@anneslydata.com  
-  **Date:** June 25  
-  **Subject:** Request
+To: inquiry@businessaudiopro.com
+From: j.annesly@anneslydata.com
+Date: June 25
+Subject: Request
 
-  I found your notice in the newspaper and wish to use your services for my data-processing and transcription business. I am looking specifically for a professionally recorded voicemail greeting intended for my clients, and I wonder if you would be available to write and record this for me, and how soon. Since I work with English- and Spanish-speaking clients, I would like the message to be recorded in both languages. Please reach out to me at my mobile phone between the hours of 10:00 A.M. and 5:00 P.M. I hope to hear from you soon.
+I found your notice in the newspaper and wish to use your services for my data-processing and transcription business. I am looking specifically for a professionally recorded voicemail greeting intended for my clients, and I wonder if you would be available to write and record this for me, and how soon. Since I work with English- and Spanish-speaking clients, I would like the message to be recorded in both languages. Please reach out to me at my mobile phone between the hours of 10:00 A.M. and 5:00 P.M. I hope to hear from you soon.
 
-  Thank you,  
-  Jody Annesly  
-  Annesly Data  
-  512-555-6879 (mobile)  
-  342 Maymill Road, Fort Worth, TX 70609`,
+Thank you,
+Jody Annesly
+Annesly Data
+512-555-6879 (mobile)
+342 Maymill Road, Fort Worth, TX 70609`,
+
     
     questions: [
       {
