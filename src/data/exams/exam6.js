@@ -2,210 +2,212 @@ export const EXAM6_DATA = {
   title: "HUFLIT Listening & Reading Practice - Exam 6 (Dựa trên Đề Thi Thử)",
   description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT. Part 1 mở rộng: 5 câu hỏi từ 1 hội thoại dài để luyện nghe chi tiết.",
   parts: {
-    part1: {
-      title: "PART 1: Short Conversations",
-      description: "Nghe đoạn hội thoại giữa Ben và Anna về các dự án công việc. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
-      type: "listening",
-      script: "Ben: Anna, how's the product redesign project coming along?\nAnna: It's progressing well, Ben. We've completed about sixty percent of the design work. The team has been working overtime to meet the deadline.\nBen: That's impressive! When do you expect to finish?\nAnna: We should be done by the end of next month if everything stays on track. However, we might need additional resources to ensure quality.\nBen: What kind of resources are you looking for?\nAnna: Mainly, we need more graphic designers and a project coordinator. The current team is stretched thin with multiple tasks.\nBen: I'll speak to the manager about allocating budget for new hires. By the way, how's your team morale?\nAnna: Overall, it's good. People are tired from the workload, but everyone is committed to delivering excellence. We just need some recognition for the hard work.",
-      questions: [
-        {
-          id: 1,
-          question: "How much of the design work has the team completed?",
-          options: [
-            "Half of the work",
-            "Eighty percent",
-            "Sixty percent",
-            "Forty percent"
-          ],
-          correct: 2,
-          explanation: "Anna nói: 'We've completed about sixty percent of the design work.' (Chúng tôi đã hoàn thành khoảng sáu mươi phần trăm công việc thiết kế.)"
-        },
-        {
-          id: 2,
-          question: "What is Anna's expected completion date?",
-          options: [
-            "By next quarter",
-            "End of next month",
-            "In two weeks",
-            "Next week"
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'We should be done by the end of next month if everything stays on track.' (Chúng tôi nên hoàn thành vào cuối tháng tới nếu mọi thứ tiến hành đúng kế hoạch.)"
-        },
-        {
-          id: 3,
-          question: "What does Anna say about her team's current situation?",
-          options: [
-            "They completed their work early",
-            "They are well-staffed and relaxed",
-            "They are stretched thin with multiple tasks",
-            "They have too many employees"
-          ],
-          correct: 2,
-          explanation: "Anna nói: 'The current team is stretched thin with multiple tasks.' (Đội hiện tại được kéo căng với nhiều tác vụ.)"
-        },
-        {
-          id: 4,
-          question: "What additional resources does Anna request?",
-          options: [
-            "A longer project timeline",
-            "Graphic designers and a project coordinator",
-            "New office equipment",
-            "More budget for marketing"
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'Mainly, we need more graphic designers and a project coordinator.' (Chủ yếu, chúng tôi cần thêm nhà thiết kế đồ họa và một điều phối viên dự án.)"
-        },
-        {
-          id: 5,
-          question: "How does Anna describe the team's morale?",
-          options: [
-            "Perfect with no issues",
-            "Good overall, though tired from workload",
-            "Very low and concerning",
-            "Completely demoralized"
-          ],
-          correct: 1,
-          explanation: "Anna nói: 'Overall, it's good. People are tired from the workload, but everyone is committed.' (Nói chung, nó tốt. Mọi người mệt mỏi từ khối lượng công việc, nhưng mọi người đều cam kết.)"
-        }
-      ]
+   part1: {
+  title: "PART 1: Short Conversations",
+  description: "Nghe đoạn hội thoại giữa Ben và Anna về các dự án công việc. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
+  type: "listening",
+  script: "Ben: Anna, how's the product redesign project coming along? I know you and your team have been working on it for several weeks now.\n\nAnna: It's progressing well, Ben. I'm happy to report that we've completed about sixty percent of the design work so far. The team has been working overtime, coming in early and staying late, to meet the deadline that management set for us. Everyone has been incredibly dedicated to this project.\n\nBen: That's impressive! I know it's been a challenging project with all the technical requirements. When do you expect to finish the remaining work?\n\nAnna: We should be done by the end of next month if everything stays on track and we don't encounter any unexpected obstacles. However, I have to be honest with you – we might need additional resources to ensure we maintain the quality standards we're known for. The current pace is unsustainable for the long term.\n\nBen: I understand your concerns. What kind of resources are you looking for specifically? Is it more budget, equipment, or personnel?\n\nAnna: Mainly, we need more graphic designers and a project coordinator to help manage workflows. The current team is stretched thin with multiple tasks happening simultaneously. We're juggling the design work, client feedback, revisions, and internal meetings all at once. Having a dedicated coordinator would help us stay organized and ensure nothing falls through the cracks.\n\nBen: That makes perfect sense. I'll speak to the manager about allocating budget for new hires. This project is important to the company, so I'm sure we can make it happen. By the way, how's your team morale holding up under all this pressure?\n\nAnna: Overall, it's good. People are tired from the heavy workload and the long hours, but everyone is committed to delivering excellence. They understand the importance of this redesign for our company's future. We just need some recognition for the hard work they're putting in. A simple thank you or acknowledgment from upper management would go a long way in keeping spirits high.",
+  questions: [
+    {
+      id: 1,
+      question: "How much of the design work has the team completed?",
+      options: [
+        "Half of the work",
+        "Eighty percent",
+        "Sixty percent",
+        "Forty percent"
+      ],
+      correct: 2,
+      explanation: "Anna nói: 'We've completed about sixty percent of the design work.' (Chúng tôi đã hoàn thành khoảng sáu mươi phần trăm công việc thiết kế.)"
     },
-    part2: {
-      title: "PART 2: Longer Conversation",
-      description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại văn phòng. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
-      type: "listening",
-      script: "Narrator: At a corporate office.\nManager: Good morning, everyone. Let's discuss the quarterly sales report. Tom, can you share the numbers?\nTom: Of course. Our Q3 revenue increased by fifteen percent compared to last year. However, we saw a decline in the eastern region due to increased competition.\nEmma: What specific strategies are we implementing to address this decline?\nTom: We're planning to launch a targeted marketing campaign in that region next month. Additionally, we're training sales staff on new product features.\nManager: Good. Emma, how are the customer satisfaction surveys looking?\nEmma: The results are quite positive. Eighty-five percent of customers rated us as excellent or very good. However, some mentioned issues with delivery times.\nTom: We should coordinate with logistics to improve delivery efficiency.\nManager: Agreed. Let's make that a priority for the next quarter.",
-      questions: [
-        {
-          id: 6,
-          question: "By how much did Q3 revenue increase?",
-          options: [
-            "Five percent",
-            "Fifteen percent",
-            "Ten percent",
-            "Twenty-five percent"
-          ],
-          correct: 1,
-          explanation: "Tom nói: 'Our Q3 revenue increased by fifteen percent compared to last year.' (Doanh thu Q3 của chúng tôi tăng mười lăm phần trăm so với năm ngoái.)"
-        },
-        {
-          id: 7,
-          question: "Which region experienced a sales decline?",
-          options: [
-            "The central region",
-            "The eastern region",
-            "The northern region",
-            "The western region"
-          ],
-          correct: 1,
-          explanation: "Tom nói: 'However, we saw a decline in the eastern region due to increased competition.' (Tuy nhiên, chúng tôi thấy sự suy giảm ở khu vực phía đông do cạnh tranh gia tăng.)"
-        },
-        {
-          id: 8,
-          question: "What percentage of customers gave excellent or very good ratings?",
-          options: [
-            "Fifty percent",
-            "Eighty-five percent",
-            "Ninety percent",
-            "Seventy percent"
-          ],
-          correct: 1,
-          explanation: "Emma nói: 'Eighty-five percent of customers rated us as excellent or very good.' (Tám mươi lăm phần trăm khách hàng xếp chúng tôi là xuất sắc hoặc rất tốt.)"
-        },
-        {
-          id: 9,
-          question: "What issue did some customers mention?",
-          options: [
-            "Rude customer service",
-            "Delivery time problems",
-            "High prices",
-            "Poor product quality"
-          ],
-          correct: 1,
-          explanation: "Emma nói: 'However, some mentioned issues with delivery times.' (Tuy nhiên, một số đề cập đến vấn đề về thời gian giao hàng.)"
-        },
-        {
-          id: 10,
-          question: "What strategy is Tom proposing to address the regional decline?",
-          options: [
-            "Hiring new managers",
-            "Launching a targeted marketing campaign",
-            "Reducing product prices",
-            "Closing the eastern region office"
-          ],
-          correct: 1,
-          explanation: "Tom nói: 'We're planning to launch a targeted marketing campaign in that region next month.' (Chúng tôi đang lên kế hoạch để khởi động một chiến dịch tiếp thị có mục tiêu ở khu vực đó vào tháng tới.)"
-        }
-      ]
+    {
+      id: 2,
+      question: "What is Anna's expected completion date?",
+      options: [
+        "By next quarter",
+        "End of next month",
+        "In two weeks",
+        "Next week"
+      ],
+      correct: 1,
+      explanation: "Anna nói: 'We should be done by the end of next month if everything stays on track.' (Chúng tôi nên hoàn thành vào cuối tháng tới nếu mọi thứ tiến hành đúng kế hoạch.)"
     },
-    part3: {
-      title: "PART 3: Monologue",
-      description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
-      type: "listening",
-      script: "Professor: Good afternoon, class. Today I want to discuss the importance of sustainable business practices. In today's world, companies must balance profit with environmental responsibility. Many organizations are now adopting green initiatives to reduce their carbon footprint. This includes using renewable energy sources and implementing waste reduction programs. However, some companies view these efforts as additional expenses rather than long-term investments. The reality is that sustainable practices often lead to cost savings over time. For example, companies that invest in solar panels initially spend more, but they recover those costs within five to seven years through reduced energy bills. Additionally, consumers increasingly prefer to support businesses that demonstrate environmental commitment. Therefore, integrating sustainability into your business strategy is not just ethical—it's also financially smart.",
-      questions: [
-        {
-          id: 11,
-          question: "According to the professor, what must companies balance?",
-          options: [
-            "Growth and stability",
-            "Profit and environmental responsibility",
-            "Marketing and sales",
-            "Employee wages and benefits"
-          ],
-          correct: 1,
-          explanation: "Professor nói: 'companies must balance profit with environmental responsibility.' (các công ty phải cân bằng lợi nhuận với trách nhiệm môi trường.)"
-        },
-        {
-          id: 12,
-          question: "What view do some companies hold about green initiatives?",
-          options: [
-            "They increase product sales",
-            "They are additional expenses",
-            "They reduce employee morale",
-            "They are essential for survival"
-          ],
-          correct: 1,
-          explanation: "Professor nói: 'some companies view these efforts as additional expenses rather than long-term investments.' (một số công ty xem những nỗ lực này như là chi phí bổ sung thay vì đầu tư dài hạn.)"
-        },
-        {
-          id: 13,
-          question: "In how many years do companies typically recover solar panel investments?",
-          options: [
-            "One to two years",
-            "Five to seven years",
-            "Ten to twelve years",
-            "Two to three years"
-          ],
-          correct: 1,
-          explanation: "Professor nói: 'they recover those costs within five to seven years through reduced energy bills.' (họ lấy lại những chi phí đó trong năm đến bảy năm thông qua hóa đơn tiền điện giảm.)"
-        },
-        {
-          id: 14,
-          question: "What does the professor say about consumer preferences?",
-          options: [
-            "Consumers don't care about business practices",
-            "Consumers increasingly prefer environmentally committed businesses",
-            "Consumers prefer the cheapest products",
-            "Consumers ignore environmental issues"
-          ],
-          correct: 1,
-          explanation: "Professor nói: 'consumers increasingly prefer to support businesses that demonstrate environmental commitment.' (người tiêu dùng ngày càng thích hỗ trợ các doanh nghiệp thể hiện cam kết môi trường.)"
-        },
-        {
-          id: 15,
-          question: "What does the professor say about the financial impact of sustainability?",
-          options: [
-            "It only benefits large corporations",
-            "It can lead to cost savings over time",
-            "It has no financial benefit",
-            "It always increases costs"
-          ],
-          correct: 1,
-          explanation: "Professor nói: 'sustainable practices often lead to cost savings over time.' (các hoạt động bền vững thường dẫn đến tiết kiệm chi phí theo thời gian.)"
-        }
-      ]
+    {
+      id: 3,
+      question: "What does Anna say about her team's current situation?",
+      options: [
+        "They completed their work early",
+        "They are well-staffed and relaxed",
+        "They are stretched thin with multiple tasks",
+        "They have too many employees"
+      ],
+      correct: 2,
+      explanation: "Anna nói: 'The current team is stretched thin with multiple tasks.' (Đội hiện tại được kéo căng với nhiều tác vụ.)"
     },
+    {
+      id: 4,
+      question: "What additional resources does Anna request?",
+      options: [
+        "A longer project timeline",
+        "Graphic designers and a project coordinator",
+        "New office equipment",
+        "More budget for marketing"
+      ],
+      correct: 1,
+      explanation: "Anna nói: 'Mainly, we need more graphic designers and a project coordinator.' (Chủ yếu, chúng tôi cần thêm nhà thiết kế đồ họa và một điều phối viên dự án.)"
+    },
+    {
+      id: 5,
+      question: "How does Anna describe the team's morale?",
+      options: [
+        "Perfect with no issues",
+        "Good overall, though tired from workload",
+        "Very low and concerning",
+        "Completely demoralized"
+      ],
+      correct: 1,
+      explanation: "Anna nói: 'Overall, it's good. People are tired from the workload, but everyone is committed.' (Nói chung, nó tốt. Mọi người mệt mỏi từ khối lượng công việc, nhưng mọi người đều cam kết.)"
+    }
+  ]
+},
+
+part2: {
+  title: "PART 2: Longer Conversation",
+  description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người tại văn phòng. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Narrator: At a corporate office.\n\nManager: Good morning, everyone. Thank you for joining today's quarterly review meeting. Let's discuss the quarterly sales report and analyze our performance. Tom, can you share the numbers with us? I know you've been preparing this presentation for a few days.\n\nTom: Of course, I'd be happy to. Overall, we had a strong quarter. Our Q3 revenue increased by fifteen percent compared to last year at this same time. This is a significant achievement considering the current economic climate and market challenges we've been facing. However, I do need to point out that we saw a decline in the eastern region due to increased competition from new market entrants. They've been offering aggressive pricing and promotional campaigns.\n\nEmma: That's concerning about the eastern region. What specific strategies are we implementing to address this decline and win back market share? We can't afford to lose ground in such an important territory.\n\nTom: Great question, Emma. We're planning to launch a targeted marketing campaign in that region next month. The campaign will focus on our unique value propositions and customer service excellence. Additionally, we're training sales staff on new product features so they can better communicate our competitive advantages to potential clients. We're also considering offering special promotional packages to attract new customers.\n\nManager: Those sound like solid initiatives. Emma, how are the customer satisfaction surveys looking? I know we sent those out about two weeks ago.\n\nEmma: The results are quite positive overall, which is encouraging. Eighty-five percent of customers rated us as excellent or very good across all categories we measured. That's actually up from last quarter's seventy-eight percent. However, some customers mentioned issues with delivery times, particularly in rural areas. They feel we could improve our logistics and shipping processes.\n\nTom: That's valuable feedback. We should coordinate with logistics to improve delivery efficiency. Maybe we can establish regional distribution centers or partner with faster shipping providers.\n\nManager: Agreed. Let's make that a priority for the next quarter. I'll schedule a meeting with the logistics team to discuss implementation strategies and budget requirements.",
+  questions: [
+    {
+      id: 6,
+      question: "By how much did Q3 revenue increase?",
+      options: [
+        "Five percent",
+        "Fifteen percent",
+        "Ten percent",
+        "Twenty-five percent"
+      ],
+      correct: 1,
+      explanation: "Tom nói: 'Our Q3 revenue increased by fifteen percent compared to last year.' (Doanh thu Q3 của chúng tôi tăng mười lăm phần trăm so với năm ngoái.)"
+    },
+    {
+      id: 7,
+      question: "Which region experienced a sales decline?",
+      options: [
+        "The central region",
+        "The eastern region",
+        "The northern region",
+        "The western region"
+      ],
+      correct: 1,
+      explanation: "Tom nói: 'However, we saw a decline in the eastern region due to increased competition.' (Tuy nhiên, chúng tôi thấy sự suy giảm ở khu vực phía đông do cạnh tranh gia tăng.)"
+    },
+    {
+      id: 8,
+      question: "What percentage of customers gave excellent or very good ratings?",
+      options: [
+        "Fifty percent",
+        "Eighty-five percent",
+        "Ninety percent",
+        "Seventy percent"
+      ],
+      correct: 1,
+      explanation: "Emma nói: 'Eighty-five percent of customers rated us as excellent or very good.' (Tám mươi lăm phần trăm khách hàng xếp chúng tôi là xuất sắc hoặc rất tốt.)"
+    },
+    {
+      id: 9,
+      question: "What issue did some customers mention?",
+      options: [
+        "Rude customer service",
+        "Delivery time problems",
+        "High prices",
+        "Poor product quality"
+      ],
+      correct: 1,
+      explanation: "Emma nói: 'However, some mentioned issues with delivery times.' (Tuy nhiên, một số đề cập đến vấn đề về thời gian giao hàng.)"
+    },
+    {
+      id: 10,
+      question: "What strategy is Tom proposing to address the regional decline?",
+      options: [
+        "Hiring new managers",
+        "Launching a targeted marketing campaign",
+        "Reducing product prices",
+        "Closing the eastern region office"
+      ],
+      correct: 1,
+      explanation: "Tom nói: 'We're planning to launch a targeted marketing campaign in that region next month.' (Chúng tôi đang lên kế hoạch để khởi động một chiến dịch tiếp thị có mục tiêu ở khu vực đó vào tháng tới.)"
+    }
+  ]
+},
+
+part3: {
+  title: "PART 3: Monologue",
+  description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+  type: "listening",
+  script: "Professor: Good afternoon, class. I'm Professor Martinez, and today I want to discuss a topic that's becoming increasingly important in the business world – the importance of sustainable business practices and environmental responsibility.\n\nIn today's world, companies must balance profit with environmental responsibility. This is no longer optional; it's becoming a necessity. Many organizations around the globe are now adopting green initiatives to reduce their carbon footprint and minimize their environmental impact. This includes using renewable energy sources such as solar and wind power, and implementing waste reduction programs throughout their operations.\n\nHowever, I want to address a common misconception. Some companies view these efforts as additional expenses rather than long-term investments. They see the upfront costs and become discouraged. But let me share some data with you that challenges this perspective.\n\nThe reality is that sustainable practices often lead to cost savings over time. Let me give you a concrete example. For example, companies that invest in solar panels initially spend more money on the installation and equipment. The upfront investment can be substantial – we're talking about tens or hundreds of thousands of dollars depending on the facility size. But here's the key point: they recover those costs within five to seven years through reduced energy bills. After that recovery period, they're essentially getting free electricity for the remaining lifespan of the solar panels, which can be twenty-five to thirty years.\n\nAdditionally, there's another important factor to consider. Consumers increasingly prefer to support businesses that demonstrate environmental commitment. This is especially true among younger generations who are more conscious about sustainability issues. They're willing to pay premium prices for products from companies that align with their values.\n\nTherefore, integrating sustainability into your business strategy is not just ethical—it's also financially smart. Companies that embrace these practices early will have a competitive advantage in the marketplace. They'll attract environmentally conscious consumers, reduce their operating costs over time, and build a positive brand reputation that can last for generations.",
+  questions: [
+    {
+      id: 11,
+      question: "According to the professor, what must companies balance?",
+      options: [
+        "Growth and stability",
+        "Profit and environmental responsibility",
+        "Marketing and sales",
+        "Employee wages and benefits"
+      ],
+      correct: 1,
+      explanation: "Professor nói: 'companies must balance profit with environmental responsibility.' (các công ty phải cân bằng lợi nhuận với trách nhiệm môi trường.)"
+    },
+    {
+      id: 12,
+      question: "What view do some companies hold about green initiatives?",
+      options: [
+        "They increase product sales",
+        "They are additional expenses",
+        "They reduce employee morale",
+        "They are essential for survival"
+      ],
+      correct: 1,
+      explanation: "Professor nói: 'some companies view these efforts as additional expenses rather than long-term investments.' (một số công ty xem những nỗ lực này như là chi phí bổ sung thay vì đầu tư dài hạn.)"
+    },
+    {
+      id: 13,
+      question: "In how many years do companies typically recover solar panel investments?",
+      options: [
+        "One to two years",
+        "Five to seven years",
+        "Ten to twelve years",
+        "Two to three years"
+      ],
+      correct: 1,
+      explanation: "Professor nói: 'they recover those costs within five to seven years through reduced energy bills.' (họ lấy lại những chi phí đó trong năm đến bảy năm thông qua hóa đơn tiền điện giảm.)"
+    },
+    {
+      id: 14,
+      question: "What does the professor say about consumer preferences?",
+      options: [
+        "Consumers don't care about business practices",
+        "Consumers increasingly prefer environmentally committed businesses",
+        "Consumers prefer the cheapest products",
+        "Consumers ignore environmental issues"
+      ],
+      correct: 1,
+      explanation: "Professor nói: 'consumers increasingly prefer to support businesses that demonstrate environmental commitment.' (người tiêu dùng ngày càng thích hỗ trợ các doanh nghiệp thể hiện cam kết môi trường.)"
+    },
+    {
+      id: 15,
+      question: "What does the professor say about the financial impact of sustainability?",
+      options: [
+        "It only benefits large corporations",
+        "It can lead to cost savings over time",
+        "It has no financial benefit",
+        "It always increases costs"
+      ],
+      correct: 1,
+      explanation: "Professor nói: 'sustainable practices often lead to cost savings over time.' (các hoạt động bền vững thường dẫn đến tiết kiệm chi phí theo thời gian.)"
+    }
+  ]
+},
     part4: {
       title: "PART 4: Extended Conversation",
       description: "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
