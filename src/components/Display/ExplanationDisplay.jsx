@@ -99,12 +99,12 @@ const ExplanationSection = ({
             {/* Text Content (Compact) */}
             <div className="flex-1 min-w-0">
               <p className={`
-                font-bold text-xs sm:text-sm md:text-lg transition-colors mb-0.5 sm:mb-1.5 line-clamp-1
+                font-bold text-xs sm:text-sm md:text-lg transition-colors mb-0.5 sm:mb-1.5
                 ${isCorrect ? 'text-emerald-700' : 'text-amber-700'}
               `}>
                 {isCorrect ? '✨ Giải thích' : '⚡ Phân tích lỗi'}
               </p>
-              <p className="text-xs text-gray-500 truncate font-medium hidden sm:block">
+              <p className="text-xs text-gray-500 font-medium hidden sm:block">
                 {isExpanded ? '👆 Thu gọn' : '👇 Xem chi tiết'}
               </p>
             </div>
@@ -126,7 +126,7 @@ const ExplanationSection = ({
       {/* Expanded Content (Mobile Optimized) */}
       <div className={`
         overflow-hidden transition-all duration-700 ease-in-out
-        ${isExpanded ? 'max-h-[12000px] opacity-100 mt-2 sm:mt-3 md:mt-5' : 'max-h-0 opacity-0 mt-0'}
+        ${isExpanded ? 'max-h-none opacity-100 mt-2 sm:mt-3 md:mt-5' : 'max-h-0 opacity-0 mt-0'}
       `}>
         <div className="space-y-2.5 sm:space-y-3 md:space-y-5">
           
@@ -149,7 +149,7 @@ const ExplanationSection = ({
             `}>
               <h4 className="font-bold text-xs sm:text-sm md:text-base text-white flex items-center gap-1.5 sm:gap-2">
                 <AlertCircle className="w-4 h-4 sm:w-5" />
-                <span className="line-clamp-1">{isCorrect ? '🎯 Chính xác' : '📊 So sánh'}</span>
+                <span>{isCorrect ? '🎯 Chính xác' : '📊 So sánh'}</span>
               </h4>
             </div>
             
@@ -163,7 +163,7 @@ const ExplanationSection = ({
                   : 'bg-red-50/70 border-red-500'
                 }
               `}>
-                <div className="flex items-center gap-1.5 sm:gap-2.5 mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2.5 mb-2 sm:mb-3 flex-wrap">
                   <div className={`
                     flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full 
                     font-bold text-xs sm:text-sm shadow-md flex-shrink-0
@@ -179,7 +179,7 @@ const ExplanationSection = ({
                     Câu trả lời của bạn
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2">
+                <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2 whitespace-normal break-words">
                   {selectedAnswerText}
                 </p>
               </div>
@@ -187,7 +187,7 @@ const ExplanationSection = ({
               {/* Correct Answer (if incorrect) */}
               {!isCorrect && (
                 <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border-l-4 bg-green-50/70 border-green-500 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-                  <div className="flex items-center gap-1.5 sm:gap-2.5 mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2.5 mb-2 sm:mb-3 flex-wrap">
                     <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md flex-shrink-0">
                       <Sparkles className="w-3 h-3 sm:w-4" />
                       {String.fromCharCode(65 + correctAnswer)}
@@ -196,7 +196,7 @@ const ExplanationSection = ({
                       ✅ Đáp án chính xác
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2">
+                  <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2 whitespace-normal break-words">
                     {correctAnswerText}
                   </p>
                 </div>
@@ -220,14 +220,14 @@ const ExplanationSection = ({
                 : 'bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100'
               }
             `}>
-              <div className="flex items-center gap-1.5 sm:gap-2 justify-between">
+              <div className="flex items-center gap-1.5 sm:gap-2 justify-between flex-wrap">
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                   <Brain className={`w-4 h-4 sm:w-5 flex-shrink-0 ${
                     isCorrect ? 'text-emerald-600' : 'text-amber-600'
                   }`} />
                   <h4 className={`font-bold text-xs sm:text-sm md:text-base ${
                     isCorrect ? 'text-emerald-900' : 'text-amber-900'
-                  } truncate`}>
+                  }`}>
                     💡 Giải thích chi tiết
                   </h4>
                 </div>
@@ -245,7 +245,7 @@ const ExplanationSection = ({
             </div>
 
             <div className="p-3 sm:p-4 md:p-6">
-              <div className="text-gray-800 text-xs sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words space-y-2 sm:space-y-3">
+              <div className="text-gray-800 text-xs sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words space-y-2 sm:space-y-3 overflow-visible">
                 {renderFormattedText(displayedExplanation)}
               </div>
 
@@ -276,13 +276,13 @@ const ExplanationSection = ({
             <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 bg-gradient-to-r from-purple-100 via-pink-100 to-fuchsia-100">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Target className="w-4 h-4 sm:w-5 flex-shrink-0 text-purple-600" />
-                <h4 className="font-bold text-xs sm:text-sm md:text-base text-purple-900 line-clamp-1">
+                <h4 className="font-bold text-xs sm:text-sm md:text-base text-purple-900">
                   💪 Lời khuyên học tập
                 </h4>
               </div>
             </div>
             <div className="p-3 sm:p-4 md:p-6">
-              <p className="text-xs sm:text-sm md:text-[15px] text-gray-800 leading-relaxed font-medium">
+              <p className="text-xs sm:text-sm md:text-[15px] text-gray-800 leading-relaxed font-medium whitespace-normal break-words">
                 {isCorrect 
                   ? '🎉 Bạn đã nắm vững kiến thức này. Hãy tiếp tục luyện tập các câu tương tự để củng cố và ghi nhớ lâu dài hơn.'
                   : '🎯 Mỗi sai lầm là một bài học quý giá. Hãy xem lại phần lý thuyết liên quan, ghi chú những điểm quan trọng, và thử làm thêm 3-5 bài tập tương tự.'}
