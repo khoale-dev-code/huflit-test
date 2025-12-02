@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Smile, Volume2, TrendingUp } from 'lucide-react';
-import { VOICE_EMOTIONS } from '../config/voiceExpression';
+import { VOICE_EMOTIONS } from '../../config/voiceExpression';
 
 /**
  * Emotion Selector Component

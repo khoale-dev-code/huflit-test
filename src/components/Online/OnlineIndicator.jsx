@@ -1,7 +1,7 @@
 // src/components/OnlineIndicator.jsx
 import React from 'react';
-import { usePresence } from '../hooks/usePresence';
-import { useOnlineUsers } from '../hooks/useOnlineUsers';
+import { usePresence } from '../../hooks/usePresence';
+import { useOnlineUsers } from '../../hooks/useOnlineUsers';
 
 const OnlineIndicator = () => {
   const { isOnline } = usePresence(); // Track chính user hiện tại

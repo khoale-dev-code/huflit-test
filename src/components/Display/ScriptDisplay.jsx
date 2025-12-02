@@ -1,10 +1,10 @@
 import React, { Suspense, useState, useMemo, useCallback, useRef, useEffect, memo } from 'react';
 import { ChevronDown, ChevronUp, FileText, Play, Pause, Copy, Sliders, Search, X, Star, Zap, RefreshCw, Loader2 } from 'lucide-react';
-import { useVoices } from './hooks/useVoices';
-import { useScriptParser } from './hooks/useScriptParser';
-import { useTextToSpeech } from './hooks/useTextToSpeech';
-import { getSpeakerColor, getSpeakerIcon, getSpeakerTTSOptions, copyScriptToClipboard, scrollToElement } from './utils/scriptUtils';
-import VoiceMetricsBadge from './VoiceMetricsBadge';
+import { useVoices } from '../hooks/useVoices';
+import { useScriptParser } from '../hooks/useScriptParser';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
+import { getSpeakerColor, getSpeakerIcon, getSpeakerTTSOptions, copyScriptToClipboard, scrollToElement } from '../utils/scriptUtils';
+import VoiceMetricsBadge from '../VoiceMetricsBadge';
 
 // ✅ Optimized Background
 const OptimizedBackground = memo(() => (

@@ -1,7 +1,7 @@
 // src/components/OnlineStats.jsx
 import React, { memo, useMemo } from 'react';
 import { Users, Globe, AlertCircle } from 'lucide-react';
-import { useOnlineUsers } from '../hooks/useOnlineUsers.js'; // ← .js
+import { useOnlineUsers } from '../../hooks/useOnlineUsers.js'; // ← .js
 
 /**
  * OnlineStats Component – Hiển thị thống kê người dùng online & tổng người dùng
