@@ -45,6 +45,7 @@ const Root = () => (
     >
       <Suspense fallback={<RootFallback />}>
         <AuthProvider>
+          {/* ✅ App Component đã chứa BrowserRouter */}
           <App />
         </AuthProvider>
       </Suspense>
@@ -64,7 +65,7 @@ root.render(<Root />);
 
 // ✅ Optimize React for production: disable strict mode in prod
 if (process.env.NODE_ENV === 'production') {
-  // Remove StrictMode by re-rendering without it
+  // ✅ Re-render without StrictMode in production for better performance
   root.render(
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY}
@@ -84,7 +85,7 @@ if (process.env.NODE_ENV === 'production') {
     </ClerkProvider>
   );
 
-  // Report Web Vitals for monitoring
+  // ✅ Report Web Vitals for monitoring
   try {
     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
       getCLS(console.log);
