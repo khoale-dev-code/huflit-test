@@ -1,11 +1,13 @@
 // src/components/Navbar.jsx
 import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, Headphones, BookOpen, BookMarked, Sparkles,
   User, ChevronDown, LogOut, GraduationCap, ChevronRight, Loader2,
   FileCheck
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
+import { ROUTES } from '../config/routes';
 import logo from '../assets/logo.png';
 import styles from './styles/Navbar.module.css';
 
@@ -27,6 +29,7 @@ GoogleLogo.displayName = 'GoogleLogo';
 // ======================================================================
 const NavItem = React.memo(({ item, isMobile = false, onItemClick }) => {
   const IconComponent = item.icon;
+  
   if (isMobile) {
     return (
       <button
@@ -244,22 +247,71 @@ export default function Navbar({
   onProfileClick,
   onAnswersClick,
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, isSignedIn, signInWithGoogle, signOut, loading: authLoading } = useFirebaseAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
+  // ===== Helper function to determine active route =====
+  const isRouteActive = useCallback((testId) => {
+    const routeMap = {
+      listening: ROUTES.TEST,
+      reading: ROUTES.TEST,
+      full: ROUTES.FULL_EXAM,
+      grammar: ROUTES.GRAMMAR,
+      vocabulary: ROUTES.VOCABULARY,
+    };
+    return location.pathname === routeMap[testId];
+  }, [location.pathname]);
+
   // === Menu Items ===
   const testMenuItems = useMemo(() => [
-    { id: 'listening', label: 'Thi Nghe', subtext: 'Listening Test', icon: Headphones, gradient: 'from-amber-500 to-orange-600', isActive: testType === 'listening' },
-    { id: 'reading', label: 'Thi Đọc', subtext: 'Reading Test', icon: BookOpen, gradient: 'from-yellow-500 to-amber-600', isActive: testType === 'reading' },
-    { id: 'full', label: 'Thi Thử', subtext: 'Full Mock Exam', icon: GraduationCap, gradient: 'from-red-500 to-orange-600', isActive: testType === 'full' },
-  ], [testType]);
+    { 
+      id: 'listening', 
+      label: 'Thi Nghe', 
+      subtext: 'Listening Test', 
+      icon: Headphones, 
+      gradient: 'from-amber-500 to-orange-600', 
+      isActive: testType === 'listening' && isRouteActive('listening')
+    },
+    { 
+      id: 'reading', 
+      label: 'Thi Đọc', 
+      subtext: 'Reading Test', 
+      icon: BookOpen, 
+      gradient: 'from-yellow-500 to-amber-600', 
+      isActive: testType === 'reading' && isRouteActive('reading')
+    },
+    { 
+      id: 'full', 
+      label: 'Thi Thử', 
+      subtext: 'Full Mock Exam', 
+      icon: GraduationCap, 
+      gradient: 'from-red-500 to-orange-600', 
+      isActive: testType === 'full' && isRouteActive('full')
+    },
+  ], [testType, isRouteActive]);
 
   const practiceMenuItems = useMemo(() => [
-    { id: 'grammar', label: 'Ngữ Pháp', subtext: 'Grammar Practice', icon: BookMarked, gradient: 'from-orange-500 to-amber-600', isActive: practiceType === 'grammar' },
-    { id: 'vocabulary', label: 'Từ Vựng', subtext: 'Vocabulary Building', icon: Sparkles, gradient: 'from-pink-500 to-red-500', isActive: practiceType === 'vocabulary' },
-  ], [practiceType]);
+    { 
+      id: 'grammar', 
+      label: 'Ngữ Pháp', 
+      subtext: 'Grammar Practice', 
+      icon: BookMarked, 
+      gradient: 'from-orange-500 to-amber-600', 
+      isActive: practiceType === 'grammar' && isRouteActive('grammar')
+    },
+    { 
+      id: 'vocabulary', 
+      label: 'Từ Vựng', 
+      subtext: 'Vocabulary Building', 
+      icon: Sparkles, 
+      gradient: 'from-pink-500 to-red-500', 
+      isActive: practiceType === 'vocabulary' && isRouteActive('vocabulary')
+    },
+  ], [practiceType, isRouteActive]);
 
   const allMenuItems = useMemo(() => [...testMenuItems, ...practiceMenuItems], [testMenuItems, practiceMenuItems]);
 
@@ -274,50 +326,77 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // === Handlers ===
+  // === Menu Item Click Handler ===
   const handleMenuClick = useCallback((item) => {
-    if (['listening', 'reading', 'full'].includes(item.id)) {
+    if (['listening', 'reading'].includes(item.id)) {
+      // Test items
       onTestTypeChange(item.id);
-    } else {
-      onPracticeTypeChange(item.id);
+      navigate(ROUTES.TEST);
+    } else if (item.id === 'full') {
+      // Full exam
+      onTestTypeChange('full');
+      navigate(ROUTES.FULL_EXAM);
+    } else if (item.id === 'grammar') {
+      // Grammar practice
+      onPracticeTypeChange('grammar');
+      navigate(ROUTES.GRAMMAR);
+    } else if (item.id === 'vocabulary') {
+      // Vocabulary practice
+      onPracticeTypeChange('vocabulary');
+      navigate(ROUTES.VOCABULARY);
     }
     setIsOpen(false);
-  }, [onTestTypeChange, onPracticeTypeChange]);
+  }, [onTestTypeChange, onPracticeTypeChange, navigate]);
 
+  // === Profile Click Handler ===
   const handleProfileClick = useCallback(() => {
     onProfileClick?.();
+    navigate(ROUTES.PROFILE);
     setShowProfileMenu(false);
     setIsOpen(false);
-  }, [onProfileClick]);
+  }, [onProfileClick, navigate]);
 
+  // === Answers Click Handler ===
   const handleAnswersClick = useCallback(() => {
     onAnswersClick?.();
+    navigate(ROUTES.ANSWERS);
     setIsOpen(false);
-  }, [onAnswersClick]);
+  }, [onAnswersClick, navigate]);
 
+  // === Sign In Handler ===
   const handleSignIn = async () => {
     const result = await signInWithGoogle();
     if (result.success) setIsOpen(false);
   };
 
+  // === Sign Out Handler ===
   const handleSignOut = async () => {
     await signOut();
     setShowProfileMenu(false);
     setIsOpen(false);
   };
 
+  // === Logo Click Handler ===
+  const handleLogoClick = useCallback(() => {
+    navigate(ROUTES.HOME);
+  }, [navigate]);
+
   return (
     <>
       {/* ====== NAVBAR ====== */}
       <nav className={styles.navContainer} aria-label="Thanh điều hướng chính">
         <div className={styles.navContent}>
-          {/* Logo */}
-          <a href="/" className={styles.logoGroup} aria-label="Trang chủ HUFLIT Exam Prep">
+          {/* Logo - Clickable to home */}
+          <button 
+            onClick={handleLogoClick}
+            className={`${styles.logoGroup} hover:opacity-80 transition-opacity`} 
+            aria-label="Trang chủ HUFLIT Exam Prep"
+          >
             <div className={styles.logoIcon}>
               <img src={logo} alt="" className={styles.logoImg} />
             </div>
             <h1 className={styles.logoText}>HUFLIT Exam Prep</h1>
-          </a>
+          </button>
 
           {/* Desktop Menu */}
           <div className={styles.desktopMenu} role="navigation" aria-label="Menu chính">

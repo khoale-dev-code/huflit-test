@@ -1,4 +1,5 @@
 import React, { useMemo, useState, lazy, Suspense, useCallback, memo } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { EXAM_DATA } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import MainLayout from './components/layout/MainLayout';
@@ -13,6 +14,8 @@ import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
 import { useOnlineUsers } from './hooks/useOnlineUsers.js';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
+import { ROUTES } from './config/routes';
+import HomePage from './pages/HomePage.jsx';
 
 // ✅ Lazy load components
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
@@ -143,7 +146,6 @@ const PartTestContent = memo(({
   score,
   onStartFullExam
 }) => {
-  // ✅ Kiểm tra xem có phải là Part 6, 7, 8 không
   const isSplitLayoutPart = testType === 'reading' && 
     (selectedPart === 'part6' || selectedPart === 'part7' || selectedPart === 'part8');
 
@@ -248,13 +250,110 @@ const PartTestContent = memo(({
 PartTestContent.displayName = 'PartTestContent';
 
 // ========================================
-// Main App Component
+// PAGE COMPONENTS
 // ========================================
-function App() {
-  // ===== STATE MANAGEMENT =====
+
+// Test Page
+const TestPage = memo(({
+  isSignedIn,
+  user,
+  selectedExam,
+  handleExamChange,
+  testType,
+  handleTestTypeChange,
+  selectedPart,
+  handlePartChange,
+  partData,
+  currentQuestionIndex,
+  setCurrentQuestionIndex,
+  answers,
+  handleAnswerSelect,
+  showResults,
+  handleSubmit,
+  handleReset,
+  score,
+  onStartFullExam
+}) => (
+  <PartTestContent
+    isSignedIn={isSignedIn}
+    user={user}
+    selectedExam={selectedExam}
+    handleExamChange={handleExamChange}
+    testType={testType}
+    handleTestTypeChange={handleTestTypeChange}
+    selectedPart={selectedPart}
+    handlePartChange={handlePartChange}
+    partData={partData}
+    currentQuestionIndex={currentQuestionIndex}
+    setCurrentQuestionIndex={setCurrentQuestionIndex}
+    answers={answers}
+    handleAnswerSelect={handleAnswerSelect}
+    showResults={showResults}
+    handleSubmit={handleSubmit}
+    handleReset={handleReset}
+    score={score}
+    onStartFullExam={onStartFullExam}
+  />
+));
+
+TestPage.displayName = 'TestPage';
+
+// Profile Page
+const ProfilePage = memo(({ user, handleBackToTest }) => (
+  <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
+    <BackButton onClick={handleBackToTest} show={true} />
+    <MemoizedUserProfile currentUser={user} />
+  </div>
+));
+
+ProfilePage.displayName = 'ProfilePage';
+
+// Full Exam Page
+const FullExamPage = memo(({ handleTestTypeChange }) => (
+  <Suspense fallback={<LoadingSpinner />}>
+    <FullExamMode
+      examData={EXAM_DATA}
+      onComplete={() => handleTestTypeChange('')}
+    />
+  </Suspense>
+));
+
+FullExamPage.displayName = 'FullExamPage';
+
+// Grammar Page
+const GrammarPage = memo(({ answers, handleAnswerSelect, handleSubmit }) => (
+  <Suspense fallback={<LoadingSpinner />}>
+    <GrammarReview
+      answers={answers}
+      onAnswerSelect={handleAnswerSelect}
+      onSubmit={handleSubmit}
+    />
+  </Suspense>
+));
+
+GrammarPage.displayName = 'GrammarPage';
+
+// Vocabulary Page
+const VocabularyPage = memo(() => <VocabularyPractice />);
+
+VocabularyPage.displayName = 'VocabularyPage';
+
+// Answers Page
+const AnswersPage = memo(({ handleBackToMain }) => (
+  <div>
+    <BackButton onClick={handleBackToMain} show={true} />
+    <ExamAnswersPage />
+  </div>
+));
+
+AnswersPage.displayName = 'AnswersPage';
+
+// ========================================
+// AppContent Component (với Routes)
+// ========================================
+const AppContent = memo(() => {
+  const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [viewMode, setViewMode] = useState('test'); // 'test', 'profile', 'answers'
-  const [currentPage, setCurrentPage] = useState('main'); // 'main', 'answers'
 
   // ✅ Hook online users
   const { onlineCount, totalUsers } = useOnlineUsers();
@@ -290,26 +389,25 @@ function App() {
   }, []);
 
   const handleViewProfile = useCallback(() => {
-    setViewMode('profile');
-  }, []);
+    navigate(ROUTES.PROFILE);
+  }, [navigate]);
 
   const handleBackToTest = useCallback(() => {
-    setViewMode('test');
-  }, []);
+    navigate(ROUTES.TEST);
+  }, [navigate]);
 
   const handleGoToAnswers = useCallback(() => {
-    setCurrentPage('answers');
-    setViewMode('answers');
-  }, []);
+    navigate(ROUTES.ANSWERS);
+  }, [navigate]);
 
   const handleBackToMain = useCallback(() => {
-    setCurrentPage('main');
-    setViewMode('test');
-  }, []);
+    navigate(ROUTES.TEST);
+  }, [navigate]);
 
   const handleStartFullExam = useCallback(() => {
     handleTestTypeChange('full');
-  }, [handleTestTypeChange]);
+    navigate(ROUTES.FULL_EXAM);
+  }, [handleTestTypeChange, navigate]);
 
   // ===== COMPUTED VALUES =====
   
@@ -342,115 +440,6 @@ function App() {
     };
   }, [practiceType, partData, answers]);
 
-  // ===== RENDER HELPERS =====
-  
-  // Render navigation (Back button)
-  const renderNavigation = useCallback(() => {
-    return (
-      <div className="mb-3 sm:mb-4 md:mb-6">
-        <BackButton 
-          onClick={handleBackToMain}
-          show={currentPage === 'answers'}
-        />
-      </div>
-    );
-  }, [currentPage, handleBackToMain]);
-
-  // Render main content based on view mode
-  const renderMainContent = useCallback(() => {
-    // ===== EXAM ANSWERS PAGE =====
-    if (currentPage === 'answers') {
-      return <ExamAnswersPage />;
-    }
-
-    // ===== USER PROFILE VIEW =====
-    if (viewMode === 'profile') {
-      return (
-        <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
-          <BackButton onClick={handleBackToTest} show={true} />
-          <MemoizedUserProfile currentUser={user} />
-        </div>
-      );
-    }
-
-    // ===== VOCABULARY PRACTICE =====
-    if (practiceType === 'vocabulary') {
-      return <VocabularyPractice />;
-    }
-
-    // ===== GRAMMAR REVIEW =====
-    if (practiceType === 'grammar') {
-      return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <GrammarReview
-            answers={answers}
-            onAnswerSelect={handleAnswerSelect}
-            onSubmit={handleSubmit}
-          />
-        </Suspense>
-      );
-    }
-
-    // ===== FULL EXAM MODE =====
-    if (testType === 'full') {
-      return (
-        <Suspense fallback={<LoadingSpinner />}>
-          <FullExamMode
-            examData={EXAM_DATA}
-            onComplete={() => handleTestTypeChange('')}
-          />
-        </Suspense>
-      );
-    }
-
-    // ===== PART TEST MODE (DEFAULT) =====
-    return (
-      <PartTestContent
-        isSignedIn={isSignedIn}
-        user={user}
-        selectedExam={selectedExam}
-        handleExamChange={handleExamChange}
-        testType={testType}
-        handleTestTypeChange={handleTestTypeChange}
-        selectedPart={selectedPart}
-        handlePartChange={handlePartChange}
-        partData={partData}
-        currentQuestionIndex={currentQuestionIndex}
-        setCurrentQuestionIndex={setCurrentQuestionIndex}
-        answers={answers}
-        handleAnswerSelect={handleAnswerSelect}
-        showResults={showResults}
-        handleSubmit={handleSubmit}
-        handleReset={handleReset}
-        score={score}
-        onStartFullExam={handleStartFullExam}
-      />
-    );
-  }, [
-    currentPage, 
-    viewMode, 
-    handleBackToTest, 
-    user, 
-    practiceType, 
-    testType, 
-    answers, 
-    handleAnswerSelect, 
-    handleSubmit, 
-    handleTestTypeChange, 
-    isSignedIn, 
-    selectedExam, 
-    handleExamChange,
-    selectedPart, 
-    handlePartChange, 
-    partData, 
-    currentQuestionIndex,
-    setCurrentQuestionIndex, 
-    showResults, 
-    handleReset, 
-    score, 
-    handleStartFullExam
-  ]);
-
   // ===== MAIN RENDER =====
   return (
     <MainLayout
@@ -461,24 +450,136 @@ function App() {
       user={user}
       onAuthClick={handleAuthOpen}
       onProfileClick={handleViewProfile}
-      viewMode={viewMode}
+      viewMode="test"
       onlineCount={onlineCount}
       totalUsers={totalUsers}
       onAnswersClick={handleGoToAnswers}
     >
       <div className="relative z-10 p-2 sm:p-4 md:p-6">
-        {/* Navigation (Back button when needed) */}
-        {renderNavigation()}
-        
-        {/* Main Content with Suspense */}
         <Suspense fallback={<LoadingSpinner />}>
-          {renderMainContent()}
+          <Routes>
+            {/* ===== TEST PAGE ===== */}
+            <Route 
+              path={ROUTES.TEST}
+              element={
+                <TestPage
+                  isSignedIn={isSignedIn}
+                  user={user}
+                  selectedExam={selectedExam}
+                  handleExamChange={handleExamChange}
+                  testType={testType}
+                  handleTestTypeChange={handleTestTypeChange}
+                  selectedPart={selectedPart}
+                  handlePartChange={handlePartChange}
+                  partData={partData}
+                  currentQuestionIndex={currentQuestionIndex}
+                  setCurrentQuestionIndex={setCurrentQuestionIndex}
+                  answers={answers}
+                  handleAnswerSelect={handleAnswerSelect}
+                  showResults={showResults}
+                  handleSubmit={handleSubmit}
+                  handleReset={handleReset}
+                  score={score}
+                  onStartFullExam={handleStartFullExam}
+                />
+              }
+            />
+               <Route 
+              path={ROUTES.HOME}
+              element={<HomePage />}
+            />
+
+            {/* ===== FULL EXAM PAGE ===== */}
+            <Route 
+              path={ROUTES.FULL_EXAM}
+              element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />}
+            />
+
+            {/* ===== GRAMMAR PAGE ===== */}
+            <Route 
+              path={ROUTES.GRAMMAR}
+              element={
+                <GrammarPage 
+                  answers={answers}
+                  handleAnswerSelect={handleAnswerSelect}
+                  handleSubmit={handleSubmit}
+                />
+              }
+            />
+
+            {/* ===== VOCABULARY PAGE ===== */}
+            <Route 
+              path={ROUTES.VOCABULARY}
+              element={<VocabularyPage />}
+            />
+
+            {/* ===== PROFILE PAGE ===== */}
+            <Route 
+              path={ROUTES.PROFILE}
+              element={
+                <ProfilePage 
+                  user={user}
+                  handleBackToTest={handleBackToTest}
+                />
+              }
+            />
+
+            {/* ===== ANSWERS PAGE ===== */}
+            <Route 
+              path={ROUTES.ANSWERS}
+              element={
+                <AnswersPage 
+                  handleBackToMain={handleBackToMain}
+                />
+              }
+            />
+
+            {/* ===== DEFAULT ROUTE (HOME) ===== */}
+            <Route 
+              path={ROUTES.HOME}
+              element={
+                <TestPage
+                  isSignedIn={isSignedIn}
+                  user={user}
+                  selectedExam={selectedExam}
+                  handleExamChange={handleExamChange}
+                  testType={testType}
+                  handleTestTypeChange={handleTestTypeChange}
+                  selectedPart={selectedPart}
+                  handlePartChange={handlePartChange}
+                  partData={partData}
+                  currentQuestionIndex={currentQuestionIndex}
+                  setCurrentQuestionIndex={setCurrentQuestionIndex}
+                  answers={answers}
+                  handleAnswerSelect={handleAnswerSelect}
+                  showResults={showResults}
+                  handleSubmit={handleSubmit}
+                  handleReset={handleReset}
+                  score={score}
+                  onStartFullExam={handleStartFullExam}
+                />
+              }
+            />
+          </Routes>
         </Suspense>
-        
-        {/* Auth Modal */}
+
+        {/* ===== AUTH MODAL ===== */}
         {showAuthModal && <AuthModal onClose={handleAuthClose} />}
       </div>
     </MainLayout>
+  );
+});
+
+AppContent.displayName = 'AppContent';
+
+// ========================================
+// Main App Component (with Router)
+// ========================================
+function App() {
+  return (
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppContent />
+    </Router>
   );
 }
 
