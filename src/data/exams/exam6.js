@@ -281,7 +281,7 @@ part3: {
       description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
       type: "reading",
       questions: [
-        {
+          {
           id: 21,
           question: "The new software system has been _______ to streamline our workflow and increase productivity.",
           options: [
@@ -291,7 +291,34 @@ part3: {
             "Implementing"
           ],
           correct: 2,
-          explanation: "📝 Cấu trúc bị động thì hiện tại hoàn thành: HAS BEEN + V3 (past participle). 'Implemented' là dạng quá khứ phân từ của 'implement'. Câu này dịch: 'Hệ thống phần mềm mới ĐÃ ĐƯỢC triển khai để...'"
+          explanation: `
+        🧠 **Giải thích chi tiết:**
+
+        Câu này dùng **thì hiện tại hoàn thành dạng bị động (Present Perfect Passive)**.  
+        Cấu trúc của bị động hiện tại hoàn thành là:
+
+        ➡️ **has/have + been + V3 (past participle)**
+
+        Ta cần một **động từ dạng V3** để hoàn thành cấu trúc trên.
+
+        ---
+
+        🔍 **Phân tích từng đáp án:**
+
+        1. **Implements** → động từ chia hiện tại đơn → ❌ không dùng sau "has been".
+        2. **Implementation** → danh từ → ❌ không đứng sau "has been".
+        3. **Implemented** → **V3 (quá khứ phân từ)** → ✔️ đúng dạng bị động.
+        4. **Implementing** → V-ing → ❌ không đúng cấu trúc bị động.
+
+        ---
+
+        🟩 **Đáp án đúng: Implemented**
+
+        **Dịch câu:**  
+        “Hệ thống phần mềm mới đã được triển khai nhằm tối ưu quy trình làm việc và tăng năng suất.”
+
+        **⇒ Lý do:** “Has been implemented” là cấu trúc bị động hoàn chỉnh và chính xác.
+        `
         },
         {
           id: 22,
