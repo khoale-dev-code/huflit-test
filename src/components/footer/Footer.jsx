@@ -1,262 +1,205 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Mail,
-  Phone,
-  MapPin,
-  Facebook,
-  Linkedin,
-  Youtube,
-  BookOpen,
-  FileText,
-  Users,
-  HelpCircle,
-  ArrowUp,
-  Send,
-  ChevronRight,
-  Heart,
-  ShieldCheck,
-  TrendingUp,
-  Trophy,
-  UserCircle,
-  AlertCircle,
-  Sparkles,
-  Zap,
-  Activity
+  Mail, Phone, MapPin, Facebook, Linkedin, Youtube, MessageCircle,
+  BookOpen, Zap, Users, HelpCircle, ArrowUp, Send,
+  ChevronRight, Heart, ShieldCheck, TrendingUp, Trophy,
+  AlertCircle, Sparkles, Globe, Code, Award, Lightbulb,
+  Github, MessageSquareText 
 } from 'lucide-react';
-import logoImage from '../../assets/logo.png';
 
-// --- GLOBAL STYLES & KEYFRAMES ---
+// --- STYLES & ANIMATIONS ---
 const GlobalStyles = () => (
   <style dangerouslySetInnerHTML={{__html: `
+    /* Keyframes for smooth transitions and effects */
     @keyframes fade-in {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
 
-    @keyframes blob {
-      0% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -50px) scale(1.1); }
-      66% { transform: translate(-20px, 20px) scale(0.9); }
-      100% { transform: translate(0, 0) scale(1); }
+    @keyframes pulse-shadow {
+      0%, 100% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); } /* Vàng */
+      50% { box-shadow: 0 0 25px rgba(255, 193, 7, 0.8); }
     }
-    .animate-blob { animation: blob 7s infinite cubic-bezier(0.6, -0.28, 0.735, 0.045); }
-
-    @keyframes float {
-      0% { transform: translateY(0px) translateX(0px); }
-      50% { transform: translateY(-10px) translateX(5px); }
-      100% { transform: translateY(0px) translateX(0px); }
+    .animate-pulse-shadow { animation: pulse-shadow 2s ease-in-out infinite; }
+    
+    @keyframes subtle-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
     }
-
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradient 5s ease infinite;
-    }
-    .animation-delay-2000 { animation-delay: 2s; }
-    .animation-delay-4000 { animation-delay: 4s; }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
-    }
-    .animate-pulse-dot {
-      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    .animate-subtle-bounce-hover:hover {
+        animation: subtle-bounce 0.8s ease-in-out infinite;
     }
 
     html { scroll-behavior: smooth; }
   `}} />
 );
-<img
-  src={logoImage}
-  alt="HUFLIT Logo"
-  className="h-16 w-16 rounded-full object-cover"
-/>
-// --- UTILITY COMPONENTS ---
+
+// --- UTILITY COMPONENTS (Giữ nguyên như bản thiết kế trước) ---
+
+// Component cho các mục liên kết (Tài Nguyên, Dịch Vụ)
 const LinkItem = ({ icon: Icon, label, href, description, delay = 0 }) => (
   <a
     href={href}
-    className="group flex items-start gap-3 p-3 rounded-lg transition-all duration-300 hover:bg-amber-50 active:scale-95 transform hover:translate-x-1 animate-fade-in"
+    className="group flex items-start gap-4 p-3 rounded-lg transition-all duration-300 hover:bg-blue-50 hover:border-l-4 hover:border-yellow-500 active:scale-[0.98] transform animate-fade-in"
     style={{ animationDelay: `${delay}ms` }}
   >
-    <Icon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-    <div className="flex-1">
-      <p className="font-semibold text-gray-900 group-hover:text-amber-700 transition-colors">{label}</p>
-      {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
+    <div className="p-2 rounded-full bg-blue-100 group-hover:bg-blue-600 transition-colors flex-shrink-0">
+        <Icon className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" />
     </div>
-    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-amber-600 transition-all group-hover:translate-x-1" />
+    <div className="flex-1 min-w-0">
+      <p className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors truncate text-base">{label}</p>
+      {description && <p className="text-sm text-gray-500 mt-0.5 leading-tight">{description}</p>}
+    </div>
+    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-transform translate-x-1 group-hover:translate-x-0 flex-shrink-0 mt-2" />
   </a>
 );
 
-const SocialButton = ({ icon: Icon, label, href, color }) => (
+// Component cho các nút Mạng Xã Hội
+const SocialButton = ({ icon: Icon, label, href, color, delay = 0, hoverColor }) => (
   <a
     href={href}
     target="_blank"
     rel="noopener noreferrer"
     title={label}
     aria-label={label}
-    className={`w-11 h-11 rounded-full ${color} text-white flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-2 transform hover:rotate-12 relative group overflow-hidden`}
+    className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${color} text-white flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 transform relative group overflow-hidden animate-fade-in active:scale-95`}
+    style={{ animationDelay: `${delay}ms` }}
   >
-    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-    <Icon className="w-5 h-5 relative z-10 group-hover:scale-125 transition-transform" />
+    <div className={`absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${hoverColor}`}></div>
+    <Icon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform" />
   </a>
 );
 
-const StatCard = ({ icon: Icon, number, label, delay = 0 }) => (
-  <div
-    className="flex flex-col items-center p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 hover:shadow-lg hover:border-amber-400 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 animate-fade-in"
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className="p-2 bg-white rounded-lg mb-3 group-hover:scale-110 transition-transform">
-      <Icon className="w-6 h-6 text-amber-700" />
-    </div>
-    <p className="text-2xl font-black bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">
-      {number}
-    </p>
-    <p className="text-xs font-semibold text-gray-700 text-center mt-1">{label}</p>
-  </div>
-);
-
-const OnlineUsersDisplay = ({ onlineCount = 0, totalUsers = 0 }) => (
-  <div className="flex flex-col sm:flex-row items-center gap-4 justify-center mb-8 animate-fade-in">
-    <div className="group relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition duration-300"></div>
-      <div className="relative flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-300 shadow-md hover:shadow-xl transition-all duration-300">
-        <div className="relative flex items-center justify-center">
-          <Activity className="w-6 h-6 text-green-600 group-hover:scale-110 transition-transform" />
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-2xl font-black text-green-700 leading-none">{onlineCount}</span>
-          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Online Now</span>
-        </div>
-      </div>
-    </div>
-
-    <div className="hidden sm:block h-12 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
-
-    <div className="group relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition duration-300"></div>
-      <div className="relative flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-300 shadow-md hover:shadow-xl transition-all duration-300">
-        <Users className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />
-        <div className="flex flex-col">
-          <span className="text-2xl font-black text-blue-700 leading-none">{totalUsers}</span>
-          <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total Users</span>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const AnimatedBackground = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute w-96 h-96 bg-gradient-to-r from-amber-300 to-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 top-0 -left-48 animate-blob"></div>
-    <div className="absolute w-96 h-96 bg-gradient-to-r from-orange-300 to-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 top-40 right-0 animate-blob animation-delay-2000"></div>
-    <div className="absolute w-96 h-96 bg-gradient-to-r from-amber-200 to-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-15 -bottom-32 left-1/3 animate-blob animation-delay-4000"></div>
-    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-50/30 to-transparent"></div>
-    {[...Array(6)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute w-1 h-1 bg-amber-400 rounded-full opacity-40 animate-pulse"
-        style={{
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-          animation: `float 6s infinite ease-in-out ${i * 0.5}s`
-        }}
-      ></div>
-    ))}
-  </div>
-);
-
-const ScrollIndicator = () => {
+// Component Scroll To Top
+const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsVisible(window.scrollY < 300);
+    const handleScroll = () => setIsVisible(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  return (
-    <div
-      className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-500 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-      }`}
-    >
-      <div className="flex flex-col items-center gap-2">
-        <Zap className="w-4 h-4 text-amber-600 animate-bounce" />
-        <p className="text-xs font-semibold text-gray-600">Khám phá thêm</p>
-      </div>
-    </div>
-  );
-};
-
-// --- MAIN FOOTER COMPONENT ---
-const Footer = ({ onlineCount = 0, totalUsers = 0 }) => {
-  const currentYear = new Date().getFullYear();
-  const [showTopButton, setShowTopButton] = useState(false);
-  const [email, setEmail] = useState('');
-  const [emailStatus, setEmailStatus] = useState({ type: '', message: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setShowTopButton(window.scrollY > 300);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleNewsletterSubmit = async () => {
-    if (!email) {
-      setEmailStatus({ type: 'error', message: 'Vui lòng nhập email' });
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailStatus({ type: 'error', message: 'Email không hợp lệ' });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setEmailStatus({ type: 'success', message: '✓ Đăng ký thành công! Cảm ơn bạn.' });
-      setEmail('');
-      setTimeout(() => setEmailStatus({ type: '', message: '' }), 4000);
-    } catch (error) {
-      setEmailStatus({ type: 'error', message: 'Có lỗi xảy ra. Vui lòng thử lại.' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  return (
+    <button
+      onClick={scrollToTop}
+      className={`fixed bottom-6 right-6 w-12 h-12 md:w-14 md:h-14 bg-blue-600 hover:bg-blue-700 text-yellow-300 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 z-50 active:scale-90 group border-2 border-white ${
+        isVisible ? 'opacity-100 translate-y-0 pointer-events-auto animate-pulse-shadow' : 'opacity-0 translate-y-12 pointer-events-none'
+      }`}
+      title="Lên đầu trang"
+      aria-label="Scroll to top"
+    >
+      <ArrowUp className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-y-1 transition-transform" />
+    </button>
+  );
+};
+
+// --- MAIN FOOTER COMPONENT ---
+const Footer = () => {
+  const currentYear = new Date().getFullYear();
+  const [discord, setDiscord] = useState('');
+  const [message, setMessage] = useState('');
+  const [discordStatus, setDiscordStatus] = useState({ type: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Webhook URL TỪ YÊU CẦU CỦA BẠN
+  const WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1445970968576266300/MQ5fL9u1d7V1lxubyU8Aa24Q0K40ezP-TG0bBXPp1b3qgcFFpax7SXX_Se5Q0DMzNm6y';
+
+  const handleDiscordSubmit = async () => {
+    if (!discord) {
+      setDiscordStatus({ type: 'error', message: 'Vui lòng nhập Discord username' });
+      return;
+    }
+
+    if (!message || message.trim().length < 10) {
+      setDiscordStatus({ type: 'error', message: 'Tin nhắn phải có ít nhất 10 ký tự' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setDiscordStatus({ type: 'info', message: 'Đang gửi tin nhắn...' });
+
+    try {
+      const payload = {
+        username: '📬 HUFLIT Trao Đổi & Kết Nối',
+        avatar_url: 'https://cdn-icons-png.flaticon.com/512/4024/4024969.png', // Icon đại diện
+        embeds: [
+          {
+            color: 0x2563EB, // Màu xanh dương cho embed
+            title: '🎉 Tin Nhắn Mới Từ Thành Viên',
+            description: message,
+            fields: [
+              {
+                name: '👤 Discord Username',
+                value: discord,
+                inline: false
+              },
+              {
+                name: '⏰ Thời Gian',
+                value: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }), // Giờ Việt Nam
+                inline: false
+              }
+            ],
+            thumbnail: {
+              url: 'https://cdn-icons-png.flaticon.com/512/4024/4024969.png'
+            }
+          }
+        ]
+      };
+
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        setDiscordStatus({ type: 'success', message: '✓ Gửi thành công! Cảm ơn bạn đã kết nối với chúng tôi.' });
+        setDiscord('');
+        setMessage('');
+        setTimeout(() => setDiscordStatus({ type: '', message: '' }), 4000);
+      } else {
+        // Discord thường trả về status 200/204 nếu thành công. Bất kỳ lỗi nào khác sẽ bị bắt ở đây.
+        throw new Error(`Failed to send (Status: ${response.status})`);
+      }
+    } catch (error) {
+      console.error('Discord Webhook Error:', error);
+      setDiscordStatus({ type: 'error', message: 'Có lỗi xảy ra khi gửi tin. Vui lòng kiểm tra lại Username.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Dữ liệu được tổ chức lại (Giữ nguyên)
   const resources = [
-    { icon: BookOpen, label: 'Thư viện đề thi', href: '#', description: '500+ bài tập chất lượng' },
-    { icon: FileText, label: 'Tài liệu học tập', href: '#', description: 'Tài liệu miễn phí' },
-    { icon: Users, label: 'Cộng đồng học tập', href: '#', description: 'Kết nối với bạn học' },
+    { icon: BookOpen, label: 'Thư viện đề thi', href: '#', description: '500+ bài tập trắc nghiệm' },
+    { icon: Zap, label: 'Tài liệu học tập', href: '#', description: 'Tài liệu độc quyền, miễn phí' },
     { icon: HelpCircle, label: 'Câu hỏi thường gặp', href: '#', description: 'Giải đáp nhanh chóng' },
   ];
 
-  const contactDetails = [
-    { icon: Mail, label: 'lekhoale30092003@gmail.com', href: 'mailto:lekhoale30092003@gmail.com' },
-    { icon: Phone, label: '+84 383196830', href: 'tel:+84383196830' },
-    { icon: MapPin, label: 'TP. Hồ Chí Minh, Việt Nam', href: '#' },
+  const services = [
+    { icon: Users, label: 'Cộng đồng học tập', href: '#', description: 'Kết nối và trao đổi kinh nghiệm' },
+    { icon: TrendingUp, label: 'Theo dõi tiến độ', href: '#', description: 'Báo cáo chi tiết quá trình học' },
+    { icon: Award, label: 'Chứng chỉ', href: '#', description: 'Công nhận thành tích' },
   ];
 
+  const contactDetails = [
+    { icon: Mail, label: 'Email', value: 'lekhoale30092003@gmail.com', href: 'mailto:lekhoale30092003@gmail.com' },
+    { icon: Phone, label: 'Hotline', value: '+84 383 196 830', href: 'tel:+84383196830' },
+    { icon: MapPin, label: 'Địa chỉ', value: 'TP. Hồ Chí Minh, Việt Nam', href: '#' },
+  ];
+
+  // Cập nhật Social Links theo yêu cầu (Giữ nguyên)
   const socialLinks = [
-    { icon: Facebook, label: 'Facebook', href: 'https://facebook.com', color: 'bg-blue-600 hover:bg-blue-700' },
-    { icon: Linkedin, label: 'LinkedIn', href: 'https://linkedin.com', color: 'bg-blue-700 hover:bg-blue-800' },
-    { icon: Youtube, label: 'YouTube', href: 'https://youtube.com', color: 'bg-red-600 hover:bg-red-700' },
+    { icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/dnkhoaoanoa/?locale=vi_VN', color: 'bg-blue-600', hoverColor: 'bg-blue-700' },
+     { icon: Github, label: 'GitHub', href: 'https://github.com/khoale-dev-code', color: 'bg-gray-800', hoverColor: 'bg-gray-900' },
+    { icon: Youtube, label: 'YouTube', href: 'https://www.youtube.com/@KhoaL%C3%AA-h7x', color: 'bg-red-600', hoverColor: 'bg-red-700' },
+    { icon: Mail, label: 'Mail', href: 'mailto:lekhoale30092003@gmail.com', color: 'bg-yellow-500', hoverColor: 'bg-yellow-600' },
   ];
 
   const legalLinks = [
@@ -265,246 +208,204 @@ const Footer = ({ onlineCount = 0, totalUsers = 0 }) => {
     { label: 'Liên hệ hỗ trợ', href: '#' },
   ];
 
-  const stats = [
-    { icon: UserCircle, number: '500', label: 'Người dùng' },
-    { icon: Trophy, number: '★ 4.8', label: 'Đánh giá' },
-    { icon: TrendingUp, number: '500+', label: 'Bài tập' },
-  ];
+  // Styles (Giữ nguyên)
+  const discordCardStyle = "relative bg-white rounded-xl border-2 border-yellow-400 p-6 shadow-xl hover:shadow-2xl transition-all duration-500";
+  const discordHeaderStyle = "text-xl font-bold text-blue-700";
+  const focusInputStyle = "focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
 
   return (
     <>
       <GlobalStyles />
-      <footer className="bg-white text-gray-900 font-sans relative">
-        <div className="relative bg-gradient-to-b from-white via-amber-50/50 to-white border-t-2 border-amber-200 overflow-hidden">
-          <AnimatedBackground />
+      <footer className="bg-gray-50 text-gray-900 font-sans relative overflow-hidden">
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 z-10">
-            {/* Brand Section */}
-            <div className="mb-16 text-center">
-              <div className="inline-flex items-center justify-center mb-6 animate-fade-in">
-                <div className="relative">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full blur-lg opacity-30 animate-pulse"></div>
-                  <div className="relative p-2 bg-white rounded-full shadow-2xl ring-4 ring-amber-500/50 transition-transform duration-500 hover:scale-110 hover:ring-amber-600">
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                    <BookOpen className="w-8 h-8 text-white" />
-                  </div>                  
-                  </div>
-                </div>  
-              </div>
+        {/* --- MAIN CONTENT SECTION --- */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 z-10">
 
-              <h2 className="text-3xl lg:text-5xl font-black text-gray-900 mb-4 animate-fade-in leading-tight">
-                HUFLIT{' '}
-                <span className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 bg-clip-text text-transparent animate-gradient">
-                  Exam Prep
-                </span>
-              </h2>
+          {/* Header Section */}
+          <div className="text-center mb-12 md:mb-16 animate-fade-in">
+            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-2">
+              <span className="text-blue-600">HUFLIT</span>
+              <span className="text-yellow-500 ml-3">Exam Prep</span>
+            </h2>
+           
+          </div>
 
-              <p className="text-gray-600 text-sm lg:text-base max-w-2xl mx-auto leading-relaxed animate-fade-in mb-8">
-                Nền tảng luyện thi hàng đầu giúp bạn chinh phục các kỳ thi ngôn ngữ và chuyên ngành với độ chính xác cao nhất.
-              </p>
-
-              <OnlineUsersDisplay onlineCount={onlineCount} totalUsers={totalUsers} />
+          {/* Content Grid - 4 Columns on Desktop, 2 on Tablet, 1 on Mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            
+            {/* Column 1: Tài Nguyên */}
+            <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
+              <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-yellow-500" />
+                Tài Nguyên
+              </h3>
+              <nav className="space-y-2">
+                {resources.map((item, idx) => (
+                  <LinkItem key={idx} {...item} delay={100 + idx * 50} />
+                ))}
+              </nav>
             </div>
 
-            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto mb-12 rounded-full"></div>
-
-            {/* Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-              {/* Resources Section */}
-              <div className="space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-amber-600" />
-                  <h3 className="text-lg font-bold text-gray-900 pb-3 border-b-2 border-amber-400 flex-1">
-                    Tài Nguyên
-                  </h3>
-                </div>
-                <nav className="space-y-1">
-                  {resources.map((item, idx) => (
-                    <LinkItem key={idx} {...item} delay={idx * 50} />
-                  ))}
-                </nav>
-              </div>
-
-              {/* Contact & Social */}
-              <div className="space-y-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-amber-600" />
-                    <h3 className="text-lg font-bold text-gray-900 pb-3 border-b-2 border-amber-400 flex-1">
-                      Liên Hệ
+            {/* Column 2: Dịch Vụ */}
+            <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+              <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-yellow-500" />
+                Dịch Vụ
+              </h3>
+              <nav className="space-y-2">
+                {services.map((item, idx) => (
+                  <LinkItem key={idx} {...item} delay={200 + idx * 50} />
+                ))}
+              </nav>
+            </div>
+            
+            {/* Column 3: Liên Hệ & Mạng Xã Hội */}
+            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '250ms' }}>
+                <div>
+                    <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
+                        <Phone className="w-5 h-5 text-yellow-500" />
+                        Thông Tin Liên Hệ
                     </h3>
-                  </div>
-                  <nav className="space-y-3">
-                    {contactDetails.map((item, idx) => (
-                      <a
-                        key={idx}
-                        href={item.href}
-                        className="flex items-start gap-3 group text-gray-700 hover:text-amber-700 transition-all duration-300 transform hover:translate-x-1"
-                      >
-                        <item.icon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 group-hover:scale-125 transition-transform" />
-                        <span className="text-sm font-medium">{item.label}</span>
-                      </a>
-                    ))}
-                  </nav>
-                </div>
-
-                {/* Social Links */}
-                <div className="pt-4 border-t border-amber-200">
-                  <p className="text-xs font-semibold text-gray-600 mb-4">Kết nối với chúng tôi</p>
-                  <div className="flex gap-3 flex-wrap">
-                    {socialLinks.map((link, idx) => (
-                      <SocialButton key={idx} {...link} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Newsletter */}
-              <div className="lg:col-span-2 space-y-6 animate-fade-in" style={{ animationDelay: '300ms' }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-amber-600" />
-                  <h3 className="text-lg font-bold text-gray-900 pb-3 border-b-2 border-amber-400 flex-1">
-                    Đăng Ký Nhận Tin
-                  </h3>
-                </div>
-
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-500 animate-pulse"></div>
-
-                  <div className="relative bg-white rounded-2xl border-2 border-amber-200 p-6 lg:p-8 shadow-xl hover:shadow-2xl transition-all duration-300">
-                    <div className="flex items-start gap-3 mb-6">
-                      <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg">
-                        <ShieldCheck className="w-6 h-6 text-amber-700" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-900">Không Spam!</p>
-                        <p className="text-xs text-gray-600 mt-0.5">Chỉ những tin tức và tài liệu hữu ích từ HUFLIT</p>
-                      </div>
+                    <div className="space-y-3">
+                        {contactDetails.map((item, idx) => (
+                            <a
+                                key={idx}
+                                href={item.href}
+                                className="group flex items-center gap-3 p-2 rounded-lg transition-all duration-300 hover:bg-yellow-50 active:scale-95 text-gray-700"
+                                style={{ animationDelay: `${300 + idx * 50}ms` }}
+                            >
+                                <item.icon className="w-5 h-5 text-blue-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors text-sm truncate">{item.label}</p>
+                                    <p className="text-xs text-gray-600 mt-0.5 group-hover:text-blue-600 truncate">{item.value}</p>
+                                </div>
+                            </a>
+                        ))}
                     </div>
+                </div>
 
-                    <div className="space-y-4">
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && handleNewsletterSubmit()}
-                          placeholder="Nhập email của bạn..."
-                          disabled={isSubmitting}
-                          className="flex-1 px-4 py-3 rounded-lg border-2 border-gray-300 bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        />
-                        <button
-                          onClick={handleNewsletterSubmit}
-                          disabled={isSubmitting}
-                          className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-gray-400 disabled:to-gray-400 text-white rounded-lg font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              <span className="hidden sm:inline">Đang xử lý</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4" />
-                              <span className="hidden sm:inline">Đăng Ký</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-
-                      {emailStatus.message && (
-                        <div
-                          className={`flex items-center gap-2 text-sm px-3 py-3 rounded-lg animate-fade-in ${
-                            emailStatus.type === 'success'
-                              ? 'bg-green-50 text-green-700 border border-green-200'
-                              : 'bg-red-50 text-red-700 border border-red-200'
-                          }`}
-                        >
-                          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                          {emailStatus.message}
-                        </div>
-                      )}
+                <div>
+                    <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-yellow-500" />
+                        Kết Nối
+                    </h3>
+                    <div className="flex gap-4 flex-wrap">
+                        {socialLinks.map((link, idx) => (
+                            <SocialButton key={idx} {...link} delay={400 + idx * 50} />
+                        ))}
                     </div>
+                </div>
+            </div>
 
-                    <p className="text-xs text-gray-500 mt-4">
-                      Chúng tôi tôn trọng quyền riêng tư của bạn.{' '}
-                      <a href="#" className="text-amber-700 font-semibold hover:underline transition-colors">
-                        Xem chính sách bảo mật
-                      </a>
-                    </p>
+            {/* Column 4: Discord Connect Form */}
+            <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: '400ms' }}>
+              <div className={discordCardStyle}>
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="p-3 bg-blue-600 rounded-xl animate-subtle-bounce-hover">
+                    <MessageCircle className="w-6 h-6 text-yellow-300" />
                   </div>
+                  <h3 className={discordHeaderStyle}>Trao Đổi & Kết Nối</h3>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-3">
-                  {stats.map((stat, idx) => (
-                    <StatCard key={idx} {...stat} delay={idx * 100} />
-                  ))}
+                <p className="text-xs text-gray-600 mb-4 text-center">Gửi tin nhắn trực tiếp đến đội ngũ qua Discord</p>
+
+                <div className="space-y-3 mb-4">
+                  <input
+                    type="text"
+                    value={discord}
+                    onChange={(e) => setDiscord(e.target.value)}
+                    placeholder="Discord Username (VD: user#1234)"
+                    disabled={isSubmitting}
+                    className={`w-full px-4 py-3 rounded-lg border border-gray-300 bg-white ${focusInputStyle} outline-none text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                  />
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Chia sẻ tâm sự/góp ý của bạn... (Tối thiểu 10 ký tự)"
+                    disabled={isSubmitting}
+                    className={`w-full px-4 py-3 rounded-lg border border-gray-300 bg-white ${focusInputStyle} outline-none text-sm font-medium transition-all resize-none h-20 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  />
+                  <button
+                    onClick={handleDiscordSubmit}
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-yellow-300 rounded-lg font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin"></div>
+                        <span>Đang gửi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Gửi Tin Nhắn</span>
+                      </>
+                    )}
+                  </button>
                 </div>
+
+                {discordStatus.message && (
+                  <div
+                    className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg animate-fade-in ${
+                      discordStatus.type === 'success'
+                        ? 'bg-green-100 text-green-700 border border-green-300'
+                        : discordStatus.type === 'error'
+                        ? 'bg-red-100 text-red-700 border border-red-300'
+                        : 'bg-blue-100 text-blue-700 border border-blue-300' // Info/Loading
+                    }`}
+                  >
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span className="font-medium">{discordStatus.message}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
-          <ScrollIndicator />
         </div>
 
-        {/* Bottom Bar */}
-        <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-t-2 border-amber-500 overflow-hidden">
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/50 to-transparent"></div>
-          </div>
-
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 z-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {/* --- BOTTOM BAR (COPYRIGHT & LEGAL) --- */}
+        <div className="bg-blue-900 border-t border-blue-700 relative">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-center">
+              
               {/* Copyright */}
-              <div className="text-center md:text-left animate-fade-in">
+              <div className="text-center md:text-left order-3 md:order-1">
                 <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                   © {currentYear} <span className="font-black text-white">HUFLIT Exam Prep</span>
                   <br />
-                  <span className="text-amber-500">Made with</span>
+                  <span className="text-yellow-400 text-xs">Made with</span>
                   <Heart className="w-3 h-3 inline ml-1 text-red-500 fill-red-500 mx-1 animate-pulse" />
-                  <span className="text-amber-500">by Khoale</span>
+                  <span className="text-yellow-400 text-xs">by Khoale</span>
                 </p>
               </div>
 
               {/* Legal Links */}
-              <div className="text-center">
-                <nav className="flex flex-wrap gap-3 justify-center">
+              <div className="text-center order-2">
+                <nav className="flex flex-wrap gap-2 md:gap-4 justify-center">
                   {legalLinks.map((link, idx) => (
                     <a
                       key={idx}
                       href={link.href}
-                      className="text-gray-400 hover:text-amber-400 transition-colors font-medium text-xs sm:text-sm hover:underline"
+                      className="text-gray-400 hover:text-yellow-400 transition-colors font-medium text-xs sm:text-sm relative group overflow-hidden"
                     >
                       {link.label}
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                     </a>
                   ))}
                 </nav>
               </div>
 
-              {/* Additional Info */}
-              <div className="text-center md:text-right">
+              {/* Version */}
+              <div className="text-center md:text-right order-1 md:order-3">
                 <p className="text-gray-500 text-xs">
-                  <span className="text-amber-500 font-semibold">Version 1.0</span> • Designed for Quality
+                  <span className="text-yellow-400 font-semibold">v2.1</span> • Designed for Excellence
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Scroll to Top Button */}
-        <button
-          onClick={scrollToTop}
-          className={`fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 z-50 active:scale-95 group ${
-            showTopButton
-              ? 'opacity-100 translate-y-0 pointer-events-auto'
-              : 'opacity-0 translate-y-12 pointer-events-none'
-          }`}
-          title="Lên đầu trang"
-          aria-label="Scroll to top"
-        >
-          <ArrowUp className="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
-        </button>
+        <ScrollToTopButton />
       </footer>
     </>
   );
