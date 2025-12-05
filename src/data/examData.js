@@ -1,68 +1,169 @@
-// src/data/examData.js
+  // src/data/examData.js
 
-import { EXAM1_DATA } from './exams/exam1';
-import { EXAM2_DATA } from './exams/exam2';
-import { EXAM3_DATA } from './exams/exam3';
-import { EXAM4_DATA } from './exams/exam4';
-import { EXAM5_DATA } from './exams/exam5';
-import { EXAM6_DATA } from './exams/exam6';
-import { EXAM7_DATA } from './exams/exam7';
-import { EXAM8_DATA } from './exams/exam8';
-import { EXAM9_DATA } from './exams/exam9';
-import { EXAM10_DATA } from './exams/exam10';
-import { EXAM11_DATA } from './exams/exam11';
-import { EXAM12_DATA } from './exams/exam12';
-import { EXAM13_DATA } from './exams/exam13';
-import { EXAM14_DATA } from './exams/exam14';
-import { EXAM15_DATA } from './exams/exam15';
-import { EXAM16_DATA } from './exams/exam16';
-import { EXAM17_DATA } from './exams/exam17';
-import { EXAM18_DATA } from './exams/exam18';
-import { EXAM19_DATA } from './exams/exam19';
-import { EXAM20_DATA } from './exams/exam20';
+  /**
+   * Lazy Loading Exam Data
+   * - Chỉ load exam khi người dùng chọn
+   * - Giảm bundle size ban đầu
+   * - Cache data sau lần load đầu tiên
+   */
 
-export const EXAM_DATA = {
-  exam1: EXAM1_DATA,
-  exam2: EXAM2_DATA,
-  exam3: EXAM3_DATA,
-  exam4: EXAM4_DATA,
-  exam5: EXAM5_DATA,
-  exam6: EXAM6_DATA,
-  exam7: EXAM7_DATA,
-  exam8: EXAM8_DATA,
-  exam9: EXAM9_DATA,
-  exam10: EXAM10_DATA,
-  exam11: EXAM11_DATA,
-  exam12: EXAM12_DATA,
-  exam13: EXAM13_DATA,
-  exam14: EXAM14_DATA,
-  exam15: EXAM15_DATA,
-  exam16: EXAM16_DATA,
-  exam17: EXAM17_DATA,
-  exam18: EXAM18_DATA,
-  exam19: EXAM19_DATA,
-  exam20: EXAM20_DATA,
- // Khi thêm exam mới:
-  // import { EXAM4_DATA } from './exams/exam4';
-  // exam4: EXAM4_DATA,
-};
+  // Metadata cho tất cả các exams (lightweight)
+  const EXAM_METADATA = {};
+  for (let i = 1; i <= 22; i++) {
+    EXAM_METADATA[`exam${i}`] = {
+      id: `exam${i}`,
+      title: `Đề thi ${i}`,
+      loaded: false,
+      data: null,
+      loading: false,
+      loadPromise: null
+    };
+  }
 
-// Helper functions
-export const getExamById = (examId) => {
-  return EXAM_DATA[examId] || null;
-};
+  // Cache để tránh load lại
+  const examCache = new Map();
 
-export const getAllExams = () => {
-  return Object.values(EXAM_DATA);
-};
+  /**
+   * Load exam data dynamically
+   * @param {string} examId - ID của exam (exam1, exam2, ...)
+   * @returns {Promise<Object>} Exam data
+   */
+  export const loadExamData = async (examId) => {
+    // Kiểm tra cache trước
+    if (examCache.has(examId)) {
+      return examCache.get(examId);
+    }
 
-export const getExamParts = (examId) => {
-  const exam = EXAM_DATA[examId];
-  return exam?.parts || {};
-};
+    const metadata = EXAM_METADATA[examId];
+    if (!metadata) {
+      console.warn(`⚠️ Exam "${examId}" không tồn tại`);
+      return null;
+    }
 
-export const getExamQuestions = (examId, partId) => {
-  const exam = EXAM_DATA[examId];
-  const part = exam?.parts?.[partId];
-  return part?.questions || [];
-};
+    // Nếu đang load, đợi promise hiện tại
+    if (metadata.loading && metadata.loadPromise) {
+      return metadata.loadPromise;
+    }
+
+    // Bắt đầu load
+    metadata.loading = true;
+    
+    const examNumber = examId.replace('exam', '');
+    
+    metadata.loadPromise = import(`./exams/exam${examNumber}.js`)
+      .then(module => {
+        const dataKey = `EXAM${examNumber}_DATA`;
+        const data = module[dataKey];
+        
+        if (!data) {
+          throw new Error(`❌ Không tìm thấy ${dataKey} trong module`);
+        }
+
+        // Lưu vào cache
+        examCache.set(examId, data);
+        metadata.data = data;
+        metadata.loaded = true;
+        metadata.loading = false;
+        
+        console.log(`✅ Đã load ${examId}`);
+        return data;
+      })
+      .catch(error => {
+        console.error(`❌ Lỗi khi load ${examId}:`, error);
+        metadata.loading = false;
+        metadata.loadPromise = null;
+        return null;
+      });
+
+    return metadata.loadPromise;
+  };
+
+  /**
+   * Preload exam để tăng tốc (optional)
+   * @param {string} examId 
+   */
+  export const preloadExamData = (examId) => {
+    if (!examCache.has(examId)) {
+      loadExamData(examId);
+    }
+  };
+
+  /**
+   * Get exam by ID (async)
+   * @param {string} examId 
+   * @returns {Promise<Object|null>}
+   */
+  export const getExamById = async (examId) => {
+    return await loadExamData(examId);
+  };
+
+  /**
+   * Get all exam metadata (synchronous - chỉ trả về thông tin cơ bản)
+   * @returns {Array<Object>}
+   */
+  export const getAllExamMetadata = () => {
+    return Object.values(EXAM_METADATA).map(({ id, title, loaded }) => ({
+      id,
+      title,
+      loaded
+    }));
+  };
+
+  /**
+   * Get all loaded exams (synchronous)
+   * @returns {Array<Object>}
+   */
+  export const getAllLoadedExams = () => {
+    return Array.from(examCache.values());
+  };
+
+  /**
+   * Get exam parts (async)
+   * @param {string} examId 
+   * @returns {Promise<Object>}
+   */
+  export const getExamParts = async (examId) => {
+    const exam = await loadExamData(examId);
+    return exam?.parts || {};
+  };
+
+  /**
+   * Get exam questions (async)
+   * @param {string} examId 
+   * @param {string} partId 
+   * @returns {Promise<Array>}
+   */
+  export const getExamQuestions = async (examId, partId) => {
+    const exam = await loadExamData(examId);
+    const part = exam?.parts?.[partId];
+    return part?.questions || [];
+  };
+
+  /**
+   * Clear cache (dùng khi cần reset)
+   */
+  export const clearExamCache = () => {
+    examCache.clear();
+    Object.values(EXAM_METADATA).forEach(meta => {
+      meta.loaded = false;
+      meta.data = null;
+      meta.loading = false;
+      meta.loadPromise = null;
+    });
+    console.log('🗑️ Đã xóa cache exams');
+  };
+
+  /**
+   * Get cache stats (debug)
+   */
+  export const getCacheStats = () => {
+    return {
+      totalExams: Object.keys(EXAM_METADATA).length,
+      loadedExams: examCache.size,
+      exams: Array.from(examCache.keys())
+    };
+  };
+
+  // Export metadata để dùng cho dropdown
+  export const EXAM_LIST = getAllExamMetadata();
+  

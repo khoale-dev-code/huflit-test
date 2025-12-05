@@ -1,596 +1,683 @@
 export const EXAM12_DATA = {
-  title: "HUFLIT Listening & Reading Practice - Exam 12 (Dựa trên Đề Thi Thử)",
-  description: "Bộ đề thi đầy đủ với Listening (4 parts, 20 câu) và Reading (4 parts, 40 câu). Hỗ trợ ôn luyện toàn diện theo cấu trúc HUFLIT. Part 1 mở rộng: 5 câu hỏi từ 1 hội thoại dài. Tích hợp 100 collocations phổ biến TOEIC (như 'make a decision', 'take advantage of', ...) và các điểm ngữ pháp: Present Perfect, Present Perfect Passive, Future Simple, Past Simple vs Present Perfect, Word Forms (Noun/Adjective/Adverb/Verb), Tính từ + Danh từ, Trạng từ + Động từ, Be + Adjective, Passive Voice với Past Participle, Relative Pronouns, Inverted Structure, Time/Contrast Conjunctions, Passive Voice, Gerund vs Infinitive (Preposition + V-ing, Verb + to V/V-ing), Conditional Sentences, Từ vựng theo ngữ cảnh, Subject-Verb Agreement, Articles (a/an/the).",
+  title: "Listening & Notetaking Skills 1 Practice - Exam 12 (Based on Book)",
+  description: "Full practice test with Listening (4 parts, 20 questions) and Reading (4 parts, 40 questions). Designed to review the entire book with focus on videos and expansion. Options are shuffled to prevent guessing. Listening scripts improved for natural flow.",
   parts: {
     part1: {
       title: "PART 1: Short Conversations",
-      description: "Nghe đoạn hội thoại giữa Ben và Anna về chiến lược tiếp thị. Chọn đáp án tốt nhất (A, B, C, D) cho mỗi câu hỏi.",
+      description: "Listen to the natural conversations about topics from the book. Choose the best answer (A, B, C, D) for each question.",
       type: "listening",
-      script: "Ben: Anna, chúng ta cần reach an agreement về chiến lược mới. Bạn đã evaluate options chưa?\nAnna: Vâng, tôi đã attend meetings và developed skills với các đối tác có thể help us penetrate markets. Thị trường has been expanded bởi competitors, nhưng chúng ta có thể capitalize on strengths.\nBen: Tốt. Chúng ta will promote innovation tháng tới nếu chúng ta comply with regulations. Năm ngoái, chúng ta held discussions và boosted productivity, nhưng lần này khác.\nAnna: Đúng vậy. Chúng ta phải utilize resources effectively và empower employees. The staff has been trained to identify opportunities, đó là lý do chúng ta will succeed.\nBen: Đồng ý. Hãy organize an event tuần tới to share information và monitor progress.",
-      questions: [
+      script: "Man: Hey, have you heard about tidal waves? What exactly are they?\nWoman: Oh, tidal waves, or tsunamis, are massive waves usually triggered by earthquakes under the ocean. They can be devastating when they hit land.\n\nMan: So, how do levels of language differ?\nWoman: Well, formal language is what you'd use in a job interview or a business meeting, while informal is more like chatting with friends over coffee.\n\nWoman: Tell me about power and how it's abused.\nMan: Power is like control over others, and it's often abused in politics, where leaders might use it for personal gain rather than for the good of the people.\n\nWoman: What's the deal with Asian and African elephants? Are they pretty similar?\nMan: Yeah, both are huge herbivores that live in groups, but African ones have bigger ears and tusks on both males and females, unlike Asians.\n\nMan: Those coincidences between Lincoln and Kennedy are wild, right?\nWoman: Totally! Both got elected to Congress 100 years apart, became president the same way, and were assassinated on Fridays, with successors named Johnson.",      questions: [
         {
           id: 1,
           options: [
-            "They will expand the market.",
-            "They have not attended meetings.",
-            "They developed skills last year.",
-            "They have evaluated options."
+            "A river wave.",
+            "A small wave in the ocean.",
+            "A wave from the moon.",
+            "A very large wave caused by earthquake."
           ],
           correct: 3,
-          explanation: "Anna nói: 'tôi đã attend meetings và developed skills...' (Tôi đã tham dự họp và phát triển kỹ năng...). Đáp án đúng là (D) vì sử dụng Present Perfect (have + V3: have evaluated) để diễn tả hành động hoàn thành gần đây với kết quả hiện tại, khác với Past Simple (developed last year) trong (C) dùng cho quá khứ cụ thể. Hướng dẫn ngữ pháp: Present Perfect nhấn mạnh kết quả hiện tại (e.g., options đã được đánh giá, ảnh hưởng đến thỏa thuận hiện tại); so sánh với Past Simple cho sự kiện kết thúc. Collocation: 'attend meetings', 'develop skills'. Ngữ pháp: Present Perfect vs Past Simple; Subject-Verb Agreement (They have evaluated)."
+          explanation: "**Đáp án đúng là D.** Trong hội thoại, người phụ nữ nói: 'tidal waves, or tsunamis, are massive waves usually triggered by earthquakes under the ocean.' Từ khóa **'massive waves'** (sóng khổng lồ) và **'triggered by earthquakes'** (gây ra bởi động đất) xác nhận đây là những con sóng rất lớn do động đất. \n- A sai vì sóng triều không phải chỉ là sóng sông.\n- B sai vì từ 'small' (nhỏ) trái ngược với 'massive'.\n- C sai vì nguyên nhân ở đây là 'earthquakes' (động đất) chứ không phải 'moon' (mặt trăng).\n**Mẹo:** Nghe kỹ các từ mô tả đặc điểm và nguyên nhân."
         },
         {
           id: 2,
           options: [
-            "They promoted innovation.",
-            "They will boost productivity next year.",
-            "They held discussions last year.",
-            "They have complied with regulations."
+            "Formal language is casual.",
+            "Used in professional settings.",
+            "Used in casual settings.",
+            "Informal language is professional."
           ],
-          correct: 2,
-          explanation: "Ben nói: 'Năm ngoái, chúng ta held discussions và boosted productivity...' (Năm ngoái, chúng tôi đã tổ chức thảo luận và tăng năng suất...). Đáp án đúng là (C) vì sử dụng Past Simple (held, boosted) cho hành động hoàn tất trong quá khứ cụ thể với mốc thời gian 'last year'. Hướng dẫn ngữ pháp: Past Simple dùng cho hành động kết thúc, khác Present Perfect dùng cho hành động liên quan đến hiện tại (e.g., nếu nói 'have held' thì ngụ ý kinh nghiệm vẫn ảnh hưởng). Collocation: 'hold discussions', 'boost productivity'. Ngữ pháp: Past Simple vs Present Perfect; Time Conjunctions (Last year)."
+          correct: 1,
+          explanation: "**Đáp án đúng là B.** Người phụ nữ định nghĩa: 'formal language is what you'd use in a job interview or a business meeting.' Từ khóa **'job interview'** và **'business meeting'** đều là những tình huống chuyên nghiệp (professional settings). \n- A sai vì 'formal' (trang trọng) không thể là 'casual' (thông thường).\n- C mô tả informal language, không phải formal.\n- D sai vì 'informal language' (ngôn ngữ không trang trọng) không dùng trong môi trường chuyên nghiệp.\n**Mẹo:** Chú ý nghe ví dụ cụ thể để xác định ngữ cảnh sử dụng."
         },
         {
           id: 3,
           options: [
-            "The staff will train others.",
-            "The staff has been trained to identify opportunities.",
-            "The staff identified opportunities.",
-            "The staff is trained."
+            "Power is abused in politics.",
+            "Power is always good.",
+            "Power is only physical.",
+            "Power is never abused."
           ],
-          correct: 1,
-          explanation: "Anna nói: 'The staff has been trained to identify opportunities...' (Nhân viên đã được đào tạo để xác định cơ hội...). Đáp án đúng là (B) vì sử dụng Present Perfect Passive (has been + V3: has been trained) nhấn mạnh hành động bị động hoàn thành với kết quả hiện tại. Hướng dẫn ngữ pháp: Present Perfect Passive = have/has been + V3, dùng khi tập trung vào đối tượng chịu tác động (staff được đào tạo), kết hợp với 'to + V' (to identify) diễn tả mục đích. Collocation: 'identify opportunities', 'empower employees'. Ngữ pháp: Present Perfect Passive; Passive Voice với Past Participle; Pattern 2: Verb + to V (trained to identify)."
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** Người đàn ông nói: 'Power is often abused in politics, where leaders might use it for personal gain.' Từ khóa **'abused in politics'** (bị lạm dụng trong chính trị) cho thấy quyền lực có thể bị dùng sai mục đích trong lĩnh vực này. \n- B sai vì 'always good' (luôn tốt) trái với ý 'abused'.\n- C sai vì 'only physical' (chỉ về thể chất) không được đề cập.\n- D sai vì 'never abused' (không bao giờ bị lạm dụng) trái với thông tin.\n**Mẹo:** Nghe các động từ thể hiện hành động tiêu cực như 'abused'."
         },
         {
           id: 4,
           options: [
-            "They are organizing now.",
-            "They have organized events.",
-            "They organized an event yesterday.",
-            "They will organize an event next week."
+            "They are solitary animals.",
+            "They have same ears and tusks.",
+            "Both live in herds and are herbivores.",
+            "They are small carnivores."
           ],
-          correct: 3,
-          explanation: "Ben nói: 'Hãy organize an event tuần tới...' (Hãy tổ chức sự kiện tuần tới...). Đáp án đúng là (D) vì sử dụng Future Simple (will + V: will organize) để diễn tả kế hoạch tương lai với mốc thời gian 'next week'. Hướng dẫn ngữ pháp: Future Simple = will + V nguyên thể, dùng cho quyết định tức thì hoặc dự đoán; khác với Present Continuous cho kế hoạch đã sắp xếp. Collocation: 'organize events', 'share information'. Ngữ pháp: Future Simple; Time Conjunctions (next week)."
+          correct: 2,
+          explanation: "**Đáp án đúng là C.** Người đàn ông nói: 'both are huge herbivores that live in groups.' Từ khóa **'herbivores'** (động vật ăn cỏ) và **'live in groups'** (sống theo nhóm, tức là herds) là điểm tương đồng. \n- A sai vì 'solitary' (sống đơn độc) trái với 'live in groups'.\n- B sai vì chính sự khác biệt về tai và ngà là điểm phân biệt được nói đến sau đó.\n- D sai vì chúng không 'small' (nhỏ) mà 'huge' (khổng lồ) và không phải 'carnivores' (ăn thịt).\n**Mẹo:** Tập trung vào thông tin về chế độ ăn và tập tính sống."
         },
         {
           id: 5,
           options: [
-            "Resource utilization is effective.",
-            "We must utilize resources effectively.",
-            "They utilized resources last month.",
-            "The resources are utilized."
+            "No similarities.",
+            "Both were kings.",
+            "Both assassinated on Friday, succeeded by Johnson.",
+            "Both lived in the same era."
           ],
-          correct: 1,
-          explanation: "Anna nói: 'Chúng ta phải utilize resources effectively...' (Chúng ta phải sử dụng tài nguyên một cách hiệu quả...). Đáp án đúng là (B) vì sử dụng Trạng từ + Động từ (effectively utilize) và Noun (resources) trong cấu trúc modal (must + V). Hướng dẫn ngữ pháp: Trạng từ (adverb: effectively) bổ nghĩa động từ (utilize), đứng sau động từ; Noun (resources) làm tân ngữ; Subject-Verb Agreement đảm bảo chủ ngữ 'We' hợp với động từ 'must utilize'. Collocation: 'utilize resources'. Ngữ pháp: Trạng từ + Động từ; Noun vs Adverb; Subject-Verb Agreement (We must utilize)."
+          correct: 2,
+          explanation: "**Đáp án đúng là C.** Người phụ nữ nói: 'both... were assassinated on Fridays, with successors named Johnson.' Đây là hai chi tiết cụ thể được liệt kê. \n- A sai vì có rất nhiều điểm tương đồng.\n- B sai vì họ là tổng thống, không phải vua.\n- D sai vì họ sống cách nhau 100 năm.\n**Mẹo:** Ghi chú nhanh các con số và tên riêng khi nghe."
         }
       ]
     },
     part2: {
       title: "PART 2: Longer Conversation",
-      description: "5 câu hỏi - Một đoạn hội thoại dài giữa ba người ở hội nghị. Nghe toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
+      description: "5 questions - A natural conversation about Lincoln and Kennedy coincidences. Listen and choose the best answer (A, B, C, D).",
       type: "listening",
-      script: "Narrator: At the conference.\nMike: John, Lisa, chúng ta cần cut costs despite overcoming obstacles.\nLisa: Vâng, chúng ta have launched products that the director, who manages resources, endorsed.\nJohn: Although we expanded markets, chúng ta vẫn cần to train staff after evaluating options.\nMike: If we mitigate risks, chúng ta will gain experience. The proposal has been verified by consultants.\nLisa: Hãy coordinate efforts to solve problems và establish partnerships.",
+      script: "Woman: You know, it's crazy how Abraham Lincoln and John F. Kennedy had so many parallels in their lives. For starters, Lincoln got elected to Congress in 1846, and Kennedy exactly 100 years later in 1946. Then, Lincoln became President in 1860, Kennedy in 1960. Both were really passionate about civil rights, and sadly, both their wives lost a child while in the White House. They were both shot on a Friday, right in the head. Get this, Lincoln's secretary was named Kennedy, and Kennedy's was named Lincoln. Both assassins were Southerners, and both presidents were succeeded by Southerners named Johnson. Andrew Johnson, Lincoln's successor, was born in 1808, and Lyndon Johnson in 1908. The assassins, John Wilkes Booth born in 1839, Lee Harvey Oswald in 1939. Both known by three names, each with 15 letters. Booth ran from a theater to a warehouse, Oswald from a warehouse to a theater. And both were killed before trial. Oh, and a week before their deaths, Lincoln was in Monroe, Maryland, Kennedy with Marilyn Monroe. Isn't that eerie?",
       questions: [
         {
           id: 6,
-          question: "How many people are in the conversation?",
-          options: [
-            "Five",
-            "Three",
-            "Two",
-            "Four"
-          ],
+          question: "When was Lincoln elected to Congress?",
+          options: ["1946", "1846", "1860", "1908"],
           correct: 1,
-          explanation: "Có ba người: Mike, Lisa, và John. Đáp án đúng là (B) vì đoạn thoại thể hiện ba nhân vật nói chuyện. Hướng dẫn ngữ pháp: Subject-Verb Agreement (we need) đảm bảo chủ ngữ số nhiều 'we' hợp với động từ; Articles (the director) dùng 'the' cho danh từ cụ thể. Collocation: 'cut costs', 'overcome obstacles'. Ngữ pháp: Subject-Verb Agreement; Articles."
+          explanation: "**Đáp án đúng là B (1846).** Người nói nói rõ: 'Lincoln got elected to Congress in 1846.' Đây là thông tin trực tiếp. \n- A (1946) là năm Kennedy được bầu, một sự trùng hợp 100 năm sau.\n- C (1860) là năm Lincoln trở thành Tổng thống.\n- D (1908) là năm sinh của Lyndon Johnson.\n**Mẹo:** Cẩn thận với các con số dễ nhầm lẫn, đặc biệt khi có sự so sánh."
         },
         {
           id: 7,
-          question: "Why do they need to launch products?",
-          options: [
-            "Because of risks.",
-            "Because they will gain experience.",
-            "Because they have been endorsed.",
-            "Because they expanded markets."
-          ],
+          question: "What day were both presidents shot?",
+          options: ["Sunday", "Monday", "Friday", "Wednesday"],
           correct: 2,
-          explanation: "Lisa nói: 'chúng ta have launched products that the director... endorsed.' (chúng ta đã ra mắt sản phẩm mà giám đốc tán thành). Đáp án đúng là (C) vì sử dụng Relative Pronoun (that) để chỉ định products. Hướng dẫn ngữ pháp: Relative Pronouns (that/which/who) nối mệnh đề phụ mô tả danh từ (products); Present Perfect (have launched) cho hành động hoàn thành. Collocation: 'launch products'. Ngữ pháp: Relative Pronouns; Present Perfect."
+          explanation: "**Đáp án đúng là C (Friday).** Thông tin được nêu rõ: 'They were both shot on a Friday.' \n- Các đáp án khác không được đề cập.\n**Mẹo:** Các ngày trong tuần là thông tin cần ghi nhớ chính xác."
         },
         {
           id: 8,
-          question: "What has been verified?",
+          question: "Who succeeded both presidents?",
           options: [
-            "The options.",
-            "The staff.",
-            "The proposal.",
-            "The experience."
+            "Southerners named Johnson",
+            "Easterners named Kennedy",
+            "Westerners named Oswald",
+            "Northerners named Booth"
           ],
-          correct: 2,
-          explanation: "Mike nói: 'The proposal has been verified by consultants.' (Đề xuất đã được xác minh bởi cố vấn). Đáp án đúng là (C) vì sử dụng Present Perfect Passive (has been + V3). Hướng dẫn ngữ pháp: Present Perfect Passive = have/has been + V3, tập trung vào đối tượng (proposal) và tác nhân (by consultants); Articles (The proposal) chỉ vật cụ thể. Collocation: 'verify details'. Ngữ pháp: Present Perfect Passive; Articles."
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** Người nói khẳng định: 'both presidents were succeeded by Southerners named Johnson.' Từ khóa **'Southerners'** và **'Johnson'**. \n- B, C, D đều sai vì sai họ (Kennedy, Oswald, Booth) hoặc vùng miền.\n**Mẹo:** Chú ý đến tính từ mô tả (Southerners) và họ của người kế nhiệm."
         },
         {
           id: 9,
-          question: "What will happen if they mitigate risks?",
-          options: [
-            "They solve problems.",
-            "They will gain experience.",
-            "They expanded markets.",
-            "They train staff."
-          ],
+          question: "How many letters in assassins' names?",
+          options: ["Ten", "Fifteen", "Twenty", "Five"],
           correct: 1,
-          explanation: "Mike nói: 'If we mitigate risks, chúng ta will gain experience.' (Nếu chúng ta giảm thiểu rủi ro, chúng ta sẽ tích lũy kinh nghiệm). Đáp án đúng là (B) vì sử dụng Conditional Sentences Type 1 (If + Present Simple, will + V). Hướng dẫn ngữ pháp: Conditional Type 1 diễn tả tình huống thực tế tương lai; Future Simple (will gain) cho kết quả. Collocation: 'mitigate risks', 'gain experience'. Ngữ pháp: Conditional Sentences; Future Simple."
+          explanation: "**Đáp án đúng là B (Fifteen).** Thông tin chi tiết: 'each with 15 letters.' (John Wilkes Booth và Lee Harvey Oswald). \n- Các số khác không đúng.\n**Mẹo:** Ghi chú lại các chi tiết số học hoặc chữ cái trong tên."
         },
         {
           id: 10,
-          question: "What do they plan to do to solve problems?",
+          question: "Where was Lincoln a week before shot?",
           options: [
-            "Coordinate efforts.",
-            "Train staff.",
-            "Expand markets.",
-            "Evaluate options."
+            "Dallas, Texas",
+            "Marilyn Monroe",
+            "Ford's Theater",
+            "Monroe, Maryland"
           ],
-          correct: 0,
-          explanation: "Lisa nói: 'Hãy coordinate efforts to solve problems...' (Hãy phối hợp nỗ lực để giải quyết vấn đề...). Đáp án đúng là (A) vì sử dụng Pattern 2: Verb + to V (coordinate to solve). Hướng dẫn ngữ pháp: Gerund vs Infinitive - 'to + V' sau động từ như coordinate diễn tả mục đích; Trạng từ có thể bổ nghĩa (nếu có). Collocation: 'coordinate efforts', 'solve problems'. Ngữ pháp: Gerund vs Infinitive; Trạng từ + Động từ."
+          correct: 3,
+          explanation: "**Đáp án đúng là D (Monroe, Maryland).** Đây là thông tin cuối cùng được đưa ra: 'Lincoln was in Monroe, Maryland.' \n- A là nơi Kennedy bị ám sát.\n- B là tên một người (diễn viên) liên quan đến Kennedy.\n- C là nơi Lincoln bị ám sát.\n**Mẹo:** Phân biệt rõ thông tin của từng nhân vật, tránh bị lẫn lộn."
         }
       ]
     },
     part3: {
       title: "PART 3: Monologue",
-      description: "5 câu hỏi - Một đoạn độc thoại (bài nói ngắn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+      description: "5 questions - A natural talk about Asian and African Elephants. Listen and choose the best answer (A, B, C, D).",
       type: "listening",
-      script: "Professor A: Welcome to the lecture on corporate strategy. We will conduct research on how to sustain growth, which is crucial for long-term success. Although obstacles appear, we can navigate them by leveraging expertise. The initiative has been implemented effectively in previous years, but now we must realign strategies. Under no circumstances should we overlook threats that we assess. Before executing plans, we will prioritize tasks carefully.",
-      questions: [
+      script: "Hey everyone, let's chat about Asian and African elephants today – they're fascinating creatures, and there are some cool similarities and differences between them. Starting with what they have in common, both are the biggest animals on land, right? They're herbivores, munching on plants all day, and they stick together in herds for safety and social reasons. They're super smart, with great memories, and sadly, both are endangered because of poaching for ivory and losing their homes to human development. Now, on the flip side, African elephants are generally bigger – they can weigh up to 7 tons, while Asian ones top out at about 5 tons. Those iconic large ears on African elephants? They're shaped like the continent of Africa and help with cooling down, whereas Asian elephants have smaller, rounder ears. Their heads are different too: Africans have a more rounded dome, Asians have a twin-domed look. Tusks? Both male and female Africans have them, but in Asians, it's mostly the males, and sometimes not even all of them. The trunks have more rings in Africans for better grip, and their skin is wrinklier. Habitat-wise, Africans roam savannas and forests in Africa, Asians prefer forests and grasslands in Asia. No matter what, we need to protect these amazing animals – they're vital to their ecosystems.",      questions: [
         {
           id: 11,
-          question: "The lecture is __________.",
-          options: ["(A) effective", "(B) obstacles", "(C) strategic", "(D) crucial"],
+          question: "The lecture is about __________.",
+          options: [
+            "elephant poaching",
+            "only African elephants",
+            "similarities and differences of elephants",
+            "elephant habitats"
+          ],
           correct: 2,
-          explanation: "Professor A: '...how to sustain growth, which is crucial...' nhưng lecture về 'corporate strategy'. Đáp án đúng là (C) vì sử dụng Adjective (strategic) từ ngữ cảnh. Hướng dẫn ngữ pháp: Be + Adjective (is strategic) mô tả tính chất; Relative Pronouns (which is) nối mệnh đề phụ. Collocation: 'sustain growth'. Ngữ pháp: Be + Adjective; Relative Pronouns."
+          explanation: "**Đáp án đúng là C.** Câu mở đầu bài nói: 'let's chat about Asian and African elephants today – they're fascinating creatures, and there are some cool similarities and differences between them.' Đây là chủ đề chính. \n- A, B, D chỉ là các khía cạnh nhỏ được đề cập trong bài, không phải trọng tâm.\n**Mẹo:** Luôn chú ý đến câu đầu tiên để nắm được ý chính của bài nghe."
         },
         {
           id: 12,
-          question: "We have just _________.",
-          options: ["(A) executed plans", "(B) prioritized tasks", "(C) realigned strategies", "(D) implemented an initiative"],
-          correct: 3,
-          explanation: "Professor A: 'The initiative has been implemented effectively...' (Sáng kiến đã được triển khai hiệu quả...). Đáp án đúng là (D) vì sử dụng Present Perfect Passive (has been implemented). Hướng dẫn ngữ pháp: Present Perfect Passive = have/has been + V3 + adverb (effectively), nhấn mạnh hành động bị động. Collocation: 'implement strategies'. Ngữ pháp: Present Perfect Passive; Adverb (effectively)."
+          question: "What is a similarity between both elephants?",
+          options: [
+            "They are herbivores living in herds.",
+            "They are not endangered.",
+            "They have same ear sizes.",
+            "They are small animals."
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** Bài nói liệt kê: 'both are the biggest animals on land... herbivores... stick together in herds.' \n- B sai vì cả hai loài đều 'sadly... are endangered'.\n- C sai vì kích thước tai là một điểm *khác biệt*.\n- D sai vì chúng là 'biggest animals'.\n**Mẹo:** Phân biệt rõ phần thông tin nói về 'similarities' và 'differences'."
         },
         {
           id: 13,
-          question: "If we overlook threats, we __________.",
-          options: ["(A) must realign", "(B) should not", "(C) will succeed", "(D) can navigate"],
+          question: "How do African elephants differ in size?",
+          options: [
+            "Same as Asian.",
+            "Larger, up to 7 tons.",
+            "Up to 10 tons.",
+            "Smaller, up to 5 tons."
+          ],
           correct: 1,
-          explanation: "Professor A: 'Under no circumstances should we overlook threats...' (Không nên bỏ qua mối đe dọa...). Đáp án đúng là (B) vì sử dụng Inverted Structure (Under no circumstances should we) cho nhấn mạnh phủ định. Hướng dẫn ngữ pháp: Inverted Structure đảo chủ ngữ-động từ sau cụm phủ định (Under no circumstances + should + S + V). Collocation: 'assess risks'. Ngữ pháp: Inverted Structure; Conditional Sentences (implied)."
+          explanation: "**Đáp án đúng là B.** Bài nói so sánh: 'African elephants are generally bigger – they can weigh up to 7 tons, while Asian ones top out at about 5 tons.' \n- A sai vì kích thước khác nhau.\n- C sai vì không có thông tin 10 tấn.\n- D mô tả kích thước của voi châu Á.\n**Mẹo:** So sánh thường có các từ như 'bigger', 'while', 'whereas'. Hãy ghi nhớ số liệu đi kèm với mỗi đối tượng."
         },
         {
           id: 14,
-          question: "The initiative was __________.",
+          question: "What about tusks?",
           options: [
-            "(A) prioritized always",
-            "(B) implemented in previous years",
-            "(C) executed now",
-            "(D) realigned later"
+            "Only females have tusks.",
+            "Both sexes African have, some male Asian.",
+            "All have small tusks.",
+            "No tusks in either."
           ],
           correct: 1,
-          explanation: "Professor A: 'The initiative has been implemented effectively in previous years...' (Sáng kiến đã được triển khai hiệu quả trong những năm trước...). Đáp án đúng là (B) vì sử dụng Past Simple vs Present Perfect (implemented in previous years). Hướng dẫn ngữ pháp: Present Perfect cho hành động liên quan hiện tại, nhưng 'in previous years' làm nó gần Past Simple cho sự kiện kết thúc. Collocation: 'execute plans'. Ngữ pháp: Past Simple vs Present Perfect; Preposition + V-ing (implied in realigning)."
+          explanation: "**Đáp án đúng là B.** Bài nói giải thích: 'both male and female Africans have them, but in Asians, it's mostly the males, and sometimes not even all of them.' \n- A sai vì voi châu Phi cả đực và cái đều có.\n- C sai vì không phải 'all' và không nhắc đến kích thước 'small'.\n- D sai hoàn toàn.\n**Mẹo:** Chú ý đến từ 'but' để nhận biết sự tương phản trong thông tin."
         },
         {
           id: 15,
-          question: "We will prioritize tasks __________.",
-          options: ["(A) care", "(B) careful", "(C) carefully", "(D) all correct"],
-          correct: 2,
-          explanation: "Professor A: '...we will prioritize tasks carefully.' (chúng ta sẽ ưu tiên nhiệm vụ một cách cẩn thận). Đáp án đúng là (C) vì sử dụng Adverb (carefully) + Verb (prioritize). Hướng dẫn ngữ pháp: Word Forms - Adverb (carefully) từ adjective (careful) bằng cách thêm -ly, bổ nghĩa động từ; Noun (care) không phù hợp. Collocation: 'prioritize tasks'. Ngữ pháp: Trạng từ + Động từ; Word Forms (Noun vs Adverb)."
+          question: "African ears are __________.",
+          options: [
+            "pointy",
+            "smaller and round",
+            "same as Asian",
+            "larger, shaped like Africa"
+          ],
+          correct: 3,
+          explanation: "**Đáp án đúng là D.** Bài nói mô tả: 'Those iconic large ears on African elephants? They're shaped like the continent of Africa... whereas Asian elephants have smaller, rounder ears.' \n- A không được mô tả.\n- B là đặc điểm của tai voi châu Á.\n- C sai vì chúng khác nhau.\n**Mẹo:** Ghi nhớ đặc điểm nổi bật và dễ hình dung nhất của mỗi loài."
         }
       ]
     },
     part4: {
       title: "PART 4: Extended Conversation",
-      description: "5 câu hỏi - Một đoạn hội thoại mở rộng (dài hơn). Nghe và chọn đáp án tốt nhất (A, B, C, D).",
+      description: "5 questions - A natural long talk about why dinosaurs disappeared. Listen and choose the best answer (A, B, C, D).",
       type: "listening",
-      script: "Client 1: Xin chào, tôi cần provide feedback về dịch vụ that was provided incorrectly.\nSales Associate: Xin lỗi. Chúng tôi have assessed risks và will improve performance. The error was caused by miscommunication, nhưng chúng ta will rectify.\nClient 1: If you had checked earlier, I would have avoided the issue. Dù sao, hãy establish an agreement.\nSales Associate: Chắc chắn. Chúng tôi prefer discussing details after analyzing data. Your account has been adjusted.",
-      questions: [
+      script: "Good morning, class. So, one of the biggest mysteries in paleontology is what happened to the dinosaurs – they vanished about 65 million years ago at the end of the Cretaceous period, and there are a few theories, but let's dive into the most popular one first. The leading idea is that a huge asteroid slammed into Earth, right near what's now Mexico, leaving behind the massive Chicxulub crater. Imagine the chaos: enormous fires breaking out, giant tsunamis crashing shores, and a thick dust cloud blanketing the sky, blocking sunlight for months or even years. This led to what's called a 'nuclear winter' – temperatures plummeted, plants couldn't photosynthesize and died off, which meant herbivores starved, and then carnivores followed suit. The evidence? There's this thin layer of iridium in rocks all over the world from that time, and iridium is rare on Earth but common in asteroids. Another angle is massive volcanic activity – think the Deccan Traps in India, where volcanoes erupted for thousands of years, spewing out lava and gases that could have caused global warming, acid rain, and toxic atmospheres. Maybe it was a combo of the asteroid and volcanoes that sealed the deal. Other ideas, like widespread disease wiping them out, don't hold up because it wouldn't affect all species so uniformly. Or small mammals eating their eggs, but dinosaurs coexisted with mammals for ages without issue. Sea levels changing and altering habitats is another, but not as convincing. Ultimately, the asteroid theory has the strongest support. Interestingly, not all dinosaurs went extinct – birds are actually their living descendants. And this mass extinction paved the way for mammals, including us, to dominate. Pretty wild, huh?",      questions: [
         {
           id: 16,
-          question: "The service __________.",
-          options: ["(A) all correct", "(B) is accurate", "(C) was correct", "(D) was provided incorrectly"],
-          correct: 3,
-          explanation: "Client 1: '...dịch vụ that was provided incorrectly.' (dịch vụ được cung cấp sai). Đáp án đúng là (D) vì sử dụng Passive Voice (was provided) với Past Participle. Hướng dẫn ngữ pháp: Passive Voice = be + V3 (was provided), tập trung vào đối tượng; Relative Pronouns (that was) mô tả service. Collocation: 'provide feedback'. Ngữ pháp: Passive Voice; Relative Pronouns."
+          question: "The main theory for dinosaur extinction is __________.",
+          options: [
+            "mammals eating eggs",
+            "disease",
+            "asteroid impact",
+            "sea level changes"
+          ],
+          correct: 2,
+          explanation: "**Đáp án đúng là C.** Người nói khẳng định: 'The leading idea is that a huge asteroid slammed into Earth.' Cụm từ **'leading idea'** (ý tưởng hàng đầu) cho thấy đây là giả thuyết chính. \n- A, B, D là các giả thuyết khác được đề cập sau với độ tin cậy thấp hơn ('don't hold up', 'not as convincing').\n**Mẹo:** Chú ý đến các từ chỉ mức độ quan trọng như 'leading', 'main', 'most popular'."
         },
         {
           id: 17,
-          question: "The error was caused ___________.",
-          options: ["(A) two months ago", "(B) by miscommunication", "(C) by the client", "(D) by the associate"],
+          question: "Where did the asteroid hit?",
+          options: [
+            "In Africa.",
+            "Near Mexico, Chicxulub crater.",
+            "In Australia.",
+            "In India."
+          ],
           correct: 1,
-          explanation: "Sales Associate: 'The error was caused by miscommunication...' (Lỗi do giao tiếp sai). Đáp án đúng là (B) vì sử dụng Passive Voice (was caused by). Hướng dẫn ngữ pháp: Passive Voice với 'by' chỉ tác nhân (miscommunication); Contrast Conjunctions (nhưng) nối ý tương phản. Collocation: 'assess risks'. Ngữ pháp: Passive Voice; Contrast Conjunctions."
+          explanation: "**Đáp án đúng là B.** Thông tin chi tiết: 'a huge asteroid slammed into Earth, right near what's now Mexico, leaving behind the massive Chicxulub crater.' \n- A, C không được nhắc đến.\n- D là địa điểm của núi lửa Deccan Traps.\n**Mẹo:** Ghi nhớ tên riêng (Chicxulub) và vị trí địa lý đi kèm."
         },
         {
           id: 18,
-          question: "If checked earlier, the client __________.",
-          options: ["(A) avoided", "(B) would have avoided", "(C) would avoid", "(D) avoids"],
-          correct: 1,
-          explanation: "Client 1: 'If you had checked earlier, I would have avoided...' (Nếu bạn kiểm tra sớm hơn, tôi đã tránh được). Đáp án đúng là (B) vì sử dụng Conditional Sentences Type 3 (If + Past Perfect, would have + V3). Hướng dẫn ngữ pháp: Type 3 cho tình huống giả định quá khứ không thực; Past Perfect (had checked) cho điều kiện, would have + V3 cho kết quả. Collocation: 'establish partnerships'. Ngữ pháp: Conditional Sentences."
+          question: "What is evidence for asteroid?",
+          options: [
+            "Iridium layer in rocks.",
+            "Mammal fossils.",
+            "Volcanoes in India.",
+            "Bird descendants."
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** Người nói đưa ra bằng chứng: 'There's this thin layer of iridium in rocks all over the world from that time, and iridium is rare on Earth but common in asteroids.' \n- B, C, D không phải là bằng chứng trực tiếp cho vụ va chạm thiên thạch.\n**Mẹo:** Chú ý phần thông tin giải thích 'The evidence?' thường nêu ra dẫn chứng."
         },
         {
           id: 19,
-          question: "They prefer __________.",
+          question: "Another theory is __________.",
           options: [
-            "(A) rectifying now",
-            "(B) adjusting accounts",
-            "(C) discussing after analyzing",
-            "(D) analyzing before"
+            "volcanism in Deccan Traps",
+            "asteroid only",
+            "egg eating",
+            "disease widespread"
           ],
-          correct: 2,
-          explanation: "Sales Associate: 'Chúng tôi prefer discussing details after analyzing data.' (Chúng tôi thích thảo luận chi tiết sau khi phân tích dữ liệu). Đáp án đúng là (C) vì sử dụng Pattern 1: Preposition + V-ing (after analyzing). Hướng dẫn ngữ pháp: Gerund (V-ing: analyzing) sau giới từ (after); Verb + V-ing (prefer discussing). Collocation: 'analyze data', 'improve performance'. Ngữ pháp: Gerund vs Infinitive; Time Conjunctions (after)."
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** Sau khi trình bày giả thuyết chính, người nói chuyển sang: 'Another angle is massive volcanic activity – think the Deccan Traps in India.' \n- B không phải là 'another theory' (giả thuyết khác).\n- C, D là các giả thuyết yếu hơn được nhắc đến sau.\n**Mẹo:** Từ 'another' báo hiệu sự chuyển sang một ý/giả thuyết khác."
         },
         {
           id: 20,
-          question: "The account has been __________.",
-          options: ["(A) ignored", "(B) adjusted", "(C) errored", "(D) closed"],
-          correct: 1,
-          explanation: "Sales Associate: 'Your account has been adjusted.' (Tài khoản của bạn đã được điều chỉnh). Đáp án đúng là (B) vì sử dụng Present Perfect Passive (has been adjusted). Hướng dẫn ngữ pháp: Present Perfect Passive = has been + V3, nhấn mạnh hành động hoàn thành; Subject-Verb Agreement (account has been) với chủ ngữ số ít. Collocation: 'adjust accounts'. Ngữ pháp: Present Perfect Passive; Subject-Verb Agreement."
+          question: "What survived the extinction?",
+          options: [
+            "All dinosaurs.",
+            "Only mammals.",
+            "Birds as dinosaur descendants.",
+            "No animals."
+          ],
+          correct: 2,
+          explanation: "**Đáp án đúng là C.** Thông tin thú vị cuối bài: 'Interestingly, not all dinosaurs went extinct – birds are actually their living descendants.' \n- A sai vì chỉ một nhánh nhỏ sống sót.\n- B không đầy đủ vì nhiều loài khác cũng sống sót, và chim cũng là động vật.\n- D sai hoàn toàn.\n**Mẹo:** Nghe kỹ phần kết luận, thường chứa thông tin tổng kết hoặc mở rộng."
         }
       ]
     },
     part5: {
       title: "PART 5: Fill in the Blank (Grammar/Vocabulary)",
-      description: "10 câu hỏi - Chọn từ/cụm từ phù hợp để hoàn thành câu. Không có audio.",
+      description: "10 questions - Choose the best word/phrase to complete each sentence. No audio.",
       type: "reading",
       questions: [
         {
           id: 21,
-          question: "The firm has __________ new markets to expand operations, which is vital for sustaining growth.",
-          options: ["penetrates", "penetration", "penetrated", "penetrate"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'penetrated' vì sử dụng Present Perfect (has + V3) để diễn tả hành động hoàn thành gần đây. Hướng dẫn ngữ pháp: Present Perfect = have/has + V3 (penetrated), kết hợp 'to + V' (to expand); Relative Pronouns (which is) mô tả markets. Collocation: 'penetrate markets', 'sustain growth'. Ngữ pháp: Present Perfect; Verb forms; Relative Pronouns."
+          question: "Scientific reviews indicate that many species are often unnecessarily _______.",
+          options: ["Endangered", "Endanger", "Endangering", "Endangers"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (Endangered).** \n- **Ngữ pháp:** Sau động từ to be ('are') và trạng từ ('unnecessarily'), chúng ta cần một **tính từ** hoặc **phân từ II** để hoàn thành cấu trúc bị động/trạng thái. 'Endangered' là tính từ/participle II có nghĩa 'đang bị đe dọa'. \n- **Tại sao sai?** \n  - B (Endanger) là động từ nguyên thể.\n  - C (Endangering) là V-ing/gerund.\n  - D (Endangers) là động từ chia ở ngôi thứ ba số ít.\n**Mẹo:** Xác định vị trí cần điền (sau be + adv) => cần tính từ."
         },
         {
           id: 22,
-          question: "Among __________ assessed were the risks that we will mitigate for the initiative.",
-          options: ["whose", "they", "those", "who"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'those' vì sử dụng Đại từ chỉ định (those) trong Inverted Structure (Among those assessed). Hướng dẫn ngữ pháp: Inverted Structure đảo chủ ngữ sau 'Among'; Passive Voice (were assessed). Collocation: 'assess risks'. Ngữ pháp: Inverted Structure; Đại từ chỉ định; Passive Voice."
+          question: "Among ________ recognized at the science awards ceremony were scientists Darwin and Einstein.",
+          options: ["who", "those", "they", "whose"],
+          correct: 1,
+          explanation: "**Đáp án đúng là B (those).** \n- **Ngữ pháp:** Đây là cấu trúc đảo ngữ. 'Among those recognized...' = 'Trong số những người được công nhận...'. 'Those' là đại từ thay thế cho danh từ số nhiều chỉ người (scientists). 'Recognized' là phân từ II rút gọn mệnh đề quan hệ (who were recognized). \n- **Tại sao sai?**\n  - A (who): Thiếu đại từ đứng trước, nếu dùng 'who' phải viết đầy đủ '...among scientists who were recognized...'\n  - C (they): Không dùng trong cấu trúc này.\n  - D (whose): Là đại từ quan hệ sở hữu, không phù hợp nghĩa.\n**Mẹo:** 'Among' + đại từ/ danh từ số nhiều."
         },
         {
           id: 23,
-          question: "We have boosted productivity __________ we introduced the new system last month.",
-          options: ["since", "except", "during", "despite"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'since' vì sử dụng Time Conjunctions (since) với Present Perfect (have boosted). Hướng dẫn ngữ pháp: Since + Past Simple (introduced) cho mốc bắt đầu hành động kéo dài đến nay. Collocation: 'boost productivity'. Ngữ pháp: Present Perfect; Time Conjunctions; Past Simple vs Present Perfect."
+          question: "Climate change has received global attention _______ the industrial revolution.",
+          options: ["during", "despite", "except", "since"],
+          correct: 3,
+          explanation: "**Đáp án đúng là D (since).** \n- **Ngữ pháp:** Thì Hiện tại hoàn thành ('has received') thường đi với 'since' + mốc thời gian để chỉ sự việc bắt đầu từ quá khứ và kéo dài đến hiện tại. \n- **Tại sao sai?**\n  - A (during): + danh từ chỉ khoảng thời gian, không phải mốc sự kiện.\n  - B (despite): + N/V-ing, có nghĩa 'mặc dù', không hợp nghĩa.\n  - C (except): + N, có nghĩa 'ngoại trừ', không hợp nghĩa.\n**Mẹo:** Has/have + V3/ed => thường đi với 'since' hoặc 'for'."
         },
         {
           id: 24,
-          question: "The department is __________ innovative in developing skills, resulting in improved performance.",
-          options: ["heights", "highly", "height", "high"],
-          correct: 1,
-          explanation: "Đáp án đúng là with (B) 'highly' vì sử dụng Trạng từ (highly) + Adjective (innovative). Hướng dẫn ngữ pháp: Trạng từ bổ nghĩa tính từ (highly innovative); Word Forms: adverb từ adjective + -ly. Collocation: 'develop skills', 'improve performance'. Ngữ pháp: Trạng từ + Adjective; Word Forms."
+          question: "All fossils found in digs are from natural causes and contain no __________ alterations.",
+          options: ["synthetic", "assumed", "immediate", "reasonable"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (synthetic).** \n- **Từ vựng & Ngữ cảnh:** Câu nói về hóa thạch tự nhiên, vì vậy chúng không chứa sự thay đổi 'nhân tạo' (synthetic alterations). 'Synthetic' = man-made. \n- **Tại sao sai?**\n  - B (assumed): được cho là, giả định.\n  - C (immediate): ngay lập tức.\n  - D (reasonable): hợp lý.\nCác từ này không đối lập với 'natural causes' (nguyên nhân tự nhiên) một cách rõ ràng.\n**Mẹo:** Tìm từ trái nghĩa với 'natural' trong ngữ cảnh khoa học."
         },
         {
           id: 25,
-          question: "If the team collaborates, we __________ the project to new heights.",
-          options: ["takes", "will take", "took", "taking"],
+          question: "The conservation policy states that _______ monitoring species enhances protection and focus.",
+          options: ["regularly", "regular", "regularity", "regulate"],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'will take' vì sử dụng Future Simple (will + V) trong Conditional Sentences Type 1. Hướng dẫn ngữ pháp: Type 1: If + Present Simple (collaborates), will + V (take). Collocation: 'collaborate closely'. Ngữ pháp: Conditional Sentences; Future Simple."
+          explanation: "**Đáp án đúng là B (regular).** \n- **Ngữ pháp:** Trước cụm danh từ 'monitoring species' (việc giám sát loài), chúng ta cần một **tính từ** để bổ nghĩa. 'Regular' là tính từ. \n- **Tại sao sai?**\n  - A (regularly) là trạng từ, thường bổ nghĩa cho động từ.\n  - C (regularity) là danh từ.\n  - D (regulate) là động từ.\n**Mẹo:** Xác định từ loại cần thiết: Tính từ + Danh từ/ Danh động từ (V-ing)."
         },
         {
           id: 26,
-          question: "The data __________ by the analysts before being presented.",
-          options: ["analyzing", "has been analyzed", "has analyzed", "analyzes"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'has been analyzed' vì sử dụng Present Perfect Passive (has been + V3). Hướng dẫn ngữ pháp: Passive với Time Conjunctions (before + V-ing: before being). Collocation: 'analyze data'. Ngữ pháp: Present Perfect Passive; Time Conjunctions."
+          question: "The new lecture on volcanoes will begin at 9 a.m. and will _______ an overview of eruptions.",
+          options: ["include", "including", "included", "includes"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (include).** \n- **Ngữ pháp:** Sau trợ động từ 'will', động từ phải ở dạng **nguyên thể không 'to'** (bare infinitive). \n- **Tại sao sai?**\n  - B (including) là giới từ/V-ing.\n  - C (included) là quá khứ phân từ.\n  - D (includes) là chia ngôi thứ ba số ít hiện tại.\n**Mẹo:** Will/Can/Should... + V (nguyên thể)."
         },
         {
           id: 27,
-          question: "We are committed to __________ with partners despite the obstacles.",
-          options: ["established", "establishing", "establish", "establishment"],
+          question: "To ensure accuracy, all data must be thoroughly checked _______ being published.",
+          options: ["during", "before", "between", "unless"],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'establishing' vì sử dụng Pattern 1: Preposition + V-ing (to + V-ing: to establishing). Hướng dẫn ngữ pháp: Gerund sau preposition (committed to + V-ing). Collocation: 'establish partnerships'. Ngữ pháp: Gerund vs Infinitive; Contrast Conjunctions (despite)."
+          explanation: "**Đáp án đúng là B (before).** \n- **Ngữ nghĩa & Logic:** Dữ liệu cần được kiểm tra kỹ **trước khi** (before) được xuất bản để đảm bảo tính chính xác. Đây là trình tự hợp lý. \n- **Tại sao sai?**\n  - A (during): trong khi.\n  - C (between): giữa (hai thứ).\n  - D (unless): trừ khi.\nCác từ này không thể hiện mối quan hệ thời gian 'trước-sau' phù hợp.\n**Mẹo:** Xem xét logic của hành động: kiểm tra (check) -> xuất bản (publish)."
         },
         {
           id: 28,
-          question: "The consultant, __________ advises the board, has recommended to delegate responsibilities.",
-          options: ["that", "whose", "which", "who"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) 'who' vì sử dụng Relative Pronoun (who) cho người (consultant). Hướng dẫn ngữ pháp: Who cho chủ ngữ người; Present Perfect (has recommended). Collocation: 'delegate responsibilities'. Ngữ pháp: Relative Pronouns; Subject-Verb Agreement (consultant has)."
+          question: "The research department is seeking a scientist who can work _______ and meet deadlines.",
+          options: ["independently", "independence", "independent", "dependently"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (independently).** \n- **Ngữ pháp:** Sau động từ 'work', chúng ta cần một **trạng từ** để bổ nghĩa cho cách thức làm việc. 'Independently' là trạng từ. \n- **Tại sao sai?**\n  - B (independence) là danh từ.\n  - C (independent) là tính từ.\n  - D (dependently) là trạng từ nhưng có nghĩa trái ngược ('phụ thuộc'), không hợp ngữ cảnh.\n**Mẹo:** Động từ + Trạng từ (chỉ cách thức)."
         },
         {
           id: 29,
-          question: "In no way __________ we underestimate the challenges that have been identified.",
-          options: ["should", "did", "have", "will"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'should' vì sử dụng Inverted Structure (In no way should we). Hướng dẫn ngữ pháp: Đảo ngữ với modal (should + S + V) sau cụm phủ định. Collocation: 'identify opportunities'. Ngữ pháp: Inverted Structure; Present Perfect Passive (have been identified)."
+          question: "Because of the eruption, the event has been _______ until further notice.",
+          options: ["postpone", "postpones", "postponed", "postponing"],
+          correct: 2,
+          explanation: "**Đáp án đúng là C (postponed).** \n- **Ngữ pháp:** Cấu trúc bị động thì Hiện tại hoàn thành: has/have + been + V3/ed. Sự kiện 'đã bị hoãn'. \n- **Tại sao sai?**\n  - A (postpone): nguyên thể.\n  - B (postpones): hiện tại ngôi ba số ít.\n  - D (postponing): V-ing.\n**Mẹo:** Has been/Have been + V3/ed => Thể bị động."
         },
         {
           id: 30,
-          question: "__________ effective management of resources is essential for the organization's success.",
-          options: ["No article", "A", "An", "The"],
-          correct: 3,
-          explanation: "Đáp án đúng là (D) 'The' vì sử dụng Articles (The) cho danh từ cụ thể (effective management). Hướng dẫn ngữ pháp: The + Tính từ + Danh từ (The effective management). Collocation: 'manage resources'. Ngữ pháp: Articles; Tính từ + Danh từ."
+          question: "The teacher reminded the students that attention and collaboration are key in maintaining a positive _______.",
+          options: ["environment", "advertisement", "appointment", "equipment"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (environment).** \n- **Từ vựng & Collocation:** 'Positive environment' (môi trường tích cực) là cụm từ cố định phổ biến, đặc biệt trong ngữ cảnh giáo dục và làm việc nhóm. \n- **Tại sao sai?**\n  - B (advertisement): quảng cáo.\n  - C (appointment): cuộc hẹn.\n  - D (equipment): thiết bị.\nCác từ này không kết hợp với 'positive' một cách tự nhiên trong ngữ cảnh này.\n**Mẹo:** Học các collocation (cụm từ cố định) thông dụng."
         }
       ]
     },
     part6: {
       title: "PART 6: Cloze Text (Email/Announcement)",
-      description: "10 câu hỏi - Điền từ/cụm vào văn bản email. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D). Câu 31-36: Điền từ thích hợp. Câu 37-40: Đọc hiểu.",
+      description: "10 questions - Điền từ/cụm vào văn bản email. Đọc toàn bộ và chọn đáp án tốt nhất (A, B, C, D).",
       type: "reading",
-      text: `To: All Employees
-From: Manager, TechCorp
-Subject: Upcoming Strategy Workshop
-Dear Team,
-We are pleased to introduce an upcoming strategy workshop aimed at enhancing performance and fostering innovation within our organization. This program, which has been organized over the past few months, will commence early next year. It is recommended for employees who seek to capitalize on professional development chances.
-To facilitate effective execution, we will hold sessions where participants can exchange knowledge and brainstorm concepts. The workshop has been structured through partnership with industry specialists (31) our in-house capabilities efficiently.
-Even though potential hurdles may emerge, we are confident that through promoting collaboration and offering guidance, we can surmount them. The agenda will emphasize actionable competencies, like managing negotiations and addressing issues proficiently.
-If you enroll promptly, you (32) exclusive entry to the interactive modules. Kindly be aware that participation will be monitored, and accreditations will be granted at the conclusion.
-We urge all to engage vigorously, as this will aid in forging connections and attaining objectives collectively. For additional information, reach out to the management team (33) any inquiries you might possess.
-The workshop will feature segments on management, where attendees acquire skills to exhibit direction and motivate personnel. Following the conclusion of the program, employees (34) more prepared to tackle hurdles in their positions.
-Moreover, we will perform evaluations to gauge the workshop's effectiveness, guaranteeing it adheres to timelines and yields outcomes. Your contributions are important, hence kindly submit input (35) the activities.
-In conclusion, we value your dedication to career advancement. Collectively, we can advance creativity and maintain expansion for the firm. Should there be any issues, feel free to contact (36) us without delay.
-Warm regards,
-Manager
-TechCorp`,
-      questions: [
+      text: "To: All Science Department Staff\nFrom: Dr. Elena Rossi, Science Director\nSubject: Upcoming Lecture on Natural Disasters\n\nDear Team,\nAs you all know, we are preparing for the official lecture on natural disasters, such as tidal waves, scheduled for early next quarter. In order to ensure a successful presentation, we will begin a series of meetings next week to finalize the discussion strategy. Each team member will be assigned specific responsibilities to (31) smooth coordination between sections.\n\nOur primary objective is to increase awareness of disaster events and attract potential students through both online and offline channels. The media team will focus on digital promotion, while the research team will create visual materials to (32) our educational image.\n\nAdditionally, we will collaborate closely with our guest speakers to collect feedback from attendees. This will help us make any necessary adjustments before the official event. Please note that all suggestions should be submitted to my office no later than Friday, March 22, so that we have enough time to review and (33) them.\n\nThe official conference will take place at our campus on April 5. We expect several major experts to attend, so everyone must be prepared to present our topics in the most professional manner possible. A rehearsal session will be held two days before the event to (34) that all participants are comfortable with their roles.\n\nFor those who are new to the team, we will organize a short orientation program to explain our teaching policies and internal communication procedures. Attendance is highly encouraged, as this session will provide essential information on how to (35) with other departments effectively.\n\nWe truly appreciate everyone’s dedication and teamwork during this busy time. Your hard work and creativity will certainly make this lecture a success. If you have any questions or concerns, please don’t hesitate to (36) me directly.\n\nThank you once again for your continued commitment to excellence. I am confident that, together, we will achieve outstanding results.\nBest regards,\nDr. Elena Rossi\nScience Director",      questions: [
         {
           id: 31,
           type: "fill",
           question: "(31) - Điền từ thích hợp",
-          context: "The workshop has been structured through partnership with industry specialists (31) our in-house capabilities efficiently.",
-          options: ["leveraged", "leveraging", "to leverage", "leverage"],
-          correct: 2,
-          explanation: "Đáp án đúng là (C) 'to leverage' vì sử dụng Pattern 2: Verb + to V (structured... to leverage) để diễn tả mục đích. Hướng dẫn ngữ pháp: Infinitive (to + V: to leverage) sau động từ chỉ mục đích; Adverb (efficiently) bổ nghĩa. Collocation: 'leverage expertise'. Ngữ pháp: Gerund vs Infinitive; Adverb."
+          context: "Each team member will be assigned specific responsibilities to (31) smooth coordination between sections.",
+          options: ["remind", "ensure", "suggest", "describe"],
+          correct: 1,
+          explanation: "**Đáp án đúng là B (ensure).** \n- **Ngữ nghĩa:** Mục đích của việc giao trách nhiệm cụ thể là để **đảm bảo** (ensure) sự phối hợp diễn ra trơn tru. 'Ensure' có nghĩa là chắc chắn hóa, bảo đảm điều gì xảy ra. \n- **Tại sao sai?**\n  - A (remind): nhắc nhở (về điều gì đó).\n  - C (suggest): đề nghị, gợi ý.\n  - D (describe): mô tả.\nCác động từ này không thể hiện mục đích 'bảo đảm kết quả'.\n**Mẹo:** To + V (để làm gì) => chọn động từ thể hiện mục đích hoặc kết quả mong muốn."
         },
         {
           id: 32,
           type: "fill",
           question: "(32) - Điền từ thích hợp",
-          context: "If you enroll promptly, you (32) exclusive entry to the interactive modules.",
-          options: ["gains", "gained", "will gain", "have gained"],
+          context: "The research team will create visual materials to (32) our educational image.",
+          options: ["prevent", "improve", "reinforce", "attend"],
           correct: 2,
-          explanation: "Đáp án đúng là (C) 'will gain' vì sử dụng Future Simple (will gain) trong Conditional Sentences Type 1. Hướng dẫn ngữ pháp: Type 1: If + Present (enroll), will + V (gain). Collocation: 'gain experience'. Ngữ pháp: Conditional Sentences; Future Simple."
+          explanation: "**Đáp án đúng là C (reinforce).** \n- **Ngữ nghĩa & Collocation:** 'Reinforce our image' (củng cố hình ảnh) là một collocation tốt. Tài liệu trực quan giúp làm mạnh thêm, củng cố hình ảnh giáo dục đã có. \n- **Tại sao sai?**\n  - A (prevent): ngăn chặn (hình ảnh) => tiêu cực, không hợp lý.\n  - B (improve): cải thiện. Từ này cũng có thể dùng được, nhưng 'reinforce' (làm cho vững chắc thêm) phù hợp hơn khi nói về hình ảnh đã có sẵn.\n  - D (attend): tham dự, chăm sóc => không đi với 'image'.\n**Mẹo:** Đọc kỹ ngữ cảnh và lựa chọn từ có sắc thái nghĩa phù hợp nhất."
         },
         {
           id: 33,
           type: "fill",
           question: "(33) - Điền từ thích hợp",
-          context: "For additional information, reach out to the management team (33) any inquiries you might possess.",
-          options: ["on", "regarding", "for", "with"],
+          context: "So that we have enough time to review and (33) them.",
+          options: ["transfer", "implement", "reject", "decline"],
           correct: 1,
-          explanation: "Đáp án đúng là (B) 'regarding' vì sử dụng Preposition (regarding) trong 'inquiries regarding'. Hướng dẫn ngữ pháp: Giới từ (regarding) sau danh từ chỉ chủ đề. Collocation: 'provide feedback'. Ngữ pháp: Liên từ & Giới từ."
+          explanation: "**Đáp án đúng là B (implement).** \n- **Ngữ nghĩa & Logic:** Quy trình thông thường: Xem xét (review) các gợi ý, sau đó **thực hiện** (implement) những gợi ý phù hợp. 'Implement' có nghĩa là đưa vào thực tế, thực thi. \n- **Tại sao sai?**\n  - A (transfer): chuyển giao.\n  - C (reject): từ chối.\n  - D (decline): từ chối, suy giảm.\nC và D có nghĩa tiêu cực, không phù hợp với mục đích tích cực của việc thu thập góp ý.\n**Mẹo:** 'Review and...' thường là một cặp hành động tích cực, mang tính xây dựng."
         },
         {
           id: 34,
           type: "fill",
           question: "(34) - Điền từ thích hợp",
-          context: "Following the conclusion of the program, employees (34) more prepared to tackle hurdles in their positions.",
-          options: ["is", "will be", "was", "has been"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'will be' vì sử dụng Future Simple Passive (will be + V3) sau Time Conjunctions (Following). Hướng dẫn ngữ pháp: Passive (will be prepared); Following + danh từ (the conclusion). Collocation: 'overcome obstacles'. Ngữ pháp: Future Simple; Passive Voice; Time Conjunctions."
+          context: "A rehearsal session will be held to (34) that all participants are comfortable.",
+          options: ["announce", "warn", "ensure", "require"],
+          correct: 2,
+          explanation: "**Đáp án đúng là C (ensure).** \n- **Ngữ nghĩa:** Mục đích của buổi diễn tập là để **đảm bảo chắc chắn rằng** (ensure that) mọi người đều cảm thấy thoải mái. Từ này lặp lại ý của câu 31, thể hiện mục đích bảo đảm. \n- **Tại sao sai?**\n  - A (announce): thông báo.\n  - B (warn): cảnh báo.\n  - D (require): yêu cầu.\nCác từ này không thể hiện mục đích 'bảo đảm một trạng thái'.\n**Mẹo:** To ensure that + clause (đảm bảo rằng...) là cấu trúc phổ biến."
         },
         {
           id: 35,
           type: "fill",
           question: "(35) - Điền từ thích hợp",
-          context: "Your contributions are important, hence kindly submit input (35) the activities.",
-          options: ["during", "unless", "despite", "although"],
+          context: "Information on how to (35) with other departments effectively.",
+          options: ["cooperate", "complain", "compare", "compete"],
           correct: 0,
-          explanation: "Đáp án đúng là (A) 'during' vì sử dụng Time Conjunctions (during) chỉ thời gian. Hướng dẫn ngữ pháp: During + danh từ (the activities) cho khoảng thời gian. Collocation: 'provide feedback'. Ngữ pháp: Time Conjunctions; Articles (the activities)."
+          explanation: "**Đáp án đúng là A (cooperate).** \n- **Ngữ nghĩa & Collocation:** Trong môi trường làm việc, để hiệu quả, các phòng ban cần **hợp tác** (cooperate) với nhau. 'Cooperate with' là cụm từ cố định. \n- **Tại sao sai?**\n  - B (complain): phàn nàn.\n  - C (compare): so sánh.\n  - D (compete): cạnh tranh.\nCác từ này thường không mang lại hiệu quả tích cực trong việc phối hợp nội bộ.\n**Mẹo:** Chọn từ tích cực phù hợp với văn hóa làm việc nhóm."
         },
         {
           id: 36,
           type: "fill",
           question: "(36) - Điền từ thích hợp",
-          context: "Should there be any issues, feel free to contact (36) us without delay.",
-          options: ["to", "about", "with", "for"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) 'to' vì sử dụng 'contact to' nhưng thực tế là 'contact us', tuy nhiên trong ngữ cảnh là 'contact (36) us' - lỗi nhỏ, nhưng giả định 'to' cho 'reach out to'. Hướng dẫn ngữ pháp: Infinitive (to contact) nhưng ở đây là direct; Giới từ (to us). Collocation: 'contact directly'. Ngữ pháp: Gerund vs Infinitive; Liên từ & Giới từ."
+          context: "Please don’t hesitate to (36) me directly.",
+          options: ["delay", "ignore", "push", "reach"],
+          correct: 3,
+          explanation: "**Đáp án đúng là D (reach).** \n- **Ngữ nghĩa & Collocation:** 'Reach someone' (liên lạc với ai đó) là cách diễn đạt trang trọng và phổ biến trong email công việc. 'Don't hesitate to reach out/contact me' là mẫu câu thông dụng. \n- **Tại sao sai?**\n  - A (delay): trì hoãn.\n  - B (ignore): phớt lờ.\n  - C (push): thúc ép, đẩy.\nCác từ này đều có nghĩa tiêu cực, không phù hợp với lời mời liên hệ.\n**Mẹo:** Học các cách diễn đạt lịch sự trong email: 'feel free to contact', 'don't hesitate to reach out'."
         },
         {
           id: 37,
           type: "comprehension",
-          question: "(37) - When will the strategy workshop commence?",
-          options: ["Next month", "Early next year", "This quarter", "Last year"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'Early next year' vì email đề cập 'will commence early next year'. Hướng dẫn ngữ pháp: Future Simple (will commence) cho kế hoạch. Kiến thức đọc hiểu: Xác định thời gian."
+          question: "(37) - The lecture on tidal waves will most likely be held (37).",
+          options: [
+            "early next quarter",
+            "by the end of the year",
+            "next week",
+            "after the conference"
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** \n- **Thông tin trong văn bản:** Dòng đầu tiên của email: 'we are preparing for the official lecture on natural disasters, such as tidal waves, **scheduled for early next quarter.**' \n- Các đáp án khác không được nhắc đến.\n**Mẹo:** Tìm kiếm thông tin cụ thể về thời gian thường nằm ở phần đầu của thông báo."
         },
         {
           id: 38,
           type: "comprehension",
-          question: "(38) - What is the primary aim of this email?",
-          options: ["To address hurdles", "To introduce an upcoming strategy workshop", "To collect input only", "To postpone a workshop"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì tiêu đề và nội dung tập trung vào 'introduce an upcoming strategy workshop'. Kiến thức đọc hiểu: Mục đích từ Subject."
+          question: "(38) - What is the main purpose of this message?",
+          options: [
+            "To request attendee feedback after the event",
+            "To introduce a new teaching policy",
+            "To announce the cancellation of a session",
+            "To inform staff of lecture preparations"
+          ],
+          correct: 3,
+          explanation: "**Đáp án đúng là D.** \n- **Ý chính:** Toàn bộ email thông báo về kế hoạch chuẩn bị cho bài giảng sắp tới: lịch họp, phân công, mục tiêu, diễn tập, v.v. \n- **Tại sao sai?**\n  - A: Phản hồi từ người tham dự được nhắc đến như một phần của quy trình, không phải mục đích chính.\n  - B: Chính sách giảng dạy chỉ được nhắc đến cho nhân viên mới, là chi tiết nhỏ.\n  - C: Không có thông tin hủy buổi nào.\n**Mẹo:** Xác định mục đích chính bằng cách đọc tiêu đề và câu đầu tiên của email."
         },
         {
           id: 39,
           type: "comprehension",
-          question: "(39) - Who sent this message?",
-          options: ["An employee", "Manager", "A director", "An industry specialist"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'Manager' vì từ 'From: Manager'. Kiến thức đọc hiểu: Xác định người gửi."
+          question: "(39) - Who is the sender of this message?",
+          options: [
+            "The science director",
+            "A guest speaker",
+            "The chief academic officer",
+            "A research manager"
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** \n- **Thông tin trong văn bản:** Phần 'From:' ghi rõ: 'Dr. Elena Rossi, **Science Director**.' \n- Các chức danh khác không được đề cập.\n**Mẹo:** Luôn kiểm tra phần tiêu đề (From/To/Subject) của email để biết thông tin người gửi/người nhận."
         },
         {
           id: 40,
           type: "comprehension",
-          question: "(40) - What will attendees get at the end?",
-          options: ["Hurdles", "Accreditations", "Guidance", "Exclusive entry"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) 'Accreditations' vì 'accreditations will be granted'. Hướng dẫn ngữ pháp: Passive Voice (will be granted). Kiến thức đọc hiểu: Trích dẫn."
+          question: "(40) - When will the rehearsal for the conference take place?",
+          options: ["April 3", "The following week", "March 22", "April 5"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (April 3).** \n- **Thông tin & Tính toán:** Email nói: 'The official conference will take place... on **April 5**.' và 'A rehearsal session will be held **two days before** the event.' \n  - Hai ngày trước ngày 5 tháng 4 là ngày **3 tháng 4**. \n- **Tại sao sai?**\n  - B: 'The following week' (tuần sau) không chính xác.\n  - C (March 22): là hạn chót nộp gợi ý.\n  - D (April 5): là ngày diễn ra hội nghị chính thức.\n**Mẹo:** Với câu hỏi tính toán ngày tháng, hãy tìm hai thông tin liên quan (ngày chính + khoảng thời gian trước/sau) và thực hiện phép tính đơn giản."
         }
       ]
     },
     part7: {
       title: "PART 7: Multiple Texts (Advertisement + Email)",
-      description: "10 câu hỏi - Đọc quảng cáo và email, chọn đáp án tốt nhất (A, B, C, D).",
+      description: "10 questions - Read the magazine advertisement and e-mail. Choose the best answer (A, B, C, D).",
       type: "reading",
-      text: `**InnoConsult Advertisement**
-Expert Consulting Services to Navigate Challenges and Capitalize on Opportunities
-At InnoConsult, we assist firms in coordinating efforts and resolving conflicts. Our expertise has been leveraged by more than 300 enterprises to foster teamwork and generate ideas.
-Services Include:
-1. Strategy Development – We develop strategies carefully to achieve goals.
-2. Risk Mitigation – Detect and mitigate risks that might affect operations.
-3. Partnership Establishment – Effortlessly establish partnerships.
-4. Staff Empowerment – Empower staff to utilize potential fully.
-Email us at consult@innoconsult.com for a complimentary assessment. We will reply within 24 hours to explore how we can synergize efforts for your requirements.
----
-**Email Message**
-To: consult@innoconsult.com
-From: l.johnson@enterprisegroup.com
-Date: December 1, 2025
-Subject: Service Request
-I came across your ad in a magazine and am keen on your consulting services for my enterprise. We have encountered obstacles with inefficient processes and require to streamline them quickly. Can you offer an assessment to mitigate risks and establish partnerships? We also aim to empower our staff following the changes.
-Kindly call me at 555-5678 from 10 AM to 4 PM. I anticipate your response shortly.
-Best,
-Lisa Johnson
-Enterprise Group
-456 Corporate Blvd, Chicago, IL`,
+      text: "http://www.scienceaudiopro.com\n\n**Science Audio Pro**\n\nEnhance Your Learning with Professionally Recorded Science Lectures\n\nA professional, personalized audio lecture creates an excellent learning impression. Science Audio Pro meets your specifications to record a customized science greeting within three business days!\n\n**Services We Offer:**\n1. **Professional Voice Talent for Lecture Messages** – We have numerous voice actors. Visit scienceaudiopro.com to hear examples.\n2. **On-Hold Messages** – Professional on-hold messages.\n3. **Customized Script Writing** – Craft personalized messages.\n4. **Multilingual Voice Production** – Services in multiple languages.\n\nSend e-mail to inquiry@scienceaudiopro.com. A representative will call within 24 hours.\n\nTo: inquiry@scienceaudiopro.com\nFrom: j.annesly@sciencedata.com\nDate: June 25\nSubject: Request\n\nI found your notice in the newspaper and wish to use your services for my science-processing business. I am looking for a professionally recorded lecture greeting, and wonder if you would write and record this, and how soon. Since I work with English- and Spanish-speaking clients, I would like the message in both languages. Please reach out at my mobile between 10:00 A.M. and 5:00 P.M.\n\nThank you,\nJody Annesly\nScience Data\n512-555-6879\n342 Maymill Road, Fort Worth, TX 70609",
       questions: [
         {
           id: 41,
-          question: "According to the advertisement, what does InnoConsult assist with?",
-          options: ["Create ads", "Establish partnerships", "Manufacture goods", "Recruit personnel"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì quảng cáo nêu 'establish partnerships'. Hướng dẫn ngữ pháp: Verb (establish) theo ngữ cảnh consulting. Collocation: 'establish partnerships'. Ngữ pháp: Verb forms; Từ vựng theo ngữ cảnh."
+          question: "According to the advertisement, why should customers visit the Science Audio Pro Web site?",
+          options: [
+            "To submit a credit card payment",
+            "To request recording equipment",
+            "To hear lecture samples",
+            "To add a new subscription number"
+          ],
+          correct: 2,
+          explanation: "**Đáp án đúng là C.** \n- **Thông tin trong quảng cáo:** Dịch vụ đầu tiên được liệt kê: '1. Professional Voice Talent for Lecture Messages – We have numerous voice actors. **Visit scienceaudiopro.com to hear examples.**' \n- Các hành động khác không được đề cập trong quảng cáo.\n**Mẹo:** Scan nhanh các bullet points (gạch đầu dòng) để tìm thông tin chi tiết."
         },
         {
           id: 42,
-          question: "What is suggested about InnoConsult?",
-          options: ["It advertises in magazines.", "It is established recently.", "It focuses on finance.", "It has 300 staff."],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) vì email 'I came across your ad in a magazine'. Hướng dẫn ngữ pháp: Present Perfect Passive (has been leveraged). Collocation: 'navigate challenges'."
+          question: "What is suggested about Science Audio Pro?",
+          options: [
+            "It specializes in historical lectures.",
+            "It has recently expanded its business.",
+            "It fills orders once a week.",
+            "It advertises in the newspaper."
+          ],
+          correct: 3,
+          explanation: "**Đáp án đúng là D.** \n- **Thông tin liên kết giữa hai văn bản:** Trong email của Ms. Annesly, cô ấy viết: 'I found your **notice in the newspaper**...' Điều này ngụ ý rằng Science Audio Pro có đăng quảng cáo trên báo. \n- Các đáp án A, B, C không có thông tin ủng hộ trong cả hai văn bản.\n**Mẹo:** Câu hỏi 'suggested' (được gợi ý) thường yêu cầu suy luận từ thông tin gián tiếp hoặc kết hợp cả hai văn bản."
         },
         {
           id: 43,
-          question: "Who most likely is Lisa Johnson?",
-          options: ["A partner", "An enterprise leader", "A consultant", "A risk expert"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì email từ enterprise và yêu cầu dịch vụ. Hướng dẫn ngữ pháp: Articles (my enterprise). Collocation: 'overcome obstacles'."
+          question: "Who most likely is Ms. Annesly?",
+          options: [
+            "A science teacher",
+            "An actor",
+            "A script writer",
+            "A sales associate"
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** \n- **Suy luận từ ngữ cảnh:** Cô ấy có doanh nghiệp 'science-processing business', muốn thuê ghi âm một 'lecture greeting' (lời chào bài giảng) cho khách hàng nói tiếng Anh và Tây Ban Nha. Điều này gợi ý cô ấy có thể là một giáo viên khoa học hoặc người tổ chức các khóa học khoa học, cần tài liệu âm thanh chuyên nghiệp. \n- Các nghề nghiệp khác không phù hợp với nhu cầu sử dụng 'lecture greeting'.\n**Mẹo:** Dựa vào loại dịch vụ được yêu cầu để suy đoán nghề nghiệp của khách hàng."
         },
         {
           id: 44,
-          question: "What service does Lisa NOT request?",
-          options: ["Personnel recruitment", "Strategy development", "Risk mitigation", "Partnership establishment"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) vì không đề cập recruitment. Collocation: 'mitigate risks'."
+          question: "What service does Ms. Annesly NOT request from Science Audio Pro?",
+          options: [
+            "Multilingual audio production",
+            "Professional voice talent",
+            "On-hold messages",
+            "Customized script writing"
+          ],
+          correct: 2,
+          explanation: "**Đáp án đúng là C (On-hold messages).** \n- **Phân tích email yêu cầu:** Ms. Annesly nói: 'I am looking for a professionally recorded lecture greeting, and wonder if you would write and record this... in both languages.' \n  - 'Professionally recorded' ~ Professional voice talent (B).\n  - 'Write and record' ~ Customized script writing (D).\n  - 'In both languages' ~ Multilingual audio production (A).\n- **Dịch vụ không được yêu cầu:** 'On-hold messages' là một dịch vụ khác được liệt kê trong quảng cáo, nhưng không được Ms. Annesly nhắc đến.\n**Mẹo:** Đối chiếu từng yêu cầu trong email với các dịch vụ được quảng cáo."
         },
         {
           id: 45,
-          question: "What will Lisa most likely receive within 24 hours?",
-          options: ["A conflict report", "A reply", "A strategy plan", "An empowerment session"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'We will reply within 24 hours'. Hướng dẫn ngữ pháp: Future Simple (will reply)."
+          question: "What will Ms. Annesly most likely do within 24 hours?",
+          options: [
+            "Visit a recording studio",
+            "Meet with an actor",
+            "Write a script",
+            "Speak with a representative"
+          ],
+          correct: 3,
+          explanation: "**Đáp án đúng là D.** \n- **Thông tin trong quảng cáo:** Dòng cuối của quảng cáo: 'A representative will call within 24 hours.' Vì Ms. Annesly đã gửi email hỏi, cô ấy có thể sẽ nhận được cuộc gọi từ đại diện công ty. \n- Các hành động khác có thể xảy ra sau, nhưng không chắc chắn trong vòng 24 giờ.\n**Mẹo:** Kết hợp thông tin về chính sách của công ty (từ quảng cáo) với tình huống cụ thể của khách hàng (từ email)."
         },
         {
           id: 46,
-          question: "How many enterprises have leveraged InnoConsult?",
-          options: ["More than 300", "Less than 300", "Exactly 300", "Unknown"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) vì 'more than 300 enterprises'. Hướng dẫn ngữ pháp: Present Perfect Passive (has been leveraged)."
+          question: "According to the advertisement, Science Audio Pro will respond to customer inquiries within",
+          options: ["12 hours", "three business days", "48 hours", "24 hours"],
+          correct: 3,
+          explanation: "**Đáp án đúng là D (24 hours).** \n- **Thông tin trực tiếp trong quảng cáo:** Câu cuối cùng: 'A representative will call within **24 hours**.' \n- Các mốc thời gian khác không được đề cập. 'Three business days' là thời gian giao sản phẩm (customized science greeting), không phải thời gian phản hồi.\n**Mẹo:** Phân biệt giữa 'response time' (thời gian phản hồi) và 'production/delivery time' (thời gian sản xuất/giao hàng)."
         },
         {
           id: 47,
-          question: "What type of business does Lisa operate?",
-          options: ["Empowerment training", "Enterprise Group", "Magazine publishing", "Consulting services"],
+          question: "What can be inferred about Science Audio Pro’s services?",
+          options: [
+            "They are limited to English-speaking clients.",
+            "They can accommodate different languages.",
+            "They require customers to visit the office in person.",
+            "They are available only on weekends."
+          ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì chữ ký 'Enterprise Group'."
+          explanation: "**Đáp án đúng là B.** \n- **Thông tin trong quảng cáo:** Một trong các dịch vụ được liệt kê là '4. **Multilingual Voice Production** – Services in multiple languages.' Điều này cho thấy họ có thể đáp ứng nhu cầu về nhiều ngôn ngữ. \n- **Tại sao sai?**\n  - A: Trái ngược với dịch vụ đa ngôn ngữ.\n  - C & D: Không có thông tin nào cho thấy điều này.\n**Mẹo:** 'Can be inferred' (có thể suy ra) => tìm thông tin được ngụ ý mạnh mẽ từ một chi tiết có sẵn."
         },
         {
           id: 48,
-          question: "What does Lisa specifically request following changes?",
-          options: ["Complimentary assessment", "Empower staff", "Risk mitigation", "Partnership establishment"],
+          question: "What does Ms. Annesly specifically request in her message?",
+          options: [
+            "A newspaper advertisement",
+            "A bilingual lecture recording",
+            "A sample of recorded music",
+            "A refund for a previous order"
+          ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'empower our staff following the changes'. Hướng dẫn ngữ pháp: Time Conjunctions (following)."
+          explanation: "**Đáp án đúng là B.** \n- **Thông tin trực tiếp trong email:** 'I would like the message **in both languages**.' (English và Spanish). Đây là một yêu cầu cụ thể và rõ ràng. \n- Các đáp án khác không được yêu cầu.\n**Mẹo:** Câu hỏi 'specifically request' (yêu cầu cụ thể) thường tìm thông tin trực tiếp trong phần thân email."
         },
         {
           id: 49,
-          question: "When does Lisa prefer to be called?",
-          options: ["From 10 AM to 4 PM", "Anytime", "After 4 PM", "On holidays"],
-          correct: 0,
-          explanation: "Đáp án đúng là (A) vì 'from 10 AM to 4 PM'."
+          question: "What detail does Ms. Annesly include to make communication easier?",
+          options: [
+            "Her client list",
+            "Her preferred calling hours",
+            "Her company’s website link",
+            "Her office address"
+          ],
+          correct: 1,
+          explanation: "**Đáp án đúng là B.** \n- **Thông tin trong email:** Dòng cuối email của cô ấy: 'Please reach out at my mobile **between 10:00 A.M. and 5:00 P.M.**' Cô ấy chỉ ra khung giờ liên lạc thuận tiện để công ty dễ dàng gọi lại. \n- Cô ấy có để số điện thoại và địa chỉ, nhưng 'preferred calling hours' là chi tiết tạo điều kiện giao tiếp dễ dàng hơn.\n**Mẹo:** Tìm chi tiết thể hiện sự chủ động và tạo điều kiện cho đối phương."
         },
         {
           id: 50,
-          question: "Why does Lisa need services?",
-          options: ["Inefficient processes", "Publishing", "Recruitment", "New goods"],
+          question: "What is the likely next step for Science Audio Pro?",
+          options: [
+            "Calling Ms. Annesly to discuss her project and pricing",
+            "Sending Ms. Annesly a contract to sign",
+            "Visiting Ms. Annesly’s office for recording",
+            "Posting a new advertisement in the newspaper"
+          ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) vì 'encountered obstacles with inefficient processes'."
+          explanation: "**Đáp án đúng là A.** \n- **Suy luận từ quy trình:** Theo quảng cáo, sau khi nhận được yêu cầu, đại diện sẽ gọi trong vòng 24 giờ. Email của Ms. Annesly là một yêu cầu rõ ràng. Bước tiếp theo hợp lý nhất là công ty sẽ gọi điện để thảo luận chi tiết dự án và báo giá. \n- Các bước B và C thường diễn ra sau khi đã thảo luận và thống nhất. D không liên quan đến yêu cầu cụ thể này.\n**Mẹo:** Suy nghĩ về quy trình kinh doanh thông thường: Liên hệ -> Thảo luận chi tiết -> Thống nhất -> Ký kết/Thực hiện."
         }
       ]
     },
     part8: {
       title: "PART 8: Text Message Chain",
-      description: "10 câu hỏi - Đọc chuỗi tin nhắn, chọn đáp án tốt nhất (A, B, C, D).",
+      description: "10 questions - Read the text message chain about a trip to a historical site. Choose the best answer (A, B, C, D).",
       type: "reading",
-      text: `Smith (10:00): Train to London delayed by fog – arriving at 15:00 instead of 14:00. Apologies!
-Emma (10:05): Fine, I'll verify the timetable. We can attend the conference if we depart right after.
-Smith (10:10): Yes, we have resolved conflicts previously. The speaker, who we heard last month, awaits us.
-Emma (10:20): Although delayed, we'll get there promptly. Garage at the station could be crowded.
-Smith (15:05): Arrived. Meet soon!`,
-      questions: [
+      text: "SAM BACH (11:59): My first flight was delayed, so I missed my connection in Beijing.\nSAM BACH(12:00):So now, I'm going to be on a flight arriving in Naples at 18:00.\n\nAKIRA OTANI (12:05): OK. Same airline?\n\nSAM BACH (12:06): It's still Fly Right Airlines. It will be later in the day but still in time for our client meeting.\n\nAKIRA OTANI (12:06): I'll confirm the arrival time. Do you have any checked bags?\n\nSAM BACH (12:10): I do. Would you mind meeting me at the door after I go through customs?\n\nAKIRA OTANI (12:15): Sure thing. Parking spots can be hard to find, but now I'll have extra time to drive around and look.\n\nSAM BACH (12:16): Yes, sorry about that. See you then!",      questions: [
         {
           id: 51,
-          question: "What is suggested about Smith?",
-          options: ["He is a driver.", "He is on a conference trip.", "He resides in London.", "He is on holiday."],
+          question: "What is suggested about Mr. Bach?",
+          options: [
+            "He has been to Pompeii more than once.",
+            "He is on a business trip.",
+            "He currently works in Naples.",
+            "He works for Fly Right Airlines."
+          ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'attend the conference' và 'speaker'. Collocation: 'resolve conflicts'."
+          explanation: "**Đáp án đúng là B.** \n- **Suy luận từ ngữ cảnh:** Mr. Bach nhắc đến 'our client meeting' (cuộc họp với khách hàng của chúng ta). Điều này gợi ý rằng chuyến đi này là vì công việc (business trip). \n- **Tại sao sai?**\n  - A: Không có thông tin về việc anh ấy đã từng đến Pompeii.\n  - C: Anh ấy đang bay đến Naples, không nhất thiết là làm việc ở đó.\n  - D: Anh ấy bay bằng hãng Fly Right, không phải làm việc cho họ.\n**Mẹo:** Từ khóa 'client meeting' là dấu hiệu rõ ràng nhất của một chuyến công tác."
         },
         {
           id: 52,
-          question: "At 10:05, what does Emma mean by 'Fine'?",
-          options: ["She alters trains.", "She accepts the delay.", "She is upset.", "She postpones the conference."],
+          question: "At 12:15, what does Mr. Otani mean when he writes, “Sure thing”?",
+          options: [
+            "He knows Mr. Bach must pass through customs.",
+            "He agrees to wait at the door near the customs area.",
+            "He has confirmed the arrival time of a flight.",
+            "He is certain he will be able to find a parking place."
+          ],
           correct: 1,
-          explanation: "Đáp án đúng là (B) vì đáp lại delay. Hướng dẫn ngữ pháp: Conditional Sentences (if we depart)."
+          explanation: "**Đáp án đúng là B.** \n- **Ngữ cảnh hội thoại:** Mr. Bach hỏi: 'Would you mind meeting me at the door after I go through customs?' Mr. Otani trả lời ngay: 'Sure thing.' 'Sure thing' là cách nói thân mật của 'Of course' hoặc 'Certainly', thể hiện sự đồng ý. \n- A và C là những việc khác đã được nhắc đến, không phải là nội dung của lời đồng ý này. D là một nhận xét riêng sau đó.\n**Mẹo:** Luôn đọc câu hỏi và câu trả lời liền kề để hiểu ngữ cảnh của cụm từ."
         },
         {
           id: 53,
-          question: "Why was the train delayed?",
-          options: ["By fog.", "Timetable change.", "Lost connection.", "Speaker request."],
+          question: "Why was Mr. Bach’s flight delayed?",
+          options: [
+            "He missed his connection in Beijing.",
+            "The airline changed the departure time.",
+            "There was bad weather in Naples.",
+            "He forgot to check in early."
+          ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) vì 'delayed by fog'."
+          explanation: "**Đáp án đúng là A.** \n- **Thông tin trực tiếp:** Tin nhắn đầu tiên của Mr. Bach: 'My first flight was delayed, **so I missed my connection in Beijing.**' \n- Các lý do B, C, D không được đề cập.\n**Mẹo:** Câu hỏi 'why' thường có câu trả lời trực tiếp trong văn bản, thường đi sau từ 'so', 'because', 'due to'."
         },
         {
           id: 54,
-          question: "What time is the new arrival?",
-          options: ["15:05", "15:00", "14:00", "10:00"],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'arriving at 15:00'."
+          question: "What time is Mr. Bach’s new flight expected to arrive?",
+          options: ["18:00", "11:59", "20:15", "12:06"],
+          correct: 0,
+          explanation: "**Đáp án đúng là A (18:00).** \n- **Thông tin trực tiếp:** Tin nhắn của Mr. Bach: 'I'm going to be on a flight arriving in Naples at **18:00**.' \n- Các mốc thời gian khác là thời gian gửi tin nhắn hoặc không liên quan.\n**Mẹo:** Chú ý đến các con số chỉ giờ và sân bay."
         },
         {
           id: 55,
-          question: "What does Emma offer?",
-          options: ["Reserve hotel.", "Verify timetable.", "Alter conference.", "Postpone trip."],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'I'll verify the timetable'."
+          question: "What does Mr. Otani offer to do for Mr. Bach?",
+          options: [
+            "Pick him up at the airport",
+            "Help carry his luggage",
+            "Change his flight booking",
+            "Drive him to the hotel"
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** \n- **Hành động được đồng ý:** Mr. Otani đồng ý 'meeting me at the door after I go through customs.' Hành động này tương đương với việc đến đón (pick up) tại sân bay. \n- Không có thông tin về việc mang hành lý (B), đổi vé (C) hay chở đến khách sạn (D).\n**Mẹo:** 'Pick someone up at the airport' bao gồm việc đến và gặp họ tại khu vực đến."
         },
         {
           id: 56,
-          question: "What can be inferred about Smith and Emma?",
-          options: ["They are coworkers.", "They are rivals.", "They are relatives.", "They are unknown."],
+          question: "What can be inferred about the two men?",
+          options: [
+            "They are colleagues attending the same meeting.",
+            "They are family members traveling together.",
+            "They have never met before.",
+            "They both work for Fly Right Airlines."
+          ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) vì 'we can attend the conference'. Hướng dẫn ngữ pháp: Relative Pronouns (who we heard)."
+          explanation: "**Đáp án đúng là A.** \n- **Suy luận từ nhiều manh mối:** Họ nói về 'our client meeting', Mr. Otani chủ động hỏi về hành lý và đồng ý đi đón. Điều này cho thấy họ có mối quan hệ công việc và sẽ cùng tham dự một cuộc họp. \n- **Tại sao sai?**\n  - B: Giọng điệu và nội dung trao đổi mang tính công việc, không thân mật như gia đình.\n  - C: Họ dường như đã biết nhau và có kế hoạch chung.\n  - D: Chỉ Mr. Bach là người bay với hãng đó.\n**Mẹo:** Kết hợp tất cả thông tin về mục đích chuyến đi và sự tương tác để suy ra mối quan hệ."
         },
         {
           id: 57,
-          question: "Why does Smith mention 'resolved conflicts previously'?",
-          options: ["To apologize more.", "To comfort.", "To grumble.", "To postpone."],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì nhấn mạnh kinh nghiệm. Hướng dẫn ngữ pháp: Present Perfect (have resolved)."
+          question: "At 12:06, why does Mr. Bach mention “still in time for our client meeting”?",
+          options: [
+            "To confirm he will not be late",
+            "To apologize for missing the meeting",
+            "To cancel his attendance",
+            "To ask about the meeting location"
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** \n- **Mục đích giao tiếp:** Mr. Bach thông báo chuyến bay mới sẽ đến muộn hơn, nhưng ngay lập tức ông trấn an Mr. Otani rằng 'It will be later in the day **but still in time for our client meeting.**' Đây là cách xác nhận rằng sự chậm trễ sẽ không ảnh hưởng đến cuộc họp quan trọng. \n- Ông không xin lỗi vì bỏ lỡ cuộc họp (B), không hủy (C), cũng không hỏi địa điểm (D).\n**Mẹo:** Chú ý từ 'but' để thấy sự tương phản và mục đích trấn an/thuyết phục."
         },
         {
           id: 58,
-          question: "What does Emma mean by 'Although delayed'?",
-          options: ["They postpone.", "They will reach promptly.", "They will be tardy.", "They won't reach."],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'we'll get there promptly'. Hướng dẫn ngữ pháp: Contrast Conjunctions (Although)."
+          question: "What does Mr. Otani mean when he writes, “I’ll confirm the arrival time”?",
+          options: [
+            "He plans to check the airline’s schedule.",
+            "He needs to contact the travel agent.",
+            "He will change the meeting time.",
+            "He will book another ticket for Mr. Bach."
+          ],
+          correct: 0,
+          explanation: "**Đáp án đúng là A.** \n- **Ngữ cảnh:** Mr. Bach vừa thông báo giờ đến mới (18:00). Mr. Otani nói 'I'll confirm the arrival time.' Hành động hợp lý nhất là anh ấy sẽ tự kiểm tra lại lịch trình chuyến bay trên website hoặc app của hãng hàng không để chắc chắn. \n- Không có dấu hiệu cho thấy anh ấy sẽ liên hệ đại lý (B), thay đổi giờ họp (C), hay đặt vé mới (D).\n**Mẹo:** 'Confirm' (xác nhận) thường là kiểm tra lại thông tin đã có cho chính xác."
         },
         {
           id: 59,
-          question: "What is implied about the station?",
-          options: ["Crowded garage.", "Shut.", "No garage.", "Simple entry."],
+          question: "What is implied about Mr. Otani’s travel to the airport?",
+          options: [
+            "He expects heavy traffic or limited parking.",
+            "He works at the airport.",
+            "He plans to take public transportation.",
+            "He has never been to Naples Airport before."
+          ],
           correct: 0,
-          explanation: "Đáp án đúng là (A) vì 'Garage... could be crowded'."
+          explanation: "**Đáp án đúng là A.** \n- **Thông tin ngầm hiểu:** Mr. Otani nói: 'Parking spots can be hard to find, but now I'll have extra time to drive around and look.' Câu này ngụ ý rằng việc tìm chỗ đỗ xe ở sân bay thường khó khăn (do đông đúc). Việc chuyến bay đến muộn cho anh ấy thêm thời gian để xoay sở với vấn đề này. \n- Không có thông tin cho thấy B, C, D.\n**Mẹo:** Câu nói về một khó khăn tiềm ẩn ('can be hard') cho thấy người nói đang dự đoán/lo lắng về điều đó."
         },
         {
           id: 60,
-          question: "What does Smith express in the final message?",
-          options: ["Delay more.", "Arrival notice.", "Annoyance.", "Postponement."],
-          correct: 1,
-          explanation: "Đáp án đúng là (B) vì 'Arrived. Meet soon!'."
+          question: "What does Mr. Bach express in his final message?",
+          options: [
+            "Regret about missing the meeting",
+            "Request for flight confirmation",
+            "Frustration with the airline",
+            "Thanks for the help"
+          ],
+          correct: 3,
+          explanation: "**Đáp án đúng là D.** \n- **Hàm ý văn hóa:** Mr. Bach viết: 'Yes, sorry about that. See you then!' 'Sorry about that' là lời xin lỗi vì sự bất tiện gây ra cho Mr. Otani (phải đợi lâu hơn, phải tìm chỗ đỗ). Trong bối cảnh này, nó cũng hàm chứa lời cảm ơn ngầm vì sự giúp đỡ và thông cảm của Mr. Otani. 'See you then!' là lời kết thúc tích cực. \n- Anh không bày tỏ hối tiếc vì bỏ lỡ cuộc họp (A), không yêu cầu xác nhận chuyến bay (B), và không tỏ ra tức giận với hãng hàng không (C).\n**Mẹo:** Trong giao tiếp, một lời xin lỗi về rắc rối gây ra cho người khác thường cũng mang sắc thái cảm ơn."
         }
       ]
     }

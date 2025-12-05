@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo, useState, memo } from 'react';
-import { ChevronDown, BookOpen, Headphones, Zap, Target, Award, ListChecks } from 'lucide-react';
-import { EXAM_DATA } from '../../data/examData';
+import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
+import { ChevronDown, BookOpen, Headphones, Zap, Target, Award, ListChecks, Loader2 } from 'lucide-react';
+import { loadExamData, getAllExamMetadata, preloadExamData } from '../../data/examData';
 
-// --- Memoized Sub-Components ---
+// --- Memoized Sub-Components (giữ nguyên) ---
 
 const DropdownItem = memo(({ children, isActive, onClick }) => (
   <li>
@@ -21,7 +21,6 @@ const DropdownItem = memo(({ children, isActive, onClick }) => (
 
 DropdownItem.displayName = 'DropdownItem';
 
-// ✅ Static Background
 const OptimizedBackground = () => (
   <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
     <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-200/15 rounded-full blur-3xl" />
@@ -29,7 +28,6 @@ const OptimizedBackground = () => (
   </div>
 );
 
-// ✅ Header Component (Compact Mobile)
 const HeaderSection = memo(() => (
   <div className="mb-3 sm:mb-6 md:mb-8">
     <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-2">
@@ -50,12 +48,14 @@ const HeaderSection = memo(() => (
 
 HeaderSection.displayName = 'HeaderSection';
 
-// ✅ Exam Selection Card (Compact)
+// ✅ Exam Selection với Loading State
 const ExamSelectionCard = memo(({
   selectedExam,
   isDropdownOpen,
+  isLoading,
   onToggleDropdown,
-  onSelectExam
+  onSelectExam,
+  examList
 }) => (
   <div className={`bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-orange-200/50 ${isDropdownOpen ? 'z-50' : 'z-10'}`}>
     <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
@@ -70,10 +70,12 @@ const ExamSelectionCard = memo(({
     <div className="relative w-full">
       <button
         onClick={onToggleDropdown}
-        className="w-full flex items-center justify-between bg-white/50 backdrop-blur border-2 border-orange-300 hover:border-orange-400 focus:ring-4 focus:ring-orange-100 font-semibold rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none transition-all duration-200 text-xs sm:text-sm"
+        disabled={isLoading}
+        className="w-full flex items-center justify-between bg-white/50 backdrop-blur border-2 border-orange-300 hover:border-orange-400 focus:ring-4 focus:ring-orange-100 font-semibold rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 focus:outline-none transition-all duration-200 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span className="truncate text-xs sm:text-sm">
-          {selectedExam ? EXAM_DATA[selectedExam]?.title : '-- Chọn --'}
+        <span className="truncate text-xs sm:text-sm flex items-center gap-1.5">
+          {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+          {selectedExam ? examList.find(e => e.id === selectedExam)?.title : '-- Chọn --'}
         </span>
         <ChevronDown className={`w-3 h-3 sm:w-3.5 ml-1.5 flex-shrink-0 transition-transform duration-200 ${
           isDropdownOpen ? 'rotate-180 text-orange-600' : 'text-amber-600'
@@ -83,13 +85,13 @@ const ExamSelectionCard = memo(({
       {isDropdownOpen && (
         <div className="absolute top-full left-0 mt-1.5 bg-white/95 backdrop-blur border border-orange-200 rounded-lg shadow-lg w-full max-h-40 overflow-y-auto z-50">
           <ul className="p-0.5 sm:p-1">
-            {Object.entries(EXAM_DATA).map(([key, value]) => (
+            {examList.map(exam => (
               <DropdownItem 
-                key={key}
-                isActive={selectedExam === key}
-                onClick={() => onSelectExam(key)}
+                key={exam.id}
+                isActive={selectedExam === exam.id}
+                onClick={() => onSelectExam(exam.id)}
               >
-                {value.title}
+                {exam.title}
               </DropdownItem>
             ))}
           </ul>
@@ -101,7 +103,6 @@ const ExamSelectionCard = memo(({
 
 ExamSelectionCard.displayName = 'ExamSelectionCard';
 
-// ✅ Test Type Card (Compact)
 const TestTypeCard = memo(({ testType, onTestTypeChange }) => (
   <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-2xl p-2.5 sm:p-3 md:p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-amber-200/50 z-20">
     <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
@@ -138,7 +139,6 @@ const TestTypeCard = memo(({ testType, onTestTypeChange }) => (
 
 TestTypeCard.displayName = 'TestTypeCard';
 
-// ✅ Part Button (Compact)
 const PartButton = memo(({
   partKey,
   info,
@@ -178,13 +178,30 @@ const PartButton = memo(({
 
 PartButton.displayName = 'PartButton';
 
-// ✅ Parts Grid (Compact)
+// ✅ Loading Placeholder cho Parts Grid
+const PartsGridLoading = () => (
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-2">
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl bg-gray-100 animate-pulse border-2 border-gray-200">
+        <div className="h-4 bg-gray-300 rounded mb-2" />
+        <div className="h-3 bg-gray-200 rounded mb-1" />
+        <div className="h-2 bg-gray-200 rounded w-1/2" />
+      </div>
+    ))}
+  </div>
+);
+
 const PartsGrid = memo(({
   availableParts,
   partInfoMap,
   selectedPart,
-  onPartChange
+  onPartChange,
+  isLoading
 }) => {
+  if (isLoading) {
+    return <PartsGridLoading />;
+  }
+
   if (availableParts.length === 0) {
     return (
       <div className="text-center py-3 sm:py-4 md:py-6 bg-white/80 backdrop-blur rounded-lg border-2 border-dashed border-amber-300 shadow-inner">
@@ -211,13 +228,21 @@ const PartsGrid = memo(({
   );
 }, (prev, next) => {
   return prev.selectedPart === next.selectedPart &&
-    prev.availableParts.length === next.availableParts.length;
+    prev.availableParts.length === next.availableParts.length &&
+    prev.isLoading === next.isLoading;
 });
 
 PartsGrid.displayName = 'PartsGrid';
 
-// ✅ Part Details Card (Compact)
-const PartDetailsCard = memo(({ partData, testType }) => {
+const PartDetailsCard = memo(({ partData, testType, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-2xl overflow-hidden shadow-lg border border-amber-200/50 p-6 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+
   if (!partData) return null;
 
   return (
@@ -285,14 +310,14 @@ const PartDetailsCard = memo(({ partData, testType }) => {
       </div>
     </div>
   );
-}, (prev, next) => prev.partData?.title === next.partData?.title && prev.testType === next.testType);
+}, (prev, next) => prev.partData?.title === next.partData?.title && prev.testType === next.testType && prev.isLoading === next.isLoading);
 
 PartDetailsCard.displayName = 'PartDetailsCard';
 
 // --- Main Component ---
 
 const PartSelector = React.memo(({
-  selectedExam = 'toeic',
+  selectedExam = 'exam1',
   onExamChange = () => {},
   testType = 'listening',
   onTestTypeChange = () => {},
@@ -300,8 +325,52 @@ const PartSelector = React.memo(({
   onPartChange = () => {}
 }) => {
   const [isExamDropdownOpen, setIsExamDropdownOpen] = useState(false);
+  const [examData, setExamData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [examList] = useState(() => getAllExamMetadata());
 
-  const examData = useMemo(() => EXAM_DATA[selectedExam], [selectedExam]);
+  // Load exam data khi selectedExam thay đổi
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadData = async () => {
+      if (!selectedExam) {
+        setExamData(null);
+        return;
+      }
+
+      setIsLoading(true);
+      
+      try {
+        const data = await loadExamData(selectedExam);
+        
+        if (!cancelled) {
+          setExamData(data);
+          
+          // Preload exam kế tiếp để tăng tốc
+          const currentIndex = examList.findIndex(e => e.id === selectedExam);
+          if (currentIndex < examList.length - 1) {
+            preloadExamData(examList[currentIndex + 1].id);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading exam:', error);
+        if (!cancelled) {
+          setExamData(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedExam, examList]);
 
   const partInfoMap = useMemo(() => {
     if (!examData?.parts) return {};
@@ -358,13 +427,14 @@ const PartSelector = React.memo(({
         
         <hr className="border-orange-200/50 mb-2.5 sm:mb-4 md:mb-6" />
 
-        {/* Selection Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
           <ExamSelectionCard
             selectedExam={selectedExam}
             isDropdownOpen={isExamDropdownOpen}
+            isLoading={isLoading}
             onToggleDropdown={handleToggleDropdown}
             onSelectExam={handleExamChange}
+            examList={examList}
           />
           <TestTypeCard
             testType={testType}
@@ -372,7 +442,6 @@ const PartSelector = React.memo(({
           />
         </div>
 
-        {/* Part Selection */}
         {selectedExam && (
           <div className="mb-3 sm:mb-4 md:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
@@ -392,14 +461,15 @@ const PartSelector = React.memo(({
               partInfoMap={partInfoMap}
               selectedPart={selectedPart}
               onPartChange={handlePartChange}
+              isLoading={isLoading}
             />
           </div>
         )}
 
-        {/* Part Details */}
         <PartDetailsCard
           partData={partData}
           testType={testType}
+          isLoading={isLoading}
         />
       </div>
     </div>

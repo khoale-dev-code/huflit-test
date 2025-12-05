@@ -1,4 +1,4 @@
-@keyframes progressShine {
+/* @keyframes progressShine {
   0% {
     background-position: 0% 50%;
   }
@@ -24,4 +24,4 @@
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
-}
+} */
