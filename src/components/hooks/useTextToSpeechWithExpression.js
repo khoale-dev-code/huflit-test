@@ -2,10 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useVoiceExpression } from './useVoiceExpression';
 import { VOICE_EMOTIONS } from '../config/voiceExpression';
 
-/**
- * Enhanced TTS Hook with Voice Expression
- * Tích hợp emotion detection và emphasis
- */
+
 export const useTextToSpeechWithExpression = ({
   getSpeakerVoice,
   synthRef,

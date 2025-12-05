@@ -1,6 +1,6 @@
-import React, { useMemo, useState, lazy, Suspense, useCallback, memo } from 'react';
+import React, { useMemo, useState, lazy, Suspense, useCallback, memo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { EXAM_DATA } from './data/examData';
+import { loadExamData, getAllExamMetadata } from './data/examData'; // ✅ Fixed import
 import { useAppState } from './hooks/useAppState';
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
@@ -308,15 +308,52 @@ const ProfilePage = memo(({ user, handleBackToTest }) => (
 
 ProfilePage.displayName = 'ProfilePage';
 
-// Full Exam Page
-const FullExamPage = memo(({ handleTestTypeChange }) => (
-  <Suspense fallback={<LoadingSpinner />}>
-    <FullExamMode
-      examData={EXAM_DATA}
-      onComplete={() => handleTestTypeChange('')}
-    />
-  </Suspense>
-));
+// ✅ Full Exam Page - Load exam data dynamically
+const FullExamPage = memo(({ handleTestTypeChange }) => {
+  const [examData, setExamData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAllExams = async () => {
+      setIsLoading(true);
+      try {
+        // Load all exams metadata
+        const examList = getAllExamMetadata();
+        
+        // Load all exam data in parallel
+        const loadPromises = examList.map(exam => loadExamData(exam.id));
+        const loadedExams = await Promise.all(loadPromises);
+        
+        // Convert to EXAM_DATA format
+        const data = {};
+        examList.forEach((exam, index) => {
+          data[exam.id] = loadedExams[index];
+        });
+        
+        setExamData(data);
+      } catch (error) {
+        console.error('Error loading exam data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAllExams();
+  }, []);
+
+  if (isLoading || !examData) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <FullExamMode
+        examData={examData}
+        onComplete={() => handleTestTypeChange('')}
+      />
+    </Suspense>
+  );
+});
 
 FullExamPage.displayName = 'FullExamPage';
 
@@ -354,6 +391,7 @@ AnswersPage.displayName = 'AnswersPage';
 const AppContent = memo(() => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [currentExamData, setCurrentExamData] = useState(null);
 
   // ✅ Hook online users
   const { onlineCount, totalUsers } = useOnlineUsers();
@@ -378,6 +416,23 @@ const AppContent = memo(() => {
     isSignedIn,
     user,
   } = useAppState();
+
+  // ✅ Load current exam data
+  useEffect(() => {
+    const loadCurrentExam = async () => {
+      if (!selectedExam) return;
+      
+      try {
+        const data = await loadExamData(selectedExam);
+        setCurrentExamData(data);
+      } catch (error) {
+        console.error('Error loading exam:', error);
+        setCurrentExamData(null);
+      }
+    };
+
+    loadCurrentExam();
+  }, [selectedExam]);
 
   // ===== EVENT HANDLERS =====
   const handleAuthClose = useCallback(() => {
@@ -413,9 +468,9 @@ const AppContent = memo(() => {
   
   // Lấy dữ liệu part hiện tại
   const partData = useMemo(() => {
-    if (practiceType) return null;
-    return EXAM_DATA[selectedExam]?.parts?.[selectedPart] || null;
-  }, [practiceType, selectedExam, selectedPart]);
+    if (practiceType || !currentExamData) return null;
+    return currentExamData.parts?.[selectedPart] || null;
+  }, [practiceType, currentExamData, selectedPart]);
 
   // Tính điểm số
   const score = useMemo(() => {
@@ -458,6 +513,12 @@ const AppContent = memo(() => {
       <div className="relative z-10 p-2 sm:p-4 md:p-6">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
+            {/* ===== HOME PAGE ===== */}
+            <Route 
+              path={ROUTES.HOME}
+              element={<HomePage />}
+            />
+
             {/* ===== TEST PAGE ===== */}
             <Route 
               path={ROUTES.TEST}
@@ -483,10 +544,6 @@ const AppContent = memo(() => {
                   onStartFullExam={handleStartFullExam}
                 />
               }
-            />
-               <Route 
-              path={ROUTES.HOME}
-              element={<HomePage />}
             />
 
             {/* ===== FULL EXAM PAGE ===== */}
@@ -530,33 +587,6 @@ const AppContent = memo(() => {
               element={
                 <AnswersPage 
                   handleBackToMain={handleBackToMain}
-                />
-              }
-            />
-
-            {/* ===== DEFAULT ROUTE (HOME) ===== */}
-            <Route 
-              path={ROUTES.HOME}
-              element={
-                <TestPage
-                  isSignedIn={isSignedIn}
-                  user={user}
-                  selectedExam={selectedExam}
-                  handleExamChange={handleExamChange}
-                  testType={testType}
-                  handleTestTypeChange={handleTestTypeChange}
-                  selectedPart={selectedPart}
-                  handlePartChange={handlePartChange}
-                  partData={partData}
-                  currentQuestionIndex={currentQuestionIndex}
-                  setCurrentQuestionIndex={setCurrentQuestionIndex}
-                  answers={answers}
-                  handleAnswerSelect={handleAnswerSelect}
-                  showResults={showResults}
-                  handleSubmit={handleSubmit}
-                  handleReset={handleReset}
-                  score={score}
-                  onStartFullExam={handleStartFullExam}
                 />
               }
             />

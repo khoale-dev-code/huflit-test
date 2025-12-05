@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Eye, EyeOff, Target, TrendingUp, Award, FileText, ChevronDown } from 'lucide-react';
 import ContentDisplay from '../Display/ContentDisplay';
-import { EXAM_DATA, getExamById } from '../../data/examData';
+import { EXAM_LIST, getExamById } from '../../data/examData'; // Đã sửa ở đây
 import { useUserProgress } from '../../hooks/useUserProgress';
 import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
 import '../styles/FullExamMode.css';
@@ -32,7 +32,7 @@ const EXAM_STRUCTURE = {
   }
 };
 
-// Question Card Component
+// Question Card Component (giữ nguyên)
 const QuestionCard = React.memo(({ 
   question, 
   questionNum, 
@@ -94,7 +94,7 @@ const QuestionCard = React.memo(({
 
 QuestionCard.displayName = 'QuestionCard';
 
-// Part Navigation Component
+// Part Navigation Component (giữ nguyên)
 const PartNavigation = React.memo(({ 
   currentPart, 
   parts, 
@@ -140,7 +140,7 @@ const PartNavigation = React.memo(({
 
 PartNavigation.displayName = 'PartNavigation';
 
-// Detailed Answer Review Component
+// Detailed Answer Review Component (giữ nguyên)
 const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPart }) => {
   const [showExplanations, setShowExplanations] = useState(true);
 
@@ -168,7 +168,6 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
 
   return (
     <div className="answer-review-container">
-      {/* Toggle Button */}
       <div className="explanation-toggle">
         <button
           onClick={() => setShowExplanations(!showExplanations)}
@@ -188,7 +187,6 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
         </button>
       </div>
 
-      {/* Answers List */}
       <div className="answers-list">
         {reviewData.map((item) => {
           const { partNum, questionNum, question, userAnswer, isCorrect } = item;
@@ -198,7 +196,6 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
               key={item.key}
               className={`answer-item ${isCorrect ? 'correct' : 'incorrect'}`}
             >
-              {/* Question Header */}
               <div className="answer-header">
                 <div className={`status-icon ${isCorrect ? 'correct' : 'incorrect'}`}>
                   {isCorrect ? (
@@ -217,7 +214,6 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
                 </div>
               </div>
 
-              {/* Answer Details */}
               <div className="answer-details">
                 <div className="answer-comparison">
                   <span className="answer-label">
@@ -241,7 +237,6 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
                   </div>
                 )}
 
-                {/* Explanation */}
                 {showExplanations && question.explanation && (
                   <div className="explanation">
                     <p className="explanation-title">
@@ -274,8 +269,28 @@ const FullExamMode = ({ onComplete }) => {
   const [selectedExamId, setSelectedExamId] = useState('exam1');
   const [resultsSaved, setResultsSaved] = useState(false);
   const [autoSaveActive, setAutoSaveActive] = useState(false);
+  const [examData, setExamData] = useState(null);
+  const [loadingExam, setLoadingExam] = useState(false);
 
-  const examData = getExamById(selectedExamId);
+  // Load exam data khi selectedExamId thay đổi
+  useEffect(() => {
+    const loadExam = async () => {
+      if (mode !== 'setup' && selectedExamId) {
+        setLoadingExam(true);
+        try {
+          const data = await getExamById(selectedExamId);
+          setExamData(data);
+        } catch (error) {
+          console.error('Lỗi load exam:', error);
+        } finally {
+          setLoadingExam(false);
+        }
+      }
+    };
+
+    loadExam();
+  }, [selectedExamId, mode]);
+
   const currentConfig = EXAM_STRUCTURE[currentSection];
 
   const partData = useMemo(() => {
@@ -475,8 +490,8 @@ const FullExamMode = ({ onComplete }) => {
     };
   };
 
-  const onExamSelect = (examId) => {
-    setSelectedExamId(examId);
+  const handleStartExam = async () => {
+    setMode('exam');
   };
 
   if (progressError) {
@@ -507,14 +522,14 @@ const FullExamMode = ({ onComplete }) => {
           
           <div className="selection-container">
             <select
-              onChange={(e) => onExamSelect(e.target.value)}
+              onChange={(e) => setSelectedExamId(e.target.value)}
               value={selectedExamId || ''}
               className="exam-select"
             >
               <option value="" className="placeholder">Chọn bài thi...</option>
-              {Object.keys(EXAM_DATA).map(examId => (
-                <option key={examId} value={examId} className="exam-option">
-                  {examId.toUpperCase()}
+              {EXAM_LIST.map(exam => (
+                <option key={exam.id} value={exam.id} className="exam-option">
+                  {exam.title}
                 </option>
               ))}
             </select>
@@ -532,7 +547,7 @@ const FullExamMode = ({ onComplete }) => {
               </div>
               <span className="exam-name">
                 <FileText className="exam-icon" />
-                {selectedExamId.toUpperCase()}
+                {EXAM_LIST.find(e => e.id === selectedExamId)?.title || selectedExamId}
               </span>
             </div>
           )}
@@ -600,13 +615,23 @@ const FullExamMode = ({ onComplete }) => {
           </div>
 
           <button
-            onClick={() => setMode('exam')}
-            disabled={!currentUser && progressLoading}
+            onClick={handleStartExam}
+            disabled={!selectedExamId || loadingExam}
             className="exam-btn-primary start-exam-btn"
           >
             <Play className="btn-icon" /> BẮT ĐẦU BÀI THI
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loadingExam) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Đang tải đề thi...</p>
       </div>
     );
   }

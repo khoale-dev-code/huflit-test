@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
-import { getExamById, getExamParts, getExamQuestions, EXAM_DATA } from '../../data/examData';
-import { BookOpen, FileText, CheckCircle, Sparkles, ChevronDown, Award, Target, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  loadExamData, 
+  getAllExamMetadata, // Dùng sync version
+  getExamParts,
+  getExamQuestions 
+} from '../../data/examData';
+import { BookOpen, FileText, CheckCircle, Sparkles, ChevronDown, Award, Target, ChevronUp, Loader2 } from 'lucide-react';
 
 // Component riêng để hiển thị explanation với expand/collapse
 const ExplanationSection = ({ explanation }) => {
@@ -8,7 +13,6 @@ const ExplanationSection = ({ explanation }) => {
   
   if (!explanation) return null;
 
-  // Kiểm tra độ dài text để quyết định có hiển thị nút expand không
   const isLongText = explanation.length > 250;
   const previewLength = 250;
   
@@ -31,7 +35,6 @@ const ExplanationSection = ({ explanation }) => {
             {displayText}
           </p>
           
-          {/* Nút expand/collapse chỉ hiển thị khi text dài */}
           {isLongText && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -59,14 +62,73 @@ const ExplanationSection = ({ explanation }) => {
 const ExamAnswersPage = () => {
   const [selectedExam, setSelectedExam] = useState('exam1');
   const [selectedPart, setSelectedPart] = useState('');
+  const [currentExam, setCurrentExam] = useState(null);
+  const [parts, setParts] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  
+  // Loading states
+  const [isLoadingExam, setIsLoadingExam] = useState(false);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
 
-  const exam = getExamById(selectedExam);
-  const parts = exam ? Object.keys(exam.parts) : [];
-  const questions = selectedPart ? getExamQuestions(selectedExam, selectedPart) : [];
+  // ✅ Get exam list synchronously (no async needed)
+  const examList = getAllExamMetadata();
 
-  React.useEffect(() => {
-    setSelectedPart('');
+  // Load exam data when selectedExam changes
+  useEffect(() => {
+    const loadExam = async () => {
+      if (!selectedExam) {
+        setCurrentExam(null);
+        setParts([]);
+        return;
+      }
+
+      setIsLoadingExam(true);
+      try {
+        const examData = await loadExamData(selectedExam);
+        setCurrentExam(examData);
+        
+        if (examData?.parts) {
+          setParts(Object.keys(examData.parts));
+        } else {
+          setParts([]);
+        }
+        
+        // Reset selected part
+        setSelectedPart('');
+      } catch (error) {
+        console.error('Error loading exam:', error);
+        setCurrentExam(null);
+        setParts([]);
+      } finally {
+        setIsLoadingExam(false);
+      }
+    };
+
+    loadExam();
   }, [selectedExam]);
+
+  // Load questions when selectedPart changes
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (!selectedExam || !selectedPart) {
+        setQuestions([]);
+        return;
+      }
+
+      setIsLoadingQuestions(true);
+      try {
+        const questionsData = await getExamQuestions(selectedExam, selectedPart);
+        setQuestions(questionsData || []);
+      } catch (error) {
+        console.error('Error loading questions:', error);
+        setQuestions([]);
+      } finally {
+        setIsLoadingQuestions(false);
+      }
+    };
+
+    loadQuestions();
+  }, [selectedExam, selectedPart]);
 
   return (
     <div className="w-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 min-h-screen">
@@ -100,8 +162,8 @@ const ExamAnswersPage = () => {
           {/* Stats Cards (Mobile Optimized) */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mt-4 sm:mt-6 md:mt-10 max-w-4xl mx-auto">
             {[
-              { icon: BookOpen, label: 'Đề thi', value: Object.keys(EXAM_DATA).length },
-              { icon: FileText, label: 'Câu hỏi', value: '100+' },
+              { icon: BookOpen, label: 'Đề thi', value: examList.length },
+              { icon: FileText, label: 'Câu hỏi', value: '2000+' },
               { icon: CheckCircle, label: 'Giải thích', value: '100%' },
               { icon: Award, label: 'Chất lượng', value: 'A+' }
             ].map((stat, idx) => (
@@ -129,22 +191,27 @@ const ExamAnswersPage = () => {
               <select
                 value={selectedExam}
                 onChange={(e) => setSelectedExam(e.target.value)}
-                className="w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-4 bg-white text-amber-900 font-semibold rounded-lg sm:rounded-2xl shadow-md border-2 border-amber-200 transition-all duration-300 hover:shadow-lg hover:border-amber-400 focus:shadow-lg focus:border-orange-500 focus:outline-none cursor-pointer appearance-none pr-9 sm:pr-11 text-xs sm:text-sm md:text-base"
+                disabled={isLoadingExam}
+                className="w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-4 bg-white text-amber-900 font-semibold rounded-lg sm:rounded-2xl shadow-md border-2 border-amber-200 transition-all duration-300 hover:shadow-lg hover:border-amber-400 focus:shadow-lg focus:border-orange-500 focus:outline-none cursor-pointer appearance-none pr-9 sm:pr-11 text-xs sm:text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {Object.keys(EXAM_DATA).map((key) => (
-                  <option key={key} value={key}>
-                    {EXAM_DATA[key]?.title || key.toUpperCase()}
+                {examList.map((exam) => (
+                  <option key={exam.id} value={exam.id}>
+                    {exam.title}
                   </option>
                 ))}
               </select>
               <div className="absolute right-2.5 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ChevronDown className="w-4 h-4 sm:w-5 text-amber-600 group-hover:text-orange-600 transition-colors" />
+                {isLoadingExam ? (
+                  <Loader2 className="w-4 h-4 sm:w-5 text-orange-500 animate-spin" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 sm:w-5 text-amber-600 group-hover:text-orange-600 transition-colors" />
+                )}
               </div>
             </div>
           </div>
 
           {/* Part Selector */}
-          {exam && parts.length > 0 && (
+          {currentExam && parts.length > 0 && (
             <div className="group">
               <label className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold text-amber-800 mb-1.5 sm:mb-2 md:mb-3 ml-1">
                 <FileText className="w-3.5 h-3.5 sm:w-4" />
@@ -154,11 +221,12 @@ const ExamAnswersPage = () => {
                 <select
                   value={selectedPart}
                   onChange={(e) => setSelectedPart(e.target.value)}
-                  className="w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-4 bg-white text-amber-900 font-semibold rounded-lg sm:rounded-2xl shadow-md border-2 border-amber-200 transition-all duration-300 hover:shadow-lg hover:border-amber-400 focus:shadow-lg focus:border-orange-500 focus:outline-none cursor-pointer appearance-none pr-9 sm:pr-11 text-xs sm:text-sm md:text-base"
+                  disabled={isLoadingQuestions}
+                  className="w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-4 bg-white text-amber-900 font-semibold rounded-lg sm:rounded-2xl shadow-md border-2 border-amber-200 transition-all duration-300 hover:shadow-lg hover:border-amber-400 focus:shadow-lg focus:border-orange-500 focus:outline-none cursor-pointer appearance-none pr-9 sm:pr-11 text-xs sm:text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">-- Chọn phần --</option>
                   {parts.map((partId) => {
-                    const part = exam.parts[partId];
+                    const part = currentExam.parts[partId];
                     return (
                       <option key={partId} value={partId}>
                         {part.title}
@@ -167,7 +235,11 @@ const ExamAnswersPage = () => {
                   })}
                 </select>
                 <div className="absolute right-2.5 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <ChevronDown className="w-4 h-4 sm:w-5 text-amber-600 group-hover:text-orange-600 transition-colors" />
+                  {isLoadingQuestions ? (
+                    <Loader2 className="w-4 h-4 sm:w-5 text-orange-500 animate-spin" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 sm:w-5 text-amber-600 group-hover:text-orange-600 transition-colors" />
+                  )}
                 </div>
               </div>
             </div>
@@ -175,7 +247,13 @@ const ExamAnswersPage = () => {
         </div>
 
         {/* Content Area */}
-        {selectedPart && questions.length > 0 ? (
+        {isLoadingQuestions ? (
+          // Loading questions
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-12 h-12 text-orange-500 animate-spin mb-4" />
+            <p className="text-amber-700 font-medium">Đang tải câu hỏi...</p>
+          </div>
+        ) : selectedPart && questions.length > 0 ? (
           <div className="space-y-3 sm:space-y-4 md:space-y-6 lg:space-y-8">
             {/* Part Header */}
             <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-lg sm:rounded-2xl md:rounded-3xl p-3 sm:p-4 md:p-6 lg:p-8 shadow-lg border-2 border-amber-200">
@@ -186,10 +264,10 @@ const ExamAnswersPage = () => {
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-amber-900 truncate">
-                      {exam.parts[selectedPart].title}
+                      {currentExam.parts[selectedPart].title}
                     </h2>
                     <p className="text-xs sm:text-sm text-amber-700 font-medium truncate">
-                      {exam.title}
+                      {currentExam.title}
                     </p>
                   </div>
                 </div>
@@ -253,7 +331,7 @@ const ExamAnswersPage = () => {
                     ))}
                   </div>
 
-                  {/* Explanation - FIX: Dùng component riêng */}
+                  {/* Explanation */}
                   <ExplanationSection explanation={q.explanation} />
                 </div>
               ))}
@@ -269,7 +347,7 @@ const ExamAnswersPage = () => {
               Chưa Có Câu Hỏi
             </h3>
             <p className="text-xs sm:text-sm md:text-base text-amber-700 text-center max-w-md">
-              Phần <span className="font-bold">{exam.parts[selectedPart].title}</span> chưa có câu hỏi
+              Phần <span className="font-bold">{currentExam?.parts[selectedPart]?.title}</span> chưa có câu hỏi
             </p>
           </div>
         ) : (
@@ -291,4 +369,4 @@ const ExamAnswersPage = () => {
   );
 };
 
-export default ExamAnswersPage;
+export default ExamAnswersPage; 
