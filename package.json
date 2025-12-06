@@ -31,6 +31,7 @@
     "file-saver": "^2.0.5",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",
+    "framer-motion": "^12.23.25",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.552.0",

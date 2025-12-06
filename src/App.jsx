@@ -17,6 +17,7 @@ import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import { ROUTES } from './config/routes';
 import HomePage from './pages/HomePage.jsx';
 const AdminApp = lazy(() => import('./admin/AdminApp'));
+const NotFoundPage = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 
 // ✅ Lazy load components
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
@@ -594,6 +595,8 @@ const AppContent = memo(() => {
                 />
               }
             />
+            {/* 404 Route is now in App component */}
+            <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />
           </Routes>
         </Suspense>
 
@@ -619,6 +622,9 @@ function App() {
           
           {/* User Routes */}
           <Route path="/*" element={<AppContent />} />
+          
+          {/* 404 Route - thêm route này cho tất cả các path không khớp */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </Router>

@@ -3,6 +3,7 @@ import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, T
 import ContentDisplay from '../Display/ContentDisplay';
 import { EXAM_LIST, getExamById } from '../../data/examData'; // Đã sửa ở đây
 import { useUserProgress } from '../../hooks/useUserProgress';
+import { motion } from 'framer-motion';
 import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
 import '../styles/FullExamMode.css';
 
@@ -31,6 +32,7 @@ const EXAM_STRUCTURE = {
     totalPoints: 100,
   }
 };
+
 
 // Question Card Component (giữ nguyên)
 const QuestionCard = React.memo(({ 
@@ -258,7 +260,7 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
 
 const FullExamMode = ({ onComplete }) => {
   const { saveProgress, currentUser, loading: progressLoading, error: progressError } = useUserProgress();
-
+  const [isOpen, setIsOpen] = useState(false); // ← THÊM DÒNG NÀY
   const [mode, setMode] = useState('setup');
   const [currentSection, setCurrentSection] = useState('listening');
   const [currentPart, setCurrentPart] = useState(1);
@@ -501,58 +503,140 @@ const FullExamMode = ({ onComplete }) => {
   // SETUP SCREEN
   if (mode === 'setup') {
     return (
-      <div className="exam-container">
-        <div className="exam-header">
-          <h1 className="exam-title">📝 BÀI THI TOÀN PHẦN</h1>
-          <p className="exam-subtitle">8 Parts • 60 Câu • 90 Phút</p>
-          {currentUser && (
-            <p className="user-greeting">👋 Chào {currentUser.name} - Auto-save sẽ được kích hoạt</p>
-          )}
+      <div className="exam-container bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100 relative overflow-hidden">
+    {/* Background gradient/decoration */}
+    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-3xl opacity-10"></div>
+    
+    <div className="exam-header relative z-10">
+        <div className="flex items-center gap-3 mb-2">
+            <h1 className="exam-title text-3xl sm:text-4xl font-extrabold text-gray-900 text-white tracking-tight text">
+                BÀI THI TOÀN PHẦN
+            </h1>
+            <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200 shadow-sm">
+                FULL TEST
+            </span>
         </div>
-
-        <div className="exam-selection-card">
-          <div className="selection-header">
-            <div className="selection-icon">
-              <FileText className="icon" />
-            </div>
-            <h2 className="selection-title">
-              Chọn Bài Thi
-            </h2>
-          </div>
-          
-          <div className="selection-container">
-            <select
-              onChange={(e) => setSelectedExamId(e.target.value)}
-              value={selectedExamId || ''}
-              className="exam-select"
-            >
-              <option value="" className="placeholder">Chọn bài thi...</option>
-              {EXAM_LIST.map(exam => (
-                <option key={exam.id} value={exam.id} className="exam-option">
-                  {exam.title}
-                </option>
-              ))}
-            </select>
-            
-            <div className="select-arrow">
-              <ChevronDown className="arrow-icon" />
-            </div>
-          </div>
-          
-          {selectedExamId && (
-            <div className="selected-exam">
-              <div className="selected-indicator">
-                <div className="pulse-dot"></div>
-                <span className="selected-label">Đã chọn:</span>
-              </div>
-              <span className="exam-name">
-                <FileText className="exam-icon" />
-                {EXAM_LIST.find(e => e.id === selectedExamId)?.title || selectedExamId}
-              </span>
-            </div>
-          )}
+        
+        {/* Statistics Bar */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-3 pb-3 border-b border-gray-200">
+            {/* Parts */}
+            <p className="exam-subtitle flex items-center gap-1 text-base font-semibold text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-list"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                <span className="font-extrabold " >8</span> Parts
+            </p>
+            {/* Questions */}
+            <p className="exam-subtitle flex items-center gap-1 text-base font-semibold text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                <span className="font-extrabold">60</span> Câu
+            </p>
+            {/* Time */}
+            <p className="exam-subtitle flex items-center gap-1 text-base font-semibold text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-timer"><line x1="10" x2="14" y1="2" y2="2"/><path d="M12 14v-4"/><path d="M4 13a8 8 0 0 1 16 0"/></svg>
+                <span className="font-extrabold">90</span> Phút
+            </p>
         </div>
+        
+        {/* User Greeting and Auto-save status */}
+        {currentUser && (
+            <div className="flex items-center justify-between mt-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <p className="user-greeting text-sm font-medium text-blue-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-hand-wave"><path d="M11 12h2a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2v0a2 2 0 0 0-2-2H9v7h3"/><path d="m14 11-1.5 5.5"/><path d="M6 14v1a3 3 0 0 0 3 3h1"/><path d="M11 17h6"/><path d="M18 19c-.27-.22-.64-.46-1-1v0-1"/><path d="m10 16-1.5 5.5"/></svg>
+                    Chào <span className="font-bold">{currentUser.name}</span>
+                </p>
+                <p className="auto-save-status text-xs font-semibold text-gray-600 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-save text-green-500"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4"/><path d="M7 3v6h6"/></svg>
+                    Auto-save được kích hoạt
+                </p>
+            </div>
+        )}
+    </div>
 
+  <div className="selection-header">
+          <div className="selection-icon">
+            <FileText className="icon" />
+          </div>
+          <h2 className="selection-title">
+            Chọn Bài Thi
+          </h2>
+        </div>
+
+        <motion.div 
+          animate={isOpen ? "open" : "closed"} 
+          className="selection-container **mb-8**" // Đã thêm mb-8 để tạo khoảng cách 2 dòng
+        >
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="exam-select-button"
+            type="button"
+            aria-expanded={isOpen}
+            aria-haspopup="listbox"
+          >
+            <span className={selectedExamId ? 'selected-text' : 'placeholder-text'}>
+              {selectedExamId 
+                ? EXAM_LIST.find(e => e.id === selectedExamId)?.title 
+                : 'Chọn bài thi...'}
+            </span>
+            <motion.span 
+              variants={{
+                open: { rotate: 180 },
+                closed: { rotate: 0 }
+              }}
+              transition={{ duration: 0.2 }}
+              className="select-arrow"
+            >
+              <ChevronDown className="arrow-icon" />
+            </motion.span>
+          </button>
+          
+          {isOpen && (
+            <motion.ul
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                when: "beforeChildren",
+                staggerChildren: 0.03,
+              }}
+              style={{ originY: "top" }}
+              className="exam-dropdown-list"
+              role="listbox"
+            >
+              {EXAM_LIST.map((exam, index) => (
+                <motion.li
+                  key={exam.id}
+                  variants={{
+                    hidden: { opacity: 0, y: -10 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: index * 0.03 }}
+                  onClick={() => {
+                    setSelectedExamId(exam.id);
+                    setIsOpen(false);
+                  }}
+                  className={`exam-option ${selectedExamId === exam.id ? 'active' : ''}`}
+                  role="option"
+                  aria-selected={selectedExamId === exam.id}
+                >
+                  <FileText className="option-icon" />
+                  <span className="option-text">{exam.title}</span>
+                  {selectedExamId === exam.id && (
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="check-icon"
+                    >
+                      ✓
+                    </motion.span>
+                  )}
+                </motion.li>
+              ))}
+            </motion.ul>
+          )}
+        </motion.div>
+      <br className=''></br>
         <div className="exam-sections">
           <div className="section-card exam-card-listening">
             <div className="section-header">

@@ -114,7 +114,7 @@ const AdminLogin = () => {
 
         {/* Footer */}
         <p className="text-center text-slate-400 text-sm mt-6">
-          © 2024 Admin Panel. Bảo mật và riêng tư.
+          © 2025 Admin Panel. Bảo mật và riêng tư.
         </p>
       </div>
     </div>
