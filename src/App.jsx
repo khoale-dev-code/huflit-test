@@ -16,6 +16,7 @@ import { useOnlineUsers } from './hooks/useOnlineUsers.js';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import { ROUTES } from './config/routes';
 import HomePage from './pages/HomePage.jsx';
+const AdminApp = lazy(() => import('./admin/AdminApp'));
 
 // ✅ Lazy load components
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
@@ -101,13 +102,16 @@ const BackButton = memo(({ onClick, show = true }) => {
   if (!show) return null;
   
   return (
+   <div className="w-full mb-6 mt-4"> {/* w-full để chiếm hết hàng, mb-6 và mt-4 để tạo khoảng cách */}
     <button
-      onClick={onClick}
-      className="group inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-700 hover:to-blue-700 text-yellow-400 rounded-lg sm:rounded-lg md:rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 shadow-md text-xs sm:text-sm md:text-base"
+        onClick={onClick}
+        // Giữ lại mr-auto để đẩy nút sang trái, bỏ mb-4 cũ (vì đã có ở div cha)
+        className="group inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-blue-900 to-blue-900 hover:from-blue-700 hover:to-blue-700 text-yellow-400 rounded-lg sm:rounded-lg md:rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 shadow-md text-xs sm:text-sm md:text-base mr-auto"
     >
-      <ArrowLeft className="w-3.5 h-3.5 sm:w-4 md:w-5 transition-transform duration-300 group-hover:-translate-x-1" />
-      <span>Quay lại</span>
+        <ArrowLeft className="w-3.5 h-3.5 sm:w-4 md:w-5 transition-transform duration-300 group-hover:-translate-x-1" />
+        <span>Quay lại</span>
     </button>
+</div>
   );
 });
 
@@ -608,9 +612,16 @@ AppContent.displayName = 'AppContent';
 function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AppContent />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          {/* Admin Routes */}
+          <Route path="/admin/*" element={<AdminApp />} />
+          
+          {/* User Routes */}
+          <Route path="/*" element={<AppContent />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }
-
 export default App;
