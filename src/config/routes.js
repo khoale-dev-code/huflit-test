@@ -6,6 +6,8 @@ export const ROUTES = {
   PROFILE: '/profile',
   ANSWERS: '/answers',
   HOME: '/',
+  NOT_FOUND: '/not-found',
+  // ADMIN: '/admin',
 };
 
 /**
@@ -18,3 +20,7 @@ export const getGrammarRoute = () => ROUTES.GRAMMAR;
 export const getVocabularyRoute = () => ROUTES.VOCABULARY;
 export const getProfileRoute = () => ROUTES.PROFILE;
 export const getAnswersRoute = () => ROUTES.ANSWERS;
+export const getNotFoundRoute = () => ROUTES.NOT_FOUND;
+
+
+// export const getAdminRoute = () => ROUTES.ADMIN;
