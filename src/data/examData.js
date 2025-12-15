@@ -1,169 +1,338 @@
-  // src/data/examData.js
+// src/data/examData.js
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
-  /**
-   * Lazy Loading Exam Data
-   * - Chỉ load exam khi người dùng chọn
-   * - Giảm bundle size ban đầu
-   * - Cache data sau lần load đầu tiên
-   */
+/**
+ * Lazy Loading Exam Data - Hybrid Mode
+ * - Firebase: exams mới được tạo từ admin
+ * - Local: exams cũ từ static files
+ * - Tự động merge + cache
+ */
 
-  // Metadata cho tất cả các exams (lightweight)
-  const EXAM_METADATA = {};
-  for (let i = 1; i <= 22; i++) {
-    EXAM_METADATA[`exam${i}`] = {
-      id: `exam${i}`,
-      title: `Đề thi ${i}`,
-      loaded: false,
-      data: null,
-      loading: false,
-      loadPromise: null
+// Cache để tránh load lại
+const examCache = new Map();
+const metadataCache = new Map();
+
+// --- Local Data (Static Files) ---
+
+/**
+ * Load local exam data từ static files
+ * Format: exam1.js, exam2.js, ..., exam22.js
+ */
+const loadLocalExamMetadata = async () => {
+  try {
+    const localMetadata = [];
+    
+    // Load metadata cho 22 exams cục bộ
+    for (let i = 1; i <= 22; i++) {
+      localMetadata.push({
+        id: `exam${i}`,
+        title: `Đề thi ${i}`,
+        source: 'local',  // ⭐ Mark as local
+        loaded: false,
+        loading: false,
+        loadPromise: null
+      });
+    }
+    
+    return localMetadata;
+  } catch (error) {
+    console.error('❌ Error loading local metadata:', error);
+    return [];
+  }
+};
+
+/**
+ * Load local exam data từ file
+ */
+const loadLocalExamData = async (examId) => {
+  try {
+    const examNumber = examId.replace('exam', '');
+    const dataKey = `EXAM${examNumber}_DATA`;
+    
+    const module = await import(`./exams/exam${examNumber}.js`);
+    const data = module[dataKey];
+    
+    if (!data) {
+      throw new Error(`❌ Không tìm thấy ${dataKey} trong module`);
+    }
+
+    return {
+      id: examId,
+      title: data.title || `Exam ${examId}`,
+      source: 'local',
+      type: data.type || 'toeic',
+      difficulty: data.difficulty || 'medium',
+      description: data.description || '',
+      parts: normalizeParts(data.parts || {})
     };
+  } catch (error) {
+    console.error(`❌ Error loading local exam ${examId}:`, error);
+    return null;
+  }
+};
+
+// --- Firebase Data ---
+
+/**
+ * Fetch exams từ Firebase
+ */
+const loadFirebaseExamMetadata = async () => {
+  try {
+    const q = query(
+      collection(db, 'exams'),
+      where('isPublished', '==', true)
+    );
+
+    const snapshot = await getDocs(q);
+    
+    const firebaseMetadata = snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        title: doc.data().title || `Exam ${doc.id}`,
+        source: 'firebase', // ⭐ Mark as firebase
+        type: doc.data().type || 'toeic',
+        difficulty: doc.data().difficulty || 'medium',
+        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+        loaded: false,
+        loading: false,
+        loadPromise: null
+      }))
+      .sort((a, b) => b.createdAt - a.createdAt);
+    
+    console.log(`✅ Loaded ${firebaseMetadata.length} exams from Firebase`);
+    return firebaseMetadata;
+  } catch (error) {
+    console.error('❌ Error loading Firebase metadata:', error);
+    return [];
+  }
+};
+
+/**
+ * Load Firebase exam data
+ */
+const loadFirebaseExamData = async (examId) => {
+  try {
+    const q = query(
+      collection(db, 'exams'),
+      where('__name__', '==', examId)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      throw new Error(`Exam "${examId}" không tìm thấy trong database`);
+    }
+
+    const examDocData = snapshot.docs[0].data();
+
+    return {
+      id: examId,
+      title: examDocData.title,
+      source: 'firebase',
+      type: examDocData.type,
+      difficulty: examDocData.difficulty,
+      description: examDocData.description || '',
+      parts: normalizeParts(examDocData.parts || {})
+    };
+  } catch (error) {
+    console.error(`❌ Error loading Firebase exam ${examId}:`, error);
+    return null;
+  }
+};
+
+// --- 🎯 CORE FUNCTIONS ---
+
+/**
+ * Fetch ALL exams metadata (Local + Firebase merged)
+ */
+export const fetchExamMetadata = async () => {
+  try {
+    if (metadataCache.has('all')) {
+      return metadataCache.get('all');
+    }
+
+    // Load cả 2 nguồn
+    const [localMeta, firebaseMeta] = await Promise.all([
+      loadLocalExamMetadata(),
+      loadFirebaseExamMetadata()
+    ]);
+
+    // Merge: Firebase trước (mới hơn), sau đó Local
+    const allMetadata = [...firebaseMeta, ...localMeta];
+
+    metadataCache.set('all', allMetadata);
+    console.log(
+      `✅ Total exams: ${allMetadata.length} (Firebase: ${firebaseMeta.length}, Local: ${localMeta.length})`
+    );
+    
+    return allMetadata;
+  } catch (error) {
+    console.error('❌ Error fetching exam metadata:', error);
+    return [];
+  }
+};
+
+/**
+ * Load exam data (tự động detect source)
+ */
+export const loadExamData = async (examId) => {
+  // 1. Check cache
+  if (examCache.has(examId)) {
+    return examCache.get(examId);
   }
 
-  // Cache để tránh load lại
-  const examCache = new Map();
+  // Lấy metadata để check source
+  const allMetadata = await fetchExamMetadata();
+  const metadata = allMetadata.find(m => m.id === examId);
 
-  /**
-   * Load exam data dynamically
-   * @param {string} examId - ID của exam (exam1, exam2, ...)
-   * @returns {Promise<Object>} Exam data
-   */
-  export const loadExamData = async (examId) => {
-    // Kiểm tra cache trước
-    if (examCache.has(examId)) {
-      return examCache.get(examId);
-    }
+  if (!metadata) {
+    console.warn(`⚠️ Exam "${examId}" không tồn tại`);
+    return null;
+  }
 
-    const metadata = EXAM_METADATA[examId];
-    if (!metadata) {
-      console.warn(`⚠️ Exam "${examId}" không tồn tại`);
-      return null;
-    }
-
-    // Nếu đang load, đợi promise hiện tại
-    if (metadata.loading && metadata.loadPromise) {
-      return metadata.loadPromise;
-    }
-
-    // Bắt đầu load
-    metadata.loading = true;
-    
-    const examNumber = examId.replace('exam', '');
-    
-    metadata.loadPromise = import(`./exams/exam${examNumber}.js`)
-      .then(module => {
-        const dataKey = `EXAM${examNumber}_DATA`;
-        const data = module[dataKey];
-        
-        if (!data) {
-          throw new Error(`❌ Không tìm thấy ${dataKey} trong module`);
-        }
-
-        // Lưu vào cache
-        examCache.set(examId, data);
-        metadata.data = data;
-        metadata.loaded = true;
-        metadata.loading = false;
-        
-        console.log(`✅ Đã load ${examId}`);
-        return data;
-      })
-      .catch(error => {
-        console.error(`❌ Lỗi khi load ${examId}:`, error);
-        metadata.loading = false;
-        metadata.loadPromise = null;
-        return null;
-      });
-
+  // 2. Nếu đang load, đợi promise hiện tại
+  if (metadata.loading && metadata.loadPromise) {
     return metadata.loadPromise;
-  };
+  }
 
-  /**
-   * Preload exam để tăng tốc (optional)
-   * @param {string} examId 
-   */
-  export const preloadExamData = (examId) => {
-    if (!examCache.has(examId)) {
-      loadExamData(examId);
+  // 3. Bắt đầu load
+  metadata.loading = true;
+
+  metadata.loadPromise = (async () => {
+    try {
+      let examData;
+
+      // Load từ source tương ứng
+      if (metadata.source === 'firebase') {
+        examData = await loadFirebaseExamData(examId);
+      } else {
+        examData = await loadLocalExamData(examId);
+      }
+
+      if (!examData) {
+        throw new Error(`Không thể load exam ${examId}`);
+      }
+
+      // Cache
+      examCache.set(examId, examData);
+      metadata.data = examData;
+      metadata.loaded = true;
+
+      console.log(`✅ Đã load exam: ${examId} (source: ${metadata.source})`);
+      return examData;
+    } catch (error) {
+      console.error(`❌ Lỗi khi load ${examId}:`, error);
+      return null;
+    } finally {
+      metadata.loading = false;
+      metadata.loadPromise = null;
     }
-  };
+  })();
 
-  /**
-   * Get exam by ID (async)
-   * @param {string} examId 
-   * @returns {Promise<Object|null>}
-   */
-  export const getExamById = async (examId) => {
-    return await loadExamData(examId);
-  };
+  return metadata.loadPromise;
+};
 
-  /**
-   * Get all exam metadata (synchronous - chỉ trả về thông tin cơ bản)
-   * @returns {Array<Object>}
-   */
-  export const getAllExamMetadata = () => {
-    return Object.values(EXAM_METADATA).map(({ id, title, loaded }) => ({
-      id,
-      title,
-      loaded
-    }));
-  };
+/**
+ * Normalize parts structure
+ */
+const normalizeParts = (partsData) => {
+  if (!partsData || typeof partsData !== 'object') {
+    return {};
+  }
 
-  /**
-   * Get all loaded exams (synchronous)
-   * @returns {Array<Object>}
-   */
-  export const getAllLoadedExams = () => {
-    return Array.from(examCache.values());
-  };
+  const normalized = {};
 
-  /**
-   * Get exam parts (async)
-   * @param {string} examId 
-   * @returns {Promise<Object>}
-   */
-  export const getExamParts = async (examId) => {
-    const exam = await loadExamData(examId);
-    return exam?.parts || {};
-  };
-
-  /**
-   * Get exam questions (async)
-   * @param {string} examId 
-   * @param {string} partId 
-   * @returns {Promise<Array>}
-   */
-  export const getExamQuestions = async (examId, partId) => {
-    const exam = await loadExamData(examId);
-    const part = exam?.parts?.[partId];
-    return part?.questions || [];
-  };
-
-  /**
-   * Clear cache (dùng khi cần reset)
-   */
-  export const clearExamCache = () => {
-    examCache.clear();
-    Object.values(EXAM_METADATA).forEach(meta => {
-      meta.loaded = false;
-      meta.data = null;
-      meta.loading = false;
-      meta.loadPromise = null;
-    });
-    console.log('🗑️ Đã xóa cache exams');
-  };
-
-  /**
-   * Get cache stats (debug)
-   */
-  export const getCacheStats = () => {
-    return {
-      totalExams: Object.keys(EXAM_METADATA).length,
-      loadedExams: examCache.size,
-      exams: Array.from(examCache.keys())
+  Object.entries(partsData).forEach(([partKey, partValue]) => {
+    normalized[partKey] = {
+      title: partValue.title || partKey,
+      description: partValue.description || '',
+      type: partValue.type || 'listening',
+      questions: Array.isArray(partValue.questions) ? partValue.questions : [],
+      duration: partValue.duration || 0
     };
-  };
+  });
 
-  // Export metadata để dùng cho dropdown
-  export const EXAM_LIST = getAllExamMetadata();
-  
+  return normalized;
+};
+
+/**
+ * Preload exam (chạy ngầm)
+ */
+export const preloadExamData = (examId) => {
+  if (!examCache.has(examId)) {
+    loadExamData(examId);
+  }
+};
+
+// --- ⚡ ASYNC GETTERS ---
+
+export const getExamById = async (examId) => {
+  return await loadExamData(examId);
+};
+
+export const getExamParts = async (examId) => {
+  const exam = await loadExamData(examId);
+  return exam?.parts || {};
+};
+
+export const getExamQuestions = async (examId, partId) => {
+  const exam = await loadExamData(examId);
+  const part = exam?.parts?.[partId];
+  return part?.questions || [];
+};
+
+// --- 🔄 SYNC GETTERS ---
+
+export const getExamByIdSync = (examId) => {
+  return examCache.get(examId) || null;
+};
+
+export const getExamPartsSync = (examId) => {
+  const exam = examCache.get(examId);
+  return exam?.parts || {};
+};
+
+// --- ℹ️ UTILITIES ---
+
+export const getAllExamMetadata = async () => {
+  return await fetchExamMetadata();
+};
+
+export const getAllLoadedExams = () => {
+  return Array.from(examCache.values());
+};
+
+export const clearExamCache = () => {
+  examCache.clear();
+  metadataCache.clear();
+  console.log('🗑️ Đã xóa cache exams');
+};
+
+export const invalidateMetadataCache = () => {
+  metadataCache.delete('all');
+  console.log('🔄 Invalidated metadata cache');
+};
+
+export const getCacheStats = () => {
+  return {
+    cachedExams: Array.from(examCache.keys()),
+    cachedExamCount: examCache.size,
+    metadataCached: metadataCache.has('all')
+  };
+};
+
+/**
+ * Export EXAM_LIST untuk backward compatibility
+ * (dùng trong các component cũ)
+ */
+export const EXAM_LIST = [];
+
+/**
+ * Initialize EXAM_LIST (async)
+ */
+export const initializeExamList = async () => {
+  const metadata = await fetchExamMetadata();
+  // Update EXAM_LIST reference nếu cần, hoặc dùng fetchExamMetadata() thay thế
+  return metadata;
+};

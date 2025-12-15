@@ -1,5 +1,5 @@
-import React, { useMemo, memo } from 'react';
-import { AlertCircle, Headphones, FileText, BookOpen, Lightbulb, Eye, Zap, Target } from 'lucide-react';
+import React, { useMemo, memo, useCallback, useState } from 'react';
+import { AlertCircle, Headphones, FileText, BookOpen, Lightbulb, Eye, Zap, Target, Loader2 } from 'lucide-react';
 
 // Import các component con
 import Part6Display from './ReadingPart6Display';
@@ -47,6 +47,8 @@ const StatCard = memo(({ icon: Icon, color, title, value }) => {
       </p>
     </div>
   );
+}, (prev, next) => {
+  return prev.color === next.color && prev.value === next.value && prev.title === next.title;
 });
 
 StatCard.displayName = 'StatCard';
@@ -65,12 +67,12 @@ const ListeningTipsSection = memo(() => (
     
     <div className="space-y-2 sm:space-y-3">
       {[
-        { id: 1, tip: 'Đọc câu hỏi trước khi nghe, chú ý **từ khóa** quan trọng' },
-        { id: 2, tip: 'Tập trung vào **giọng điệu** và **ý chính** của đoạn hội thoại' },
+        { id: 1, tip: 'Đọc câu hỏi trước khi nghe, chú ý <strong class="font-bold">từ khóa</strong> quan trọng' },
+        { id: 2, tip: 'Tập trung vào <strong class="font-bold">giọng điệu</strong> và <strong class="font-bold">ý chính</strong> của đoạn hội thoại' },
         { id: 3, tip: 'Hạn chế nhìn script khi luyện tập để cải thiện khả năng nghe' },
       ].map(({ id, tip }) => (
         <div 
-          key={id} 
+          key={`tip-${id}`}
           className="flex items-start gap-2 sm:gap-3 bg-white/10 rounded-lg p-2 sm:p-3 backdrop-blur-sm hover:bg-white/15 transition-colors"
         >
           <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -78,9 +80,7 @@ const ListeningTipsSection = memo(() => (
           </div>
           <p 
             className="text-xs sm:text-sm leading-relaxed" 
-            dangerouslySetInnerHTML={{ 
-              __html: tip.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>') 
-            }} 
+            dangerouslySetInnerHTML={{ __html: tip }} 
           />
         </div>
       ))}
@@ -104,12 +104,12 @@ const ReadingTipsSection = memo(() => (
     
     <div className="space-y-2 sm:space-y-3">
       {[
-        { id: 1, tip: 'Đọc **lướt nhanh** toàn bộ văn bản để nắm ý chính' },
-        { id: 2, tip: 'Chú ý **từ khóa** và **câu chủ đề** ở mỗi đoạn văn' },
+        { id: 1, tip: 'Đọc <strong class="font-bold">lướt nhanh</strong> toàn bộ văn bản để nắm ý chính' },
+        { id: 2, tip: 'Chú ý <strong class="font-bold">từ khóa</strong> và <strong class="font-bold">câu chủ đề</strong> ở mỗi đoạn văn' },
         { id: 3, tip: 'Đọc kỹ phần liên quan đến câu hỏi, không cần đọc hết' },
       ].map(({ id, tip }) => (
         <div 
-          key={id} 
+          key={`reading-tip-${id}`}
           className="flex items-start gap-2 sm:gap-3 bg-white/10 rounded-lg p-2 sm:p-3 backdrop-blur-sm hover:bg-white/15 transition-colors"
         >
           <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -117,9 +117,7 @@ const ReadingTipsSection = memo(() => (
           </div>
           <p 
             className="text-xs sm:text-sm leading-relaxed" 
-            dangerouslySetInnerHTML={{ 
-              __html: tip.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>') 
-            }} 
+            dangerouslySetInnerHTML={{ __html: tip }} 
           />
         </div>
       ))}
@@ -137,26 +135,35 @@ const ListeningContent = memo(({
   content, 
   selectedPart, 
   onPlayScript, 
-  isPlayingScript 
+  isPlayingScript,
+  isLoadingScript
 }) => {
   const partNumber = selectedPart.replace('part', '');
   
   // Tính thời gian nghe ước tính (dựa trên độ dài script)
   const estimatedTime = useMemo(() => {
+    if (!content) return 0;
     return Math.ceil(content.length / 500) * 30; // ~30s cho mỗi 500 ký tự
-  }, [content.length]);
+  }, [content]);
 
   return (
     <div className="animate-in fade-in duration-500 space-y-3 sm:space-y-5">
       
       {/* ===== SCRIPT DISPLAY ===== */}
-      <ScriptDisplay 
-        script={content}
-        partTitle={partData.title}
-        showByDefault={true}
-        onPlayScript={onPlayScript}
-        isPlaying={isPlayingScript}
-      />
+      {content ? (
+        <ScriptDisplay 
+          script={content}
+          partTitle={partData?.title || `Part ${partNumber}`}
+          showByDefault={true}
+          onPlayScript={onPlayScript}
+          isPlaying={isPlayingScript}
+        />
+      ) : (
+        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg sm:rounded-2xl p-6 text-center border-2 border-blue-300 animate-pulse">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
+          <p className="text-blue-700 font-semibold text-sm">Đang tải script...</p>
+        </div>
+      )}
 
       {/* ===== ADDITIONAL INFO SECTION ===== */}
       <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-lg sm:rounded-2xl p-3.5 sm:p-6 border-2 border-blue-200 shadow-xl">
@@ -181,7 +188,7 @@ const ListeningContent = memo(({
             icon={FileText} 
             color="purple" 
             title="Độ dài" 
-            value={`${content.length}`} 
+            value={`${content?.length || 0}`} 
           />
           <StatCard 
             icon={Zap} 
@@ -208,8 +215,9 @@ const ReadingContent = memo(({ partData, content, selectedPart }) => {
   
   // Tính thời gian đọc ước tính (dựa trên tốc độ đọc 250 từ/phút)
   const readingTime = useMemo(() => {
+    if (!content) return 0;
     return Math.ceil(content.length / 1250); // ~5 ký tự/từ, 250 từ/phút
-  }, [content.length]);
+  }, [content]);
 
   return (
     <div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl border-2 border-emerald-100 overflow-hidden animate-in fade-in duration-500">
@@ -232,7 +240,7 @@ const ReadingContent = memo(({ partData, content, selectedPart }) => {
               </span>
             </h2>
             <p className="text-xs sm:text-sm text-emerald-50 mt-0.5">
-              {partData.title || 'Nội dung đọc hiểu'}
+              {partData?.title || 'Nội dung đọc hiểu'}
             </p>
           </div>
         </div>
@@ -242,11 +250,18 @@ const ReadingContent = memo(({ partData, content, selectedPart }) => {
       <div className="p-3 sm:p-6">
         
         {/* Text Content Container */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg sm:rounded-xl border-2 border-emerald-200 p-3 sm:p-6 shadow-inner max-h-[32rem] overflow-y-auto">
-          <p className="text-xs sm:text-base leading-relaxed whitespace-pre-wrap text-gray-800 break-words">
-            {content}
-          </p>
-        </div>
+        {content ? (
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg sm:rounded-xl border-2 border-emerald-200 p-3 sm:p-6 shadow-inner max-h-[32rem] overflow-y-auto">
+            <p className="text-xs sm:text-base leading-relaxed whitespace-pre-wrap text-gray-800 break-words">
+              {content}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg sm:rounded-xl border-2 border-green-300 p-6 text-center animate-pulse">
+            <Loader2 className="w-8 h-8 text-green-600 animate-spin mx-auto mb-2" />
+            <p className="text-green-700 font-semibold text-sm">Đang tải nội dung...</p>
+          </div>
+        )}
 
         {/* Info Stats */}
         <div className="mt-3 sm:mt-5 grid grid-cols-2 gap-2 sm:gap-3">
@@ -254,13 +269,13 @@ const ReadingContent = memo(({ partData, content, selectedPart }) => {
             icon={FileText} 
             color="amber" 
             title="Độ dài" 
-            value={`${content.length} ký tự`} 
+            value={`${content?.length || 0} ký tự`} 
           />
           <StatCard 
             icon={Eye} 
             color="orange" 
             title="Thời gian" 
-            value={`~${readingTime} phút`} 
+            value={`~${Math.ceil((content?.length || 0) / 1250)} phút`} 
           />
         </div>
 
@@ -295,6 +310,14 @@ const EmptyState = memo(({ type = 'no-part' }) => {
       borderColor: 'border-amber-200',
       title: 'Không có nội dung',
       description: 'Nội dung sẽ được cập nhật sau'
+    },
+    'loading': {
+      icon: Loader2,
+      iconColor: 'text-blue-600 animate-spin',
+      bgGradient: 'from-white to-blue-50',
+      borderColor: 'border-blue-200',
+      title: 'Đang tải dữ liệu',
+      description: 'Vui lòng chờ...'
     }
   };
 
@@ -321,31 +344,41 @@ const EmptyState = memo(({ type = 'no-part' }) => {
 EmptyState.displayName = 'EmptyState';
 
 // ========================================
-// MAIN COMPONENT: ContentDisplay
+// MAIN COMPONENT: ContentDisplay (Enhanced)
 // ========================================
 const ContentDisplay = memo(({ 
   partData, 
-  selectedPart, 
-  currentQuestionIndex, 
-  testType,
+  selectedPart = 'part1', 
+  currentQuestionIndex = 0, 
+  testType = 'listening',
   onPlayScript = null,
   isPlayingScript = false
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
   
   // ===== EXTRACT CONTENT =====
   const content = useMemo(() => {
     if (!partData) return '';
 
-    // Listening: Lấy script từ question hiện tại hoặc part
-    if (testType === 'listening') {
-      if (selectedPart === 'part1') {
+    try {
+      // Listening: Lấy script từ question hiện tại hoặc part
+      if (testType === 'listening') {
+        if (selectedPart === 'part1') {
+          return partData.script || '';
+        }
+        // Script from specific question
+        const questionScript = partData.questions?.[currentQuestionIndex]?.script;
+        if (questionScript) return questionScript;
+        // Fallback to part script
         return partData.script || '';
       }
-      return partData.questions?.[currentQuestionIndex]?.script || partData.script || '';
+      
+      // Reading: Lấy text từ part
+      return partData.text || partData.content || '';
+    } catch (error) {
+      console.error('Error extracting content:', error);
+      return '';
     }
-    
-    // Reading: Lấy text từ part
-    return partData.text || '';
   }, [partData, selectedPart, currentQuestionIndex, testType]);
 
   // ===== CASE 1: HIDE FOR READING PART 5 =====
@@ -359,12 +392,12 @@ const ContentDisplay = memo(({
   }
 
   // ===== CASE 3: NO CONTENT =====
-  if (!content.trim()) {
+  if (!content || !content.trim()) {
     return <EmptyState type="no-content" />;
   }
 
   // ========================================
-  // RENDER: READING PARTS
+  // RENDER: READING PARTS (SPECIAL LAYOUTS)
   // ========================================
   if (testType === 'reading') {
     
@@ -372,7 +405,7 @@ const ContentDisplay = memo(({
     if (selectedPart === 'part6') {
       return (
         <div className="animate-in fade-in duration-300">
-          <Part6Display part6={partData} />
+          {partData ? <Part6Display part6={partData} /> : <EmptyState type="no-content" />}
         </div>
       );
     }
@@ -381,7 +414,11 @@ const ContentDisplay = memo(({
     if (selectedPart === 'part7') {
       return (
         <div className="animate-in fade-in duration-300">
-          <ReadingPart7Display text={content} type="reading" />
+          {content ? (
+            <ReadingPart7Display text={content} type="reading" />
+          ) : (
+            <EmptyState type="no-content" />
+          )}
         </div>
       );
     }
@@ -390,7 +427,11 @@ const ContentDisplay = memo(({
     if (selectedPart === 'part8') {
       return (
         <div className="animate-in fade-in duration-300">
-          <ReadingPart8Display text={content} type="reading" />
+          {content ? (
+            <ReadingPart8Display text={content} type="reading" />
+          ) : (
+            <EmptyState type="no-content" />
+          )}
         </div>
       );
     }
@@ -415,13 +456,22 @@ const ContentDisplay = memo(({
         content={content} 
         selectedPart={selectedPart} 
         onPlayScript={onPlayScript} 
-        isPlayingScript={isPlayingScript} 
+        isPlayingScript={isPlayingScript}
+        isLoadingScript={isLoading}
       />
     );
   }
 
   // ===== FALLBACK: EMPTY STATE =====
-  return null;
+  return <EmptyState type="no-part" />;
+}, (prev, next) => {
+  return (
+    prev.selectedPart === next.selectedPart &&
+    prev.currentQuestionIndex === next.currentQuestionIndex &&
+    prev.testType === next.testType &&
+    prev.partData?.id === next.partData?.id &&
+    prev.isPlayingScript === next.isPlayingScript
+  );
 });
 
 ContentDisplay.displayName = 'ContentDisplay';

@@ -118,7 +118,13 @@ const SubmitStatusNotification = ({ status }) => {
 // ========================================
 // SUB-COMPONENT: Question Option (Single Choice)
 // ========================================
-const QuestionOption = ({ option, index, isSelected, onSelect, questionId }) => {
+const QuestionOption = React.memo(({ 
+  option, 
+  index, 
+  isSelected, 
+  onSelect, 
+  questionId 
+}) => {
   const optionLabel = String.fromCharCode(65 + index); // A, B, C, D
 
   return (
@@ -181,12 +187,21 @@ const QuestionOption = ({ option, index, isSelected, onSelect, questionId }) => 
       />
     </label>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.option === nextProps.option &&
+    prevProps.index === nextProps.index &&
+    prevProps.questionId === nextProps.questionId
+  );
+});
+
+QuestionOption.displayName = 'QuestionOption';
 
 // ========================================
 // SUB-COMPONENT: Question Card
 // ========================================
-const QuestionCard = ({ 
+const QuestionCard = React.memo(({ 
   question, 
   script, 
   options, 
@@ -229,9 +244,9 @@ const QuestionCard = ({
 
       {/* Options List */}
       <div className="space-y-2 sm:space-y-2.5">
-        {options?.map((option, index) => (
+        {options && Array.isArray(options) && options.map((option, index) => (
           <QuestionOption
-            key={`${question.id}-${index}`}
+            key={`opt-${question.id}-${index}`}
             questionId={question.id}
             option={option}
             index={index}
@@ -242,7 +257,7 @@ const QuestionCard = ({
       </div>
 
       {/* Selected Answer Summary */}
-      {isAnswered && selectedAnswer !== undefined && (
+      {isAnswered && selectedAnswer !== undefined && options && options[selectedAnswer] && (
         <div className="mt-3 sm:mt-3.5 pt-3 sm:pt-3.5 border-t border-gray-200">
           <div className="flex items-center gap-2 text-xs sm:text-sm">
             <span className="text-gray-600 font-medium">Lựa chọn của bạn:</span>
@@ -254,7 +269,16 @@ const QuestionCard = ({
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.question.id === nextProps.question.id &&
+    prevProps.isAnswered === nextProps.isAnswered &&
+    prevProps.selectedAnswer === nextProps.selectedAnswer &&
+    JSON.stringify(prevProps.options) === JSON.stringify(nextProps.options)
+  );
+});
+
+QuestionCard.displayName = 'QuestionCard';
 
 // ========================================
 // MAIN COMPONENT: QuestionDisplay
@@ -438,7 +462,7 @@ const QuestionDisplay = ({
   // ===== RENDER CONDITIONS =====
   
   // Không hiển thị nếu không có data hoặc đã show results
-  if (!partData || showResults || !partData.questions) {
+  if (!partData || showResults || !partData.questions || partData.questions.length === 0) {
     return null;
   }
 
@@ -487,21 +511,28 @@ const QuestionDisplay = ({
               ? 'max-h-[50vh] lg:max-h-[55vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-orange-300 scrollbar-track-gray-100'
               : ''
           }`}>
-            {partData.questions.map((q) => {
-              const selectedAns = answers[q.id];
-              
-              return (
-                <QuestionCard
-                  key={q.id}
-                  question={q}
-                  script={q.script}
-                  options={q.options}
-                  isAnswered={selectedAns !== undefined}
-                  selectedAnswer={selectedAns}
-                  onAnswerSelect={onAnswerSelect}
-                />
-              );
-            })}
+            {partData.questions && partData.questions.length > 0 ? (
+              partData.questions.map((q) => {
+                const selectedAns = answers[q.id];
+                
+                return (
+                  <QuestionCard
+                    key={`q-${selectedPart}-${q.id}`}
+                    question={q}
+                    script={q.script}
+                    options={q.options}
+                    isAnswered={selectedAns !== undefined}
+                    selectedAnswer={selectedAns}
+                    onAnswerSelect={onAnswerSelect}
+                  />
+                );
+              })
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>Không có câu hỏi</p>
+              </div>
+            )}
           </div>
         </div>
 

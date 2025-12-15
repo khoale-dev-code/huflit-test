@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
-import { ChevronDown, BookOpen, Headphones, Zap, Target, Award, ListChecks, Loader2 } from 'lucide-react';
-import { loadExamData, getAllExamMetadata, preloadExamData } from '../../data/examData';
+import { ChevronDown, BookOpen, Headphones, Zap, Target, Award, ListChecks, Loader2, X } from 'lucide-react';
+import { loadExamData, getAllExamMetadata, preloadExamData, invalidateMetadataCache } from '../../data/examData';
 
 // --- Memoized Sub-Components (giữ nguyên) ---
 
@@ -178,7 +178,6 @@ const PartButton = memo(({
 
 PartButton.displayName = 'PartButton';
 
-// ✅ Loading Placeholder cho Parts Grid
 const PartsGridLoading = () => (
   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-2">
     {[...Array(6)].map((_, i) => (
@@ -207,7 +206,7 @@ const PartsGrid = memo(({
       <div className="text-center py-3 sm:py-4 md:py-6 bg-white/80 backdrop-blur rounded-lg border-2 border-dashed border-amber-300 shadow-inner">
         <BookOpen className="w-5 h-5 sm:w-6 text-amber-300 mx-auto mb-1" />
         <p className="text-xs text-amber-700 font-medium">
-          Chọn Exam
+          Chọn Exam hoặc loại bài
         </p>
       </div>
     );
@@ -314,20 +313,150 @@ const PartDetailsCard = memo(({ partData, testType, isLoading }) => {
 
 PartDetailsCard.displayName = 'PartDetailsCard';
 
+// ===== DEBUG COMPONENT =====
+const DebugPanel = memo(({ 
+  selectedExam, 
+  examData, 
+  examList, 
+  testType, 
+  availableParts, 
+  partInfoMap, 
+  selectedPart, 
+  partData, 
+  isLoading 
+}) => {
+  const [showDebug, setShowDebug] = useState(false);
+
+  if (!showDebug) {
+    return (
+      <button
+        onClick={() => setShowDebug(true)}
+        className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg font-bold z-[999] hover:bg-red-600 transition-all"
+      >
+        🔴 DEBUG
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 bg-gray-950 text-white p-4 rounded-lg max-w-lg max-h-[80vh] overflow-y-auto z-[999] text-xs font-mono border-2 border-red-500 shadow-2xl">
+      <button
+        onClick={() => setShowDebug(false)}
+        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-1 rounded"
+        title="Close"
+      >
+        <X className="w-4 h-4" />
+      </button>
+
+      <div className="space-y-3 pr-6 pt-2">
+        
+        {/* METADATA Section */}
+        <div className="border-b border-gray-700 pb-2">
+          <p className="text-yellow-300 font-bold mb-1">📋 METADATA</p>
+          <p className="text-green-300">examList.length: <span className="text-white font-bold">{examList?.length || 0}</span></p>
+          <div className="text-cyan-300 text-xs ml-2 mt-1">
+            {examList?.slice(0, 3).map(e => (
+              <p key={e.id}>• {e.id}: <span className="text-amber-300">{e.source || 'unknown'}</span></p>
+            ))}
+          </div>
+        </div>
+
+        {/* EXAM DATA Section */}
+        <div className="border-b border-gray-700 pb-2">
+          <p className="text-yellow-300 font-bold mb-1">📦 EXAM DATA</p>
+          <p>selectedExam: <span className={`font-bold ${selectedExam ? 'text-green-300' : 'text-red-300'}`}>{selectedExam || 'NONE'}</span></p>
+          <p>examData: <span className={`font-bold ${examData ? 'text-green-300' : 'text-red-300'}`}>{examData ? '✓ YES' : '✗ NO'}</span></p>
+          <p>isLoading: <span className={`font-bold ${isLoading ? 'text-yellow-300' : 'text-green-300'}`}>{isLoading ? '⏳ YES' : '✓ NO'}</span></p>
+        </div>
+
+        {/* PARTS Section */}
+        <div className="border-b border-gray-700 pb-2">
+          <p className="text-yellow-300 font-bold mb-1">🎯 PARTS</p>
+          <p>testType: <span className="text-blue-300 font-bold">{testType}</span></p>
+          <p>availableParts: <span className={`font-bold ${availableParts?.length > 0 ? 'text-green-300' : 'text-red-300'}`}>{availableParts?.length || 0}</span></p>
+          <div className="text-cyan-300 text-xs ml-2 mt-1">
+            {availableParts?.slice(0, 4).map(p => (
+              <p key={p}>• {p}: <span className="text-amber-300">{partInfoMap?.[p]?.questions || 0}q</span></p>
+            ))}
+          </div>
+        </div>
+
+        {/* SELECTED PART Section */}
+        <div className="border-b border-gray-700 pb-2">
+          <p className="text-yellow-300 font-bold mb-1">📄 SELECTED PART</p>
+          <p>selectedPart: <span className={`font-bold ${selectedPart ? 'text-green-300' : 'text-red-300'}`}>{selectedPart || 'NONE'}</span></p>
+          <p>partData: <span className={`font-bold ${partData ? 'text-green-300' : 'text-red-300'}`}>{partData ? '✓ YES' : '✗ NO'}</span></p>
+          
+          {partData && (
+            <div className="text-cyan-300 text-xs ml-2 mt-2 space-y-1">
+              <p>title: <span className="text-amber-300">{partData.title}</span></p>
+              <p>type: <span className="text-amber-300">{partData.type}</span></p>
+              <p>questions: <span className="text-amber-300">{partData.questions?.length || 0}</span></p>
+              <p className={partData.script ? 'text-green-300' : 'text-red-300'}>
+                script: {partData.script ? `✓ YES (${partData.script.length} chars)` : '✗ MISSING'}
+              </p>
+              <p className={partData.text ? 'text-green-300' : 'text-red-300'}>
+                text: {partData.text ? `✓ YES (${partData.text.length} chars)` : '✗ NO'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* EXAM STRUCTURE Section */}
+        <div className="border-b border-gray-700 pb-2">
+          <p className="text-yellow-300 font-bold mb-1">🔍 EXAM STRUCTURE</p>
+          {examData ? (
+            <pre className="text-xs bg-gray-900 p-2 rounded overflow-auto max-h-40 border border-gray-700">
+              {JSON.stringify(examData, null, 2).substring(0, 500)}...
+            </pre>
+          ) : (
+            <p className="text-gray-400">No exam data to display</p>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+});
+
+DebugPanel.displayName = 'DebugPanel';
+
 // --- Main Component ---
 
 const PartSelector = React.memo(({
-  selectedExam = 'exam1',
+  selectedExam = null,
   onExamChange = () => {},
   testType = 'listening',
   onTestTypeChange = () => {},
-  selectedPart = 'part1',
+  selectedPart = null,
   onPartChange = () => {}
 }) => {
   const [isExamDropdownOpen, setIsExamDropdownOpen] = useState(false);
   const [examData, setExamData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [examList] = useState(() => getAllExamMetadata());
+  const [examList, setExamList] = useState([]);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
+
+  // Load exam metadata khi component mount
+  useEffect(() => {
+    const loadMetadata = async () => {
+      try {
+        const metadata = await getAllExamMetadata();
+        setExamList(metadata);
+        
+        // Auto-select first exam if no selection
+        if (!selectedExam && metadata.length > 0) {
+          onExamChange({ target: { value: metadata[0].id } });
+        }
+      } catch (error) {
+        console.error('Error loading metadata:', error);
+      } finally {
+        setIsLoadingMetadata(false);
+      }
+    };
+
+    loadMetadata();
+  }, [selectedExam, onExamChange]);
 
   // Load exam data khi selectedExam thay đổi
   useEffect(() => {
@@ -347,9 +476,9 @@ const PartSelector = React.memo(({
         if (!cancelled) {
           setExamData(data);
           
-          // Preload exam kế tiếp để tăng tốc
+          // Preload next exam để tăng tốc
           const currentIndex = examList.findIndex(e => e.id === selectedExam);
-          if (currentIndex < examList.length - 1) {
+          if (currentIndex >= 0 && currentIndex < examList.length - 1) {
             preloadExamData(examList[currentIndex + 1].id);
           }
         }
@@ -376,10 +505,7 @@ const PartSelector = React.memo(({
     if (!examData?.parts) return {};
     
     const map = {};
-    const parts = Object.entries(examData.parts);
-    
-    for (let i = 0; i < parts.length; i++) {
-      const [part, data] = parts[i];
+    Object.entries(examData.parts).forEach(([part, data]) => {
       if (data.type === testType) {
         map[part] = {
           title: data.title || part,
@@ -387,7 +513,7 @@ const PartSelector = React.memo(({
           description: data.description || ''
         };
       }
-    }
+    });
     return map;
   }, [examData, testType]);
 
@@ -395,6 +521,13 @@ const PartSelector = React.memo(({
     () => Object.keys(partInfoMap),
     [partInfoMap]
   );
+
+  // Auto-select first part when available
+  useEffect(() => {
+    if (availableParts.length > 0 && !selectedPart) {
+      onPartChange({ target: { value: availableParts[0] } });
+    }
+  }, [availableParts, selectedPart, onPartChange]);
 
   const partData = useMemo(
     () => examData?.parts?.[selectedPart] || null,
@@ -431,7 +564,7 @@ const PartSelector = React.memo(({
           <ExamSelectionCard
             selectedExam={selectedExam}
             isDropdownOpen={isExamDropdownOpen}
-            isLoading={isLoading}
+            isLoading={isLoading || isLoadingMetadata}
             onToggleDropdown={handleToggleDropdown}
             onSelectExam={handleExamChange}
             examList={examList}
@@ -472,6 +605,19 @@ const PartSelector = React.memo(({
           isLoading={isLoading}
         />
       </div>
+
+      {/* ===== DEBUG PANEL - PASS PROPS ===== */}
+      <DebugPanel 
+        selectedExam={selectedExam}
+        examData={examData}
+        examList={examList}
+        testType={testType}
+        availableParts={availableParts}
+        partInfoMap={partInfoMap}
+        selectedPart={selectedPart}
+        partData={partData}
+        isLoading={isLoading}
+      />
     </div>
   );
 });

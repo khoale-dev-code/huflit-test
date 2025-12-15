@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Eye, EyeOff, Target, TrendingUp, Award, FileText, ChevronDown } from 'lucide-react';
 import ContentDisplay from '../Display/ContentDisplay';
-import { EXAM_LIST, getExamById } from '../../data/examData'; // Đã sửa ở đây
+import { getAllExamMetadata, getExamById } from '../../data/examData'; // ✅ FIX: Changed import
 import { useUserProgress } from '../../hooks/useUserProgress';
 import { motion } from 'framer-motion';
 import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
@@ -260,7 +260,8 @@ const DetailedAnswerReview = ({ examData, answers, sectionType, startPart, endPa
 
 const FullExamMode = ({ onComplete }) => {
   const { saveProgress, currentUser, loading: progressLoading, error: progressError } = useUserProgress();
-  const [isOpen, setIsOpen] = useState(false); // ← THÊM DÒNG NÀY
+  const [isOpen, setIsOpen] = useState(false);
+  const [examList, setExamList] = useState([]); // ✅ FIX: Add state for exam list
   const [mode, setMode] = useState('setup');
   const [currentSection, setCurrentSection] = useState('listening');
   const [currentPart, setCurrentPart] = useState(1);
@@ -273,6 +274,25 @@ const FullExamMode = ({ onComplete }) => {
   const [autoSaveActive, setAutoSaveActive] = useState(false);
   const [examData, setExamData] = useState(null);
   const [loadingExam, setLoadingExam] = useState(false);
+
+  // ✅ FIX: Load exam list on mount
+  useEffect(() => {
+    const loadExamList = async () => {
+      try {
+        const metadata = await getAllExamMetadata();
+        setExamList(metadata);
+        // Auto-select first exam
+        if (metadata.length > 0) {
+          setSelectedExamId(metadata[0].id);
+        }
+      } catch (error) {
+        console.error('Error loading exam list:', error);
+        setExamList([]);
+      }
+    };
+
+    loadExamList();
+  }, []);
 
   // Load exam data khi selectedExamId thay đổi
   useEffect(() => {
@@ -552,90 +572,90 @@ const FullExamMode = ({ onComplete }) => {
     </div>
 
   <div className="selection-header">
-          <div className="selection-icon">
-            <FileText className="icon" />
-          </div>
-          <h2 className="selection-title">
-            Chọn Bài Thi
-          </h2>
-        </div>
+          <div className="selection-icon">
+            <FileText className="icon" />
+          </div>
+          <h2 className="selection-title">
+            Chọn Bài Thi
+          </h2>
+        </div>
 
-        <motion.div 
-          animate={isOpen ? "open" : "closed"} 
-          className="selection-container **mb-8**" // Đã thêm mb-8 để tạo khoảng cách 2 dòng
-        >
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="exam-select-button"
-            type="button"
-            aria-expanded={isOpen}
-            aria-haspopup="listbox"
-          >
-            <span className={selectedExamId ? 'selected-text' : 'placeholder-text'}>
-              {selectedExamId 
-                ? EXAM_LIST.find(e => e.id === selectedExamId)?.title 
-                : 'Chọn bài thi...'}
-            </span>
-            <motion.span 
-              variants={{
-                open: { rotate: 180 },
-                closed: { rotate: 0 }
-              }}
-              transition={{ duration: 0.2 }}
-              className="select-arrow"
-            >
-              <ChevronDown className="arrow-icon" />
-            </motion.span>
-          </button>
-          
-          {isOpen && (
-            <motion.ul
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={{ scaleY: 1, opacity: 1 }}
-              exit={{ scaleY: 0, opacity: 0 }}
-              transition={{
-                duration: 0.2,
-                when: "beforeChildren",
-                staggerChildren: 0.03,
-              }}
-              style={{ originY: "top" }}
-              className="exam-dropdown-list"
-              role="listbox"
-            >
-              {EXAM_LIST.map((exam, index) => (
-                <motion.li
-                  key={exam.id}
-                  variants={{
-                    hidden: { opacity: 0, y: -10 },
-                    visible: { opacity: 1, y: 0 }
-                  }}
-                  initial="hidden"
-                  animate="visible"
-                  transition={{ delay: index * 0.03 }}
-                  onClick={() => {
-                    setSelectedExamId(exam.id);
-                    setIsOpen(false);
-                  }}
-                  className={`exam-option ${selectedExamId === exam.id ? 'active' : ''}`}
-                  role="option"
-                  aria-selected={selectedExamId === exam.id}
-                >
-                  <FileText className="option-icon" />
-                  <span className="option-text">{exam.title}</span>
-                  {selectedExamId === exam.id && (
-                    <motion.span 
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="check-icon"
-                    >
-                      ✓
-                    </motion.span>
-                  )}
-                </motion.li>
-              ))}
-            </motion.ul>
-          )}
-        </motion.div>
+        <motion.div 
+          animate={isOpen ? "open" : "closed"} 
+          className="selection-container mb-8"
+        >
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="exam-select-button"
+            type="button"
+            aria-expanded={isOpen}
+            aria-haspopup="listbox"
+          >
+            <span className={selectedExamId ? 'selected-text' : 'placeholder-text'}>
+              {selectedExamId 
+                ? examList.find(e => e.id === selectedExamId)?.title 
+                : 'Chọn bài thi...'}
+            </span>
+            <motion.span 
+              variants={{
+                open: { rotate: 180 },
+                closed: { rotate: 0 }
+              }}
+              transition={{ duration: 0.2 }}
+              className="select-arrow"
+            >
+              <ChevronDown className="arrow-icon" />
+            </motion.span>
+          </button>
+          
+          {isOpen && (
+            <motion.ul
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                when: "beforeChildren",
+                staggerChildren: 0.03,
+              }}
+              style={{ originY: "top" }}
+              className="exam-dropdown-list"
+              role="listbox"
+            >
+              {examList.map((exam, index) => (
+                <motion.li
+                  key={exam.id}
+                  variants={{
+                    hidden: { opacity: 0, y: -10 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: index * 0.03 }}
+                  onClick={() => {
+                    setSelectedExamId(exam.id);
+                    setIsOpen(false);
+                  }}
+                  className={`exam-option ${selectedExamId === exam.id ? 'active' : ''}`}
+                  role="option"
+                  aria-selected={selectedExamId === exam.id}
+                >
+                  <FileText className="option-icon" />
+                  <span className="option-text">{exam.title}</span>
+                  {selectedExamId === exam.id && (
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="check-icon"
+                    >
+                      ✓
+                    </motion.span>
+                  )}
+                </motion.li>
+              ))}
+            </motion.ul>
+          )}
+        </motion.div>
       <br className=''></br>
         <div className="exam-sections">
           <div className="section-card exam-card-listening">
@@ -697,7 +717,6 @@ const FullExamMode = ({ onComplete }) => {
               <li>⚠️ Cảnh báo khi còn 5 phút</li>
             </ul>
           </div>
-
           <button
             onClick={handleStartExam}
             disabled={!selectedExamId || loadingExam}

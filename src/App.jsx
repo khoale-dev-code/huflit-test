@@ -315,27 +315,26 @@ ProfilePage.displayName = 'ProfilePage';
 
 // ✅ Full Exam Page - Load exam data dynamically
 const FullExamPage = memo(({ handleTestTypeChange }) => {
-  const [examData, setExamData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadAllExams = async () => {
       setIsLoading(true);
       try {
-        // Load all exams metadata
-        const examList = getAllExamMetadata();
+        // ✅ FIX: getAllExamMetadata() is now async
+        const examList = await getAllExamMetadata();
         
+        if (!examList || examList.length === 0) {
+          console.warn('No exams loaded');
+          setIsLoading(false);
+          return;
+        }
+
         // Load all exam data in parallel
         const loadPromises = examList.map(exam => loadExamData(exam.id));
-        const loadedExams = await Promise.all(loadPromises);
+        await Promise.all(loadPromises);
         
-        // Convert to EXAM_DATA format
-        const data = {};
-        examList.forEach((exam, index) => {
-          data[exam.id] = loadedExams[index];
-        });
-        
-        setExamData(data);
+        console.log(`✅ Loaded ${examList.length} exams for FullExamMode`);
       } catch (error) {
         console.error('Error loading exam data:', error);
       } finally {
@@ -346,14 +345,13 @@ const FullExamPage = memo(({ handleTestTypeChange }) => {
     loadAllExams();
   }, []);
 
-  if (isLoading || !examData) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <FullExamMode
-        examData={examData}
         onComplete={() => handleTestTypeChange('')}
       />
     </Suspense>
@@ -361,7 +359,6 @@ const FullExamPage = memo(({ handleTestTypeChange }) => {
 });
 
 FullExamPage.displayName = 'FullExamPage';
-
 // Grammar Page
 const GrammarPage = memo(({ answers, handleAnswerSelect, handleSubmit }) => (
   <Suspense fallback={<LoadingSpinner />}>
@@ -597,6 +594,8 @@ const AppContent = memo(() => {
             />
             {/* 404 Route is now in App component */}
             <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />
+
+            
           </Routes>
         </Suspense>
 
@@ -625,9 +624,13 @@ function App() {
           
           {/* 404 Route - thêm route này cho tất cả các path không khớp */}
           <Route path="*" element={<NotFoundPage />} />
+         
         </Routes>
       </Suspense>
     </Router>
   );
 }
 export default App;
+ 
+
+ 
