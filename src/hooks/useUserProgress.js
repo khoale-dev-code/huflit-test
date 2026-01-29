@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { 
   collection, 
   addDoc, 
@@ -13,20 +12,24 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
+/**
+ * Hook để quản lý tiến độ luyện thi của người dùng
+ * Chỉ sử dụng Firebase Authentication (Clerk đã bị loại bỏ)
+ */
 export const useUserProgress = () => {
-  // Clerk user
-  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  
-  // Firebase user
+  // Firebase authentication state
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [firebaseLoaded, setFirebaseLoaded] = useState(false);
   
+  // Progress data và status
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Listen to Firebase Auth state
+  // ============================================
+  // Listen to Firebase Auth State
+  // ============================================
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setFirebaseUser(user);
@@ -36,25 +39,12 @@ export const useUserProgress = () => {
   }, []);
 
   // ============================================
-  // Get Current User with Full Info
+  // Get Current User Info (Firebase Only)
   // ============================================
   const getCurrentUser = () => {
-    if (clerkUser) {
-      return {
-        id: clerkUser.id,
-        clerkId: clerkUser.id,
-        firebaseUid: null,
-        email: clerkUser.primaryEmailAddress?.emailAddress,
-        name: clerkUser.firstName || clerkUser.primaryEmailAddress?.emailAddress || 'Anonymous',
-        provider: 'clerk',
-        photoURL: clerkUser.imageUrl,
-      };
-    }
-    
     if (firebaseUser) {
       return {
         id: firebaseUser.uid,
-        clerkId: null,
         firebaseUid: firebaseUser.uid,
         email: firebaseUser.email,
         name: firebaseUser.displayName || firebaseUser.email || 'Anonymous',
@@ -66,18 +56,18 @@ export const useUserProgress = () => {
     return null;
   };
 
-  // Update currentUser whenever auth changes
+  // Update currentUser whenever Firebase auth changes
   useEffect(() => {
     const user = getCurrentUser();
     setCurrentUser(user);
-  }, [clerkUser, firebaseUser]);
+  }, [firebaseUser]);
 
   // ============================================
-  // Subscribe to User's Progress
+  // Subscribe to User's Progress from Firestore
   // ============================================
   useEffect(() => {
-    // Đợi cả 2 auth providers load xong
-    if (!clerkLoaded || !firebaseLoaded) {
+    // Đợi Firebase auth load xong
+    if (!firebaseLoaded) {
       return;
     }
 
@@ -90,28 +80,18 @@ export const useUserProgress = () => {
 
     console.log('📊 Setting up progress listener:', {
       provider: user.provider,
-      id: user.id,
+      firebaseUid: user.firebaseUid,
       email: user.email,
     });
 
     try {
-      let q;
-      
-      if (user.provider === 'clerk') {
-        console.log('🔐 Querying Clerk user with clerkId:', user.clerkId);
-        q = query(
-          collection(db, 'userProgress'),
-          where('clerkId', '==', user.clerkId)
-        );
-      } else if (user.provider === 'firebase') {
-        console.log('🔥 Querying Firebase user with firebaseUid:', user.firebaseUid);
-        q = query(
-          collection(db, 'userProgress'),
-          where('firebaseUid', '==', user.firebaseUid)
-        );
-      } else {
-        return;
-      }
+      // Query Firestore cho user này
+      const q = query(
+        collection(db, 'userProgress'),
+        where('firebaseUid', '==', user.firebaseUid)
+      );
+
+      console.log('🔥 Querying Firebase user with firebaseUid:', user.firebaseUid);
 
       const unsubscribe = onSnapshot(
         q,
@@ -120,6 +100,7 @@ export const useUserProgress = () => {
           const data = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
+            // Convert Firestore timestamp to JavaScript Date
             completedAt: doc.data().completedAt?.toDate?.() || doc.data().completedAt,
           }));
           
@@ -139,6 +120,8 @@ export const useUserProgress = () => {
           if (err.code === 'permission-denied') {
             console.warn('⚠️ Permission denied - Check Firestore Rules!');
             setError('Permission denied - check Firestore rules');
+          } else {
+            setError(err.message);
           }
         }
       );
@@ -148,10 +131,10 @@ export const useUserProgress = () => {
       console.error('❌ Error setting up listener:', err);
       setError(err.message);
     }
-  }, [clerkUser, firebaseUser, clerkLoaded, firebaseLoaded]);
+  }, [firebaseUser, firebaseLoaded]);
 
   // ============================================
-  // Save or Update Progress
+  // Save or Update Progress to Firestore
   // ============================================
   const saveProgress = async (testData) => {
     const user = getCurrentUser();
@@ -164,39 +147,50 @@ export const useUserProgress = () => {
     try {
       setLoading(true);
 
-      // ✅ FIX: Build object with ONLY non-null/non-undefined fields
+      // ✅ Build progress data object - ONLY include defined fields
       // Firestore strictly forbids undefined values
-      const progressData = {};
+      const progressData = {
+        // Required user info
+        firebaseUid: user.firebaseUid,
+        userEmail: user.email || '',
+        userName: user.name || 'Anonymous',
+        
+        // Test data
+        exam: testData.exam,
+        part: testData.part,
+        score: testData.score || 0,
+        answers: testData.answers || {},
+        totalQuestions: testData.totalQuestions || 0,
+        correctAnswers: testData.correctAnswers || 0,
+        isDraft: testData.isDraft || false,
+        testType: testData.testType || 'unknown',  // ✅ FIXED: testData.testType not testType
+        
+        // Timestamps
+        createdAt: serverTimestamp(),
+        completedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
 
-      // Required fields - always add (even if null, convert to empty string)
-      progressData.provider = user.provider || 'unknown';
-      progressData.userEmail = user.email || '';
-      progressData.userName = user.name || 'Anonymous';
-      progressData.exam = testData.exam;
-      progressData.part = testData.part;
-      progressData.score = testData.score;
-      progressData.answers = testData.answers || {};
-      progressData.totalQuestions = testData.totalQuestions || 0;
-      progressData.correctAnswers = testData.correctAnswers || 0;
-      progressData.isDraft = testData.isDraft || false;
-      progressData.testType = testData.testType || 'unknown';
-      progressData.createdAt = serverTimestamp();
-      progressData.completedAt = serverTimestamp();
-      progressData.updatedAt = serverTimestamp();
-
-      // Optional fields - ONLY add if they have actual truthy values
-      // This prevents undefined/null from being saved
-      if (user.clerkId) {
-        progressData.clerkId = user.clerkId;
-      }
-      if (user.firebaseUid) {
-        progressData.firebaseUid = user.firebaseUid;
-      }
+      // Optional fields - only add if they have values
       if (user.photoURL) {
         progressData.photoURL = user.photoURL;
       }
 
-      // ✅ CRITICAL: Verify no undefined values exist
+      // Include additional listening/reading specific data if provided
+      if (testData.listeningScore !== undefined) {
+        progressData.listeningScore = testData.listeningScore;
+      }
+      if (testData.readingScore !== undefined) {
+        progressData.readingScore = testData.readingScore;
+      }
+      if (testData.listeningCorrect !== undefined) {
+        progressData.listeningCorrect = testData.listeningCorrect;
+      }
+      if (testData.readingCorrect !== undefined) {
+        progressData.readingCorrect = testData.readingCorrect;
+      }
+
+      // ✅ CRITICAL: Verify no undefined values
       for (const [key, value] of Object.entries(progressData)) {
         if (value === undefined) {
           console.warn(`⚠️ WARNING: Field "${key}" is undefined, removing it`);
@@ -205,42 +199,24 @@ export const useUserProgress = () => {
       }
 
       console.log('📋 Final progressData to save:', progressData);
-
       console.log('💾 Saving progress - User info:', {
-        provider: user.provider,
-        clerkId: user.clerkId,
         firebaseUid: user.firebaseUid,
         email: user.email,
       });
-      
       console.log('💾 Saving progress - Test data:', {
         exam: testData.exam,
         part: testData.part,
         score: testData.score,
+        testType: testData.testType,
       });
 
       // Check if progress already exists for this test
-      let existingQuery;
-      
-      if (user.provider === 'clerk' && user.clerkId) {
-        existingQuery = query(
-          collection(db, 'userProgress'),
-          where('clerkId', '==', user.clerkId),
-          where('exam', '==', testData.exam),
-          where('part', '==', testData.part)
-        );
-      } else if (user.provider === 'firebase' && user.firebaseUid) {
-        existingQuery = query(
-          collection(db, 'userProgress'),
-          where('firebaseUid', '==', user.firebaseUid),
-          where('exam', '==', testData.exam),
-          where('part', '==', testData.part)
-        );
-      } else {
-        console.warn('⚠️ Cannot determine user provider for query');
-        setError('Invalid user provider');
-        return false;
-      }
+      const existingQuery = query(
+        collection(db, 'userProgress'),
+        where('firebaseUid', '==', user.firebaseUid),
+        where('exam', '==', testData.exam),
+        where('part', '==', testData.part)
+      );
 
       const existingDocs = await getDocs(existingQuery);
 
@@ -248,11 +224,11 @@ export const useUserProgress = () => {
         // Update existing document
         const existingDoc = existingDocs.docs[0];
         await updateDoc(doc(db, 'userProgress', existingDoc.id), progressData);
-        console.log(`✅ Progress updated (${user.provider}):`, existingDoc.id);
+        console.log(`✅ Progress updated:`, existingDoc.id);
       } else {
         // Create new document
         const docRef = await addDoc(collection(db, 'userProgress'), progressData);
-        console.log(`✅ Progress saved (${user.provider}):`, docRef.id);
+        console.log(`✅ Progress saved:`, docRef.id);
       }
 
       setError(null);
@@ -276,6 +252,7 @@ export const useUserProgress = () => {
     loading,
     error,
     saveProgress,
-    currentUser, // Unified user info (Clerk or Firebase)
+    currentUser, // User info from Firebase
+    isLoaded: firebaseLoaded, // Auth state is loaded
   };
 };

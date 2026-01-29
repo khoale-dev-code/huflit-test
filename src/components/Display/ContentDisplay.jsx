@@ -1,5 +1,5 @@
 import React, { useMemo, memo } from 'react';
-import { AlertCircle, Headphones, FileText, BookOpen, Lightbulb, Eye, Zap, Target } from 'lucide-react';
+import { AlertCircle, Headphones, FileText, BookOpen, Zap, Target, Clock, BarChart3 } from 'lucide-react';
 
 // Import các component con
 import Part6Display from './ReadingPart6Display';
@@ -8,192 +8,111 @@ import ReadingPart8Display from './ReadingPart8Display';
 import ScriptDisplay from './ScriptDisplay';
 
 // ========================================
-// HELPER COMPONENT: StatCard (Mobile Optimized)
+// HELPER COMPONENT: InfoCard
 // ========================================
-const StatCard = memo(({ icon: Icon, color, title, value }) => {
+const InfoCard = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   const colorMap = {
-    blue: { 
-      bg: 'bg-white border-blue-200', 
-      text: 'text-blue-600', 
-      icon: 'text-blue-500' 
-    },
-    purple: { 
-      bg: 'bg-white border-purple-200', 
-      text: 'text-purple-600', 
-      icon: 'text-purple-500' 
-    },
-    orange: { 
-      bg: 'bg-white border-orange-200', 
-      text: 'text-orange-600', 
-      icon: 'text-orange-500' 
-    },
-    amber: { 
-      bg: 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200', 
-      text: 'text-amber-600', 
-      icon: 'text-amber-600' 
-    },
+    indigo: 'text-indigo-600 bg-indigo-50',
+    purple: 'text-purple-600 bg-purple-50',
+    emerald: 'text-emerald-600 bg-emerald-50',
+    amber: 'text-amber-600 bg-amber-50',
   };
-  
-  const theme = colorMap[color] || colorMap.blue;
 
   return (
-    <div className={`${theme.bg} rounded-lg sm:rounded-xl p-2.5 sm:p-4 border-2 shadow-md transition-all hover:shadow-lg`}>
-      <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-        <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${theme.icon}`} />
-        <span className="text-xs font-semibold text-gray-600">{title}</span>
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+      <div className={`p-2 rounded-lg ${colorMap[color]}`}>
+        <Icon className={`w-4 h-4`} strokeWidth={2} />
       </div>
-      <p className={`text-lg sm:text-2xl font-bold ${theme.text} leading-none truncate`}>
-        {value}
-      </p>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{label}</p>
+        <p className="text-sm font-bold text-slate-900 truncate">{value}</p>
+      </div>
     </div>
   );
 });
 
-StatCard.displayName = 'StatCard';
-
-// ========================================
-// SUB-COMPONENT: Listening Tips Section
-// ========================================
-const ListeningTipsSection = memo(() => (
-  <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg sm:rounded-xl p-3.5 sm:p-5 text-white shadow-lg">
-    <div className="flex items-center gap-2 mb-3 sm:mb-4">
-      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm flex-shrink-0">
-        <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
-      </div>
-      <p className="font-bold text-sm sm:text-lg">💡 Mẹo nghe hiệu quả</p>
-    </div>
-    
-    <div className="space-y-2 sm:space-y-3">
-      {[
-        { id: 1, tip: 'Đọc câu hỏi trước khi nghe, chú ý **từ khóa** quan trọng' },
-        { id: 2, tip: 'Tập trung vào **giọng điệu** và **ý chính** của đoạn hội thoại' },
-        { id: 3, tip: 'Hạn chế nhìn script khi luyện tập để cải thiện khả năng nghe' },
-      ].map(({ id, tip }) => (
-        <div 
-          key={id} 
-          className="flex items-start gap-2 sm:gap-3 bg-white/10 rounded-lg p-2 sm:p-3 backdrop-blur-sm hover:bg-white/15 transition-colors"
-        >
-          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-bold">{id}</span>
-          </div>
-          <p 
-            className="text-xs sm:text-sm leading-relaxed" 
-            dangerouslySetInnerHTML={{ 
-              __html: tip.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>') 
-            }} 
-          />
-        </div>
-      ))}
-    </div>
-  </div>
-));
-
-ListeningTipsSection.displayName = 'ListeningTipsSection';
-
-// ========================================
-// SUB-COMPONENT: Reading Tips Section
-// ========================================
-const ReadingTipsSection = memo(() => (
-  <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg sm:rounded-xl p-3.5 sm:p-5 text-white shadow-xl">
-    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm flex-shrink-0">
-        <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
-      </div>
-      <p className="font-bold text-sm sm:text-lg">📖 Kỹ thuật đọc hiệu quả</p>
-    </div>
-    
-    <div className="space-y-2 sm:space-y-3">
-      {[
-        { id: 1, tip: 'Đọc **lướt nhanh** toàn bộ văn bản để nắm ý chính' },
-        { id: 2, tip: 'Chú ý **từ khóa** và **câu chủ đề** ở mỗi đoạn văn' },
-        { id: 3, tip: 'Đọc kỹ phần liên quan đến câu hỏi, không cần đọc hết' },
-      ].map(({ id, tip }) => (
-        <div 
-          key={id} 
-          className="flex items-start gap-2 sm:gap-3 bg-white/10 rounded-lg p-2 sm:p-3 backdrop-blur-sm hover:bg-white/15 transition-colors"
-        >
-          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-            <span className="text-xs font-bold">{id}</span>
-          </div>
-          <p 
-            className="text-xs sm:text-sm leading-relaxed" 
-            dangerouslySetInnerHTML={{ 
-              __html: tip.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>') 
-            }} 
-          />
-        </div>
-      ))}
-    </div>
-  </div>
-));
-
-ReadingTipsSection.displayName = 'ReadingTipsSection';
+InfoCard.displayName = 'InfoCard';
 
 // ========================================
 // MAIN COMPONENT: Listening Content
 // ========================================
 const ListeningContent = memo(({ 
   partData, 
-  content, 
-  selectedPart, 
-  onPlayScript, 
-  isPlayingScript 
+  selectedPart,
+  testType
 }) => {
   const partNumber = selectedPart.replace('part', '');
   
-  // Tính thời gian nghe ước tính (dựa trên độ dài script)
-  const estimatedTime = useMemo(() => {
-    return Math.ceil(content.length / 500) * 30; // ~30s cho mỗi 500 ký tự
-  }, [content.length]);
+  // ✅ IMPROVED: Multiple fallbacks for script extraction
+  const script = useMemo(() => {
+    if (!partData) {
+      console.warn('❌ partData is null');
+      return '';
+    }
+    
+    console.log('📋 partData keys:', Object.keys(partData));
+    
+    // 1️⃣ Try direct script property
+    if (partData.script) {
+      console.log('✅ Found script in partData.script');
+      return partData.script;
+    }
+    
+    // 2️⃣ Try text property (fallback)
+    if (partData.text) {
+      console.log('✅ Found text in partData.text');
+      return partData.text;
+    }
+    
+    // 3️⃣ Try extracting from questions
+    if (partData.questions && Array.isArray(partData.questions)) {
+      console.log(`📍 Found ${partData.questions.length} questions, extracting scripts...`);
+      
+      const scripts = partData.questions
+        .filter(q => q.script)
+        .map(q => q.script)
+        .join('\n\n---\n\n');
+      
+      if (scripts.trim()) {
+        console.log('✅ Extracted scripts from questions');
+        return scripts;
+      }
+    }
+    
+    // 4️⃣ Try description as fallback
+    if (partData.description) {
+      console.log('✅ Using description as fallback');
+      return partData.description;
+    }
+    
+    console.warn('⚠️ No script found in any property');
+    return '';
+  }, [partData]);
+
+  const partTitle = useMemo(() => {
+    return partData?.title || `Part ${partNumber} - Phần Nghe`;
+  }, [partData, partNumber]);
+
+  if (!script) {
+    return (
+      <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-8 text-center">
+        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Headphones className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
+        </div>
+        <p className="text-slate-900 font-bold text-lg">Chưa có kịch bản</p>
+        <p className="text-slate-600 text-sm mt-2">Kịch bản cho phần này sẽ sớm có</p>
+        <p className="text-slate-500 text-xs mt-4">Part: {partNumber}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="animate-in fade-in duration-500 space-y-3 sm:space-y-5">
-      
-      {/* ===== SCRIPT DISPLAY ===== */}
+  <div className="animate-in fade-in duration-300 w-full relative z-20">
       <ScriptDisplay 
-        script={content}
-        partTitle={partData.title}
+        script={script}
+        partTitle={partTitle}
         showByDefault={true}
-        onPlayScript={onPlayScript}
-        isPlaying={isPlayingScript}
       />
-
-      {/* ===== ADDITIONAL INFO SECTION ===== */}
-      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-lg sm:rounded-2xl p-3.5 sm:p-6 border-2 border-blue-200 shadow-xl">
-        
-        {/* Header */}
-        <div className="flex items-center gap-2.5 sm:gap-3 mb-3.5 sm:mb-5">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-            <Headphones className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-          </div>
-          <h3 className="text-sm sm:text-lg font-bold text-indigo-900">Thông tin chi tiết</h3>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3.5 sm:mb-5">
-          <StatCard 
-            icon={Target} 
-            color="blue" 
-            title="Part" 
-            value={partNumber} 
-          />
-          <StatCard 
-            icon={FileText} 
-            color="purple" 
-            title="Độ dài" 
-            value={`${content.length}`} 
-          />
-          <StatCard 
-            icon={Zap} 
-            color="orange" 
-            title="Thời gian" 
-            value={`~${estimatedTime}s`} 
-          />
-        </div>
-
-        {/* Tips Section */}
-        <ListeningTipsSection />
-      </div>
     </div>
   );
 });
@@ -201,72 +120,75 @@ const ListeningContent = memo(({
 ListeningContent.displayName = 'ListeningContent';
 
 // ========================================
-// MAIN COMPONENT: Reading Content (Generic)
+// MAIN COMPONENT: Reading Content
 // ========================================
 const ReadingContent = memo(({ partData, content, selectedPart }) => {
   const partNumber = selectedPart.replace('part', '');
   
-  // Tính thời gian đọc ước tính (dựa trên tốc độ đọc 250 từ/phút)
   const readingTime = useMemo(() => {
-    return Math.ceil(content.length / 1250); // ~5 ký tự/từ, 250 từ/phút
+    return Math.ceil(content.length / 1250);
   }, [content.length]);
 
   return (
-    <div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl border-2 border-emerald-100 overflow-hidden animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 w-full">
       
-      {/* ===== HEADER ===== */}
-      <div className="px-3 sm:px-6 py-3.5 sm:py-5 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 relative overflow-hidden">
-        {/* Decorative gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 opacity-50" />
-        
-        <div className="flex items-center gap-2 sm:gap-3 relative z-10">
-          <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-          </div>
-          
-          <div className="min-w-0 flex-1">
-            <h2 className="text-sm sm:text-xl font-bold text-white flex items-center gap-2 flex-wrap">
-              Văn Bản Đọc
-              <span className="bg-white/20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm backdrop-blur-sm whitespace-nowrap">
-                Part {partNumber}
-              </span>
-            </h2>
-            <p className="text-xs sm:text-sm text-emerald-50 mt-0.5">
-              {partData.title || 'Nội dung đọc hiểu'}
-            </p>
-          </div>
+      {/* ===== READING SECTION HEADER ===== */}
+      <div className="flex items-center gap-3 px-1">
+        <div className="p-2.5 rounded-lg bg-emerald-100">
+          <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2} />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Phần Đọc</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Part {partNumber}</p>
         </div>
       </div>
 
-      {/* ===== CONTENT ===== */}
-      <div className="p-3 sm:p-6">
-        
-        {/* Text Content Container */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg sm:rounded-xl border-2 border-emerald-200 p-3 sm:p-6 shadow-inner max-h-[32rem] overflow-y-auto">
-          <p className="text-xs sm:text-base leading-relaxed whitespace-pre-wrap text-gray-800 break-words">
-            {content}
-          </p>
+      {/* ===== INFO PANEL ===== */}
+      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="w-4 h-4 text-emerald-700" strokeWidth={2} />
+          <p className="text-sm font-bold text-emerald-900 uppercase tracking-wider">Thông tin</p>
         </div>
-
-        {/* Info Stats */}
-        <div className="mt-3 sm:mt-5 grid grid-cols-2 gap-2 sm:gap-3">
-          <StatCard 
+        <div className="space-y-2">
+          <InfoCard 
+            icon={Target} 
+            label="Part" 
+            value={partNumber}
+            color="indigo"
+          />
+          <InfoCard 
             icon={FileText} 
-            color="amber" 
-            title="Độ dài" 
-            value={`${content.length} ký tự`} 
+            label="Độ dài" 
+            value={`${content.length} ký tự`}
+            color="amber"
           />
-          <StatCard 
-            icon={Eye} 
-            color="orange" 
-            title="Thời gian" 
-            value={`~${readingTime} phút`} 
+          <InfoCard 
+            icon={Clock} 
+            label="Thời gian dự tính" 
+            value={`~${readingTime} phút`}
+            color="emerald"
           />
         </div>
+      </div>
 
-        {/* Reading Tips */}
-        <div className="mt-3 sm:mt-5">
-          <ReadingTipsSection />
+      {/* ===== READING CONTENT ===== */}
+      <div>
+        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Nội dung</p>
+        <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-visible w-full">
+          
+          {/* Content Title Bar */}
+          <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
+            <p className="text-sm font-bold text-slate-900">
+              {partData.title || `Nội dung Part ${partNumber}`}
+            </p>
+          </div>
+
+          {/* Text Container */}
+          <div className="p-6 max-h-[40rem] overflow-y-auto">
+            <p className="text-base leading-relaxed whitespace-pre-wrap text-slate-800 break-words font-medium">
+              {content}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -282,19 +204,19 @@ const EmptyState = memo(({ type = 'no-part' }) => {
   const states = {
     'no-part': {
       icon: AlertCircle,
-      iconColor: 'text-gray-400',
-      bgGradient: 'from-white to-gray-50',
-      borderColor: 'border-gray-200',
+      iconColor: 'text-slate-400',
+      bgColor: 'from-slate-50 to-white',
+      borderColor: 'border-slate-200',
       title: 'Chọn Part để bắt đầu',
-      description: 'Nội dung sẽ hiển thị ở đây'
+      description: 'Vui lòng chọn một phần thi từ danh sách trên'
     },
     'no-content': {
       icon: FileText,
       iconColor: 'text-amber-600',
-      bgGradient: 'from-white to-amber-50',
+      bgColor: 'from-amber-50 to-white',
       borderColor: 'border-amber-200',
       title: 'Không có nội dung',
-      description: 'Nội dung sẽ được cập nhật sau'
+      description: 'Nội dung cho phần này chưa được tải hoặc cập nhật'
     }
   };
 
@@ -302,15 +224,15 @@ const EmptyState = memo(({ type = 'no-part' }) => {
   const Icon = state.icon;
 
   return (
-    <div className={`bg-gradient-to-br ${state.bgGradient} rounded-lg sm:rounded-2xl shadow-xl border-2 ${state.borderColor} p-4 sm:p-8 animate-in fade-in duration-300`}>
-      <div className="text-center py-6 sm:py-12">
-        <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${state.bgGradient} rounded-lg sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg`}>
-          <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${state.iconColor}`} />
+    <div className={`bg-gradient-to-br ${state.bgColor} rounded-2xl border-2 ${state.borderColor} p-8 sm:p-12 animate-in fade-in duration-300 w-full`}>
+      <div className="text-center py-12">
+        <div className="w-20 h-20 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center mx-auto mb-6 shadow-sm">
+          <Icon className={`w-10 h-10 ${state.iconColor}`} strokeWidth={1.5} />
         </div>
-        <p className="text-gray-600 font-bold text-base sm:text-xl mb-1 sm:mb-2">
+        <p className="text-slate-900 font-bold text-xl mb-2">
           {state.title}
         </p>
-        <p className="text-gray-400 text-xs sm:text-sm">
+        <p className="text-slate-600 text-base">
           {state.description}
         </p>
       </div>
@@ -336,17 +258,29 @@ const ContentDisplay = memo(({
   const content = useMemo(() => {
     if (!partData) return '';
 
-    // Listening: Lấy script từ question hiện tại hoặc part
     if (testType === 'listening') {
-      if (selectedPart === 'part1') {
-        return partData.script || '';
+      // Cho phần nghe, lấy script từ partData
+      if (partData.script) {
+        return partData.script;
       }
-      return partData.questions?.[currentQuestionIndex]?.script || partData.script || '';
+      // Hoặc từ text
+      if (partData.text) {
+        return partData.text;
+      }
+      // Hoặc từ questions nếu partData không có script chung
+      if (partData.questions && Array.isArray(partData.questions)) {
+        const scripts = partData.questions
+          .filter(q => q.script)
+          .map(q => q.script)
+          .join('\n\n');
+        return scripts;
+      }
+      return '';
     }
     
-    // Reading: Lấy text từ part
+    // Cho phần đọc
     return partData.text || '';
-  }, [partData, selectedPart, currentQuestionIndex, testType]);
+  }, [partData, testType]);
 
   // ===== CASE 1: HIDE FOR READING PART 5 =====
   if (testType === 'reading' && selectedPart === 'part5') {
@@ -364,32 +298,29 @@ const ContentDisplay = memo(({
   }
 
   // ========================================
-  // RENDER: READING PARTS
+  // RENDER: READING PARTS (Special Cases)
   // ========================================
   if (testType === 'reading') {
     
-    // Part 6: Text Completion (với chỗ trống)
     if (selectedPart === 'part6') {
       return (
-        <div className="animate-in fade-in duration-300">
+        <div className="animate-in fade-in duration-300 overflow-visible w-full">
           <Part6Display part6={partData} />
         </div>
       );
     }
 
-    // Part 7: Multiple Documents (Email, Letter, etc.)
     if (selectedPart === 'part7') {
       return (
-        <div className="animate-in fade-in duration-300">
+        <div className="animate-in fade-in duration-300 overflow-visible w-full">
           <ReadingPart7Display text={content} type="reading" />
         </div>
       );
     }
 
-    // Part 8: Chat Threads / Multiple Texts
     if (selectedPart === 'part8') {
       return (
-        <div className="animate-in fade-in duration-300">
+        <div className="animate-in fade-in duration-300 overflow-visible w-full">
           <ReadingPart8Display text={content} type="reading" />
         </div>
       );
@@ -411,16 +342,13 @@ const ContentDisplay = memo(({
   if (testType === 'listening') {
     return (
       <ListeningContent 
-        partData={partData} 
-        content={content} 
-        selectedPart={selectedPart} 
-        onPlayScript={onPlayScript} 
-        isPlayingScript={isPlayingScript} 
+        partData={partData}
+        selectedPart={selectedPart}
+        testType={testType}
       />
     );
   }
 
-  // ===== FALLBACK: EMPTY STATE =====
   return null;
 });
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Lightbulb, ChevronDown, ChevronUp, BookOpen, Brain, 
-  CheckCircle2, AlertCircle, Copy, Check, Sparkles, Zap, Target
+  Lightbulb, ChevronDown, ChevronUp, Brain, 
+  CheckCircle2, XCircle, Copy, Check, Sparkles, Target
 } from 'lucide-react';
 
 const ExplanationSection = ({ 
@@ -20,12 +20,11 @@ const ExplanationSection = ({
   const selectedAnswerText = options[userAnswer] || 'Chưa chọn';
   const correctAnswerText = options[correctAnswer] || 'N/A';
 
-  // Kiểm tra xem explanation có dài không (> 300 ký tự)
   const isLongExplanation = explanation && explanation.length > 300;
   const previewLength = 300;
   const displayedExplanation = isExplanationExpanded || !isLongExplanation 
     ? explanation 
-    : explanation?.substring(0, previewLength) + '...';
+    : explanation?.substring(0, previewLength);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(explanation);
@@ -33,10 +32,8 @@ const ExplanationSection = ({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  // Format text với **bold** thành HTML
   const renderFormattedText = (text) => {
     if (!text) return null;
-    
     const parts = text.split(/(\*\*[^*]+\*\*)/g);
     
     return parts.map((part, idx) => {
@@ -45,7 +42,7 @@ const ExplanationSection = ({
         return (
           <span 
             key={idx} 
-            className="font-bold bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 px-1.5 sm:px-2 py-0.5 rounded-lg inline-block mx-0.5 shadow-sm border border-blue-200/60 text-blue-900 text-xs sm:text-sm"
+            className="font-semibold text-blue-700 bg-blue-50/50 px-1.5 py-0.5 rounded text-sm"
           >
             {boldText}
           </span>
@@ -58,145 +55,97 @@ const ExplanationSection = ({
   if (!explanation) return null;
 
   return (
-    <div className="w-full my-3 sm:my-4 md:my-6">
-      {/* Header Button (Mobile Optimized) */}
+    <div className="w-full my-6 space-y-4">
+      {/* ===== INSIGHT BAR (Header Toggle) ===== */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className={`
-          w-full text-left transition-all duration-500 ease-out 
-          rounded-lg sm:rounded-2xl p-3 sm:p-4 md:p-5 backdrop-blur-md
+          w-full text-left transition-all duration-300 ease-out 
+          px-5 py-4 rounded-xl
           ${isExpanded 
-            ? isCorrect 
-              ? 'bg-gradient-to-br from-emerald-50/95 via-teal-50/95 to-cyan-50/95 shadow-lg sm:shadow-xl shadow-emerald-200/60 scale-[1.01] sm:scale-[1.02] border-2 border-emerald-200/50' 
-              : 'bg-gradient-to-br from-orange-50/95 via-amber-50/95 to-yellow-50/95 shadow-lg sm:shadow-xl shadow-amber-200/60 scale-[1.01] sm:scale-[1.02] border-2 border-amber-200/50'
-            : 'bg-white/80 hover:bg-gradient-to-br hover:from-gray-50 hover:to-slate-50 shadow-md hover:shadow-lg border-2 border-gray-100 hover:border-gray-200'
+            ? 'bg-slate-50 border border-slate-200 shadow-soft' 
+            : 'bg-white border border-slate-100 hover:border-slate-200 shadow-xs hover:shadow-sm'
           }
         `}
       >
-        <div className="flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
-            {/* Icon Container (Compact) */}
-            <div className={`
-              relative p-2 sm:p-2.5 md:p-3.5 rounded-lg sm:rounded-xl flex-shrink-0 transition-all duration-500
-              ${isCorrect 
-                ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500' 
-                : 'bg-gradient-to-br from-orange-400 via-amber-500 to-yellow-500'
-              }
-              ${isExpanded ? 'scale-105 sm:scale-110 rotate-12 shadow-lg' : 'scale-100 rotate-0 shadow-md'}
-            `}>
-              {isCorrect ? (
-                <Sparkles className={`w-4 h-4 sm:w-5 md:w-6 text-white transition-all duration-500 ${isExpanded ? 'animate-pulse' : ''}`} />
-              ) : (
-                <Zap className={`w-4 h-4 sm:w-5 md:w-6 text-white ${isExpanded ? 'animate-bounce' : ''}`} />
-              )}
-              <div 
-                className={`absolute inset-0 rounded-lg sm:rounded-xl blur-lg opacity-40 -z-10 ${
-                  isCorrect ? 'bg-emerald-400' : 'bg-amber-400'
-                }`}
-              />
-            </div>
-            
-            {/* Text Content (Compact) */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1">
+            <Lightbulb className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              isCorrect ? 'text-amber-500' : 'text-slate-400'
+            }`} />
             <div className="flex-1 min-w-0">
-              <p className={`
-                font-bold text-xs sm:text-sm md:text-lg transition-colors mb-0.5 sm:mb-1.5
-                ${isCorrect ? 'text-emerald-700' : 'text-amber-700'}
-              `}>
-                {isCorrect ? '✨ Giải thích' : '⚡ Phân tích lỗi'}
+              <p className="text-sm font-semibold text-slate-900">
+                {isCorrect ? 'Giải thích' : 'Phân tích'}
               </p>
-              <p className="text-xs text-gray-500 font-medium hidden sm:block">
-                {isExpanded ? '👆 Thu gọn' : '👇 Xem chi tiết'}
+              <p className="text-xs text-slate-500 mt-0.5">
+                {isExpanded ? 'Thu gọn' : 'Xem chi tiết'}
               </p>
             </div>
           </div>
           
-          {/* Chevron Icon */}
+          {/* Status Badge */}
           <div className={`
-            p-1.5 sm:p-2 md:p-2.5 rounded-lg sm:rounded-xl transition-all duration-300
-            ${isExpanded 
-              ? 'bg-white/60 rotate-180 shadow-inner' 
-              : 'bg-gray-100/80 shadow-sm hover:bg-gray-200/80'
+            px-3 py-1.5 rounded-full text-xs font-medium flex-shrink-0
+            transition-colors
+            ${isCorrect 
+              ? 'bg-emerald-50 text-emerald-700' 
+              : 'bg-rose-50 text-rose-700'
             }
           `}>
-            <ChevronDown className="w-4 h-4 sm:w-5 text-gray-700" />
+            {isCorrect ? '✓ Chính xác' : '✕ Sai'}
           </div>
+          
+          <ChevronDown className={`w-4 h-4 text-slate-600 transition-transform duration-300 ${
+            isExpanded ? 'rotate-180' : ''
+          }`} />
         </div>
       </button>
 
-      {/* Expanded Content (Mobile Optimized) */}
+      {/* ===== EXPANDED CONTENT ===== */}
       <div className={`
-        overflow-hidden transition-all duration-700 ease-in-out
-        ${isExpanded ? 'max-h-none opacity-100 mt-2 sm:mt-3 md:mt-5' : 'max-h-0 opacity-0 mt-0'}
+        overflow-hidden transition-all duration-500 ease-in-out
+        ${isExpanded ? 'opacity-100' : 'max-h-0 opacity-0 hidden'}
       `}>
-        <div className="space-y-2.5 sm:space-y-3 md:space-y-5">
+        <div className="space-y-4 animate-in fade-in">
           
-          {/* ========== ANSWER COMPARISON CARD ========== */}
-          <div className={`
-            rounded-lg sm:rounded-2xl border-2 overflow-hidden backdrop-blur-sm 
-            transition-all duration-500 shadow-lg sm:shadow-xl
-            ${isCorrect
-              ? 'bg-gradient-to-br from-white/90 to-emerald-50/30 border-emerald-300 shadow-emerald-200/50'
-              : 'bg-gradient-to-br from-white/90 to-red-50/30 border-red-300 shadow-red-200/50'
-            }
-          `}>
+          {/* ===== COMPARISON BOX ===== */}
+          <div className="bg-white border border-slate-100 rounded-xl shadow-soft overflow-hidden">
             {/* Header */}
-            <div className={`
-              px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4
-              ${isCorrect
-                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500'
-                : 'bg-gradient-to-r from-red-500 via-orange-500 to-amber-500'
-              }
-            `}>
-              <h4 className="font-bold text-xs sm:text-sm md:text-base text-white flex items-center gap-1.5 sm:gap-2">
-                <AlertCircle className="w-4 h-4 sm:w-5" />
-                <span>{isCorrect ? '🎯 Chính xác' : '📊 So sánh'}</span>
-              </h4>
+            <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
+              <h3 className="text-sm font-semibold text-slate-900">So sánh câu trả lời</h3>
             </div>
             
-            <div className="p-3 sm:p-4 md:p-6 space-y-2.5 sm:space-y-3 md:space-y-4">
+            {/* Content - 2 column layout */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
               {/* Your Answer */}
-              <div className={`
-                rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border-l-4 transition-all duration-300 
-                hover:scale-[1.01] hover:shadow-lg
-                ${isCorrect
-                  ? 'bg-emerald-50/70 border-emerald-500'
-                  : 'bg-red-50/70 border-red-500'
-                }
-              `}>
-                <div className="flex items-center gap-1.5 sm:gap-2.5 mb-2 sm:mb-3 flex-wrap">
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
                   <div className={`
-                    flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full 
-                    font-bold text-xs sm:text-sm shadow-md flex-shrink-0
-                    ${isCorrect
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
-                      : 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                    flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold flex-shrink-0
+                    ${isCorrect 
+                      ? 'bg-emerald-100 text-emerald-700' 
+                      : 'bg-rose-100 text-rose-700'
                     }
                   `}>
-                    <CheckCircle2 className="w-3 h-3 sm:w-4" />
-                    {userAnswer !== undefined ? String.fromCharCode(65 + userAnswer) : 'N/A'}
+                    {userAnswer !== undefined ? String.fromCharCode(65 + userAnswer) : '?'}
                   </div>
-                  <span className="text-xs sm:text-sm text-gray-700 font-bold">
-                    Câu trả lời của bạn
-                  </span>
+                  <span className="text-sm font-medium text-slate-700">Câu trả lời của bạn</span>
                 </div>
-                <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2 whitespace-normal break-words">
+                <p className="text-sm text-slate-800 leading-relaxed">
                   {selectedAnswerText}
                 </p>
               </div>
 
               {/* Correct Answer (if incorrect) */}
               {!isCorrect && (
-                <div className="rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border-l-4 bg-green-50/70 border-green-500 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-                  <div className="flex items-center gap-1.5 sm:gap-2.5 mb-2 sm:mb-3 flex-wrap">
-                    <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md flex-shrink-0">
-                      <Sparkles className="w-3 h-3 sm:w-4" />
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex-shrink-0">
                       {String.fromCharCode(65 + correctAnswer)}
                     </div>
-                    <span className="text-xs sm:text-sm text-green-700 font-bold">
-                      ✅ Đáp án chính xác
-                    </span>
+                    <span className="text-sm font-medium text-emerald-700">Đáp án đúng</span>
                   </div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-800 leading-relaxed pl-2 whitespace-normal break-words">
+                  <p className="text-sm text-slate-800 leading-relaxed">
                     {correctAnswerText}
                   </p>
                 </div>
@@ -204,66 +153,50 @@ const ExplanationSection = ({
             </div>
           </div>
 
-          {/* ========== MAIN EXPLANATION CARD ========== */}
-          <div className={`
-            rounded-lg sm:rounded-2xl border-2 overflow-hidden backdrop-blur-sm 
-            shadow-lg sm:shadow-xl transition-all duration-500
-            ${isCorrect
-              ? 'bg-gradient-to-br from-white/90 to-emerald-50/30 border-emerald-300 shadow-emerald-200/50'
-              : 'bg-gradient-to-br from-white/90 to-amber-50/30 border-amber-300 shadow-amber-200/50'
-            }
-          `}>
-            <div className={`
-              px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4
-              ${isCorrect
-                ? 'bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100'
-                : 'bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100'
-              }
-            `}>
-              <div className="flex items-center gap-1.5 sm:gap-2 justify-between flex-wrap">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <Brain className={`w-4 h-4 sm:w-5 flex-shrink-0 ${
-                    isCorrect ? 'text-emerald-600' : 'text-amber-600'
-                  }`} />
-                  <h4 className={`font-bold text-xs sm:text-sm md:text-base ${
-                    isCorrect ? 'text-emerald-900' : 'text-amber-900'
-                  }`}>
-                    💡 Giải thích chi tiết
-                  </h4>
-                </div>
-                {/* Badge hiển thị số ký tự nếu text dài */}
-                {isLongExplanation && (
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0 ${
-                    isCorrect 
-                      ? 'bg-emerald-200 text-emerald-800' 
-                      : 'bg-amber-200 text-amber-800'
-                  }`}>
-                    {explanation.length} ký tự
-                  </span>
-                )}
+          {/* ===== MAIN EXPLANATION CARD ===== */}
+          <div className="bg-white border border-slate-100 rounded-xl shadow-soft overflow-hidden">
+            {/* Header */}
+            <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-slate-600" />
+                <h3 className="text-sm font-semibold text-slate-900">Giải thích chi tiết</h3>
               </div>
             </div>
-
-            <div className="p-3 sm:p-4 md:p-6">
-              <div className="text-gray-800 text-xs sm:text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words space-y-2 sm:space-y-3 overflow-visible">
-                {renderFormattedText(displayedExplanation)}
+            
+            {/* Content */}
+            <div className="p-6">
+              <div className="relative">
+                <div className={`
+                  text-sm leading-relaxed text-slate-800 whitespace-pre-wrap break-words
+                  ${isLongExplanation && !isExplanationExpanded 
+                    ? 'line-clamp-4 bg-gradient-to-b from-slate-900 via-slate-900 to-transparent bg-clip-text' 
+                    : ''
+                  }
+                `}>
+                  {renderFormattedText(displayedExplanation)}
+                </div>
+                
+                {/* Fade out effect for long explanations */}
+                {isLongExplanation && !isExplanationExpanded && (
+                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                )}
               </div>
 
-              {/* Nút expand/collapse cho explanation nếu text dài */}
+              {/* Expand/Collapse button */}
               {isLongExplanation && (
                 <button
                   onClick={() => setIsExplanationExpanded(!isExplanationExpanded)}
-                  className="mt-3 sm:mt-4 md:mt-5 flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-xs sm:text-sm transition-colors duration-200 hover:bg-blue-50 px-3 py-2 rounded-lg"
+                  className="mt-5 flex items-center gap-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors group"
                 >
                   {isExplanationExpanded ? (
                     <>
-                      <ChevronUp className="w-4 h-4" />
-                      <span>Thu gọn giải thích</span>
+                      <ChevronUp className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      <span>Thu gọn</span>
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="w-4 h-4" />
-                      <span>Xem toàn bộ giải thích</span>
+                      <ChevronDown className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      <span>Xem toàn bộ ({explanation.length} ký tự)</span>
                     </>
                   )}
                 </button>
@@ -271,49 +204,50 @@ const ExplanationSection = ({
             </div>
           </div>
 
-          {/* ========== TIPS CARD ========== */}
-          <div className="rounded-lg sm:rounded-2xl border-2 bg-gradient-to-br from-white/90 to-purple-50/30 border-purple-300 overflow-hidden backdrop-blur-sm shadow-lg sm:shadow-xl shadow-purple-200/50 transition-all duration-500 hover:scale-[1.01]">
-            <div className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 bg-gradient-to-r from-purple-100 via-pink-100 to-fuchsia-100">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Target className="w-4 h-4 sm:w-5 flex-shrink-0 text-purple-600" />
-                <h4 className="font-bold text-xs sm:text-sm md:text-base text-purple-900">
-                  💪 Lời khuyên học tập
-                </h4>
+          {/* ===== PRO TIP / STICKY NOTE ===== */}
+          <div className="bg-violet-50 border border-violet-100 rounded-xl overflow-hidden shadow-soft">
+            <div className="p-6 relative">
+              {/* Decorative icon in corner */}
+              <div className="absolute top-4 right-4 opacity-10">
+                <Sparkles className="w-8 h-8 text-violet-600" />
               </div>
-            </div>
-            <div className="p-3 sm:p-4 md:p-6">
-              <p className="text-xs sm:text-sm md:text-[15px] text-gray-800 leading-relaxed font-medium whitespace-normal break-words">
-                {isCorrect 
-                  ? '🎉 Bạn đã nắm vững kiến thức này. Hãy tiếp tục luyện tập các câu tương tự để củng cố và ghi nhớ lâu dài hơn.'
-                  : '🎯 Mỗi sai lầm là một bài học quý giá. Hãy xem lại phần lý thuyết liên quan, ghi chú những điểm quan trọng, và thử làm thêm 3-5 bài tập tương tự.'}
-              </p>
+              
+              <div className="flex items-start gap-3 relative z-10">
+                <Target className="w-5 h-5 text-violet-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-violet-900 mb-2">Lời khuyên</h4>
+                  <p className="text-sm text-violet-800 leading-relaxed">
+                    {isCorrect 
+                      ? 'Bạn đã nắm vững kiến thức này. Tiếp tục luyện tập để ghi nhớ lâu dài hơn.'
+                      : 'Mỗi sai lầm là bài học quý giá. Hãy xem lại phần lý thuyết liên quan và luyện tập thêm 3-5 bài tương tự.'}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* ========== COPY BUTTON ========== */}
+          {/* ===== COPY BUTTON (Ghost Style) ===== */}
           <button
             onClick={copyToClipboard}
             className={`
-              w-full flex items-center justify-center gap-2 sm:gap-3
-              py-2.5 sm:py-3 md:py-4 px-4 sm:px-6 rounded-lg sm:rounded-2xl font-bold text-xs sm:text-sm md:text-base
-              transition-all duration-300 transform 
-              hover:scale-[1.01] sm:hover:scale-[1.02] active:scale-95 
-              shadow-md sm:shadow-lg hover:shadow-lg sm:hover:shadow-xl
+              w-full flex items-center justify-center gap-2
+              py-3 px-5 rounded-xl font-medium text-sm
+              transition-all duration-200
               ${isCopied
-                ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white shadow-green-300'
-                : 'bg-gradient-to-r from-white to-gray-50 border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:shadow-gray-300'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
               }
             `}
           >
             {isCopied ? (
               <>
-                <Check className="w-3.5 h-3.5 sm:w-4 md:w-5 animate-bounce" />
-                <span>✅ Đã sao chép!</span>
+                <Check className="w-4 h-4" />
+                <span>Đã sao chép!</span>
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5 sm:w-4 md:w-5" />
-                <span>📋 Sao chép giải thích</span>
+                <Copy className="w-4 h-4" />
+                <span>Sao chép giải thích</span>
               </>
             )}
           </button>

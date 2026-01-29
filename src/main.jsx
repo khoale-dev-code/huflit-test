@@ -1,10 +1,9 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ClerkProvider } from '@clerk/clerk-react';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 import './index.css';
 
-// ✅ Lazy load App for better initial load
+// ✅ Lazy load App and AuthProvider
 const App = React.lazy(() => import('./App'));
 const AuthProvider = React.lazy(() => 
   import('./contexts/AuthContext').then(module => ({ 
@@ -12,46 +11,27 @@ const AuthProvider = React.lazy(() =>
   }))
 );
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-// ✅ Validate env at build time
-if (!PUBLISHABLE_KEY) {
-  throw new Error(
-    'Missing VITE_CLERK_PUBLISHABLE_KEY environment variable. ' +
-    'Please add it to your .env file.'
-  );
-}
-
-// ✅ Loading Fallback Component - Minimal
+// ✅ Loading Fallback - Keep it simple and fast
 const RootFallback = () => (
   <div className="flex items-center justify-center h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
     <LoadingSpinner />
   </div>
 );
 
-// ✅ Root Component - Separated for clarity
-const Root = () => (
-  <React.StrictMode>
-    <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY}
-      afterSignOutUrl="/"
-      // ✅ Optimized Clerk config
-      appearance={{
-        baseTheme: undefined,
-        variables: {
-          colorPrimary: '#f97316', // Orange
-        }
-      }}
-    >
-      <Suspense fallback={<RootFallback />}>
-        <AuthProvider>
-          {/* ✅ App Component đã chứa BrowserRouter */}
-          <App />
-        </AuthProvider>
-      </Suspense>
-    </ClerkProvider>
-  </React.StrictMode>
-);
+// ✅ Root Component - Only wrap with StrictMode in dev
+const Root = () => {
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  const content = (
+    <Suspense fallback={<RootFallback />}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </Suspense>
+  );
+
+  return isDev ? <StrictMode>{content}</StrictMode> : content;
+};
 
 // ✅ Initialize React root with error handling
 const rootElement = document.getElementById('root');
@@ -63,54 +43,49 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(<Root />);
 
-// ✅ Optimize React for production: disable strict mode in prod
+// ✅ Web Vitals monitoring (Production only)
 if (process.env.NODE_ENV === 'production') {
-  // ✅ Re-render without StrictMode in production for better performance
-  root.render(
-    <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY}
-      afterSignOutUrl="/"
-      appearance={{
-        baseTheme: undefined,
-        variables: {
-          colorPrimary: '#f97316',
-        }
-      }}
-    >
-      <Suspense fallback={<RootFallback />}>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </Suspense>
-    </ClerkProvider>
-  );
-
-  // ✅ Report Web Vitals for monitoring
-  try {
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(console.log);
-      getFID(console.log);
-      getFCP(console.log);
-      getLCP(console.log);
-      getTTFB(console.log);
+  // Report Web Vitals for monitoring
+  import('web-vitals')
+    .then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      // Send to analytics (replace with your analytics service)
+      getCLS(metric => console.log('CLS:', metric.value));
+      getFID(metric => console.log('FID:', metric.value));
+      getFCP(metric => console.log('FCP:', metric.value));
+      getLCP(metric => console.log('LCP:', metric.value));
+      getTTFB(metric => console.log('TTFB:', metric.value));
+    })
+    .catch(() => {
+      // web-vitals not installed
     });
-  } catch {
-    console.log('web-vitals not installed. Skipping performance monitoring.');
-  }
 
-  // ✅ Enable paint timing API for scroll performance monitoring
-  if (window.PerformanceObserver) {
+  // ✅ Long Task monitoring - only in production
+  if ('PerformanceObserver' in window) {
     try {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (entry.duration > 50) { // Log slow frames (>50ms)
-            console.warn(`Slow paint: ${entry.name} - ${entry.duration.toFixed(2)}ms`);
+          // Log tasks longer than 50ms
+          if (entry.duration > 50) {
+            console.warn(`Long task detected: ${entry.duration.toFixed(2)}ms`, entry);
           }
         }
       });
-      observer.observe({ entryTypes: ['measure', 'navigation'] });
+      // Only observe 'longtask' in production
+      observer.observe({ entryTypes: ['longtask'] });
     } catch (e) {
-      // PerformanceObserver not supported
+      // PerformanceObserver or longtask not supported
     }
   }
+
+  // ✅ Handle unhandled promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    // Send to error tracking service (e.g., Sentry)
+  });
+
+  // ✅ Handle runtime errors
+  window.addEventListener('error', (event) => {
+    console.error('Runtime error:', event.error);
+    // Send to error tracking service
+  });
 }

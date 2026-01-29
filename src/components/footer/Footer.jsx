@@ -1,414 +1,393 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import {
-  Mail, Phone, MapPin, Facebook, Linkedin, Youtube, MessageCircle,
-  BookOpen, Zap, Users, HelpCircle, ArrowUp, Send,
-  ChevronRight, Heart, ShieldCheck, TrendingUp, Trophy,
-  AlertCircle, Sparkles, Globe, Code, Award, Lightbulb,
-  Github, MessageSquareText 
+  Mail, Phone, MapPin, Facebook, Youtube, MessageCircle,
+  BookOpen, Zap, Users, HelpCircle, Send,
+  ChevronRight, Heart, TrendingUp, Award, Github,
+  Sparkles, ExternalLink, Rocket, AlertCircle
 } from 'lucide-react';
 
-// --- STYLES & ANIMATIONS ---
-const GlobalStyles = () => (
-  <style dangerouslySetInnerHTML={{__html: `
-    /* Keyframes for smooth transitions and effects */
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+// --- SUB-COMPONENTS (MEMOIZED) ---
 
-    @keyframes pulse-shadow {
-      0%, 100% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); } /* Vàng */
-      50% { box-shadow: 0 0 25px rgba(255, 193, 7, 0.8); }
-    }
-    .animate-pulse-shadow { animation: pulse-shadow 2s ease-in-out infinite; }
+const FooterCard = memo(({ title, children, icon: Icon }) => (
+  <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+        <Icon size={20} strokeWidth={2.5} />
+      </div>
+      <h3 className="text-lg font-bold text-slate-800 tracking-tight">{title}</h3>
+    </div>
+    <div className="flex flex-col gap-3">{children}</div>
+  </div>
+));
+
+FooterCard.displayName = 'FooterCard';
+
+const SmartLink = memo(({ label, href, icon: Icon }) => (
+  <a
+    href={href}
+    className="group flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-50 cursor-pointer"
+  >
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-blue-600 flex items-center justify-center transition-colors duration-300">
+        <Icon size={14} className="text-slate-500 group-hover:text-white" />
+      </div>
+      <span className="text-sm font-semibold text-slate-600 group-hover:text-blue-700">{label}</span>
+    </div>
+    <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 text-blue-400 transition-all duration-300" />
+  </a>
+));
+
+SmartLink.displayName = 'SmartLink';
+
+const SocialButton = memo(({ href, icon: Icon, bgGradient, title }) => (
+  <a 
+    href={href} 
+    className={`w-11 h-11 rounded-full ${bgGradient} text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-transform duration-300`}
+    title={title}
+  >
+    <Icon size={20} />
+  </a>
+));
+
+SocialButton.displayName = 'SocialButton';
+
+const StatusMessage = memo(({ message, type }) => (
+  <div
+    className={`flex items-center gap-3 text-sm px-5 py-3.5 rounded-xl font-semibold transition-all border-2 animate-in fade-in duration-300 ${
+      type === 'success'
+        ? 'bg-green-50 text-green-700 border-green-300'
+        : type === 'error'
+        ? 'bg-red-50 text-red-700 border-red-300'
+        : 'bg-blue-50 text-blue-700 border-blue-300'
+    }`}
+  >
+    <AlertCircle size={18} className="flex-shrink-0" />
+    <span>{message}</span>
+  </div>
+));
+
+StatusMessage.displayName = 'StatusMessage';
+
+const ContactInfo = memo(() => (
+  <div className="p-6 bg-[#00358E] rounded-[24px] text-white space-y-4 shadow-xl">
+    <div className="flex items-center gap-4 group cursor-pointer hover:opacity-80 transition-opacity">
+      <div className="w-10 h-10 rounded-full bg-blue-800 group-hover:bg-[#FF7D00] flex items-center justify-center transition-colors duration-300">
+        <Mail size={18} />
+      </div>
+      <div>
+        <p className="text-[10px] uppercase font-bold text-blue-300">Email hỗ trợ</p>
+        <p className="text-sm font-bold">lekhoale3009@gmail.com</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-4 group cursor-pointer hover:opacity-80 transition-opacity">
+      <div className="w-10 h-10 rounded-full bg-blue-800 group-hover:bg-[#FF7D00] flex items-center justify-center transition-colors duration-300">
+        <Phone size={18} />
+      </div>
+      <div>
+        <p className="text-[10px] uppercase font-bold text-blue-300">Hotline</p>
+        <p className="text-sm font-bold">+84 383 196 830</p>
+      </div>
+    </div>
+  </div>
+));
+
+ContactInfo.displayName = 'ContactInfo';
+
+const DiscordForm = memo(({ isSubmitting, discord, setDiscord, message, setMessage, discordStatus, onSubmit }) => (
+  <div className="lg:col-span-7 bg-gradient-to-br from-white via-blue-50 to-white p-8 rounded-[32px] shadow-2xl shadow-blue-100/50 border border-blue-100 relative overflow-hidden animate-in fade-in duration-500">
+    {/* Decorative background elements */}
+    <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-20 pointer-events-none" />
+    <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-200 rounded-full blur-3xl opacity-10 pointer-events-none" />
     
-    @keyframes subtle-bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-    .animate-subtle-bounce-hover:hover {
-        animation: subtle-bounce 0.8s ease-in-out infinite;
-    }
+    <div className="relative z-10 space-y-6">
+      {/* Header with Icon */}
+      <div className="flex items-center justify-center gap-4 pb-2">
+        <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-lg shadow-blue-300/50 hover:scale-110 transition-transform duration-300">
+          <MessageCircle className="w-7 h-7 text-yellow-300" />
+        </div>
+        <div>
+          <h3 className="text-2xl font-black text-[#00358E]">Trao Đổi & Kết Nối</h3>
+          <p className="text-xs text-slate-500 font-semibold">Liên hệ trực tiếp với đội ngũ</p>
+        </div>
+      </div>
 
-    html { scroll-behavior: smooth; }
-  `}} />
-);
+      {/* Subtitle */}
+      <p className="text-center text-slate-600 text-sm leading-relaxed px-2">
+        Có câu hỏi hoặc đề xuất? Gửi tin nhắn trực tiếp đến đội ngũ HUFLIT Exam qua Discord ngay!
+      </p>
 
-// --- UTILITY COMPONENTS (Giữ nguyên như bản thiết kế trước) ---
+      {/* Form Fields */}
+      <div className="space-y-3 pt-2">
+        {/* Discord Username Input */}
+        <div className="relative animate-in fade-in duration-500" style={{ animationDelay: '100ms' }}>
+          <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">
+            👤 Discord Username
+          </label>
+          <input
+            type="text"
+            value={discord}
+            onChange={(e) => setDiscord(e.target.value)}
+            placeholder="Ví dụ: user#1234"
+            disabled={isSubmitting}
+            className="w-full px-5 py-3.5 rounded-xl bg-white border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-400"
+          />
+        </div>
 
-// Component cho các mục liên kết (Tài Nguyên, Dịch Vụ)
-const LinkItem = ({ icon: Icon, label, href, description, delay = 0 }) => (
-  <a
-    href={href}
-    className="group flex items-start gap-4 p-3 rounded-lg transition-all duration-300 hover:bg-blue-50 hover:border-l-4 hover:border-yellow-500 active:scale-[0.98] transform animate-fade-in"
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className="p-2 rounded-full bg-blue-100 group-hover:bg-blue-600 transition-colors flex-shrink-0">
-        <Icon className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" />
+        {/* Message Textarea */}
+        <div className="relative animate-in fade-in duration-500" style={{ animationDelay: '200ms' }}>
+          <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">
+            💬 Tin Nhắn Của Bạn
+          </label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Chia sẻ tâm sự, góp ý hoặc đặt câu hỏi của bạn... (Tối thiểu 10 ký tự)"
+            disabled={isSubmitting}
+            className="w-full px-5 py-3.5 rounded-xl bg-white border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition-all duration-300 resize-none h-24 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-400"
+          />
+          <div className="absolute bottom-3 right-3 text-xs font-semibold text-slate-400">
+            {message.length}/10
+          </div>
+        </div>
+        
+        {/* Submit Button */}
+        <button
+          onClick={onSubmit}
+          disabled={isSubmitting}
+          className="w-full py-4 bg-gradient-to-r from-[#00358E] to-blue-700 hover:from-blue-800 hover:to-blue-900 disabled:from-slate-400 disabled:to-slate-500 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-blue-300/50 transition-all duration-300 disabled:cursor-not-allowed text-base active:scale-95 animate-in fade-in duration-500"
+          style={{ animationDelay: '300ms' }}
+        >
+          {isSubmitting ? (
+            <>
+              <div className="w-5 h-5 border-2.5 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Đang gửi...</span>
+            </>
+          ) : (
+            <>
+              <Send size={20} />
+              <span>Gửi Tin Nhắn</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Status Message with Animation */}
+      {discordStatus.message && (
+        <StatusMessage message={discordStatus.message} type={discordStatus.type} />
+      )}
+
+      {/* Social Links */}
+      <div className="pt-4 border-t border-slate-200 flex justify-center gap-4">
+        <SocialButton href="#" icon={Facebook} bgGradient="bg-gradient-to-br from-[#1877F2] to-blue-700" title="Facebook" />
+        <SocialButton href="#" icon={Github} bgGradient="bg-gradient-to-br from-[#24292F] to-black" title="Github" />
+        <SocialButton href="#" icon={Youtube} bgGradient="bg-gradient-to-br from-[#FF0000] to-red-700" title="Youtube" />
+      </div>
     </div>
-    <div className="flex-1 min-w-0">
-      <p className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors truncate text-base">{label}</p>
-      {description && <p className="text-sm text-gray-500 mt-0.5 leading-tight">{description}</p>}
+  </div>
+));
+
+DiscordForm.displayName = 'DiscordForm';
+
+const TopSection = memo(({ isSubmitting, discord, setDiscord, message, setMessage, discordStatus, onSubmit }) => (
+  <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20 items-center">
+    <div className="lg:col-span-5 space-y-6">
+      <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest animate-in fade-in duration-500">
+        <Rocket size={14} /> Chinh phục điểm cao ngay hôm nay
+      </div>
+      <h2 className="text-4xl md:text-5xl font-black text-[#00358E] leading-tight animate-in fade-in duration-500" style={{ animationDelay: '100ms' }}>
+        Nâng tầm kỹ năng <br /> 
+        <span className="text-[#FF7D00] relative">
+          Toeic & English
+          <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 100 8" preserveAspectRatio="none">
+            <path d="M0 7C25 2 75 2 100 7" stroke="#FF7D00" strokeWidth="3" fill="none" opacity="0.3" />
+          </svg>
+        </span>
+      </h2>
+      <p className="text-slate-500 text-lg max-w-md animate-in fade-in duration-500" style={{ animationDelay: '200ms' }}>
+        Hệ thống luyện thi thông minh giúp bạn tối ưu hóa thời gian và đạt kết quả mong muốn với lộ trình cá nhân hóa.
+      </p>
     </div>
-    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-transform translate-x-1 group-hover:translate-x-0 flex-shrink-0 mt-2" />
-  </a>
-);
 
-// Component cho các nút Mạng Xã Hội
-const SocialButton = ({ icon: Icon, label, href, color, delay = 0, hoverColor }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    title={label}
-    aria-label={label}
-    className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${color} text-white flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 transform relative group overflow-hidden animate-fade-in active:scale-95`}
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className={`absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 ${hoverColor}`}></div>
-    <Icon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform" />
-  </a>
-);
+    <DiscordForm 
+      isSubmitting={isSubmitting}
+      discord={discord}
+      setDiscord={setDiscord}
+      message={message}
+      setMessage={setMessage}
+      discordStatus={discordStatus}
+      onSubmit={onSubmit}
+    />
+  </div>
+));
 
-// Component Scroll To Top
-const ScrollToTopButton = () => {
-  const [isVisible, setIsVisible] = useState(false);
+TopSection.displayName = 'TopSection';
 
-  useEffect(() => {
-    const handleScroll = () => setIsVisible(window.scrollY > 300);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+const BottomSection = memo(() => (
+  <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 bg-[#00358E] rounded-lg flex items-center justify-center text-white font-black text-xs">H</div>
+      <span className="text-slate-400 text-sm font-medium">© 2026 <span className="text-slate-900">HUFLIT Exam</span>. All rights reserved.</span>
+    </div>
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    <div className="flex items-center gap-8">
+      {['Điều khoản', 'Bảo mật', 'Cookies'].map((item, i) => (
+        <a key={i} href="#" className="text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors duration-300">{item}</a>
+      ))}
+    </div>
 
-  return (
-    <button
-      onClick={scrollToTop}
-      className={`fixed bottom-6 right-6 w-12 h-12 md:w-14 md:h-14 bg-blue-600 hover:bg-blue-700 text-yellow-300 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 z-50 active:scale-90 group border-2 border-white ${
-        isVisible ? 'opacity-100 translate-y-0 pointer-events-auto animate-pulse-shadow' : 'opacity-0 translate-y-12 pointer-events-none'
-      }`}
-      title="Lên đầu trang"
-      aria-label="Scroll to top"
-    >
-      <ArrowUp className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-y-1 transition-transform" />
-    </button>
-  );
-};
+    <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
+      Crafted with <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" /> by <span className="text-slate-900 font-bold ml-1">Khoale</span>
+    </div>
+  </div>
+));
 
-// --- MAIN FOOTER COMPONENT ---
-const Footer = () => {
-  const currentYear = new Date().getFullYear();
+BottomSection.displayName = 'BottomSection';
+
+// --- MAIN COMPONENT ---
+const Footer = memo(() => {
   const [discord, setDiscord] = useState('');
   const [message, setMessage] = useState('');
-  const [discordStatus, setDiscordStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [discordStatus, setDiscordStatus] = useState({ type: null, message: '' });
 
-  // Webhook URL TỪ YÊU CẦU CỦA BẠN
-  const WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1445970968576266300/MQ5fL9u1d7V1lxubyU8Aa24Q0K40ezP-TG0bBXPp1b3qgcFFpax7SXX_Se5Q0DMzNm6y';
-
-  const handleDiscordSubmit = async () => {
-    if (!discord) {
+  // Handle form submission with Discord webhook integration
+  const handleDiscordSubmit = useCallback(async (e) => {
+    e?.preventDefault();
+    
+    // Validate inputs
+    if (!discord.trim()) {
       setDiscordStatus({ type: 'error', message: 'Vui lòng nhập Discord username' });
       return;
     }
-
-    if (!message || message.trim().length < 10) {
+    
+    if (message.length < 10) {
       setDiscordStatus({ type: 'error', message: 'Tin nhắn phải có ít nhất 10 ký tự' });
       return;
     }
 
     setIsSubmitting(true);
-    setDiscordStatus({ type: 'info', message: 'Đang gửi tin nhắn...' });
+    setDiscordStatus({ type: 'info', message: 'Đang gửi...' });
 
     try {
-      const payload = {
-        username: '📬 HUFLIT Trao Đổi & Kết Nối',
-        avatar_url: 'https://cdn-icons-png.flaticon.com/512/4024/4024969.png', // Icon đại diện
-        embeds: [
-          {
-            color: 0x2563EB, // Màu xanh dương cho embed
-            title: '🎉 Tin Nhắn Mới Từ Thành Viên',
-            description: message,
-            fields: [
-              {
-                name: '👤 Discord Username',
-                value: discord,
-                inline: false
-              },
-              {
-                name: '⏰ Thời Gian',
-                value: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }), // Giờ Việt Nam
-                inline: false
-              }
-            ],
-            thumbnail: {
-              url: 'https://cdn-icons-png.flaticon.com/512/4024/4024969.png'
-            }
-          }
-        ]
-      };
-
-      const response = await fetch(WEBHOOK_URL, {
+      // Send message to Discord webhook
+      const webhookUrl = 'https://discord.com/api/webhooks/1456551898457833564/Mp-FcK12R8udXBLjEtNCnWcC71hX8aYuj00m_PwmoFPzuiY7wejp9_q7qYCvP-u0LWiH';
+      
+      const response = await fetch(webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'HUFLIT Exam System',
+          avatar_url: 'https://cdn-icons-png.flaticon.com/512/3588/3588592.png',
+          embeds: [
+            {
+              color: 0x00358E,
+              title: '📬 Tin Nhắn Mới Từ Khách Hàng',
+              fields: [
+                {
+                  name: '👤 Discord Username',
+                  value: discord,
+                  inline: true,
+                },
+                {
+                  name: '🕐 Thời gian',
+                  value: new Date().toLocaleString('vi-VN'),
+                  inline: true,
+                },
+                {
+                  name: '💬 Tin Nhắn',
+                  value: message,
+                  inline: false,
+                },
+              ],
+              footer: {
+                text: 'HUFLIT Exam - Discord Integration',
+              },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        }),
       });
 
-      if (response.ok) {
-        setDiscordStatus({ type: 'success', message: '✓ Gửi thành công! Cảm ơn bạn đã kết nối với chúng tôi.' });
-        setDiscord('');
-        setMessage('');
-        setTimeout(() => setDiscordStatus({ type: '', message: '' }), 4000);
-      } else {
-        // Discord thường trả về status 200/204 nếu thành công. Bất kỳ lỗi nào khác sẽ bị bắt ở đây.
-        throw new Error(`Failed to send (Status: ${response.status})`);
+      if (!response.ok) {
+        throw new Error('Failed to send message');
       }
+      
+      // Success feedback
+      setDiscordStatus({ type: 'success', message: 'Tin nhắn đã được gửi thành công! Cảm ơn bạn 🎉' });
+      setDiscord('');
+      setMessage('');
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setDiscordStatus({ type: null, message: '' }), 5000);
     } catch (error) {
-      console.error('Discord Webhook Error:', error);
-      setDiscordStatus({ type: 'error', message: 'Có lỗi xảy ra khi gửi tin. Vui lòng kiểm tra lại Username.' });
+      console.error('Discord submission error:', error);
+      setDiscordStatus({ type: 'error', message: 'Có lỗi xảy ra, vui lòng thử lại' });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [discord, message]);
 
-  // Dữ liệu được tổ chức lại (Giữ nguyên)
-  const resources = [
-    { icon: BookOpen, label: 'Thư viện đề thi', href: '#', description: '500+ bài tập trắc nghiệm' },
-    { icon: Zap, label: 'Tài liệu học tập', href: '#', description: 'Tài liệu độc quyền, miễn phí' },
-    { icon: HelpCircle, label: 'Câu hỏi thường gặp', href: '#', description: 'Giải đáp nhanh chóng' },
-  ];
+  // Memoize link data
+  const learningLinks = useMemo(() => [
+    { label: 'Thư viện đề thi', icon: Sparkles },
+    { label: 'Lộ trình học tập', icon: TrendingUp },
+    { label: 'Mẹo làm bài thi', icon: Zap },
+  ], []);
 
-  const services = [
-    { icon: Users, label: 'Cộng đồng học tập', href: '#', description: 'Kết nối và trao đổi kinh nghiệm' },
-    { icon: TrendingUp, label: 'Theo dõi tiến độ', href: '#', description: 'Báo cáo chi tiết quá trình học' },
-    { icon: Award, label: 'Chứng chỉ', href: '#', description: 'Công nhận thành tích' },
-  ];
-
-  const contactDetails = [
-    { icon: Mail, label: 'Email', value: 'lekhoale30092003@gmail.com', href: 'mailto:lekhoale30092003@gmail.com' },
-    { icon: Phone, label: 'Hotline', value: '+84 383 196 830', href: 'tel:+84383196830' },
-    { icon: MapPin, label: 'Địa chỉ', value: 'TP. Hồ Chí Minh, Việt Nam', href: '#' },
-  ];
-
-  // Cập nhật Social Links theo yêu cầu (Giữ nguyên)
-  const socialLinks = [
-    { icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/dnkhoaoanoa/?locale=vi_VN', color: 'bg-blue-600', hoverColor: 'bg-blue-700' },
-     { icon: Github, label: 'GitHub', href: 'https://github.com/khoale-dev-code', color: 'bg-gray-800', hoverColor: 'bg-gray-900' },
-    { icon: Youtube, label: 'YouTube', href: 'https://www.youtube.com/@KhoaL%C3%AA-h7x', color: 'bg-red-600', hoverColor: 'bg-red-700' },
-    { icon: Mail, label: 'Mail', href: 'mailto:lekhoale30092003@gmail.com', color: 'bg-yellow-500', hoverColor: 'bg-yellow-600' },
-  ];
-
-  const legalLinks = [
-    { label: 'Điều khoản sử dụng', href: '#' },
-    { label: 'Chính sách bảo mật', href: '#' },
-    { label: 'Liên hệ hỗ trợ', href: '#' },
-  ];
-
-  // Styles (Giữ nguyên)
-  const discordCardStyle = "relative bg-white rounded-xl border-2 border-yellow-400 p-6 shadow-xl hover:shadow-2xl transition-all duration-500";
-  const discordHeaderStyle = "text-xl font-bold text-blue-700";
-  const focusInputStyle = "focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+  const supportLinks = useMemo(() => [
+    { label: 'Cộng đồng thảo luận', icon: MessageCircle },
+    { label: 'Câu hỏi thường gặp', icon: HelpCircle },
+    { label: 'Vinh danh thủ khoa', icon: Award },
+  ], []);
 
   return (
-    <>
-      <GlobalStyles />
-      <footer className="bg-gray-50 text-gray-900 font-sans relative overflow-hidden">
+    <footer className="relative bg-[#F8FAFC] pt-24 pb-12 overflow-hidden border-t border-slate-200">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-20 pointer-events-none" />
+      <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-200 rounded-full blur-[100px] opacity-30 pointer-events-none" />
+      <div className="absolute top-1/2 -right-24 w-64 h-64 bg-orange-200 rounded-full blur-[100px] opacity-20 pointer-events-none" />
 
-        {/* --- MAIN CONTENT SECTION --- */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 z-10">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        
+        {/* TOP SECTION */}
+        <TopSection 
+          isSubmitting={isSubmitting}
+          discord={discord}
+          setDiscord={setDiscord}
+          message={message}
+          setMessage={setMessage}
+          discordStatus={discordStatus}
+          onSubmit={handleDiscordSubmit}
+        />
 
-          {/* Header Section */}
-          <div className="text-center mb-12 md:mb-16 animate-fade-in">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-2">
-              <span className="text-blue-600">HUFLIT</span>
-              <span className="text-yellow-500 ml-3">Exam Prep</span>
-            </h2>
-           
-          </div>
+        {/* MIDDLE SECTION: LINKS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-20">
+          <FooterCard title="Tài Nguyên Học Tập" icon={BookOpen}>
+            {learningLinks.map((link, i) => (
+              <SmartLink key={i} label={link.label} href="#" icon={link.icon} />
+            ))}
+          </FooterCard>
 
-          {/* Content Grid - 4 Columns on Desktop, 2 on Tablet, 1 on Mobile */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            
-            {/* Column 1: Tài Nguyên */}
-            <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
-              <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-yellow-500" />
-                Tài Nguyên
-              </h3>
-              <nav className="space-y-2">
-                {resources.map((item, idx) => (
-                  <LinkItem key={idx} {...item} delay={100 + idx * 50} />
-                ))}
-              </nav>
-            </div>
+          <FooterCard title="Hỗ Trợ Thành Viên" icon={Users}>
+            {supportLinks.map((link, i) => (
+              <SmartLink key={i} label={link.label} href="#" icon={link.icon} />
+            ))}
+          </FooterCard>
 
-            {/* Column 2: Dịch Vụ */}
-            <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-              <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-yellow-500" />
-                Dịch Vụ
-              </h3>
-              <nav className="space-y-2">
-                {services.map((item, idx) => (
-                  <LinkItem key={idx} {...item} delay={200 + idx * 50} />
-                ))}
-              </nav>
-            </div>
-            
-            {/* Column 3: Liên Hệ & Mạng Xã Hội */}
-            <div className="space-y-8 animate-fade-in" style={{ animationDelay: '250ms' }}>
-                <div>
-                    <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
-                        <Phone className="w-5 h-5 text-yellow-500" />
-                        Thông Tin Liên Hệ
-                    </h3>
-                    <div className="space-y-3">
-                        {contactDetails.map((item, idx) => (
-                            <a
-                                key={idx}
-                                href={item.href}
-                                className="group flex items-center gap-3 p-2 rounded-lg transition-all duration-300 hover:bg-yellow-50 active:scale-95 text-gray-700"
-                                style={{ animationDelay: `${300 + idx * 50}ms` }}
-                            >
-                                <item.icon className="w-5 h-5 text-blue-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors text-sm truncate">{item.label}</p>
-                                    <p className="text-xs text-gray-600 mt-0.5 group-hover:text-blue-600 truncate">{item.value}</p>
-                                </div>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className="text-lg font-bold text-blue-700 mb-5 border-b-2 border-yellow-400 pb-2 flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-yellow-500" />
-                        Kết Nối
-                    </h3>
-                    <div className="flex gap-4 flex-wrap">
-                        {socialLinks.map((link, idx) => (
-                            <SocialButton key={idx} {...link} delay={400 + idx * 50} />
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Column 4: Discord Connect Form */}
-            <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: '400ms' }}>
-              <div className={discordCardStyle}>
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <div className="p-3 bg-blue-600 rounded-xl animate-subtle-bounce-hover">
-                    <MessageCircle className="w-6 h-6 text-yellow-300" />
-                  </div>
-                  <h3 className={discordHeaderStyle}>Trao Đổi & Kết Nối</h3>
-                </div>
-
-                <p className="text-xs text-gray-600 mb-4 text-center">Gửi tin nhắn trực tiếp đến đội ngũ qua Discord</p>
-
-                <div className="space-y-3 mb-4">
-                  <input
-                    type="text"
-                    value={discord}
-                    onChange={(e) => setDiscord(e.target.value)}
-                    placeholder="Discord Username (VD: user#1234)"
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-lg border border-gray-300 bg-white ${focusInputStyle} outline-none text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
-                  />
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Chia sẻ tâm sự/góp ý của bạn... (Tối thiểu 10 ký tự)"
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 rounded-lg border border-gray-300 bg-white ${focusInputStyle} outline-none text-sm font-medium transition-all resize-none h-20 disabled:opacity-50 disabled:cursor-not-allowed`}
-                  />
-                  <button
-                    onClick={handleDiscordSubmit}
-                    disabled={isSubmitting}
-                    className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-yellow-300 rounded-lg font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin"></div>
-                        <span>Đang gửi...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        <span>Gửi Tin Nhắn</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {discordStatus.message && (
-                  <div
-                    className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg animate-fade-in ${
-                      discordStatus.type === 'success'
-                        ? 'bg-green-100 text-green-700 border border-green-300'
-                        : discordStatus.type === 'error'
-                        ? 'bg-red-100 text-red-700 border border-red-300'
-                        : 'bg-blue-100 text-blue-700 border border-blue-300' // Info/Loading
-                    }`}
-                  >
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span className="font-medium">{discordStatus.message}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <FooterCard title="Liên Hệ Trực Tiếp" icon={Phone}>
+            <ContactInfo />
+          </FooterCard>
         </div>
 
-        {/* --- BOTTOM BAR (COPYRIGHT & LEGAL) --- */}
-        <div className="bg-blue-900 border-t border-blue-700 relative">
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 z-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-center">
-              
-              {/* Copyright */}
-              <div className="text-center md:text-left order-3 md:order-1">
-                <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-                  © {currentYear} <span className="font-black text-white">HUFLIT Exam Prep</span>
-                  <br />
-                  <span className="text-yellow-400 text-xs">Made with</span>
-                  <Heart className="w-3 h-3 inline ml-1 text-red-500 fill-red-500 mx-1 animate-pulse" />
-                  <span className="text-yellow-400 text-xs">by Khoale</span>
-                </p>
-              </div>
-
-              {/* Legal Links */}
-              <div className="text-center order-2">
-                <nav className="flex flex-wrap gap-2 md:gap-4 justify-center">
-                  {legalLinks.map((link, idx) => (
-                    <a
-                      key={idx}
-                      href={link.href}
-                      className="text-gray-400 hover:text-yellow-400 transition-colors font-medium text-xs sm:text-sm relative group overflow-hidden"
-                    >
-                      {link.label}
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
-                    </a>
-                  ))}
-                </nav>
-              </div>
-
-              {/* Version */}
-              <div className="text-center md:text-right order-1 md:order-3">
-                <p className="text-gray-500 text-xs">
-                  <span className="text-yellow-400 font-semibold">v2.1</span> • Designed for Excellence
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <ScrollToTopButton />
-      </footer>
-    </>
+        {/* BOTTOM SECTION */}
+        <BottomSection />
+      </div>
+    </footer>
   );
-};
+});
+
+Footer.displayName = 'Footer';
 
 export default Footer;

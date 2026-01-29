@@ -14,12 +14,12 @@ const MainLayout = ({
   onChatClick,
   onProfileClick,
   viewMode,
-  onlineCount,    // ✅ NHẬN TỪ APP
-  totalUsers,     // ✅ NHẬN TỪ APP
-  onAnswersClick  // ✅ NHẬN TỪ APP
+  onlineCount,
+  totalUsers,
+  onAnswersClick
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col overflow-visible">
       
       {/* Navbar */}
       <Navbar
@@ -32,20 +32,20 @@ const MainLayout = ({
         onChatClick={onChatClick}
         onProfileClick={onProfileClick}
         viewMode={viewMode}
-        onlineCount={onlineCount}      // ✅ TRUYỀN VÀO NAVBAR
-        totalUsers={totalUsers}        // ✅ TRUYỀN VÀO NAVBAR
-        onAnswersClick={onAnswersClick} // ✅ TRUYỀN VÀO NAVBAR
+        onlineCount={onlineCount}
+        totalUsers={totalUsers}
+        onAnswersClick={onAnswersClick}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8">
+      {/* Main Content - NO OVERFLOW RESTRICTIONS */}
+      <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8 overflow-visible w-full relative z-0">
         {children}
       </main>
 
-      {/* Footer - TRUYỀN PROPS XUỐNG */}
+      {/* Footer */}
       <Footer 
-        onlineCount={onlineCount}  // ✅ TRUYỀN VÀO FOOTER
-        totalUsers={totalUsers}    // ✅ TRUYỀN VÀO FOOTER
+        onlineCount={onlineCount}
+        totalUsers={totalUsers}
       />
       
     </div>
