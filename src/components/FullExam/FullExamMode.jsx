@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Target, TrendingUp, Award, FileText, ChevronDown, Headphones, Send, ArrowRight, Flag, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Target, TrendingUp, Award, FileText, ChevronDown, Headphones, Send, ArrowRight, Flag, RotateCcw, Lock } from 'lucide-react';
 import ContentDisplay from '../Display/ContentDisplay';
 import { EXAM_LIST, getExamById } from '../../data/examData';
 import { useUserProgress } from '../../hooks/useUserProgress';
 import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
 
-// ===== THEME (Prep.vn Inspired - Enhanced) =====
+// ===== THEME =====
 const COLORS = {
   blue: '#0066CC',
   darkBlue: '#004399',
@@ -28,7 +28,6 @@ const EXAM_STRUCTURE = {
     totalQuestions: 20,
     totalPoints: 100,
     pointsPerQuestion: 5,
-    listenings: 2,
   },
   reading: {
     title: 'READING',
@@ -111,29 +110,15 @@ const ModernDropdown = memo(({ examId, setExamId, isOpen, setIsOpen }) => {
 
       <style>{`
         @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
 });
-
-ModernDropdown.displayName = 'ModernDropdown';
 
 // ===== QUESTION CARD =====
 const QuestionCard = memo(({ 
@@ -209,11 +194,10 @@ const QuestionCard = memo(({
   );
 }, (p, n) => p.selectedAnswer === n.selectedAnswer && p.questionNum === n.questionNum);
 
-QuestionCard.displayName = 'QuestionCard';
-
 // ===== PART NAVIGATION =====
 const PartNavigation = memo(({ 
-  currentPart, parts, answers, currentSection, questionsPerPart, onPartChange 
+  currentPart, parts, answers, currentSection, questionsPerPart, onPartChange, 
+  playedParts = []  // 👈 Parts đã nghe
 }) => {
   const partStats = useMemo(() => {
     const stats = {};
@@ -234,22 +218,28 @@ const PartNavigation = memo(({
           const answered = partStats[partNum] || 0;
           const isCurrent = currentPart === partNum;
           const isComplete = answered === questionsPerPart;
+          const isPlayed = playedParts.includes(partNum);  // 👈 Check đã nghe
           
           return (
             <button
               key={partNum}
-              onClick={() => onPartChange(partNum)}
-              className={`py-4 px-3 rounded-lg font-bold text-sm transition-all duration-200 ease-out border-2 text-center hover:shadow-md active:scale-95 ${
-                isCurrent 
+              onClick={() => !isPlayed && onPartChange(partNum)}  // 👈 Disable nếu đã nghe
+              disabled={isPlayed}  // 👈 Disable button
+              className={`py-4 px-3 rounded-lg font-bold text-sm transition-all duration-200 ease-out border-2 text-center hover:shadow-md active:scale-95 relative ${
+                isPlayed  // 👈 Nếu đã nghe
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : isCurrent 
                   ? 'text-white border-blue-600 shadow-lg scale-100' 
                   : isComplete 
                   ? 'text-white border-blue-600 opacity-80' 
                   : 'text-slate-700 border-slate-200 hover:border-slate-300'
               }`}
               style={{
-                backgroundColor: isCurrent || isComplete ? COLORS.blue : COLORS.white,
+                backgroundColor: isPlayed ? '#d1d5db' : (isCurrent || isComplete ? COLORS.blue : COLORS.white),
               }}
+              title={isPlayed ? 'Đã nghe rồi, không thể quay lại' : `Part ${partNum}`}
             >
+              {isPlayed && <Lock className="w-3 h-3 absolute top-1 right-1" />}  {/* 👈 Icon lock */}
               <div className="font-bold">P{partNum}</div>
               <div className="text-xs opacity-75 mt-1">{answered}/{questionsPerPart}</div>
             </button>
@@ -258,94 +248,7 @@ const PartNavigation = memo(({
       </div>
     </div>
   );
-}, (p, n) => p.currentPart === n.currentPart && Object.keys(p.answers).length === Object.keys(n.answers).length);
-
-PartNavigation.displayName = 'PartNavigation';
-
-// ===== ANSWER REVIEW =====
-const SimpleAnswerReview = memo(({ examData, answers, sectionType, startPart, endPart }) => {
-  const [expandedParts, setExpandedParts] = useState(new Set([startPart]));
-
-  const reviewData = useMemo(() => {
-    const data = [];
-    for (let part = startPart; part <= endPart; part++) {
-      const partData = examData?.parts?.[`part${part}`];
-      if (!partData?.questions) continue;
-      partData.questions.forEach((q, i) => {
-        const key = `${sectionType}-part${part}-q${i + 1}`;
-        data.push({
-          partNum: part,
-          qNum: i + 1,
-          q,
-          userAns: answers[key],
-          correct: answers[key] === q.correct,
-          key
-        });
-      });
-    }
-    return data;
-  }, [examData, answers, sectionType, startPart, endPart]);
-
-  const togglePart = useCallback((partNum) => {
-    setExpandedParts(p => {
-      const n = new Set(p);
-      n.has(partNum) ? n.delete(partNum) : n.add(partNum);
-      return n;
-    });
-  }, []);
-
-  const parts = useMemo(() => [...new Set(reviewData.map(d => d.partNum))], [reviewData]);
-
-  return (
-    <div className="space-y-3">
-      {parts.map(part => {
-        const partItems = reviewData.filter(d => d.partNum === part);
-        const correct = partItems.filter(d => d.correct).length;
-        const isOpen = expandedParts.has(part);
-
-        return (
-          <div key={part} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
-            <button
-              onClick={() => togglePart(part)}
-              className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors duration-200 ease-out"
-            >
-              <span className="font-semibold text-slate-900">
-                Part {part} <span className="text-sm font-normal text-slate-600">({correct}/{partItems.length} correct)</span>
-              </span>
-              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isOpen && (
-              <div className="p-5 space-y-3 bg-slate-50 border-t border-slate-200 animate-in fade-in duration-200">
-                {partItems.map((item) => (
-                  <div key={item.key} className={`p-4 rounded-lg border-l-4 transition-colors duration-200 ${
-                    item.correct 
-                      ? 'bg-emerald-50 border-l-emerald-500' 
-                      : 'bg-rose-50 border-l-rose-500'
-                  }`}>
-                    <p className="font-medium text-sm text-slate-900 mb-2">Q{item.qNum}: {item.q.question}</p>
-                    <div className="space-y-1 text-xs">
-                      <p className={item.correct ? 'text-emerald-700' : 'text-rose-700'}>
-                        <span className="font-semibold">Your answer:</span> {item.userAns !== undefined ? String.fromCharCode(65 + item.userAns) + '. ' + item.q.options[item.userAns] : '(Not answered)'}
-                      </p>
-                      {!item.correct && (
-                        <p className="text-emerald-700 font-semibold">
-                          <span className="font-semibold">Correct:</span> {String.fromCharCode(65 + item.q.correct)}. {item.q.options[item.q.correct]}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
 });
-
-SimpleAnswerReview.displayName = 'SimpleAnswerReview';
 
 // ===== MAIN COMPONENT =====
 const FullExamMode = ({ onComplete }) => {
@@ -362,6 +265,9 @@ const FullExamMode = ({ onComplete }) => {
   const [examData, setExamData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // 🔴 KEY STATE: Track which parts have been listened to
+  const [playedListeningParts, setPlayedListeningParts] = useState(new Set());
 
   const cfg = EXAM_STRUCTURE[section];
 
@@ -385,6 +291,96 @@ const FullExamMode = ({ onComplete }) => {
       setMode('results');
     }
   }, [section]);
+
+  // 🔴 KEY CALLBACK: Called when audio ends
+  const handleAudioEnd = useCallback(() => {
+    console.log(`🎵 Audio kết thúc ở Part ${part}`);
+    
+    if (section === 'listening') {
+      // Mark this part as played (listened to)
+      setPlayedListeningParts(prev => {
+        const newSet = new Set(prev);
+        newSet.add(part);
+        console.log(`✅ Marked Part ${part} as played. Now played: [${Array.from(newSet).join(', ')}]`);
+        return newSet;
+      });
+
+      // Auto advance to next part
+      if (part < 4) {
+        console.log(`➡️ Auto advancing: Part ${part} → Part ${part + 1}`);
+        setPart(part + 1);
+      } else {
+        // Last listening part - switch to reading
+        console.log(`🎯 Part 4 done! Switching to Reading Section`);
+        setSection('reading');
+        setPart(5);
+        setTimeLeft(READING_TIME);
+      }
+    }
+  }, [section, part]);
+
+  // Load exam data
+  useEffect(() => {
+    if (mode === 'setup') return;
+    setLoading(true);
+    getExamById(examId).then(data => {
+      setExamData(data);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [examId, mode]);
+
+  // Timer
+  useEffect(() => {
+    if (mode !== 'exam' || isPaused) return;
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        const newTime = prev - 1;
+        if (newTime === WARNING_TIME) setShowWarning(true);
+        if (newTime <= 0) {
+          if (section === 'listening') {
+            setSection('reading');
+            setPart(5);
+            setTimeLeft(READING_TIME);
+          } else {
+            setMode('results');
+          }
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mode, isPaused, section]);
+
+  useEffect(() => {
+    if (mode === 'exam') {
+      setTimeLeft(section === 'listening' ? LISTENING_TIME : READING_TIME);
+      setPart(section === 'listening' ? 1 : 5);
+      setIsPaused(false);
+    }
+  }, [mode, section]);
+
+  // Save progress
+  useEffect(() => {
+    if (mode !== 'results' || !currentUser || saved || progressLoading) return;
+    const results = calcResults();
+    saveProgress({
+      exam: examId,
+      part: 'full',
+      score: results.averageScore,
+      answers,
+      correctAnswers: results.listening.correct + results.reading.correct,
+      listeningScore: results.listening.points,
+      readingScore: results.reading.points,
+      testType: 'full-exam',
+      listeningCorrect: results.listening.correct,
+      readingCorrect: results.reading.correct,
+      totalQuestions: 60,
+      totalScore: results.totalScore,
+      cefrLevel: results.cefr.level,
+      isDraft: false,
+    }).then(() => setSaved(true)).catch(err => console.error('Save failed:', err));
+  }, [mode, currentUser, saved, progressLoading, examId]);
 
   const calcResults = useCallback(() => {
     const res = {
@@ -436,73 +432,10 @@ const FullExamMode = ({ onComplete }) => {
   const answeredCount = useMemo(() => Object.keys(answers).filter(k => k.startsWith(`${section}-`)).length, [answers, section]);
   const progress = (answeredCount / cfg.totalQuestions) * 100;
 
-  useEffect(() => {
-    if (mode === 'setup') return;
-    setLoading(true);
-    getExamById(examId).then(data => {
-      setExamData(data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [examId, mode]);
-
-  useEffect(() => {
-    if (mode !== 'exam' || isPaused) return;
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        const newTime = prev - 1;
-        if (newTime === WARNING_TIME) setShowWarning(true);
-        if (newTime <= 0) {
-          if (section === 'listening') {
-            setSection('reading');
-            setPart(5);
-            setTimeLeft(READING_TIME);
-          } else {
-            setMode('results');
-          }
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [mode, isPaused, section]);
-
-  useEffect(() => {
-    if (mode === 'exam') {
-      setTimeLeft(section === 'listening' ? LISTENING_TIME : READING_TIME);
-      setPart(section === 'listening' ? 1 : 5);
-      setIsPaused(false);
-    }
-  }, [mode, section]);
-
-  useEffect(() => {
-    if (mode !== 'results' || !currentUser || saved || progressLoading) return;
-    
-    const results = calcResults();
-    
-    saveProgress({
-      exam: examId,
-      part: 'full',
-      score: results.averageScore,
-      answers,
-      correctAnswers: results.listening.correct + results.reading.correct,
-      listeningScore: results.listening.points,
-      readingScore: results.reading.points,
-      testType: 'full-exam',
-      listeningCorrect: results.listening.correct,
-      readingCorrect: results.reading.correct,
-      totalQuestions: 60,
-      totalScore: results.totalScore,
-      cefrLevel: results.cefr.level,
-      isDraft: false,
-    }).then(() => setSaved(true)).catch(err => console.error('Save failed:', err));
-  }, [mode, currentUser, saved, progressLoading, examId]);
-
-  // === SETUP SCREEN ===
+  // ===== SETUP SCREEN =====
   if (mode === 'setup') {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#f0f9ff' }}>
-        {/* Gradient Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div 
             className="absolute top-0 right-1/4 w-96 h-96 rounded-full opacity-10"
@@ -533,7 +466,6 @@ const FullExamMode = ({ onComplete }) => {
             <div className="h-1.5" style={{ backgroundColor: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.orange} 100%)` }} />
             
             <div className="p-8">
-              {/* Test Info Grid */}
               <div className="grid grid-cols-4 gap-4 mb-8">
                 {[
                   { num: '8', label: 'Parts' },
@@ -551,7 +483,6 @@ const FullExamMode = ({ onComplete }) => {
                 ))}
               </div>
 
-              {/* Exam Selection */}
               <div className="mb-8">
                 <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Chọn Bài Thi</label>
                 <ModernDropdown 
@@ -562,85 +493,6 @@ const FullExamMode = ({ onComplete }) => {
                 />
               </div>
 
-              {/* Test Sections */}
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="p-6 rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Headphones className="w-6 h-6" style={{ color: COLORS.blue }} />
-                    <h3 className="font-bold text-slate-900 uppercase tracking-wide">Listening</h3>
-                  </div>
-                  <div className="space-y-2.5 text-sm text-slate-600">
-                    <p className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      30 phút
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      20 câu (5 câu/part)
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      Nghe 2 lần
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Trophy className="w-4 h-4" />
-                      100 điểm (5 điểm/câu)
-                    </p>
-                  </div>
-                </div>
-                <div className="p-6 rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <BookOpen className="w-6 h-6" style={{ color: COLORS.blue }} />
-                    <h3 className="font-bold text-slate-900 uppercase tracking-wide">Reading</h3>
-                  </div>
-                  <div className="space-y-2.5 text-sm text-slate-600">
-                    <p className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      60 phút
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      40 câu (10 câu/part)
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4" />
-                      Đọc hiểu
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Trophy className="w-4 h-4" />
-                      100 điểm (2.5 điểm/câu)
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* CEFR Levels */}
-              <div className="mb-8 p-6 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
-                <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Award className="w-5 h-5" style={{ color: COLORS.blue }} />
-                  Chuẩn CEFR
-                </h3>
-                <div className="grid grid-cols-5 gap-3 text-sm">
-                  {[
-                    { level: 'A1', range: '0-14', color: '#DC2626' },
-                    { level: 'A2', range: '15-24', color: '#F59E0B' },
-                    { level: 'B1', range: '25-49', color: COLORS.orange },
-                    { level: 'B2', range: '50-74', color: COLORS.blue },
-                    { level: 'C1', range: '75-100', color: '#059669' }
-                  ].map((item, idx) => (
-                    <div 
-                      key={idx}
-                      className="text-center p-3 rounded-lg border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out"
-                      style={{ backgroundColor: item.color + '10' }}
-                    >
-                      <p className="font-bold" style={{ color: item.color }}>{item.level}</p>
-                      <p className="text-xs mt-1" style={{ color: item.color + 'cc' }}>{item.range}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Start Button */}
               <button
                 onClick={() => setMode('exam')}
                 disabled={!examId || loading}
@@ -667,22 +519,11 @@ const FullExamMode = ({ onComplete }) => {
             </div>
           </div>
         </div>
-
-        <style>{`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-
-          body {
-            animation: fadeIn 0.3s ease-out;
-          }
-        `}</style>
       </div>
     );
   }
 
-  // === EXAM SCREEN ===
+  // ===== EXAM SCREEN =====
   if (mode === 'exam') {
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#f8fafc' }}>
@@ -760,12 +601,17 @@ const FullExamMode = ({ onComplete }) => {
         <div className="max-w-6xl mx-auto p-4 space-y-6 pb-32">
           {/* Content Display */}
           {partData && (
-            <ContentDisplay
-              partData={partData}
-              selectedPart={`part${part}`}
-              currentQuestionIndex={0}
-              testType={section}
-            />
+            <div className="relative z-20">
+              <ContentDisplay
+                partData={partData}
+                selectedPart={`part${part}`}
+                currentQuestionIndex={0}
+                testType={section}
+                examId={examId}
+                isPartPlayed={playedListeningParts.has(part)}  // 👈 Pass this
+                onAudioEnd={section === 'listening' && !playedListeningParts.has(part) ? handleAudioEnd : null}  // 👈 Only call if not played
+              />
+            </div>
           )}
 
           {/* Questions */}
@@ -795,13 +641,20 @@ const FullExamMode = ({ onComplete }) => {
             currentSection={section}
             questionsPerPart={cfg.questionsPerPart}
             onPartChange={setPart}
+            playedParts={section === 'listening' ? Array.from(playedListeningParts) : []}  // 👈 Pass played parts
           />
 
           {/* Navigation Buttons */}
           <div className="flex gap-4">
             <button
-              onClick={() => setPart(p => Math.max(section === 'listening' ? 1 : 5, p - 1))}
-              disabled={part === (section === 'listening' ? 1 : 5)}
+              onClick={() => {
+                if (section === 'listening' && playedListeningParts.has(part - 1)) {
+                  alert('❌ Bạn không thể quay lại part đã nghe');
+                  return;
+                }
+                setPart(p => Math.max(section === 'listening' ? 1 : 5, p - 1));
+              }}
+              disabled={part === (section === 'listening' ? 1 : 5) || (section === 'listening' && playedListeningParts.has(part - 1))}
               className="flex-1 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
               style={{ backgroundColor: COLORS.blue }}
             >
@@ -836,21 +689,13 @@ const FullExamMode = ({ onComplete }) => {
     );
   }
 
-  // === RESULTS SCREEN ===
+  // ===== RESULTS SCREEN =====
   if (mode === 'results') {
     const res = calcResults();
     const percentage = ((res.listening.correct + res.reading.correct) / 60) * 100;
 
     return (
       <div className="min-h-screen" style={{ backgroundColor: '#f0f9ff' }}>
-        {/* Gradient Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div 
-            className="absolute top-0 right-1/4 w-96 h-96 rounded-full opacity-10"
-            style={{ backgroundColor: COLORS.blue, filter: 'blur(40px)' }}
-          />
-        </div>
-
         <div className="relative max-w-4xl mx-auto p-6">
           {/* Results Header */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-slate-100">
@@ -877,9 +722,7 @@ const FullExamMode = ({ onComplete }) => {
           >
             <div className="p-8 text-center">
               <p className="text-sm font-bold text-slate-600 uppercase tracking-wide mb-2">Điểm trung bình</p>
-              <div 
-                className="text-6xl font-black text-slate-900 mb-6 animate-in fade-in duration-700"
-              >
+              <div className="text-6xl font-black text-slate-900 mb-6 animate-in fade-in duration-700">
                 {res.averageScore.toFixed(1)}
               </div>
               <div className="flex items-center justify-center gap-6">
@@ -897,71 +740,6 @@ const FullExamMode = ({ onComplete }) => {
             </div>
           </div>
 
-          {/* Score Breakdown */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {[
-              { label: 'Listening', points: res.listening.points.toFixed(0), correct: res.listening.correct, total: 20, pointPerQ: '5 điểm/câu' },
-              { label: 'Reading', points: res.reading.points.toFixed(0), correct: res.reading.correct, total: 40, pointPerQ: '2.5 điểm/câu' },
-              { label: 'Tổng điểm', points: res.totalScore.toFixed(0), correct: null, total: 200, pointPerQ: `(Trung bình: ${res.averageScore.toFixed(1)})`, isTotal: true }
-            ].map((item, idx) => (
-              <div 
-                key={idx}
-                className="bg-white rounded-xl p-6 border-t-4 shadow-sm hover:shadow-lg transition-shadow duration-300"
-                style={{ borderTopColor: item.isTotal ? COLORS.orange : COLORS.blue }}
-              >
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-3">{item.label}</p>
-                <div 
-                  className="text-3xl font-black text-slate-900 mb-2"
-                  style={{ color: item.isTotal ? COLORS.blue : 'inherit' }}
-                >
-                  {item.points}
-                </div>
-                <p className="text-sm text-slate-600">
-                  {item.correct !== null ? `${item.correct}/${item.total} câu` : `/${item.total} điểm`}
-                </p>
-                <p className="text-xs text-slate-500 mt-2">({item.pointPerQ})</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Overall Progress */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 mb-8">
-            <p className="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide">Tỷ lệ câu đúng</p>
-            <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden mb-3">
-              <div 
-                className="h-full transition-all duration-1000 ease-out" 
-                style={{ width: `${percentage}%`, backgroundColor: COLORS.blue }} 
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-semibold text-slate-600">{percentage.toFixed(0)}%</span>
-              <span className="text-sm font-semibold text-slate-600">{res.listening.correct + res.reading.correct}/60 câu</span>
-            </div>
-          </div>
-
-          {/* Detailed Reviews */}
-          <div className="space-y-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
-              <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent flex items-center gap-3">
-                <TrendingUp className="w-5 h-5" style={{ color: COLORS.blue }} />
-                <h3 className="font-bold text-lg text-slate-900">Chi tiết Listening</h3>
-              </div>
-              <div className="p-6">
-                <SimpleAnswerReview examData={examData} answers={answers} sectionType="listening" startPart={1} endPart={4} />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
-              <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent flex items-center gap-3">
-                <TrendingUp className="w-5 h-5" style={{ color: COLORS.blue }} />
-                <h3 className="font-bold text-lg text-slate-900">Chi tiết Reading</h3>
-              </div>
-              <div className="p-6">
-                <SimpleAnswerReview examData={examData} answers={answers} sectionType="reading" startPart={5} endPart={8} />
-              </div>
-            </div>
-          </div>
-
           {/* Action Buttons */}
           <div className="flex gap-4">
             <button
@@ -971,6 +749,7 @@ const FullExamMode = ({ onComplete }) => {
                 setSection('listening');
                 setPart(1);
                 setSaved(false);
+                setPlayedListeningParts(new Set());
               }}
               className="flex-1 py-4 rounded-xl font-bold text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95 uppercase tracking-wide flex items-center justify-center gap-2"
               style={{ backgroundColor: COLORS.blue, background: `linear-gradient(135deg, ${COLORS.blue} 0%, ${COLORS.darkBlue} 100%)` }}
@@ -985,6 +764,7 @@ const FullExamMode = ({ onComplete }) => {
                 setSection('listening');
                 setPart(1);
                 setSaved(false);
+                setPlayedListeningParts(new Set());
                 onComplete?.();
               }}
               className="flex-1 py-4 rounded-xl font-bold text-slate-900 bg-white border-2 border-slate-300 transition-all duration-200 ease-out hover:bg-slate-50 hover:shadow-lg active:scale-95 uppercase tracking-wide flex items-center justify-center gap-2"
@@ -994,28 +774,6 @@ const FullExamMode = ({ onComplete }) => {
             </button>
           </div>
         </div>
-
-        <style>{`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-
-          @keyframes slideDown {
-            from {
-              opacity: 0;
-              transform: translateY(-8px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-
-          .animate-in {
-            animation: fadeIn 0.4s ease-out;
-          }
-        `}</style>
       </div>
     );
   }

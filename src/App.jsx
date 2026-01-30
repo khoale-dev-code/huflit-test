@@ -139,11 +139,16 @@ const PartTestContent = memo(({
     (selectedPart === 'part6' || selectedPart === 'part7' || selectedPart === 'part8');
 
   return (
-    <div className="space-y-6 w-full relative z-10">
-      {/* ✅ REMOVE HeaderSection from here - it's in PartSelector */}
-      {isSignedIn && <MemoizedUserProfile />}
+    <div className="w-full">
+      {/* User Profile - Compact */}
+      {isSignedIn && (
+        <div className="mb-4">
+          <MemoizedUserProfile />
+        </div>
+      )}
 
-      <div className="mt-3 w-full">
+      {/* Part Selector */}
+      <div className="mb-6">
         <MemoizedPartSelector
           selectedExam={selectedExam}
           onExamChange={handleExamChange}
@@ -154,59 +159,31 @@ const PartTestContent = memo(({
         />
       </div>
 
-      <div className="space-y-6 mt-6 w-full">
-        {isSplitLayoutPart ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-            {/* Left Column - Content */}
-            <div className="order-1 w-full">
-              <div className="space-y-3 w-full">
-                <div className="flex items-center gap-2 px-1">
-                  <div className="w-1 h-6 rounded-full bg-indigo-600" />
-                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
-                </div>
-                <div className="w-full relative z-20">
-                  <MemoizedContentDisplay
-                    partData={partData}
-                    selectedPart={selectedPart}
-                    currentQuestionIndex={currentQuestionIndex}
-                    testType={testType}
-                  />
-                </div>
+      {/* Content & Questions Layout */}
+      {isSplitLayoutPart ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Left Column - Content */}
+          <div className="order-1 w-full">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-1 h-6 rounded-full bg-indigo-600" />
+                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
               </div>
-            </div>
-            
-            {/* Right Column - Questions */}
-            <div className="order-2 w-full">
-              <div className="space-y-3 w-full">
-                <MemoizedQuestionDisplay
-                  selectedPart={selectedPart}
-                  selectedExam={selectedExam}
+              <div className="relative z-20">
+                <MemoizedContentDisplay
                   partData={partData}
+                  selectedPart={selectedPart}
                   currentQuestionIndex={currentQuestionIndex}
-                  onQuestionChange={setCurrentQuestionIndex}
-                  answers={answers}
-                  onAnswerSelect={handleAnswerSelect}
-                  showResults={showResults}
-                  onSubmit={handleSubmit}
                   testType={testType}
+                  examId={selectedExam}
                 />
               </div>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Full Width - Content */}
-            <div className="space-y-3 w-full relative z-20">
-              <MemoizedContentDisplay
-                partData={partData}
-                selectedPart={selectedPart}
-                currentQuestionIndex={currentQuestionIndex}
-                testType={testType}
-              />
-            </div>
-
-            {/* Full Width - Questions */}
-            <div className="space-y-3 w-full">
+          
+          {/* Right Column - Questions */}
+          <div className="order-2 w-full">
+            <div className="space-y-3">
               <MemoizedQuestionDisplay
                 selectedPart={selectedPart}
                 selectedExam={selectedExam}
@@ -220,12 +197,42 @@ const PartTestContent = memo(({
                 testType={testType}
               />
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6 mb-6">
+          {/* Full Width - Content */}
+          <div className="space-y-3 relative z-20">
+            <MemoizedContentDisplay
+              partData={partData}
+              selectedPart={selectedPart}
+              currentQuestionIndex={currentQuestionIndex}
+              testType={testType}
+              examId={selectedExam}
+            />
+          </div>
 
+          {/* Full Width - Questions */}
+          <div className="space-y-3">
+            <MemoizedQuestionDisplay
+              selectedPart={selectedPart}
+              selectedExam={selectedExam}
+              partData={partData}
+              currentQuestionIndex={currentQuestionIndex}
+              onQuestionChange={setCurrentQuestionIndex}
+              answers={answers}
+              onAnswerSelect={handleAnswerSelect}
+              showResults={showResults}
+              onSubmit={handleSubmit}
+              testType={testType}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Results Section */}
       {showResults && (
-        <div className="space-y-3 mt-6 w-full">
+        <div className="mb-6">
           <MemoizedResultsDisplay
             score={score}
             partData={partData}
@@ -235,9 +242,8 @@ const PartTestContent = memo(({
         </div>
       )}
 
-      <div className="mt-6 w-full">
-        <StatsGrid score={score} isSignedIn={isSignedIn} />
-      </div>
+      {/* Stats Grid */}
+      <StatsGrid score={score} isSignedIn={isSignedIn} />
     </div>
   );
 });
@@ -287,8 +293,10 @@ const TestPage = memo(({
 TestPage.displayName = 'TestPage';
 
 const ProfilePage = memo(({ user, handleBackToTest }) => (
-  <div className="space-y-6 w-full">
-    <BackButton onClick={handleBackToTest} show={true} />
+  <div className="w-full">
+    <div className="mb-6">
+      <BackButton onClick={handleBackToTest} show={true} />
+    </div>
     <MemoizedUserProfile currentUser={user} />
   </div>
 ));
@@ -356,8 +364,10 @@ const VocabularyPage = memo(() => <VocabularyPractice />);
 VocabularyPage.displayName = 'VocabularyPage';
 
 const AnswersPage = memo(({ handleBackToMain }) => (
-  <div className="space-y-6 w-full">
-    <BackButton onClick={handleBackToMain} show={true} />
+  <div className="w-full">
+    <div className="mb-6">
+      <BackButton onClick={handleBackToMain} show={true} />
+    </div>
     <ExamAnswersPage />
   </div>
 ));
@@ -471,46 +481,43 @@ const AppContent = memo(() => {
 
   return (
     <MainLayout {...layoutProps}>
-      <div className="relative z-10 w-full">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 w-full">
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path={ROUTES.HOME} element={<HomePage />} />
-              <Route 
-                path={ROUTES.TEST} 
-                element={
-                  <TestPage 
-                    isSignedIn={isSignedIn} 
-                    user={user} 
-                    selectedExam={selectedExam} 
-                    handleExamChange={handleExamChange} 
-                    testType={testType} 
-                    handleTestTypeChange={handleTestTypeChange} 
-                    selectedPart={selectedPart} 
-                    handlePartChange={handlePartChange} 
-                    partData={partData} 
-                    currentQuestionIndex={currentQuestionIndex} 
-                    setCurrentQuestionIndex={setCurrentQuestionIndex} 
-                    answers={answers} 
-                    handleAnswerSelect={handleAnswerSelect} 
-                    showResults={showResults} 
-                    handleSubmit={handleSubmit} 
-                    handleReset={handleReset} 
-                    score={score} 
-                  />
-                } 
+      {/* Content - No extra padding (already handled in MainLayout) */}
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route 
+            path={ROUTES.TEST} 
+            element={
+              <TestPage 
+                isSignedIn={isSignedIn} 
+                user={user} 
+                selectedExam={selectedExam} 
+                handleExamChange={handleExamChange} 
+                testType={testType} 
+                handleTestTypeChange={handleTestTypeChange} 
+                selectedPart={selectedPart} 
+                handlePartChange={handlePartChange} 
+                partData={partData} 
+                currentQuestionIndex={currentQuestionIndex} 
+                setCurrentQuestionIndex={setCurrentQuestionIndex} 
+                answers={answers} 
+                handleAnswerSelect={handleAnswerSelect} 
+                showResults={showResults} 
+                handleSubmit={handleSubmit} 
+                handleReset={handleReset} 
+                score={score} 
               />
-              <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
-              <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
-              <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
-              <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
-              <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-          {showAuthModal && <AuthModal onClose={handleAuthClose} />}
-        </div>
-      </div>
+            } 
+          />
+          <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
+          <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
+          <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
+          <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
+          <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+      {showAuthModal && <AuthModal onClose={handleAuthClose} />}
     </MainLayout>
   );
 });

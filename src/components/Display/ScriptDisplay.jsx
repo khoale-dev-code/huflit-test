@@ -1,368 +1,259 @@
-import React, { useState, useMemo, useCallback, useEffect, memo, useRef } from 'react';
-import { Play, Pause, Square, RotateCcw, Loader2, AlertCircle, Volume2 } from 'lucide-react';
-import { useVoices } from '../hooks/useVoices';
-import { useScriptParser } from '../hooks/useScriptParser';
-import { useTextToSpeech } from '../hooks/useTextToSpeech';
-import { getSpeakerColor, getSpeakerIcon, getSpeakerTTSOptions } from '../utils/scriptUtils';
+import React, { useState, memo, useMemo, useEffect } from 'react';
+import { 
+  Play, Pause, Square, Volume2, VolumeX, 
+  AlertCircle, Loader2, ChevronDown, Info, Lightbulb 
+} from 'lucide-react';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
-// ==================== STATE COMPONENTS ====================
-const ErrorState = memo(({ error, onRetry }) => (
-  <div className="w-full flex items-center justify-center p-4 bg-white rounded-xl border border-red-200">
-    <div className="max-w-md w-full">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-red-100">
-        <div className="flex justify-center mb-4">
-          <div className="p-3 bg-red-50 rounded-full">
-            <AlertCircle className="w-8 h-8 text-red-500" />
-          </div>
-        </div>
-        <h3 className="text-xl font-semibold text-slate-900 text-center mb-2">Oops! Something went wrong</h3>
-        <p className="text-sm text-slate-600 text-center mb-6">{error}</p>
-        <button
-          onClick={onRetry}
-          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-3 rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
-        >
-          <RotateCcw className="w-4 h-4" /> Try Again
-        </button>
-      </div>
-    </div>
-  </div>
-));
-ErrorState.displayName = 'ErrorState';
-
-const LoadingState = memo(() => (
-  <div className="w-full flex items-center justify-center p-8 bg-white rounded-xl border border-slate-200">
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative w-12 h-12">
-        <Loader2 className="w-full h-full text-blue-500 animate-spin" />
-      </div>
-      <p className="text-slate-600 font-medium">Loading voices...</p>
-    </div>
-  </div>
-));
-LoadingState.displayName = 'LoadingState';
-
-const EmptyState = memo(() => (
-  <div className="w-full flex items-center justify-center p-8 bg-white rounded-xl border border-slate-200">
-    <div className="text-center">
-      <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Volume2 className="w-8 h-8 text-slate-500" />
-      </div>
-      <p className="text-slate-600 font-medium">No script to display</p>
-    </div>
-  </div>
-));
-EmptyState.displayName = 'EmptyState';
-
-// ==================== CONVERSATION ITEM ====================
-const ConversationItem = memo(({
-  conv,
-  index,
-  isPlaying
-}) => {
-  const Icon = getSpeakerIcon(conv.speaker);
-  
-  return (
-    <div
-      id={`conv-${index}`}
-      className={`transition-all duration-300 rounded-xl p-4 border-l-4 transform origin-left ${
-        isPlaying
-          ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-500 scale-105 shadow-md'
-          : 'bg-white border-slate-200 hover:shadow-md'
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        <div className={`text-2xl flex-shrink-0 transition-transform duration-300 ${
-          isPlaying ? 'scale-110' : ''
-        }`}>
-          {Icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className={`font-semibold text-xs uppercase tracking-wide mb-1 transition-colors ${
-            isPlaying ? 'text-blue-600' : 'text-slate-600'
-          }`}>
-            {conv.speaker}
-          </p>
-          <p className={`text-sm leading-relaxed break-words transition-colors ${
-            isPlaying ? 'text-slate-900 font-medium' : 'text-slate-700'
-          }`}>
-            {conv.text}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}, (prev, next) => {
-  return prev.isPlaying === next.isPlaying &&
-         prev.conv.speaker === next.conv.speaker &&
-         prev.conv.text === next.conv.text;
-});
-ConversationItem.displayName = 'ConversationItem';
-
-// ==================== SCRIPT CONTENT ====================
-const ScriptContent = memo(({
-  conversations,
-  currentIndex
-}) => {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (currentIndex >= 0) {
-      const element = document.getElementById(`conv-${currentIndex}`);
-      if (element && containerRef.current) {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest'
-        });
-      }
-    }
-  }, [currentIndex]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="flex-1 overflow-y-auto space-y-2 pr-2 scroll-smooth min-h-0"
-      style={{
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#cbd5e1 #f1f5f9'
-      }}
-    >
-      {conversations.map((conv, index) => (
-        <ConversationItem
-          key={`${conv.speaker}-${index}`}
-          conv={conv}
-          index={index}
-          isPlaying={currentIndex === index}
-        />
-      ))}
-    </div>
-  );
-});
-ScriptContent.displayName = 'ScriptContent';
-
-// ==================== CONTROL BUTTONS ====================
-const ControlButtons = memo(({
-  isPlaying,
-  isPaused,
-  isDisabled,
-  onPlay,
-  onPause,
-  onStop
-}) => (
-  <div className="flex items-center gap-2 w-full">
-    {!isPlaying ? (
-      <button
-        onClick={onPlay}
-        disabled={isDisabled}
-        className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-semibold py-3 rounded-lg transition-all duration-200 active:scale-95 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        title="Play"
-      >
-        <Play className="w-5 h-5 fill-current" />
-        <span className="text-sm">Play</span>
-      </button>
-    ) : (
-      <>
-        <button
-          onClick={onPause}
-          className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
-          title="Pause"
-        >
-          <Pause className="w-5 h-5 fill-current" />
-          <span className="text-sm">Pause</span>
-        </button>
-        <button
-          onClick={onStop}
-          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
-          title="Stop"
-        >
-          <Square className="w-5 h-5 fill-current" />
-          <span className="text-sm">Stop</span>
-        </button>
-      </>
-    )}
-  </div>
-));
-ControlButtons.displayName = 'ControlButtons';
-
-// ==================== HEADER ====================
-const Header = memo(({ title, lineCount, isPlaying, isPaused, playingTime, currentSpeaker }) => (
-  <div className="w-full bg-white border-b border-slate-200 px-6 py-4 md:py-5">
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-      <div className="flex-1">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">{title}</h1>
-        <p className="text-sm text-slate-600">{lineCount} lines</p>
-      </div>
-      
-      {(isPlaying || isPaused) && (
-        <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-3 rounded-lg border border-blue-200 flex-shrink-0">
-          {isPlaying && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-slate-900">{playingTime}</span>
-              {currentSpeaker && (
-                <>
-                  <span className="text-slate-400">•</span>
-                  <span className="text-sm font-medium text-slate-700">{currentSpeaker}</span>
-                </>
-              )}
-            </div>
-          )}
-          {isPaused && (
-            <span className="text-sm font-medium text-slate-700">⏸ Paused</span>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-));
-Header.displayName = 'Header';
-
-// ==================== MAIN COMPONENT ====================
-const ScriptDisplay = ({
-  script,
-  partTitle = "Script",
-  showByDefault = true
-}) => {
-  const [isScriptPlaying, setIsScriptPlaying] = useState(false);
-  const [pausedIndex, setPausedIndex] = useState(-1);
-  
-  const {
-    allVoices,
-    getSpeakerVoice,
-    synthRef,
-    error: voicesError,
-    reloadVoices,
-    warmupVoices
-  } = useVoices();
-  
-  const { parsedScript, speakers } = useScriptParser(script);
-  
-  const {
-    currentPlayingIndex,
-    setCurrentPlayingIndex,
-    playingTime,
-    isPaused,
-    pauseScript,
-    resumeScript,
-    stopScript,
-    speakNextInQueue,
-    queueConversations
-  } = useTextToSpeech({
-    getSpeakerVoice,
-    synthRef,
-    isScriptPlaying
-  });
-
-  const handlePlay = useCallback(async () => {
-    if (!synthRef.current || allVoices.length === 0 || parsedScript.length === 0) return;
-    
-    if (isPaused && pausedIndex >= 0) {
-      resumeScript();
-      setIsScriptPlaying(true);
-      setPausedIndex(-1);
-      return;
-    }
-
-    if (speakers.length > 0) {
-      await warmupVoices(speakers.slice(0, 3));
-    }
-
-    const hasQueue = queueConversations(
-      parsedScript,
-      (speaker) => getSpeakerTTSOptions(speaker, 0.9, 1),
-      false
-    );
-
-    if (hasQueue) {
-      setIsScriptPlaying(true);
-      setCurrentPlayingIndex(-1);
-      setPausedIndex(-1);
-      
-      setTimeout(() => {
-        try {
-          speakNextInQueue();
-        } catch (error) {
-          console.warn('Speech error:', error);
-          setIsScriptPlaying(false);
-        }
-      }, 100);
-    }
-  }, [parsedScript, synthRef, allVoices.length, speakers, warmupVoices, queueConversations, speakNextInQueue, setCurrentPlayingIndex, isPaused, pausedIndex, resumeScript]);
-
-  const handlePause = useCallback(() => {
-    pauseScript();
-    setIsScriptPlaying(false);
-    setPausedIndex(currentPlayingIndex);
-  }, [pauseScript, currentPlayingIndex]);
-
-  const handleStop = useCallback(() => {
-    stopScript();
-    setIsScriptPlaying(false);
-    setPausedIndex(-1);
-    setCurrentPlayingIndex(-1);
-  }, [stopScript, setCurrentPlayingIndex]);
-
-  if (voicesError) {
-    return <ErrorState error={voicesError} onRetry={reloadVoices} />;
-  }
-
-  if (allVoices.length === 0) {
-    return <LoadingState />;
-  }
-
-  if (!script || parsedScript.length === 0) {
-    return <EmptyState />;
-  }
-
-  const currentSpeaker = currentPlayingIndex >= 0 ? parsedScript[currentPlayingIndex]?.speaker : null;
-
-  return (
-    <div className="w-full bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col relative z-30">
-      {/* Header - Fixed Height */}
-      <div className="flex-shrink-0">
-        <Header
-          title={partTitle}
-          lineCount={parsedScript.length}
-          isPlaying={isScriptPlaying}
-          isPaused={isPaused}
-          playingTime={playingTime}
-          currentSpeaker={currentSpeaker}
-        />
-      </div>
-
-      {/* Script Content - Takes remaining space */}
-      <div className="flex-1 overflow-y-auto min-h-[200px] p-4">
-        <ScriptContent
-          conversations={parsedScript}
-          currentIndex={currentPlayingIndex}
-        />
-      </div>
-
-      {/* Pause Indicator - Fixed Height */}
-      {isPaused && pausedIndex >= 0 && (
-        <div className="flex-shrink-0 px-4 py-3 bg-amber-50 border-t border-amber-200 flex items-center gap-3">
-          <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-amber-900">Paused at</p>
-            <p className="text-xs text-amber-700">{parsedScript[pausedIndex]?.speaker}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Control Buttons - Fixed Height, Always Visible */}
-      <div className="flex-shrink-0 px-4 py-4 bg-gradient-to-t from-white to-slate-50 border-t border-slate-200">
-        <ControlButtons
-          isPlaying={isScriptPlaying}
-          isPaused={isPaused}
-          isDisabled={allVoices.length === 0}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          onStop={handleStop}
-        />
-      </div>
-    </div>
-  );
+// ==================== UTILS: ĐỊNH NGHĨA MÀU NHÂN VẬT ====================
+const getSpeakerStyle = (name) => {
+  const themes = [
+    { text: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
+    { text: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    { text: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+    { text: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200' },
+    { text: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
+  ];
+  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % themes.length;
+  return themes[index];
 };
 
+// ==================== SUB-COMPONENT: NỘI DUNG SCRIPT ====================
+const ScriptContent = memo(({ script }) => {
+  const lines = useMemo(() => script.split('\n').filter(line => line.trim()), [script]);
+
+  return (
+    <div className="p-6 md:p-10 space-y-10">
+      <div className="flex gap-4 p-5 bg-blue-50/50 border border-blue-100 rounded-2xl animate-in fade-in zoom-in duration-500">
+        <div className="bg-blue-500 p-2 rounded-lg h-fit">
+          <Lightbulb className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h4 className="font-bold text-blue-900 text-sm italic">Lưu ý khi sử dụng Script:</h4>
+          <p className="text-sm text-blue-800/80 leading-relaxed mt-1">
+            Bạn nên nghe ít nhất 2 lần trước khi nhìn Script. Khi đọc, hãy chú ý vào 
+            <strong> nối âm</strong> và <strong>ngữ điệu</strong> của nhân vật để cải thiện kỹ năng nói.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        {lines.map((line, index) => {
+          const isSpeaker = line.includes(':') && !line.startsWith(' ');
+          const trimmedLine = line.trim();
+
+          if (isSpeaker) {
+            const [name, ...contentParts] = trimmedLine.split(':');
+            const content = contentParts.join(':').trim();
+            const style = getSpeakerStyle(name.trim());
+
+            return (
+              <div 
+                key={index} 
+                className="group flex flex-col gap-2.5 animate-in slide-in-from-left duration-500 fill-mode-both"
+                style={{ animationDelay: `${index * 70}ms` }}
+              >
+                <span className={`w-fit px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-tighter border ${style.bg} ${style.text} ${style.border}`}>
+                  {name.trim()}
+                </span>
+                <p className="text-[17px] text-slate-800 leading-relaxed font-semibold group-hover:text-blue-600 transition-colors">
+                  {content}
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div 
+              key={index} 
+              className="py-2 border-l-4 border-slate-100 pl-4 italic animate-in fade-in duration-1000"
+            >
+              <p className="text-sm text-slate-400 font-medium">{trimmedLine}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+// ==================== MAIN COMPONENT: SCRIPT DISPLAY ====================
+const ScriptDisplay = memo(({
+  script = '',
+  audioUrl = null,
+  partTitle = 'Bài nghe chi tiết',
+  isPartPlayed = false,  // 👈 Prop để check đã nghe hay chưa
+  onAudioEnd = null,     // 👈 Callback khi audio kết thúc
+}) => {
+  const {
+    isPlaying, currentTime, duration, volume, error, isLoading,
+    play, pause, stop, seek, setVolume, formatTime,
+  } = useAudioPlayer(audioUrl);
+
+  const [showScript, setShowScript] = useState(false);
+
+  // ✨ KEY LOGIC: Trigger callback khi audio kết thúc
+  useEffect(() => {
+    // Điều kiện:
+    // 1. Audio đang phát xong (isPlaying = false)
+    // 2. Đã có thời lượng video (duration > 0)
+    // 3. Vị trí hiện tại gần cuối (currentTime >= duration - 1)
+    // 4. onAudioEnd callback có tồn tại
+    
+    if (!isPlaying && duration > 0 && currentTime >= duration - 1 && onAudioEnd) {
+      console.log(`✅ Audio kết thúc! Gọi callback onAudioEnd`);
+      onAudioEnd();
+    }
+  }, [isPlaying, duration, currentTime, onAudioEnd]);
+
+  if (!script) return null;
+
+  return (
+    <div className="w-full bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+      
+      {/* 1. Header & Audio Controls */}
+      <div className="p-6 md:p-8 bg-slate-50/80 border-b border-slate-100">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">{partTitle}</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`flex h-2 w-2 rounded-full animate-pulse ${isPartPlayed ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
+                {isPartPlayed ? '✓ Đã nghe xong' : audioUrl ? 'Sẵn sàng phát' : 'Không có audio'}
+              </p>
+            </div>
+          </div>
+
+          {audioUrl && (
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-sm font-mono font-bold text-blue-600">
+                {formatTime(currentTime)} <span className="text-slate-300 mx-1">/</span> {formatTime(duration)}
+              </span>
+              <div className="w-32 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-300" 
+                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Nút điều khiển âm thanh */}
+        {audioUrl && (
+          <div className="flex items-center gap-4 mt-8">
+            {!isPlaying ? (
+              <button 
+                onClick={() => play()}
+                disabled={isLoading || isPartPlayed}  // 👈 Disable nếu đã nghe
+                className={`flex-[2] py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg ${
+                  isPartPlayed
+                    ? 'bg-emerald-600 opacity-60 cursor-not-allowed text-white'
+                    : isLoading
+                    ? 'bg-slate-300 text-slate-600'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
+                }`}
+                title={isPartPlayed ? 'Đã nghe rồi, không thể nghe lại' : 'Bấm để nghe audio'}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin w-5 h-5" />
+                    <span>Đang tải...</span>
+                  </>
+                ) : isPartPlayed ? (
+                  <>
+                    <span className="text-xl">✓</span>
+                    <span>Đã nghe</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="fill-current w-5 h-5" />
+                    <span>Nghe Audio</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="flex-[2] flex gap-3">
+                <button 
+                  onClick={pause} 
+                  className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-amber-600"
+                >
+                  <Pause className="fill-current w-5 h-5" /> Tạm dừng
+                </button>
+                <button 
+                  onClick={stop} 
+                  className="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-900"
+                >
+                  <Square className="fill-current w-5 h-5" /> Dừng
+                </button>
+              </div>
+            )}
+            <div className="flex-1 hidden md:flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200">
+              <Volume2 className="w-5 h-5 text-slate-400" />
+              <input 
+                type="range" min="0" max="1" step="0.1" value={volume} 
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full accent-blue-600"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Status message khi đã nghe */}
+        {isPartPlayed && (
+          <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-in fade-in">
+            <span className="text-2xl">✓</span>
+            <div>
+              <p className="font-semibold text-emerald-900 text-sm">Nghe xong rồi!</p>
+              <p className="text-xs text-emerald-700 mt-1">Bạn có thể tập trung trả lời các câu hỏi</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. Toggle Bar */}
+      <div className="px-6 py-4 bg-white flex items-center justify-between border-b border-slate-50">
+        <div className="flex items-center gap-2">
+          <Info className="w-4 h-4 text-blue-500" />
+          <span className="text-[13px] font-bold text-slate-500 uppercase tracking-tight">Kịch bản chi tiết</span>
+        </div>
+        <button
+          onClick={() => setShowScript(!showScript)}
+          className={`group flex items-center gap-3 px-6 py-2.5 rounded-xl font-bold transition-all duration-500 ${
+            showScript 
+            ? 'bg-blue-600 text-white shadow-xl shadow-blue-100' 
+            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+          }`}
+        >
+          <span>{showScript ? 'Ẩn' : 'Hiện'} Script</span>
+          <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${showScript ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+
+      {/* 3. Script Content Area */}
+      <div 
+        className={`transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${
+          showScript ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="bg-white">
+          <ScriptContent script={script} />
+        </div>
+      </div>
+
+      {/* 4. Placeholder khi ẩn */}
+      {!showScript && (
+        <div className="py-16 flex flex-col items-center justify-center gap-4 text-slate-300">
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center">
+            <ChevronDown className="w-6 h-6 animate-bounce" />
+          </div>
+          <p className="text-sm font-medium italic">Kịch bản đang được ẩn để bạn tập trung nghe</p>
+        </div>
+      )}
+    </div>
+  );
+});
+
 ScriptDisplay.displayName = 'ScriptDisplay';
-export default memo(ScriptDisplay);
+
+export default ScriptDisplay;

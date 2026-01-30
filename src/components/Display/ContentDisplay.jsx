@@ -1,11 +1,16 @@
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useEffect } from 'react';
 import { AlertCircle, Headphones, FileText, BookOpen, Zap, Target, Clock, BarChart3 } from 'lucide-react';
 
-// Import các component con
 import Part6Display from './ReadingPart6Display';
 import ReadingPart7Display from './ReadingPart7Display';
 import ReadingPart8Display from './ReadingPart8Display';
 import ScriptDisplay from './ScriptDisplay';
+
+// Helper function để lấy audio path
+const getAudioPath = (examId, partId) => {
+  if (!examId || !partId) return null;
+  return `/public/data/audio/${examId}/listening/${partId}.mp3`;
+};
 
 // ========================================
 // HELPER COMPONENT: InfoCard
@@ -39,11 +44,12 @@ InfoCard.displayName = 'InfoCard';
 const ListeningContent = memo(({ 
   partData, 
   selectedPart,
-  testType
+  testType,
+  examId
 }) => {
   const partNumber = selectedPart.replace('part', '');
   
-  // ✅ IMPROVED: Multiple fallbacks for script extraction
+  // Script extraction logic (unchanged)
   const script = useMemo(() => {
     if (!partData) {
       console.warn('❌ partData is null');
@@ -52,19 +58,16 @@ const ListeningContent = memo(({
     
     console.log('📋 partData keys:', Object.keys(partData));
     
-    // 1️⃣ Try direct script property
     if (partData.script) {
       console.log('✅ Found script in partData.script');
       return partData.script;
     }
     
-    // 2️⃣ Try text property (fallback)
     if (partData.text) {
       console.log('✅ Found text in partData.text');
       return partData.text;
     }
     
-    // 3️⃣ Try extracting from questions
     if (partData.questions && Array.isArray(partData.questions)) {
       console.log(`📍 Found ${partData.questions.length} questions, extracting scripts...`);
       
@@ -79,7 +82,6 @@ const ListeningContent = memo(({
       }
     }
     
-    // 4️⃣ Try description as fallback
     if (partData.description) {
       console.log('✅ Using description as fallback');
       return partData.description;
@@ -88,6 +90,29 @@ const ListeningContent = memo(({
     console.warn('⚠️ No script found in any property');
     return '';
   }, [partData]);
+
+  // Audio URL - Ưu tiên từ partData, nếu không thì tạo mặc định
+  const audioUrl = useMemo(() => {
+    if (!examId) return null;
+    
+    // Nếu partData đã có audioUrl, dùng nó
+    if (partData?.audioUrl) {
+      return partData.audioUrl;
+    }
+    
+    // Nếu không, tạo đường dẫn mặc định
+    return getAudioPath(examId, selectedPart);
+  }, [examId, selectedPart, partData]);
+  const DEBUG_ADDITION = `
+  // 🔍 DEBUG LOG
+  useEffect(() => {
+    console.log('📍 ListeningContent DEBUG:');
+    console.log('  examId:', examId);
+    console.log('  selectedPart:', selectedPart);
+    console.log('  partData?.audioUrl:', partData?.audioUrl);
+    console.log('  computed audioUrl:', audioUrl);
+  }, [examId, selectedPart, partData, audioUrl]);
+`;
 
   const partTitle = useMemo(() => {
     return partData?.title || `Part ${partNumber} - Phần Nghe`;
@@ -107,11 +132,11 @@ const ListeningContent = memo(({
   }
 
   return (
-  <div className="animate-in fade-in duration-300 w-full relative z-20">
+    <div className="animate-in fade-in duration-300 w-full relative z-20">
       <ScriptDisplay 
         script={script}
+        audioUrl={audioUrl}
         partTitle={partTitle}
-        showByDefault={true}
       />
     </div>
   );
@@ -250,24 +275,20 @@ const ContentDisplay = memo(({
   selectedPart, 
   currentQuestionIndex, 
   testType,
-  onPlayScript = null,
-  isPlayingScript = false
+  examId  // 👈 Thêm props này
 }) => {
   
-  // ===== EXTRACT CONTENT =====
+  // Extract content
   const content = useMemo(() => {
     if (!partData) return '';
 
     if (testType === 'listening') {
-      // Cho phần nghe, lấy script từ partData
       if (partData.script) {
         return partData.script;
       }
-      // Hoặc từ text
       if (partData.text) {
         return partData.text;
       }
-      // Hoặc từ questions nếu partData không có script chung
       if (partData.questions && Array.isArray(partData.questions)) {
         const scripts = partData.questions
           .filter(q => q.script)
@@ -278,21 +299,20 @@ const ContentDisplay = memo(({
       return '';
     }
     
-    // Cho phần đọc
     return partData.text || '';
   }, [partData, testType]);
 
-  // ===== CASE 1: HIDE FOR READING PART 5 =====
+  // CASE 1: Hide for reading part 5
   if (testType === 'reading' && selectedPart === 'part5') {
     return null;
   }
 
-  // ===== CASE 2: NO PART DATA =====
+  // CASE 2: No part data
   if (!partData) {
     return <EmptyState type="no-part" />;
   }
 
-  // ===== CASE 3: NO CONTENT =====
+  // CASE 3: No content
   if (!content.trim()) {
     return <EmptyState type="no-content" />;
   }
@@ -345,6 +365,7 @@ const ContentDisplay = memo(({
         partData={partData}
         selectedPart={selectedPart}
         testType={testType}
+        examId={examId}  // 👈 Pass examId
       />
     );
   }

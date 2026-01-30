@@ -1,4 +1,3 @@
-// src/components/layout/MainLayout.jsx
 import React from 'react';
 import Navbar from '../Navbar';
 import Footer from '../footer/Footer';
@@ -19,34 +18,44 @@ const MainLayout = ({
   onAnswersClick
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col overflow-visible">
+    <div className="min-h-screen bg-white flex flex-col">
       
-      {/* Navbar */}
-      <Navbar
-        testType={testType}
-        onTestTypeChange={onTestTypeChange}
-        practiceType={practiceType}
-        onPracticeTypeChange={onPracticeTypeChange}
-        user={user}
-        onAuthClick={onAuthClick}
-        onChatClick={onChatClick}
-        onProfileClick={onProfileClick}
-        viewMode={viewMode}
-        onlineCount={onlineCount}
-        totalUsers={totalUsers}
-        onAnswersClick={onAnswersClick}
-      />
+      {/* Navbar - Fixed at top */}
+      <div className="sticky top-0 z-50">
+        <Navbar
+          testType={testType}
+          onTestTypeChange={onTestTypeChange}
+          practiceType={practiceType}
+          onPracticeTypeChange={onPracticeTypeChange}
+          user={user}
+          onAuthClick={onAuthClick}
+          onChatClick={onChatClick}
+          onProfileClick={onProfileClick}
+          viewMode={viewMode}
+          onlineCount={onlineCount}
+          totalUsers={totalUsers}
+          onAnswersClick={onAnswersClick}
+        />
+      </div>
 
-      {/* Main Content - NO OVERFLOW RESTRICTIONS */}
-      <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8 overflow-visible w-full relative z-0">
-        {children}
+      {/* Main Content Container */}
+      <main className="flex-1 w-full">
+        {/* Padding wrapper */}
+        <div className="h-full px-4 sm:px-6 md:px-8 lg:px-10 py-6 sm:py-8">
+          {/* Max width container */}
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
-      <Footer 
-        onlineCount={onlineCount}
-        totalUsers={totalUsers}
-      />
+      <footer className="w-full mt-auto border-t border-slate-200 bg-white">
+        <Footer 
+          onlineCount={onlineCount}
+          totalUsers={totalUsers}
+        />
+      </footer>
       
     </div>
   );
