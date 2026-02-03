@@ -73,10 +73,10 @@ Christopher: It is, but there are so many lines and stations. Everything is so c
           id: 1,
           question: "Why didn't Michael buy anything?",
           options: [
-            "He didn't find anything beautiful.",
-            "He found the prices too high.",
-            "He bought a lot of things because they're really cheap.",
-            "He didn't have enough time."
+            "A. He didn't find anything beautiful.",
+            "B. He found the prices too high.",
+            "C. He bought a lot of things because they're really cheap.",
+            "D. He didn't have enough time."
           ],
           correct: 1,
           explanation: "Michael nói: 'I didn't buy anything in the end because the prices were way too high.' → Anh không mua gì vì giá quá cao."
@@ -85,10 +85,10 @@ Christopher: It is, but there are so many lines and stations. Everything is so c
           id: 2,
           question: "How long did Jennifer spend in Thailand?",
           options: [
-            "She spent one month there.",
-            "She spent seven months there.",
-            "She spent one week there.",
-            "She spent several times there."
+            "A. She spent one month there.",
+            "B. She spent seven months there.",
+            "C. She spent one week there.",
+            "D. She spent several times there."
           ],
           correct: 1,
           explanation: "Jennifer nói: 'I spent seven months there altogether.' → Cô ấy ở Thái Lan 7 tháng."
@@ -97,10 +97,10 @@ Christopher: It is, but there are so many lines and stations. Everything is so c
           id: 3,
           question: "What did Victoria buy in Taipei?",
           options: [
-            "She didn't buy anything in Taipei.",
-            "She bought many things in Taipei.",
-            "She bought a few things in Taipei.",
-            "She bought a souvenir in Taipei."
+            "A. She didn't buy anything in Taipei.",
+            "B. She bought many things in Taipei.",
+            "C. She bought a few things in Taipei.",
+            "D. She bought a souvenir in Taipei."
           ],
           correct: 2,
           explanation: "Victoria nói: 'I bought a few things - some local tea, a small jade bracelet, and a couple of books' → Cô mua một vài món đồ."
@@ -109,10 +109,10 @@ Christopher: It is, but there are so many lines and stations. Everything is so c
           id: 4,
           question: "When should Andrew visit Japan according to Lisa?",
           options: [
-            "People told him to visit in the summer.",
-            "People didn't tell him to visit in the spring.",
-            "People told him to visit in the spring.",
-            "People told him to visit in the autumn."
+            "A. People told him to visit in the summer.",
+            "B. People didn't tell him to visit in the spring.",
+            "C. People told him to visit in the spring.",
+            "D. People told him to visit in the autumn."
           ],
           correct: 2,
           explanation: "Lisa nói: 'you should definitely go in spring! The cherry blossoms are beautiful.' → Nên đi vào mùa xuân."
@@ -121,10 +121,10 @@ Christopher: It is, but there are so many lines and stations. Everything is so c
           id: 5,
           question: "How does Christopher feel about navigating Tokyo?",
           options: [
-            "He found that Tokyo was very easy to get around.",
-            "He found that Tokyo was not easy to get around.",
-            "He found that Tokyo was a little bit easy to get around.",
-            "He found that Tokyo was too busy to get around."
+            "A. He found that Tokyo was very easy to get around.",
+            "B. He found that Tokyo was not easy to get around.",
+            "C. He found that Tokyo was a little bit easy to get around.",
+            "D. He found that Tokyo was too busy to get around."
           ],
           correct: 1,
           explanation: "Christopher nói: 'It was pretty difficult to get around' → Khó tìm đường."
@@ -174,7 +174,12 @@ ROBERTSON: Honestly, we're still talking about it. My wife thinks clothes, I thi
         {
           id: 6,
           question: "How many people want orange juice?",
-          options: ["Two", "Three", "Four", "Five"],
+          options: [
+            "A. Two",
+            "B. Three",
+            "C. Four",
+            "D. Five"
+          ],
           correct: 1,
           explanation: "Mark, Linda, và Robertson đều muốn nước cam. Mark xác nhận: 'So three orange juices.'"
         },
@@ -182,10 +187,10 @@ ROBERTSON: Honestly, we're still talking about it. My wife thinks clothes, I thi
           id: 7,
           question: "Why doesn't the woman (Linda) want anything to eat?",
           options: [
-            "Because she's not hungry.",
-            "Because she doesn't feel well.",
-            "Because she's on a diet.",
-            "Because the food is not good enough."
+            "A. Because she's not hungry.",
+            "B. Because she doesn't feel well.",
+            "C. Because she's on a diet.",
+            "D. Because the food is not good enough."
           ],
           correct: 0,
           explanation: "Linda nói: 'I'm really not hungry right now. I had a big breakfast this morning.'"
@@ -194,10 +199,10 @@ ROBERTSON: Honestly, we're still talking about it. My wife thinks clothes, I thi
           id: 8,
           question: "What does Robertson do now?",
           options: [
-            "He owns a restaurant.",
-            "He works in Orlando.",
-            "He works with young players.",
-            "He works in a restaurant."
+            "A. He owns a restaurant.",
+            "B. He works in Orlando.",
+            "C. He works with young players.",
+            "D. He works in a restaurant."
           ],
           correct: 2,
           explanation: "Robertson nói: 'now I spend most of my time working with young players. I coach at a local sports academy.'"
@@ -206,10 +211,10 @@ ROBERTSON: Honestly, we're still talking about it. My wife thinks clothes, I thi
           id: 9,
           question: "Who's coming to lunch?",
           options: [
-            "The man's mother-in-law and his sister.",
-            "The man's mother and his sister-in-law.",
-            "The man's mother-in-law and her sister.",
-            "The man's sister-in-law and his sister."
+            "A. The man's mother-in-law and his sister.",
+            "B. The man's mother and his sister-in-law.",
+            "C. The man's mother-in-law and her sister.",
+            "D. The man's sister-in-law and his sister."
           ],
           correct: 2,
           explanation: "Mark nói: 'my mother-in-law is coming to lunch tomorrow... and she's bringing her sister along.'"
@@ -218,10 +223,10 @@ ROBERTSON: Honestly, we're still talking about it. My wife thinks clothes, I thi
           id: 10,
           question: "What are they going to give their granddaughter for her birthday?",
           options: [
-            "Money",
-            "Clothes",
-            "A hat",
-            "They can't decide."
+            "A. Money",
+            "B. Clothes",
+            "C. A hat",
+            "D. They can't decide."
           ],
           correct: 3,
           explanation: "Robertson nói: 'we're still talking about it... we haven't made a final decision yet.'"
@@ -256,10 +261,10 @@ Thanks so much for tuning in today. It's been a pleasure sharing these moments w
           id: 11,
           question: "Angela describes the English class as __________.",
           options: [
-            "good enough",
-            "acceptable",
-            "awful",
-            "a real success"
+            "A. good enough",
+            "B. acceptable",
+            "C. awful",
+            "D. a real success"
           ],
           correct: 3,
           explanation: "Angela nói: 'the class was a real success. It wasn't just acceptable or good enough—and thank goodness it was far from awful!'"
@@ -268,10 +273,10 @@ Thanks so much for tuning in today. It's been a pleasure sharing these moments w
           id: 12,
           question: "Angela has just __________.",
           options: [
-            "done a master's",
-            "got the result of my English test",
-            "got 6.5",
-            "get"
+            "A. done a master's",
+            "B. got the result of my English test",
+            "C. got 6.5",
+            "D. get"
           ],
           correct: 1,
           explanation: "Angela nói: 'I've just got the result of my English test!'"
@@ -280,10 +285,10 @@ Thanks so much for tuning in today. It's been a pleasure sharing these moments w
           id: 13,
           question: "If you miss a deadline your tutor has set, you __________.",
           options: [
-            "will be given a zero",
-            "will get 50% of your marks",
-            "will be fined",
-            "will get all marks"
+            "A. will be given a zero",
+            "B. will get 50% of your marks",
+            "C. will be fined",
+            "D. will get all marks"
           ],
           correct: 1,
           explanation: "Angela nói: 'if you miss a deadline she has set, you will only get fifty percent of your marks for that task.'"
@@ -292,10 +297,10 @@ Thanks so much for tuning in today. It's been a pleasure sharing these moments w
           id: 14,
           question: "Angela was __________.",
           options: [
-            "an intelligent kid in class",
-            "a bit bored at her school",
-            "an AI",
-            "already"
+            "A. an intelligent kid in class",
+            "B. a bit bored at her school",
+            "C. an AI",
+            "D. already"
           ],
           correct: 1,
           explanation: "Angela nói: 'I was a bit bored at my school back then' và giải thích 'the traditional classroom just didn't spark anything in me.'"
@@ -304,10 +309,10 @@ Thanks so much for tuning in today. It's been a pleasure sharing these moments w
           id: 15,
           question: "The restaurant in the main street __________.",
           options: [
-            "has a good menu",
-            "has nice food",
-            "has lots of options for vegetarians",
-            "all correct"
+            "A. has a good menu",
+            "B. has nice food",
+            "C. has lots of options for vegetarians",
+            "D. all correct"
           ],
           correct: 3,
           explanation: "Angela nói: 'it has a great menu, the food is absolutely delicious, and what impressed me most was that it has lots of options for vegetarians.'"
@@ -370,10 +375,10 @@ NARRATOR: Michael left the store to search for the receipt. Jessica tried to hel
           id: 16,
           question: "The tie __________.",
           options: [
-            "was a birthday present",
-            "was a Christmas present",
-            "was a gift of a boyfriend",
-            "all correct"
+            "A. was a birthday present",
+            "B. was a Christmas present",
+            "C. was a gift of a boyfriend",
+            "D. all correct"
           ],
           correct: 0,
           explanation: "Michael nói: 'This tie was given to me as a birthday present from my wife.'"
@@ -382,10 +387,10 @@ NARRATOR: Michael left the store to search for the receipt. Jessica tried to hel
           id: 17,
           question: "The tie was purchased __________.",
           options: [
-            "last week",
-            "a few weeks ago",
-            "two weeks ago",
-            "two years ago"
+            "A. last week",
+            "B. a few weeks ago",
+            "C. two weeks ago",
+            "D. two years ago"
           ],
           correct: 2,
           explanation: "Michael nói: 'My wife gave me the first one about two weeks ago on my birthday.'"
@@ -394,10 +399,10 @@ NARRATOR: Michael left the store to search for the receipt. Jessica tried to hel
           id: 18,
           question: "When asking for refunding, the man __________.",
           options: [
-            "had a receipt",
-            "left his receipt at home",
-            "didn't have receipt",
-            "don't receipt"
+            "A. had a receipt",
+            "B. left his receipt at home",
+            "C. didn't have receipt",
+            "D. don't receipt"
           ],
           correct: 2,
           explanation: "Michael nói: 'No, I don't have the receipt. My wife bought it as a gift and didn't give me the receipt.'"
@@ -406,10 +411,10 @@ NARRATOR: Michael left the store to search for the receipt. Jessica tried to hel
           id: 19,
           question: "She (the shop assistant) didn't agree to pay back money because __________.",
           options: [
-            "she didn't believe in the man",
-            "the man couldn't prove that the tie was purchased from her store",
-            "she has no right to do so",
-            "she hadn't believed"
+            "A. she didn't believe in the man",
+            "B. the man couldn't prove that the tie was purchased from her store",
+            "C. she has no right to do so",
+            "D. she hadn't believed"
           ],
           correct: 1,
           explanation: "Jessica nói: 'Without a receipt, I have no way to verify that this tie was purchased from our store. Company policy requires proof of purchase.'"
@@ -418,10 +423,10 @@ NARRATOR: Michael left the store to search for the receipt. Jessica tried to hel
           id: 20,
           question: "The shop assistant tries to __________.",
           options: [
-            "make the man angry",
-            "calm the man down",
-            "bother the man",
-            "make the man happy"
+            "A. make the man angry",
+            "B. calm the man down",
+            "C. bother the man",
+            "D. make the man happy"
           ],
           correct: 1,
           explanation: "Jessica nói: 'I understand your frustration and I really want to help... Let's stay positive. You've got this!'"
@@ -440,72 +445,122 @@ NARRATOR: Michael left the store to search for the receipt. Jessica tried to hel
         {
           id: 21,
           question: "Customer reviews indicate that many modern mobile devices are often unnecessarily _______.",
-          options: ["Complication", "Complicates", "Complicate", "Complicated"],
+          options: [
+            "A. Complication",
+            "B. Complicates",
+            "C. Complicate",
+            "D. Complicated"
+          ],
           correct: 3,
-          explanation: "Cấu trúc: 'devices are _______' yêu cầu tính từ. 'Complicated' là đáp án đúng."
+          explanation: "Cấu trúc: 'devices are _______' yêu cầu tính từ. 'Complicated' là đáp án đúng (có nghĩa là phức tạp)."
         },
         {
           id: 22,
           question: "Among ________ recognized at the company awards ceremony were senior business analyst Natalie Obi and sales associate Peter Comeau.",
-          options: ["who", "whose", "they", "those"],
+          options: [
+            "A. who",
+            "B. whose",
+            "C. they",
+            "D. those"
+          ],
           correct: 3,
-          explanation: "'Among those recognized... were [subject]' sử dụng 'those' làm đại từ."
+          explanation: "'Among those recognized... were [subject]' sử dụng 'those' làm đại từ. 'Those' = những người được công nhận."
         },
         {
           id: 23,
           question: "Jamal Nawzad has received top performance reviews _______ he joined the sales department two years ago.",
-          options: ["despite", "except", "since", "during"],
+          options: [
+            "A. despite",
+            "B. except",
+            "C. since",
+            "D. during"
+          ],
           correct: 2,
-          explanation: "'has received... since' là cấu trúc thì hiện tại hoàn thành đúng."
+          explanation: "'has received... since' là cấu trúc thì hiện tại hoàn thành đúng. 'Since' = từ khi nào đó."
         },
         {
           id: 24,
           question: "All clothing sold in Develyn's Boutique is made from natural materials and contains no __________ dyes.",
-          options: ["immediate", "synthetic", "reasonable", "assumed"],
+          options: [
+            "A. immediate",
+            "B. synthetic",
+            "C. reasonable",
+            "D. assumed"
+          ],
           correct: 1,
-          explanation: "'Synthetic dyes' (thuốc nhuộm nhân tạo) trái ngược với 'natural materials'."
+          explanation: "'Synthetic dyes' (thuốc nhuộm nhân tạo) trái ngược với 'natural materials'. 'Synthetic' = nhân tạo."
         },
         {
           id: 25,
           question: "Gyeon Corporation's continuing education policy states that _______ learning new skills enhances creativity and focus.",
-          options: ["regular", "regularity", "regulate", "regularly"],
+          options: [
+            "A. regular",
+            "B. regularity",
+            "C. regulate",
+            "D. regularly"
+          ],
           correct: 0,
-          explanation: "'regular learning' cần tính từ để mô tả 'learning'."
+          explanation: "'regular learning' cần tính từ để mô tả danh từ 'learning'. 'Regular' = thường xuyên, đều đặn."
         },
         {
           id: 26,
           question: "The new employee orientation will begin at 9 a.m. and will _______ an overview of company policies.",
-          options: ["include", "includes", "included", "including"],
+          options: [
+            "A. include",
+            "B. includes",
+            "C. included",
+            "D. including"
+          ],
           correct: 0,
-          explanation: "'will + V nguyên thể' là cấu trúc thì tương lai đơn."
+          explanation: "'will + V nguyên thể' là cấu trúc thì tương lai đơn. 'Include' = bao gồm."
         },
         {
           id: 27,
           question: "To ensure product quality, all items must be thoroughly tested _______ being shipped to customers.",
-          options: ["before", "during", "between", "unless"],
+          options: [
+            "A. before",
+            "B. during",
+            "C. between",
+            "D. unless"
+          ],
           correct: 0,
-          explanation: "'before + V-ing' chỉ hành động xảy ra trước một hành động khác."
+          explanation: "'before + V-ing' chỉ hành động xảy ra trước một hành động khác. 'Before' = trước khi."
         },
         {
           id: 28,
           question: "The marketing department is seeking a graphic designer who can work _______ and meet tight deadlines.",
-          options: ["independence", "independently", "independent", "dependently"],
+          options: [
+            "A. independence",
+            "B. independently",
+            "C. independent",
+            "D. dependently"
+          ],
           correct: 1,
-          explanation: "Sau động từ 'work' cần trạng từ 'independently'."
+          explanation: "Sau động từ 'work' cần trạng từ. 'Independently' = độc lập. (work independently = làm việc độc lập)"
         },
         {
           id: 29,
           question: "Because of the heavy rain, the outdoor event has been _______ until next weekend.",
-          options: ["postponed", "postponing", "postpone", "postpones"],
+          options: [
+            "A. postponed",
+            "B. postponing",
+            "C. postpone",
+            "D. postpones"
+          ],
           correct: 0,
-          explanation: "'has been + V3' là cấu trúc thì hiện tại hoàn thành bị động."
+          explanation: "'has been + V3' là cấu trúc thì hiện tại hoàn thành bị động. 'Postponed' = được hoãn lại."
         },
         {
           id: 30,
           question: "The manager reminded the staff that punctuality and teamwork are key factors in maintaining a positive _______.",
-          options: ["environment", "equipment", "advertisement", "appointment"],
+          options: [
+            "A. environment",
+            "B. equipment",
+            "C. advertisement",
+            "D. appointment"
+          ],
           correct: 0,
-          explanation: "'positive environment' (môi trường tích cực) là collocation phù hợp."
+          explanation: "'positive environment' (môi trường tích cực) là collocation phù hợp. 'Environment' = môi trường."
         }
       ]
     },
@@ -546,44 +601,122 @@ InnovateTech Solutions`,
         {
           id: 31,
           question: "(31) - Điền từ thích hợp",
-          options: ["ensure", "suggest", "describe", "remind"],
+          options: [
+            "A. ensure",
+            "B. suggest",
+            "C. describe",
+            "D. remind"
+          ],
           correct: 0,
-          explanation: "'ensure + noun' = 'đảm bảo rằng'."
+          explanation: "'ensure + noun' = 'đảm bảo rằng'. Cấu trúc: 'assigned specific responsibilities to ensure smooth coordination.'"
         },
         {
           id: 32,
           question: "(32) - Điền từ thích hợp",
-          options: ["attend", "improve", "reinforce", "prevent"],
+          options: [
+            "A. attend",
+            "B. improve",
+            "C. reinforce",
+            "D. prevent"
+          ],
           correct: 2,
-          explanation: "'reinforce brand image' = 'tăng cường hình ảnh thương hiệu'."
+          explanation: "'reinforce brand image' = 'tăng cường/củng cố hình ảnh thương hiệu'. Reinforce = làm cho mạnh mẽ hơn."
         },
         {
           id: 33,
           question: "(33) - Điền từ thích hợp",
-          options: ["reject", "implement", "transfer", "decline"],
+          options: [
+            "A. reject",
+            "B. implement",
+            "C. transfer",
+            "D. decline"
+          ],
           correct: 1,
-          explanation: "'review and implement' = 'xem xét và triển khai'."
+          explanation: "'review and implement' = 'xem xét và triển khai'. Implement = đưa vào thực hiện, triển khai."
         },
         {
           id: 34,
           question: "(34) - Điền từ thích hợp",
-          options: ["warn", "announce", "require", "ensure"],
+          options: [
+            "A. warn",
+            "B. announce",
+            "C. require",
+            "D. ensure"
+          ],
           correct: 3,
-          explanation: "'ensure + that + clause' = 'đảm bảo rằng'."
+          explanation: "'ensure + that + clause' = 'đảm bảo rằng'. Cấu trúc: 'held to ensure that all participants are comfortable.'"
         },
         {
           id: 35,
           question: "(35) - Điền từ thích hợp",
-          options: ["compete", "cooperate", "complain", "compare"],
+          options: [
+            "A. compete",
+            "B. cooperate",
+            "C. complain",
+            "D. compare"
+          ],
           correct: 1,
-          explanation: "'cooperate with other departments' = 'hợp tác với các phòng ban khác'."
+          explanation: "'cooperate with other departments' = 'hợp tác với các phòng ban khác'. Cooperate = làm việc cùng nhau."
         },
         {
           id: 36,
           question: "(36) - Điền từ thích hợp",
-          options: ["reach", "push", "delay", "ignore"],
+          options: [
+            "A. reach",
+            "B. push",
+            "C. delay",
+            "D. ignore"
+          ],
           correct: 0,
-          explanation: "'reach me directly' = 'liên hệ với tôi trực tiếp'."
+          explanation: "'reach me directly' = 'liên hệ với tôi trực tiếp'. Reach = tiếp cận, liên hệ."
+        },
+        {
+          id: 37,
+          question: "The EcoSmart Home Series will most likely be released __________.",
+          options: [
+            "A. next week",
+            "B. early next quarter",
+            "C. by the end of the year",
+            "D. after the press conference"
+          ],
+          correct: 1,
+          explanation: "Email nói rõ: 'scheduled for early next quarter' → Sản phẩm sẽ được ra mắt vào đầu quý tới."
+        },
+        {
+          id: 38,
+          question: "What is the main purpose of this message?",
+          options: [
+            "A. To introduce a new marketing policy",
+            "B. To inform staff of product launch preparations",
+            "C. To announce the cancellation of a campaign",
+            "D. To request client feedback after the event"
+          ],
+          correct: 1,
+          explanation: "Email nói: 'we are preparing for the official launch' và thảo luận về các bước chuẩn bị → Mục đích là thông báo chuẩn bị ra mắt sản phẩm."
+        },
+        {
+          id: 39,
+          question: "Who is the sender of this message?",
+          options: [
+            "A. A sales representative",
+            "B. A design manager",
+            "C. The marketing director",
+            "D. The chief financial officer"
+          ],
+          correct: 2,
+          explanation: "Email kí tên: 'Clara Lee, Marketing Director' → Người gửi là giám đốc marketing."
+        },
+        {
+          id: 40,
+          question: "When will the rehearsal for the press conference take place?",
+          options: [
+            "A. March 22",
+            "B. April 3",
+            "C. April 5",
+            "D. The following week"
+          ],
+          correct: 1,
+          explanation: "Email nói: 'press conference will take place... on April 5' và 'rehearsal session will be held two days before the event' → April 5 - 2 ngày = April 3."
         }
       ]
     },
@@ -592,12 +725,10 @@ InnovateTech Solutions`,
     // READING PART 7 - MULTIPLE TEXTS
     // ==========================================
     part7: {
-      title: "PART 7: Multiple Texts",
-      description: "10 câu hỏi - Đọc quảng cáo và email, chọn đáp án tốt nhất.",
+      title: "PART 7: Multiple Texts (Advertisement & Email)",
+      description: "10 câu hỏi - Đọc quảng cáo dịch vụ và email khách hàng, chọn đáp án tốt nhất.",
       type: "reading",
-      text: `http://www.businessaudiopro.com
-
-BUSINESS AUDIO PRO
+      text: `BUSINESS AUDIO PRO
 Enhance Your Company's Image with a Professionally Recorded Telephone Greeting
 
 A professional, personalized voicemail message creates an excellent first impression. Business Audio Pro meets your specifications to record a customized telephone greeting within three business days!
@@ -634,22 +765,22 @@ Annesly Data
           id: 41,
           question: "According to the advertisement, why should customers visit the Business Audio Pro Web site?",
           options: [
-            "To hear voice samples",
-            "To add a new phone number",
-            "To submit a credit card payment",
-            "To request recording equipment"
+            "A. To hear voice samples",
+            "B. To add a new phone number",
+            "C. To submit a credit card payment",
+            "D. To request recording equipment"
           ],
           correct: 0,
-          explanation: "Quảng cáo nói: 'Visit businessaudiopro.com to hear examples of what each actor sounds like.'"
+          explanation: "Quảng cáo nói: 'Visit businessaudiopro.com to hear examples of what each actor sounds like.' → Để nghe các mẫu giọng nói."
         },
         {
           id: 42,
           question: "What is suggested about Business Audio Pro?",
           options: [
-            "It fills orders once a week.",
-            "It advertises in the newspaper.",
-            "It specializes in data-processing services.",
-            "It has recently expanded its business."
+            "A. It fills orders once a week.",
+            "B. It advertises in the newspaper.",
+            "C. It specializes in data-processing services.",
+            "D. It has recently expanded its business."
           ],
           correct: 1,
           explanation: "Email từ Annesly: 'I found your notice in the newspaper' → Business Audio Pro quảng cáo trên báo."
@@ -658,37 +789,97 @@ Annesly Data
           id: 43,
           question: "Who most likely is Ms. Annesly?",
           options: [
-            "An actor",
-            "A script writer",
-            "A sales associate",
-            "A business owner"
+            "A. An actor",
+            "B. A script writer",
+            "C. A sales associate",
+            "D. A business owner"
           ],
           correct: 3,
-          explanation: "Email: 'my data-processing and transcription business' + chữ ký 'Annesly Data' → Cô là chủ doanh nghiệp."
+          explanation: "Email: 'my data-processing and transcription business' + chữ ký 'Annesly Data' → Cô là chủ sở hữu doanh nghiệp."
         },
         {
           id: 44,
           question: "What service does Ms. Annesly NOT request from Business Audio Pro?",
           options: [
-            "Professional voice talent",
-            "On-hold messages",
-            "Customized script writing",
-            "Multilingual voice production"
+            "A. Professional voice talent",
+            "B. On-hold messages",
+            "C. Customized script writing",
+            "D. Multilingual voice production"
           ],
           correct: 1,
-          explanation: "Annesly yêu cầu: 'voicemail greeting', 'script writing', và 'both languages'. Cô không đề cập 'on-hold messages'."
+          explanation: "Annesly yêu cầu: 'voicemail greeting', 'write and record', và 'both languages'. Cô KHÔNG đề cập 'on-hold messages' (thông điệp chờ trên đường)."
         },
         {
           id: 45,
-          question: "What will Ms. Annesly most likely receive within 24 hours?",
+          question: "What will Ms. Annesly most likely do within 24 hours?",
           options: [
-            "A voice sample recording",
-            "A phone call from a representative",
-            "A written script",
-            "A completed voicemail greeting"
+            "A. Meet with an actor",
+            "B. Visit a recording studio",
+            "C. Write a script",
+            "D. Speak with a representative"
+          ],
+          correct: 3,
+          explanation: "Quảng cáo: 'A representative will call you within 24 hours to discuss your project' → Cô sẽ nói chuyện với đại diện công ty."
+        },
+        {
+          id: 46,
+          question: "According to the advertisement, Business Audio Pro will respond to customer inquiries within",
+          options: [
+            "A. 12 hours",
+            "B. 24 hours",
+            "C. 48 hours",
+            "D. three business days"
           ],
           correct: 1,
-          explanation: "Quảng cáo: 'A representative will call you within 24 hours.'"
+          explanation: "Quảng cáo nói: 'A representative will call you within 24 hours' → Business Audio Pro sẽ trả lời trong vòng 24 giờ."
+        },
+        {
+          id: 47,
+          question: "What can be inferred about Business Audio Pro's services?",
+          options: [
+            "A. They are limited to English-speaking clients.",
+            "B. They are available only on weekends.",
+            "C. They can accommodate different languages.",
+            "D. They require customers to visit the office in person."
+          ],
+          correct: 2,
+          explanation: "Quảng cáo nói: 'Multilingual Voice Production – For those with a multilingual customer base, we offer services in a wide range of languages.' → Họ có thể cung cấp dịch vụ nhiều ngôn ngữ."
+        },
+        {
+          id: 48,
+          question: "What does Ms. Annesly specifically request in her message?",
+          options: [
+            "A. A sample of recorded music",
+            "B. A bilingual voicemail recording",
+            "C. A newspaper advertisement",
+            "D. A refund for a previous order"
+          ],
+          correct: 1,
+          explanation: "Email nói: 'I would like the message to be recorded in both languages' → Cô yêu cầu ghi âm lời chào hàng nhân viên bằng cả tiếng Anh và tiếng Tây Ban Nha."
+        },
+        {
+          id: 49,
+          question: "What detail does Ms. Annesly include to make communication easier?",
+          options: [
+            "A. Her office address",
+            "B. Her preferred calling hours",
+            "C. Her company's website link",
+            "D. Her client list"
+          ],
+          correct: 1,
+          explanation: "Email: 'Please reach out to me at my mobile phone between the hours of 10:00 A.M. and 5:00 P.M.' → Cô cung cấp thời gian gọi điện ưu tiên."
+        },
+        {
+          id: 50,
+          question: "What is the likely next step for Business Audio Pro?",
+          options: [
+            "A. Sending Ms. Annesly a contract to sign",
+            "B. Visiting Ms. Annesly's office for recording",
+            "C. Calling Ms. Annesly to discuss her project and pricing",
+            "D. Posting a new advertisement in the newspaper"
+          ],
+          correct: 2,
+          explanation: "Quảng cáo nói: 'A representative will call you within 24 hours to discuss your project and provide a price estimate.' → Bước tiếp theo là gọi để thảo luận dự án và giá."
         }
       ]
     },
@@ -720,116 +911,121 @@ SAM BACH (12:16): Yes, sorry about that. See you then!`,
           id: 51,
           question: "What is suggested about Mr. Bach?",
           options: [
-            "He has been to Kansai more than once.",
-            "He currently works in Beijing.",
-            "He is on a business trip.",
-            "He works for Fly Right Airlines."
+            "A. He has been to Kansai more than once.",
+            "B. He currently works in Beijing.",
+            "C. He is on a business trip.",
+            "D. He works for Fly Right Airlines."
           ],
-          correct: 2, // (C)
-          explanation: "Mr. Bach đề cập đến 'our client meeting' (cuộc họp khách hàng của chúng ta), điều này ngụ ý ông đang thực hiện một chuyến công tác. Không có thông tin về việc ông làm việc cho hãng hàng không hay đã đến Kansai trước đó."
+          correct: 2,
+          explanation: "Mr. Bach đề cập đến 'our client meeting' (cuộc họp khách hàng của chúng ta), điều này ngụ ý ông đang thực hiện một chuyến công tác."
         },
         {
           id: 52,
           question: "At 12:15, what does Mr. Otani mean when he writes, 'Sure thing'?",
           options: [
-            "He has confirmed the arrival time of a flight.",
-            "He is certain he will be able to find a parking place.",
-            "He agrees to wait at the door near the customs area.",
-            "He knows Mr. Bach must pass through customs."
+            "A. He has confirmed the arrival time of a flight.",
+            "B. He is certain he will be able to find a parking place.",
+            "C. He agrees to wait at the door near the customs area.",
+            "D. He knows Mr. Bach must pass through customs."
           ],
-          correct: 2, // (C)
-          explanation: "'Sure thing' là câu trả lời đồng ý cho yêu cầu trước đó của Mr. Bach là 'Would you mind meeting me at the door after I go through customs?' (Bạn có phiền gặp tôi ở cửa sau khi tôi qua cửa hải quan không?)."
+          correct: 2,
+          explanation: "'Sure thing' là câu trả lời đồng ý cho yêu cầu trước đó: 'Would you mind meeting me at the door after I go through customs?'"
         },
         {
           id: 53,
           question: "Why was Mr. Bach's flight delayed?",
           options: [
-            "There was bad weather in Kansai.",
-            "He missed his connection in Beijing.",
-            "The airline changed the departure time.",
-            "He forgot to check in early."
+            "A. There was bad weather in Kansai.",
+            "B. He missed his connection in Beijing.",
+            "C. The airline changed the departure time.",
+            "D. He forgot to check in early."
           ],
-          correct: 1, // (B)
-          explanation: "Trong tin nhắn lúc 11:59, Mr. Bach nói rõ: 'missed my connection in Beijing' (đã lỡ chuyến bay chuyển tiếp tại Bắc Kinh) do chuyến bay đầu tiên bị trễ."
+          correct: 1,
+          explanation: "Không có thông tin trực tiếp về lý do delay. Tuy nhiên, Mr. Bach nói 'My first flight was delayed, so I missed my connection in Beijing' → Chuyến bay đầu tiên bị trễ khiến anh lỡ kết nối."
         },
         {
           id: 54,
           question: "What time is Mr. Bach's new flight expected to arrive?",
-          options: ["11:59", "12:06", "18:00", "20:15"],
-          correct: 2, // (C)
-          explanation: "Mr. Bach thông báo ở tin nhắn lúc 12:00: 'arriving in Kansai at 18:00' (đến Kansai lúc 18 giờ)."
+          options: [
+            "A. 11:59",
+            "B. 12:06",
+            "C. 18:00",
+            "D. 20:15"
+          ],
+          correct: 2,
+          explanation: "Mr. Bach thông báo ở tin nhắn lúc 12:00: 'I'm going to be on a flight arriving in Kansai at 18:00' → Đến lúc 18 giờ (6 chiều)."
         },
         {
           id: 55,
           question: "What does Mr. Otani offer to do for Mr. Bach?",
           options: [
-            "Drive him to the hotel",
-            "Pick him up at the airport",
-            "Change his flight booking",
-            "Help carry his luggage"
+            "A. Drive him to the hotel",
+            "B. Pick him up at the airport",
+            "C. Change his flight booking",
+            "D. Help carry his luggage"
           ],
-          correct: 1, // (B)
-          explanation: "Bằng việc đồng ý gặp ở cửa sau hải quan và nói về việc tìm chỗ đậu xe, Mr. Otani đang đề nghị đón Mr. Bach tại sân bay."
+          correct: 1,
+          explanation: "Bằng việc đồng ý 'meeting me at the door after I go through customs', Mr. Otani đang đề nghị đón Mr. Bach tại sân bay."
         },
         {
           id: 56,
           question: "What can be inferred about the two men?",
           options: [
-            "They are colleagues attending the same meeting.",
-            "They are family members traveling together.",
-            "They both work for Fly Right Airlines.",
-            "They have never met before."
+            "A. They are colleagues attending the same meeting.",
+            "B. They are family members traveling together.",
+            "C. They both work for Fly Right Airlines.",
+            "D. They have never met before."
           ],
-          correct: 0, // (A)
+          correct: 0,
           explanation: "Việc sử dụng cụm từ 'our client meeting' (cuộc họp khách hàng của chúng ta) cho thấy họ là đồng nghiệp và cùng tham gia vào một sự kiện công việc chung."
         },
         {
           id: 57,
           question: "At 12:06, why does Mr. Bach mention 'still in time for our client meeting'?",
           options: [
-            "To apologize for missing the meeting",
-            "To confirm he will not be late",
-            "To ask about the meeting location",
-            "To cancel his attendance"
+            "A. To apologize for missing the meeting",
+            "B. To confirm he will not be late",
+            "C. To ask about the meeting location",
+            "D. To cancel his attendance"
           ],
-          correct: 1, // (B)
-          explanation: "Ông muốn trấn an Mr. Otani rằng mặc dù chuyến bay bị trễ nhưng ông vẫn sẽ đến kịp giờ cho cuộc họp với khách hàng."
+          correct: 1,
+          explanation: "Mr. Bach muốn trấn an Mr. Otani rằng mặc dù chuyến bay bị trễ nhưng ông vẫn sẽ đến kịp giờ cho cuộc họp với khách hàng."
         },
         {
           id: 58,
           question: "What does Mr. Otani mean when he writes, 'I'll confirm the arrival time'?",
           options: [
-            "He plans to check the airline's schedule.",
-            "He will change the meeting time.",
-            "He needs to contact the travel agent.",
-            "He will book another ticket for Mr. Bach."
+            "A. He plans to check the airline's schedule.",
+            "B. He will change the meeting time.",
+            "C. He needs to contact the travel agent.",
+            "D. He will book another ticket for Mr. Bach."
           ],
-          correct: 0, // (A)
-          explanation: "Ông sẽ kiểm tra lại lịch trình thực tế của hãng hàng không để chắc chắn thời gian hạ cánh chính xác trước khi đi đón."
+          correct: 0,
+          explanation: "Mr. Otani sẽ kiểm tra lại lịch trình thực tế của hãng hàng không để chắc chắn thời gian hạ cánh chính xác trước khi đi đón."
         },
         {
           id: 59,
           question: "What is implied about Mr. Otani's travel to the airport?",
           options: [
-            "He expects heavy traffic or limited parking.",
-            "He plans to take public transportation.",
-            "He works at the airport.",
-            "He has never been to Kansai Airport before."
+            "A. He expects heavy traffic or limited parking.",
+            "B. He plans to take public transportation.",
+            "C. He works at the airport.",
+            "D. He has never been to Kansai Airport before."
           ],
-          correct: 0, // (A)
-          explanation: "Ông nói 'Parking spots can be hard to find' (Chỗ đậu xe có thể khó tìm), điều này cho thấy ông dự đoán sẽ có khó khăn về bãi đỗ xe hoặc mật độ xe đông đúc."
+          correct: 0,
+          explanation: "Mr. Otani nói 'Parking spots can be hard to find, but now I'll have extra time to drive around and look.' → Ông dự đoán sẽ có khó khăn về bãi đỗ xe."
         },
         {
           id: 60,
           question: "What does Mr. Bach express in his final message?",
           options: [
-            "Thanks for the help",
-            "Regret about missing the meeting",
-            "Frustration with the airline",
-            "Request for flight confirmation"
+            "A. Thanks for the help",
+            "B. Regret about missing the meeting",
+            "C. Frustration with the airline",
+            "D. Request for flight confirmation"
           ],
-          correct: 0, // (A)
-          explanation: "Dòng cuối 'Yes, sorry about that. See you then!' mang hàm ý cảm ơn vì sự giúp đỡ và kiên nhẫn của Mr. Otani khi phải thay đổi lịch đón."
+          correct: 0,
+          explanation: "Dòng cuối 'Yes, sorry about that. See you then!' mang hàm ý cảm ơn vì sự giúp đỡ và kiên nhẫn của Mr. Otani."
         }
       ]
     }

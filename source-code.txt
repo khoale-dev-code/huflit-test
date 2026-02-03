@@ -103,7 +103,6 @@ huflit-test.git/packed-refs
 index.html
 package.json
 postcss.config.js
-public/data/audio/exam1/listening/full.mp3
 public/data/audio/exam1/listening/part1.mp3
 public/data/audio/exam1/listening/part2.mp3
 public/data/audio/exam1/listening/part3.mp3
@@ -291,162 +290,6 @@ vite.config.js
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="src/hooks/useAudioPlayer.js">
-import { useState, useCallback, useRef, useEffect } from 'react';
-
-/**
- * Hook quản lý audio player
- * Hỗ trợ play, pause, stop, seek, volume control
- */
-export const useAudioPlayer = (audioUrl) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const audioRef = useRef(null);
-
-  // Khởi tạo audio element
-  useEffect(() => {
-    if (!audioUrl) return;
-
-    const audio = new Audio(audioUrl);
-    audioRef.current = audio;
-
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-      setIsLoading(false);
-    };
-
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-      setCurrentTime(0);
-    };
-
-    const handleError = (e) => {
-      setError('Failed to load audio');
-      setIsPlaying(false);
-      console.error('Audio error:', e);
-    };
-
-    const handlePlay = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-    };
-
-    const handlePause = () => {
-      setIsPlaying(false);
-      setIsPaused(true);
-    };
-
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-
-    audio.volume = volume;
-
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-    };
-  }, [audioUrl, volume]);
-
-  const play = useCallback(() => {
-    if (audioRef.current && !isPlaying) {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsLoading(false);
-            })
-            .catch((err) => {
-              setError('Failed to play audio');
-              setIsLoading(false);
-              console.error('Play error:', err);
-            });
-        }
-      } catch (err) {
-        setError('Failed to play audio');
-        setIsLoading(false);
-      }
-    }
-  }, [isPlaying]);
-
-  const pause = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-  }, []);
-
-  const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
-      setIsPlaying(false);
-      setIsPaused(false);
-    }
-  }, []);
-
-  const seek = useCallback((time) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(0, Math.min(time, duration));
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  }, [duration]);
-
-  const handleVolumeChange = useCallback((newVolume) => {
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
-  }, []);
-
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  return {
-    isPlaying,
-    isPaused,
-    isLoading,
-    currentTime,
-    duration,
-    volume,
-    error,
-    play,
-    pause,
-    stop,
-    seek,
-    setVolume: handleVolumeChange,
-    formatTime,
-  };
-};
-</file>
 
 <file path=".firebaserc">
 {
@@ -27027,6 +26870,162 @@ export const useAudio = (maleVoice, femaleVoice, rate = 1) => {
 export default useAudio;
 </file>
 
+<file path="src/hooks/useAudioPlayer.js">
+import { useState, useCallback, useRef, useEffect } from 'react';
+
+/**
+ * Hook quản lý audio player
+ * Hỗ trợ play, pause, stop, seek, volume control
+ */
+export const useAudioPlayer = (audioUrl) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const audioRef = useRef(null);
+
+  // Khởi tạo audio element
+  useEffect(() => {
+    if (!audioUrl) return;
+
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      setIsLoading(false);
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setCurrentTime(0);
+    };
+
+    const handleError = (e) => {
+      setError('Failed to load audio');
+      setIsPlaying(false);
+      console.error('Audio error:', e);
+    };
+
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setIsPaused(false);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      setIsPaused(true);
+    };
+
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    audio.volume = volume;
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, [audioUrl, volume]);
+
+  const play = useCallback(() => {
+    if (audioRef.current && !isPlaying) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsLoading(false);
+            })
+            .catch((err) => {
+              setError('Failed to play audio');
+              setIsLoading(false);
+              console.error('Play error:', err);
+            });
+        }
+      } catch (err) {
+        setError('Failed to play audio');
+        setIsLoading(false);
+      }
+    }
+  }, [isPlaying]);
+
+  const pause = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, []);
+
+  const stop = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+      setIsPlaying(false);
+      setIsPaused(false);
+    }
+  }, []);
+
+  const seek = useCallback((time) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, Math.min(time, duration));
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  }, [duration]);
+
+  const handleVolumeChange = useCallback((newVolume) => {
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  }, []);
+
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return {
+    isPlaying,
+    isPaused,
+    isLoading,
+    currentTime,
+    duration,
+    volume,
+    error,
+    play,
+    pause,
+    stop,
+    seek,
+    setVolume: handleVolumeChange,
+    formatTime,
+  };
+};
+</file>
+
 <file path="src/hooks/useAutoSaveProgress.js">
 import { useEffect, useRef } from 'react';
 import { useUserProgress } from './useUserProgress';
@@ -33429,387 +33428,6 @@ export default function UserProfile({ currentUser: currentUserProp }) {
     </div>
   );
 }
-</file>
-
-<file path="src/components/Display/ContentDisplay.jsx">
-import React, { useMemo, memo, useEffect } from 'react';
-import { AlertCircle, Headphones, FileText, BookOpen, Zap, Target, Clock, BarChart3 } from 'lucide-react';
-
-import Part6Display from './ReadingPart6Display';
-import ReadingPart7Display from './ReadingPart7Display';
-import ReadingPart8Display from './ReadingPart8Display';
-import ScriptDisplay from './ScriptDisplay';
-
-// Helper function để lấy audio path
-const getAudioPath = (examId, partId) => {
-  if (!examId || !partId) return null;
-  return `/public/data/audio/${examId}/listening/${partId}.mp3`;
-};
-
-// ========================================
-// HELPER COMPONENT: InfoCard
-// ========================================
-const InfoCard = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
-  const colorMap = {
-    indigo: 'text-indigo-600 bg-indigo-50',
-    purple: 'text-purple-600 bg-purple-50',
-    emerald: 'text-emerald-600 bg-emerald-50',
-    amber: 'text-amber-600 bg-amber-50',
-  };
-
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-      <div className={`p-2 rounded-lg ${colorMap[color]}`}>
-        <Icon className={`w-4 h-4`} strokeWidth={2} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{label}</p>
-        <p className="text-sm font-bold text-slate-900 truncate">{value}</p>
-      </div>
-    </div>
-  );
-});
-
-InfoCard.displayName = 'InfoCard';
-
-// ========================================
-// MAIN COMPONENT: Listening Content
-// ========================================
-const ListeningContent = memo(({ 
-  partData, 
-  selectedPart,
-  testType,
-  examId
-}) => {
-  const partNumber = selectedPart.replace('part', '');
-  
-  // Script extraction logic (unchanged)
-  const script = useMemo(() => {
-    if (!partData) {
-      console.warn('❌ partData is null');
-      return '';
-    }
-    
-    console.log('📋 partData keys:', Object.keys(partData));
-    
-    if (partData.script) {
-      console.log('✅ Found script in partData.script');
-      return partData.script;
-    }
-    
-    if (partData.text) {
-      console.log('✅ Found text in partData.text');
-      return partData.text;
-    }
-    
-    if (partData.questions && Array.isArray(partData.questions)) {
-      console.log(`📍 Found ${partData.questions.length} questions, extracting scripts...`);
-      
-      const scripts = partData.questions
-        .filter(q => q.script)
-        .map(q => q.script)
-        .join('\n\n---\n\n');
-      
-      if (scripts.trim()) {
-        console.log('✅ Extracted scripts from questions');
-        return scripts;
-      }
-    }
-    
-    if (partData.description) {
-      console.log('✅ Using description as fallback');
-      return partData.description;
-    }
-    
-    console.warn('⚠️ No script found in any property');
-    return '';
-  }, [partData]);
-
-  // Audio URL - Ưu tiên từ partData, nếu không thì tạo mặc định
-  const audioUrl = useMemo(() => {
-    if (!examId) return null;
-    
-    // Nếu partData đã có audioUrl, dùng nó
-    if (partData?.audioUrl) {
-      return partData.audioUrl;
-    }
-    
-    // Nếu không, tạo đường dẫn mặc định
-    return getAudioPath(examId, selectedPart);
-  }, [examId, selectedPart, partData]);
-  const DEBUG_ADDITION = `
-  // 🔍 DEBUG LOG
-  useEffect(() => {
-    console.log('📍 ListeningContent DEBUG:');
-    console.log('  examId:', examId);
-    console.log('  selectedPart:', selectedPart);
-    console.log('  partData?.audioUrl:', partData?.audioUrl);
-    console.log('  computed audioUrl:', audioUrl);
-  }, [examId, selectedPart, partData, audioUrl]);
-`;
-
-  const partTitle = useMemo(() => {
-    return partData?.title || `Part ${partNumber} - Phần Nghe`;
-  }, [partData, partNumber]);
-
-  if (!script) {
-    return (
-      <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-8 text-center">
-        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-          <Headphones className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
-        </div>
-        <p className="text-slate-900 font-bold text-lg">Chưa có kịch bản</p>
-        <p className="text-slate-600 text-sm mt-2">Kịch bản cho phần này sẽ sớm có</p>
-        <p className="text-slate-500 text-xs mt-4">Part: {partNumber}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="animate-in fade-in duration-300 w-full relative z-20">
-      <ScriptDisplay 
-        script={script}
-        audioUrl={audioUrl}
-        partTitle={partTitle}
-      />
-    </div>
-  );
-});
-
-ListeningContent.displayName = 'ListeningContent';
-
-// ========================================
-// MAIN COMPONENT: Reading Content
-// ========================================
-const ReadingContent = memo(({ partData, content, selectedPart }) => {
-  const partNumber = selectedPart.replace('part', '');
-  
-  const readingTime = useMemo(() => {
-    return Math.ceil(content.length / 1250);
-  }, [content.length]);
-
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500 w-full">
-      
-      {/* ===== READING SECTION HEADER ===== */}
-      <div className="flex items-center gap-3 px-1">
-        <div className="p-2.5 rounded-lg bg-emerald-100">
-          <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2} />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">Phần Đọc</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Part {partNumber}</p>
-        </div>
-      </div>
-
-      {/* ===== INFO PANEL ===== */}
-      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-4 h-4 text-emerald-700" strokeWidth={2} />
-          <p className="text-sm font-bold text-emerald-900 uppercase tracking-wider">Thông tin</p>
-        </div>
-        <div className="space-y-2">
-          <InfoCard 
-            icon={Target} 
-            label="Part" 
-            value={partNumber}
-            color="indigo"
-          />
-          <InfoCard 
-            icon={FileText} 
-            label="Độ dài" 
-            value={`${content.length} ký tự`}
-            color="amber"
-          />
-          <InfoCard 
-            icon={Clock} 
-            label="Thời gian dự tính" 
-            value={`~${readingTime} phút`}
-            color="emerald"
-          />
-        </div>
-      </div>
-
-      {/* ===== READING CONTENT ===== */}
-      <div>
-        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Nội dung</p>
-        <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-visible w-full">
-          
-          {/* Content Title Bar */}
-          <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
-            <p className="text-sm font-bold text-slate-900">
-              {partData.title || `Nội dung Part ${partNumber}`}
-            </p>
-          </div>
-
-          {/* Text Container */}
-          <div className="p-6 max-h-[40rem] overflow-y-auto">
-            <p className="text-base leading-relaxed whitespace-pre-wrap text-slate-800 break-words font-medium">
-              {content}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-ReadingContent.displayName = 'ReadingContent';
-
-// ========================================
-// MAIN COMPONENT: Empty State
-// ========================================
-const EmptyState = memo(({ type = 'no-part' }) => {
-  const states = {
-    'no-part': {
-      icon: AlertCircle,
-      iconColor: 'text-slate-400',
-      bgColor: 'from-slate-50 to-white',
-      borderColor: 'border-slate-200',
-      title: 'Chọn Part để bắt đầu',
-      description: 'Vui lòng chọn một phần thi từ danh sách trên'
-    },
-    'no-content': {
-      icon: FileText,
-      iconColor: 'text-amber-600',
-      bgColor: 'from-amber-50 to-white',
-      borderColor: 'border-amber-200',
-      title: 'Không có nội dung',
-      description: 'Nội dung cho phần này chưa được tải hoặc cập nhật'
-    }
-  };
-
-  const state = states[type] || states['no-part'];
-  const Icon = state.icon;
-
-  return (
-    <div className={`bg-gradient-to-br ${state.bgColor} rounded-2xl border-2 ${state.borderColor} p-8 sm:p-12 animate-in fade-in duration-300 w-full`}>
-      <div className="text-center py-12">
-        <div className="w-20 h-20 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center mx-auto mb-6 shadow-sm">
-          <Icon className={`w-10 h-10 ${state.iconColor}`} strokeWidth={1.5} />
-        </div>
-        <p className="text-slate-900 font-bold text-xl mb-2">
-          {state.title}
-        </p>
-        <p className="text-slate-600 text-base">
-          {state.description}
-        </p>
-      </div>
-    </div>
-  );
-});
-
-EmptyState.displayName = 'EmptyState';
-
-// ========================================
-// MAIN COMPONENT: ContentDisplay
-// ========================================
-const ContentDisplay = memo(({ 
-  partData, 
-  selectedPart, 
-  currentQuestionIndex, 
-  testType,
-  examId  // 👈 Thêm props này
-}) => {
-  
-  // Extract content
-  const content = useMemo(() => {
-    if (!partData) return '';
-
-    if (testType === 'listening') {
-      if (partData.script) {
-        return partData.script;
-      }
-      if (partData.text) {
-        return partData.text;
-      }
-      if (partData.questions && Array.isArray(partData.questions)) {
-        const scripts = partData.questions
-          .filter(q => q.script)
-          .map(q => q.script)
-          .join('\n\n');
-        return scripts;
-      }
-      return '';
-    }
-    
-    return partData.text || '';
-  }, [partData, testType]);
-
-  // CASE 1: Hide for reading part 5
-  if (testType === 'reading' && selectedPart === 'part5') {
-    return null;
-  }
-
-  // CASE 2: No part data
-  if (!partData) {
-    return <EmptyState type="no-part" />;
-  }
-
-  // CASE 3: No content
-  if (!content.trim()) {
-    return <EmptyState type="no-content" />;
-  }
-
-  // ========================================
-  // RENDER: READING PARTS (Special Cases)
-  // ========================================
-  if (testType === 'reading') {
-    
-    if (selectedPart === 'part6') {
-      return (
-        <div className="animate-in fade-in duration-300 overflow-visible w-full">
-          <Part6Display part6={partData} />
-        </div>
-      );
-    }
-
-    if (selectedPart === 'part7') {
-      return (
-        <div className="animate-in fade-in duration-300 overflow-visible w-full">
-          <ReadingPart7Display text={content} type="reading" />
-        </div>
-      );
-    }
-
-    if (selectedPart === 'part8') {
-      return (
-        <div className="animate-in fade-in duration-300 overflow-visible w-full">
-          <ReadingPart8Display text={content} type="reading" />
-        </div>
-      );
-    }
-    
-    // Default Reading Content (Part 1-4)
-    return (
-      <ReadingContent 
-        partData={partData} 
-        content={content} 
-        selectedPart={selectedPart} 
-      />
-    );
-  }
-
-  // ========================================
-  // RENDER: LISTENING PARTS
-  // ========================================
-  if (testType === 'listening') {
-    return (
-      <ListeningContent 
-        partData={partData}
-        selectedPart={selectedPart}
-        testType={testType}
-        examId={examId}  // 👈 Pass examId
-      />
-    );
-  }
-
-  return null;
-});
-
-ContentDisplay.displayName = 'ContentDisplay';
-
-export default ContentDisplay;
 </file>
 
 <file path="src/components/Display/PreviousResults.jsx">
@@ -42046,6 +41664,387 @@ async function main() {
 main();
 </file>
 
+<file path="src/components/Display/ContentDisplay.jsx">
+import React, { useMemo, memo, useEffect } from 'react';
+import { AlertCircle, Headphones, FileText, BookOpen, Zap, Target, Clock, BarChart3 } from 'lucide-react';
+
+import Part6Display from './ReadingPart6Display';
+import ReadingPart7Display from './ReadingPart7Display';
+import ReadingPart8Display from './ReadingPart8Display';
+import ScriptDisplay from './ScriptDisplay';
+
+// Helper function để lấy audio path
+const getAudioPath = (examId, partId) => {
+  if (!examId || !partId) return null;
+  return `/public/data/audio/${examId}/listening/${partId}.mp3`;
+};
+
+// ========================================
+// HELPER COMPONENT: InfoCard
+// ========================================
+const InfoCard = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
+  const colorMap = {
+    indigo: 'text-indigo-600 bg-indigo-50',
+    purple: 'text-purple-600 bg-purple-50',
+    emerald: 'text-emerald-600 bg-emerald-50',
+    amber: 'text-amber-600 bg-amber-50',
+  };
+
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+      <div className={`p-2 rounded-lg ${colorMap[color]}`}>
+        <Icon className={`w-4 h-4`} strokeWidth={2} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{label}</p>
+        <p className="text-sm font-bold text-slate-900 truncate">{value}</p>
+      </div>
+    </div>
+  );
+});
+
+InfoCard.displayName = 'InfoCard';
+
+// ========================================
+// MAIN COMPONENT: Listening Content
+// ========================================
+const ListeningContent = memo(({ 
+  partData, 
+  selectedPart,
+  testType,
+  examId
+}) => {
+  const partNumber = selectedPart.replace('part', '');
+  
+  // Script extraction logic (unchanged)
+  const script = useMemo(() => {
+    if (!partData) {
+      console.warn('❌ partData is null');
+      return '';
+    }
+    
+    console.log('📋 partData keys:', Object.keys(partData));
+    
+    if (partData.script) {
+      console.log('✅ Found script in partData.script');
+      return partData.script;
+    }
+    
+    if (partData.text) {
+      console.log('✅ Found text in partData.text');
+      return partData.text;
+    }
+    
+    if (partData.questions && Array.isArray(partData.questions)) {
+      console.log(`📍 Found ${partData.questions.length} questions, extracting scripts...`);
+      
+      const scripts = partData.questions
+        .filter(q => q.script)
+        .map(q => q.script)
+        .join('\n\n---\n\n');
+      
+      if (scripts.trim()) {
+        console.log('✅ Extracted scripts from questions');
+        return scripts;
+      }
+    }
+    
+    if (partData.description) {
+      console.log('✅ Using description as fallback');
+      return partData.description;
+    }
+    
+    console.warn('⚠️ No script found in any property');
+    return '';
+  }, [partData]);
+
+  // Audio URL - Ưu tiên từ partData, nếu không thì tạo mặc định
+  const audioUrl = useMemo(() => {
+    if (!examId) return null;
+    
+    // Nếu partData đã có audioUrl, dùng nó
+    if (partData?.audioUrl) {
+      return partData.audioUrl;
+    }
+    
+    // Nếu không, tạo đường dẫn mặc định
+    return getAudioPath(examId, selectedPart);
+  }, [examId, selectedPart, partData]);
+  const DEBUG_ADDITION = `
+  // 🔍 DEBUG LOG
+  useEffect(() => {
+    console.log('📍 ListeningContent DEBUG:');
+    console.log('  examId:', examId);
+    console.log('  selectedPart:', selectedPart);
+    console.log('  partData?.audioUrl:', partData?.audioUrl);
+    console.log('  computed audioUrl:', audioUrl);
+  }, [examId, selectedPart, partData, audioUrl]);
+`;
+
+  const partTitle = useMemo(() => {
+    return partData?.title || `Part ${partNumber} - Phần Nghe`;
+  }, [partData, partNumber]);
+
+  if (!script) {
+    return (
+      <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-8 text-center">
+        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+          <Headphones className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
+        </div>
+        <p className="text-slate-900 font-bold text-lg">Chưa có kịch bản</p>
+        <p className="text-slate-600 text-sm mt-2">Kịch bản cho phần này sẽ sớm có</p>
+        <p className="text-slate-500 text-xs mt-4">Part: {partNumber}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="animate-in fade-in duration-300 w-full relative z-20">
+      <ScriptDisplay 
+        script={script}
+        audioUrl={audioUrl}
+        partTitle={partTitle}
+      />
+    </div>
+  );
+});
+
+ListeningContent.displayName = 'ListeningContent';
+
+// ========================================
+// MAIN COMPONENT: Reading Content
+// ========================================
+const ReadingContent = memo(({ partData, content, selectedPart }) => {
+  const partNumber = selectedPart.replace('part', '');
+  
+  const readingTime = useMemo(() => {
+    return Math.ceil(content.length / 1250);
+  }, [content.length]);
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500 w-full">
+      
+      {/* ===== READING SECTION HEADER ===== */}
+      <div className="flex items-center gap-3 px-1">
+        <div className="p-2.5 rounded-lg bg-emerald-100">
+          <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2} />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Phần Đọc</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Part {partNumber}</p>
+        </div>
+      </div>
+
+      {/* ===== INFO PANEL ===== */}
+      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="w-4 h-4 text-emerald-700" strokeWidth={2} />
+          <p className="text-sm font-bold text-emerald-900 uppercase tracking-wider">Thông tin</p>
+        </div>
+        <div className="space-y-2">
+          <InfoCard 
+            icon={Target} 
+            label="Part" 
+            value={partNumber}
+            color="indigo"
+          />
+          <InfoCard 
+            icon={FileText} 
+            label="Độ dài" 
+            value={`${content.length} ký tự`}
+            color="amber"
+          />
+          <InfoCard 
+            icon={Clock} 
+            label="Thời gian dự tính" 
+            value={`~${readingTime} phút`}
+            color="emerald"
+          />
+        </div>
+      </div>
+
+      {/* ===== READING CONTENT ===== */}
+      <div>
+        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Nội dung</p>
+        <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-visible w-full">
+          
+          {/* Content Title Bar */}
+          <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
+            <p className="text-sm font-bold text-slate-900">
+              {partData.title || `Nội dung Part ${partNumber}`}
+            </p>
+          </div>
+
+          {/* Text Container */}
+          <div className="p-6 max-h-[40rem] overflow-y-auto">
+            <p className="text-base leading-relaxed whitespace-pre-wrap text-slate-800 break-words font-medium">
+              {content}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+ReadingContent.displayName = 'ReadingContent';
+
+// ========================================
+// MAIN COMPONENT: Empty State
+// ========================================
+const EmptyState = memo(({ type = 'no-part' }) => {
+  const states = {
+    'no-part': {
+      icon: AlertCircle,
+      iconColor: 'text-slate-400',
+      bgColor: 'from-slate-50 to-white',
+      borderColor: 'border-slate-200',
+      title: 'Chọn Part để bắt đầu',
+      description: 'Vui lòng chọn một phần thi từ danh sách trên'
+    },
+    'no-content': {
+      icon: FileText,
+      iconColor: 'text-amber-600',
+      bgColor: 'from-amber-50 to-white',
+      borderColor: 'border-amber-200',
+      title: 'Không có nội dung',
+      description: 'Nội dung cho phần này chưa được tải hoặc cập nhật'
+    }
+  };
+
+  const state = states[type] || states['no-part'];
+  const Icon = state.icon;
+
+  return (
+    <div className={`bg-gradient-to-br ${state.bgColor} rounded-2xl border-2 ${state.borderColor} p-8 sm:p-12 animate-in fade-in duration-300 w-full`}>
+      <div className="text-center py-12">
+        <div className="w-20 h-20 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center mx-auto mb-6 shadow-sm">
+          <Icon className={`w-10 h-10 ${state.iconColor}`} strokeWidth={1.5} />
+        </div>
+        <p className="text-slate-900 font-bold text-xl mb-2">
+          {state.title}
+        </p>
+        <p className="text-slate-600 text-base">
+          {state.description}
+        </p>
+      </div>
+    </div>
+  );
+});
+
+EmptyState.displayName = 'EmptyState';
+
+// ========================================
+// MAIN COMPONENT: ContentDisplay
+// ========================================
+const ContentDisplay = memo(({ 
+  partData, 
+  selectedPart, 
+  currentQuestionIndex, 
+  testType,
+  examId  // 👈 Thêm props này
+}) => {
+  
+  // Extract content
+  const content = useMemo(() => {
+    if (!partData) return '';
+
+    if (testType === 'listening') {
+      if (partData.script) {
+        return partData.script;
+      }
+      if (partData.text) {
+        return partData.text;
+      }
+      if (partData.questions && Array.isArray(partData.questions)) {
+        const scripts = partData.questions
+          .filter(q => q.script)
+          .map(q => q.script)
+          .join('\n\n');
+        return scripts;
+      }
+      return '';
+    }
+    
+    return partData.text || '';
+  }, [partData, testType]);
+
+  // CASE 1: Hide for reading part 5
+  if (testType === 'reading' && selectedPart === 'part5') {
+    return null;
+  }
+
+  // CASE 2: No part data
+  if (!partData) {
+    return <EmptyState type="no-part" />;
+  }
+
+  // CASE 3: No content
+  if (!content.trim()) {
+    return <EmptyState type="no-content" />;
+  }
+
+  // ========================================
+  // RENDER: READING PARTS (Special Cases)
+  // ========================================
+  if (testType === 'reading') {
+    
+    if (selectedPart === 'part6') {
+      return (
+        <div className="animate-in fade-in duration-300 overflow-visible w-full">
+          <Part6Display part6={partData} />
+        </div>
+      );
+    }
+
+    if (selectedPart === 'part7') {
+      return (
+        <div className="animate-in fade-in duration-300 overflow-visible w-full">
+          <ReadingPart7Display text={content} type="reading" />
+        </div>
+      );
+    }
+
+    if (selectedPart === 'part8') {
+      return (
+        <div className="animate-in fade-in duration-300 overflow-visible w-full">
+          <ReadingPart8Display text={content} type="reading" />
+        </div>
+      );
+    }
+    
+    // Default Reading Content (Part 1-4)
+    return (
+      <ReadingContent 
+        partData={partData} 
+        content={content} 
+        selectedPart={selectedPart} 
+      />
+    );
+  }
+
+  // ========================================
+  // RENDER: LISTENING PARTS
+  // ========================================
+  if (testType === 'listening') {
+    return (
+      <ListeningContent 
+        partData={partData}
+        selectedPart={selectedPart}
+        testType={testType}
+        examId={examId}  // 👈 Pass examId
+      />
+    );
+  }
+
+  return null;
+});
+
+ContentDisplay.displayName = 'ContentDisplay';
+
+export default ContentDisplay;
+</file>
+
 <file path="src/components/Display/ExplanationDisplay.jsx">
 import React, { useState } from 'react';
 import { 
@@ -43037,380 +43036,6 @@ const PartSelector = React.memo(({
 PartSelector.displayName = 'PartSelector';
 
 export default PartSelector;
-</file>
-
-<file path="src/components/Display/ScriptDisplay.jsx">
-import React, { useState, memo, useRef, useEffect } from 'react';
-  import { Play, Pause, Square, Volume2, VolumeX, AlertCircle, Loader2, ChevronDown, Info } from 'lucide-react';
-  import { useAudioPlayer } from '../../hooks/useAudioPlayer';
-
-  // ==================== STATE COMPONENTS ====================
-  const ErrorState = memo(({ error, onRetry }) => (
-    <div className="w-full bg-red-50 border-2 border-red-200 rounded-xl p-6">
-      <div className="flex items-start gap-3">
-        <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
-        <div className="flex-1">
-          <h3 className="font-semibold text-red-900 mb-1">Error Loading Audio</h3>
-          <p className="text-sm text-red-700 mb-3">{error}</p>
-          {onRetry && (
-            <button
-              onClick={onRetry}
-              className="inline-flex items-center gap-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-all active:scale-95"
-            >
-              Try Again
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  ));
-  ErrorState.displayName = 'ErrorState';
-
-  const LoadingState = memo(() => (
-    <div className="w-full flex items-center justify-center p-6 bg-slate-50 rounded-xl border border-slate-200">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-        <p className="text-sm text-slate-600 font-medium">Loading audio...</p>
-      </div>
-    </div>
-  ));
-  LoadingState.displayName = 'LoadingState';
-
-  // ==================== PROGRESS BAR ====================
-  const ProgressBar = memo(({
-    currentTime,
-    duration,
-    onSeek,
-    isDisabled
-  }) => {
-    const containerRef = useRef(null);
-
-    const handleClick = (e) => {
-      if (!containerRef.current || isDisabled) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      const newTime = percent * duration;
-      onSeek(newTime);
-    };
-
-    const handleMouseDown = (e) => {
-      handleClick(e);
-    };
-
-    const percent = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-    return (
-      <div
-        ref={containerRef}
-        onClick={handleClick}
-        onMouseDown={handleMouseDown}
-        className={`w-full h-2 bg-slate-200 rounded-full cursor-pointer hover:h-3 transition-all ${
-          isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-      >
-        <div
-          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-    );
-  });
-  ProgressBar.displayName = 'ProgressBar';
-
-  // ==================== VOLUME CONTROL ====================
-  const VolumeControl = memo(({ volume, onVolumeChange }) => {
-    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-
-    return (
-      <div className="relative flex items-center gap-2">
-        <button
-          onClick={() => setShowVolumeSlider(!showVolumeSlider)}
-          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-          title={volume === 0 ? 'Unmute' : 'Mute'}
-        >
-          {volume === 0 ? (
-            <VolumeX className="w-4 h-4 text-slate-600" />
-          ) : (
-            <Volume2 className="w-4 h-4 text-slate-600" />
-          )}
-        </button>
-
-        {showVolumeSlider && (
-          <div className="absolute bottom-full mb-2 left-0 bg-white border border-slate-200 rounded-lg shadow-lg p-2">
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-              className="w-20 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${volume * 100}%, #e2e8f0 ${volume * 100}%, #e2e8f0 100%)`
-              }}
-            />
-          </div>
-        )}
-      </div>
-    );
-  });
-  VolumeControl.displayName = 'VolumeControl';
-
-  // ==================== CONTROL BUTTONS ====================
-  const ControlButtons = memo(({
-    isPlaying,
-    isPaused,
-    isLoading,
-    isDisabled,
-    onPlay,
-    onPause,
-    onStop,
-    volume,
-    onVolumeChange
-  }) => (
-    <div className="flex items-center gap-3 w-full">
-      {!isPlaying ? (
-        <button
-          onClick={onPlay}
-          disabled={isDisabled || isLoading}
-          className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-semibold py-3 rounded-lg transition-all duration-200 active:scale-95 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          title="Play"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Loading...</span>
-            </>
-          ) : (
-            <>
-              <Play className="w-5 h-5 fill-current" />
-              <span className="text-sm">Play</span>
-            </>
-          )}
-        </button>
-      ) : (
-        <>
-          <button
-            onClick={onPause}
-            className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
-            title="Pause"
-          >
-            <Pause className="w-5 h-5 fill-current" />
-            <span className="text-sm">Pause</span>
-          </button>
-          <button
-            onClick={onStop}
-            className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
-            title="Stop"
-          >
-            <Square className="w-5 h-5 fill-current" />
-            <span className="text-sm">Stop</span>
-          </button>
-        </>
-      )}
-
-      <VolumeControl volume={volume} onVolumeChange={onVolumeChange} />
-    </div>
-  ));
-  ControlButtons.displayName = 'ControlButtons';
-
-  // ==================== SCRIPT CONTENT ====================
-  const ScriptContent = memo(({ script }) => {
-    const lines = script.split('\n').filter(line => line.trim());
-
-    return (
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 min-h-0">
-        {lines.map((line, index) => {
-          const isSpeaker = line.includes(':') && !line.startsWith(' ');
-          const trimmedLine = line.trim();
-
-          return (
-            <div key={index} className="flex gap-4">
-              {isSpeaker ? (
-                <>
-                  <div className="flex-shrink-0 text-2xl">👤</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">
-                      {trimmedLine.split(':')[0].trim()}
-                    </p>
-                    <p className="text-base text-slate-800 leading-relaxed break-words font-medium">
-                      {trimmedLine.split(':').slice(1).join(':').trim()}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-600 leading-relaxed break-words italic">
-                    {trimmedLine}
-                  </p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  });
-  ScriptContent.displayName = 'ScriptContent';
-
-  // ==================== MAIN COMPONENT ====================
-  const ScriptDisplay = memo(({
-    script = '',
-    audioUrl = null,
-    partTitle = 'Script',
-    onAudioEnd = null,
-  }) => {
-    const {
-      isPlaying,
-      isPaused,
-      isLoading,
-      currentTime,
-      duration,
-      volume,
-      error,
-      play,
-      pause,
-      stop,
-      seek,
-      setVolume,
-      formatTime,
-    } = useAudioPlayer(audioUrl);
-
-    const [showScript, setShowScript] = useState(false);
-    const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
-
-    // Track when audio ends
-    useEffect(() => {
-      if (!isPlaying && hasPlayedOnce && duration > 0 && currentTime >= duration - 0.1) {
-        // Audio finished
-        onAudioEnd?.();
-      }
-    }, [isPlaying, hasPlayedOnce, duration, currentTime, onAudioEnd]);
-
-    const hasAudio = audioUrl && audioUrl.trim().length > 0;
-
-    if (!script) {
-      return (
-        <div className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-8 text-center">
-          <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-slate-400" />
-          </div>
-          <p className="text-slate-900 font-bold text-lg">No Script Available</p>
-          <p className="text-slate-600 text-sm mt-2">Script content will be available soon</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col relative z-30">
-        {/* Header */}
-        <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200 px-6 py-5 rounded-t-2xl">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{partTitle}</h1>
-              <p className="text-sm text-slate-600 mt-1">{script.split('\n').filter(line => line.trim()).length} lines</p>
-            </div>
-
-            {/* Time Info */}
-            {hasAudio && (
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  {isPlaying && (
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  )}
-                  <span className="font-medium text-slate-700 whitespace-nowrap">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Audio Section */}
-        {hasAudio && (
-          <div className="flex-shrink-0 border-b border-slate-200 px-6 py-4 bg-slate-50 space-y-3">
-            {error && <ErrorState error={error} />}
-
-            {!error && (
-              <>
-                {/* Progress Bar */}
-                <ProgressBar
-                  currentTime={currentTime}
-                  duration={duration}
-                  onSeek={seek}
-                  isDisabled={isLoading}
-                />
-
-                {/* Controls */}
-                <ControlButtons
-                  isPlaying={isPlaying}
-                  isPaused={isPaused}
-                  isLoading={isLoading}
-                  isDisabled={false}
-                  onPlay={() => {
-                    play();
-                    setHasPlayedOnce(true);
-                  }}
-                  onPause={pause}
-                  onStop={stop}
-                  volume={volume}
-                  onVolumeChange={setVolume}
-                />
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Script Toggle Button */}
-        <div className="flex-shrink-0 px-6 py-3 bg-white border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-semibold text-slate-700">
-              Bạn có thể tham khảo kịch bản dưới đây
-            </span>
-          </div>
-          <button
-            onClick={() => setShowScript(!showScript)}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
-              showScript
-                ? 'bg-blue-500 text-white'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-            }`}
-          >
-            <span>{showScript ? 'Ẩn' : 'Hiển thị'} Script</span>
-            <ChevronDown
-              className={`w-4 h-4 transition-transform duration-300 ${
-                showScript ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Script Content - Conditional Render */}
-        {showScript && (
-          <div className="flex-1 overflow-hidden min-h-[400px] flex flex-col bg-gradient-to-b from-white to-slate-50 border-t border-slate-200 animate-in fade-in duration-300">
-            <ScriptContent script={script} />
-          </div>
-        )}
-
-        {!showScript && (
-          <div className="flex-1 flex items-center justify-center py-12 px-6 text-center">
-            <div className="space-y-3">
-              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto">
-                <ChevronDown className="w-8 h-8 text-slate-400" />
-              </div>
-              <p className="text-slate-600 font-medium">Bấm "Hiển thị Script" để xem nội dung</p>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  });
-
-  ScriptDisplay.displayName = 'ScriptDisplay';
-
-  export default ScriptDisplay;
 </file>
 
 <file path="src/components/footer/ScrollToTopButton.jsx">
@@ -48945,6 +48570,268 @@ export { LoadingSpinner };
 export default LoadingSpinner;
 </file>
 
+<file path="src/components/Display/ScriptDisplay.jsx">
+import React, { useState, memo, useMemo, useEffect } from 'react';
+import { 
+  Play, Pause, Square, Volume2, VolumeX, 
+  AlertCircle, Loader2, ChevronDown, Info, Lightbulb 
+} from 'lucide-react';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
+
+// ==================== UTILS: ĐỊNH NGHĨA MÀU NHÂN VẬT ====================
+const getSpeakerStyle = (name) => {
+  const themes = [
+    { text: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
+    { text: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    { text: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+    { text: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200' },
+    { text: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
+  ];
+  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % themes.length;
+  return themes[index];
+};
+
+// ==================== SUB-COMPONENT: NỘI DUNG SCRIPT ====================
+const ScriptContent = memo(({ script }) => {
+  const lines = useMemo(() => script.split('\n').filter(line => line.trim()), [script]);
+
+  return (
+    <div className="p-6 md:p-10 space-y-10">
+      <div className="flex gap-4 p-5 bg-blue-50/50 border border-blue-100 rounded-2xl animate-in fade-in zoom-in duration-500">
+        <div className="bg-blue-500 p-2 rounded-lg h-fit">
+          <Lightbulb className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h4 className="font-bold text-blue-900 text-sm italic">Lưu ý khi sử dụng Script:</h4>
+          <p className="text-sm text-blue-800/80 leading-relaxed mt-1">
+            Bạn nên nghe ít nhất 2 lần trước khi nhìn Script. Khi đọc, hãy chú ý vào 
+            <strong> nối âm</strong> và <strong>ngữ điệu</strong> của nhân vật để cải thiện kỹ năng nói.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        {lines.map((line, index) => {
+          const isSpeaker = line.includes(':') && !line.startsWith(' ');
+          const trimmedLine = line.trim();
+
+          if (isSpeaker) {
+            const [name, ...contentParts] = trimmedLine.split(':');
+            const content = contentParts.join(':').trim();
+            const style = getSpeakerStyle(name.trim());
+
+            return (
+              <div 
+                key={index} 
+                className="group flex flex-col gap-2.5 animate-in slide-in-from-left duration-500 fill-mode-both"
+                style={{ animationDelay: `${index * 70}ms` }}
+              >
+                <span className={`w-fit px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-tighter border ${style.bg} ${style.text} ${style.border}`}>
+                  {name.trim()}
+                </span>
+                <p className="text-[17px] text-slate-800 leading-relaxed font-semibold group-hover:text-blue-600 transition-colors">
+                  {content}
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div 
+              key={index} 
+              className="py-2 border-l-4 border-slate-100 pl-4 italic animate-in fade-in duration-1000"
+            >
+              <p className="text-sm text-slate-400 font-medium">{trimmedLine}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+// ==================== MAIN COMPONENT: SCRIPT DISPLAY ====================
+const ScriptDisplay = memo(({
+  script = '',
+  audioUrl = null,
+  partTitle = 'Bài nghe chi tiết',
+  isPartPlayed = false,  // 👈 Prop để check đã nghe hay chưa
+  onAudioEnd = null,     // 👈 Callback khi audio kết thúc
+}) => {
+  const {
+    isPlaying, currentTime, duration, volume, error, isLoading,
+    play, pause, stop, seek, setVolume, formatTime,
+  } = useAudioPlayer(audioUrl);
+
+  const [showScript, setShowScript] = useState(false);
+
+  // ✨ KEY LOGIC: Trigger callback khi audio kết thúc
+  useEffect(() => {
+    // Điều kiện:
+    // 1. Audio đang phát xong (isPlaying = false)
+    // 2. Đã có thời lượng video (duration > 0)
+    // 3. Vị trí hiện tại gần cuối (currentTime >= duration - 1)
+    // 4. onAudioEnd callback có tồn tại
+    
+    if (!isPlaying && duration > 0 && currentTime >= duration - 1 && onAudioEnd) {
+      console.log(`✅ Audio kết thúc! Gọi callback onAudioEnd`);
+      onAudioEnd();
+    }
+  }, [isPlaying, duration, currentTime, onAudioEnd]);
+
+  if (!script) return null;
+
+  return (
+    <div className="w-full bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+      
+      {/* 1. Header & Audio Controls */}
+      <div className="p-6 md:p-8 bg-slate-50/80 border-b border-slate-100">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">{partTitle}</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`flex h-2 w-2 rounded-full animate-pulse ${isPartPlayed ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+              <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
+                {isPartPlayed ? '✓ Đã nghe xong' : audioUrl ? 'Sẵn sàng phát' : 'Không có audio'}
+              </p>
+            </div>
+          </div>
+
+          {audioUrl && (
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-sm font-mono font-bold text-blue-600">
+                {formatTime(currentTime)} <span className="text-slate-300 mx-1">/</span> {formatTime(duration)}
+              </span>
+              <div className="w-32 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-300" 
+                  style={{ width: `${(currentTime / duration) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Nút điều khiển âm thanh */}
+        {audioUrl && (
+          <div className="flex items-center gap-4 mt-8">
+            {!isPlaying ? (
+              <button 
+                onClick={() => play()}
+                disabled={isLoading || isPartPlayed}  // 👈 Disable nếu đã nghe
+                className={`flex-[2] py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg ${
+                  isPartPlayed
+                    ? 'bg-emerald-600 opacity-60 cursor-not-allowed text-white'
+                    : isLoading
+                    ? 'bg-slate-300 text-slate-600'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
+                }`}
+                title={isPartPlayed ? 'Đã nghe rồi, không thể nghe lại' : 'Bấm để nghe audio'}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin w-5 h-5" />
+                    <span>Đang tải...</span>
+                  </>
+                ) : isPartPlayed ? (
+                  <>
+                    <span className="text-xl">✓</span>
+                    <span>Đã nghe</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="fill-current w-5 h-5" />
+                    <span>Nghe Audio</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="flex-[2] flex gap-3">
+                <button 
+                  onClick={pause} 
+                  className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-amber-600"
+                >
+                  <Pause className="fill-current w-5 h-5" /> Tạm dừng
+                </button>
+                <button 
+                  onClick={stop} 
+                  className="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-900"
+                >
+                  <Square className="fill-current w-5 h-5" /> Dừng
+                </button>
+              </div>
+            )}
+            <div className="flex-1 hidden md:flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200">
+              <Volume2 className="w-5 h-5 text-slate-400" />
+              <input 
+                type="range" min="0" max="1" step="0.1" value={volume} 
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-full accent-blue-600"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Status message khi đã nghe */}
+        {isPartPlayed && (
+          <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-in fade-in">
+            <span className="text-2xl">✓</span>
+            <div>
+              <p className="font-semibold text-emerald-900 text-sm">Nghe xong rồi!</p>
+              <p className="text-xs text-emerald-700 mt-1">Bạn có thể tập trung trả lời các câu hỏi</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. Toggle Bar */}
+      <div className="px-6 py-4 bg-white flex items-center justify-between border-b border-slate-50">
+        <div className="flex items-center gap-2">
+          <Info className="w-4 h-4 text-blue-500" />
+          <span className="text-[13px] font-bold text-slate-500 uppercase tracking-tight">Kịch bản chi tiết</span>
+        </div>
+        <button
+          onClick={() => setShowScript(!showScript)}
+          className={`group flex items-center gap-3 px-6 py-2.5 rounded-xl font-bold transition-all duration-500 ${
+            showScript 
+            ? 'bg-blue-600 text-white shadow-xl shadow-blue-100' 
+            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+          }`}
+        >
+          <span>{showScript ? 'Ẩn' : 'Hiện'} Script</span>
+          <ChevronDown className={`w-4 h-4 transition-transform duration-500 ${showScript ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
+
+      {/* 3. Script Content Area */}
+      <div 
+        className={`transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${
+          showScript ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="bg-white">
+          <ScriptContent script={script} />
+        </div>
+      </div>
+
+      {/* 4. Placeholder khi ẩn */}
+      {!showScript && (
+        <div className="py-16 flex flex-col items-center justify-center gap-4 text-slate-300">
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center">
+            <ChevronDown className="w-6 h-6 animate-bounce" />
+          </div>
+          <p className="text-sm font-medium italic">Kịch bản đang được ẩn để bạn tập trung nghe</p>
+        </div>
+      )}
+    </div>
+  );
+});
+
+ScriptDisplay.displayName = 'ScriptDisplay';
+
+export default ScriptDisplay;
+</file>
+
 <file path="src/config/firebase.js">
 // src/firebase.js
 import { initializeApp } from "firebase/app";
@@ -52857,1077 +52744,6 @@ Footer.displayName = 'Footer';
 export default Footer;
 </file>
 
-<file path="src/components/FullExam/FullExamMode.jsx">
-import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
-import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Target, TrendingUp, Award, FileText, ChevronDown, Headphones, Send, ArrowRight, Flag, RotateCcw, Lock } from 'lucide-react';
-import ContentDisplay from '../Display/ContentDisplay';
-import { EXAM_LIST, getExamById } from '../../data/examData';
-import { useUserProgress } from '../../hooks/useUserProgress';
-import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
-
-// ===== THEME =====
-const COLORS = {
-  blue: '#0066CC',
-  darkBlue: '#004399',
-  lightBlue: '#E6F2FF',
-  orange: '#FF8C42',
-  lightOrange: '#FFF3E6',
-  slate: '#6B7280',
-  success: '#059669',
-  danger: '#DC2626',
-  white: '#FFFFFF',
-};
-
-// ===== EXAM CONFIGURATION =====
-const EXAM_STRUCTURE = {
-  listening: {
-    title: 'LISTENING',
-    totalTime: 1800,
-    parts: 4,
-    questionsPerPart: 5,
-    totalQuestions: 20,
-    totalPoints: 100,
-    pointsPerQuestion: 5,
-    listenings: 2,
-  },
-  reading: {
-    title: 'READING',
-    totalTime: 3600,
-    parts: 4,
-    questionsPerPart: 10,
-    totalQuestions: 40,
-    totalPoints: 100,
-    pointsPerQuestion: 2.5,
-  }
-};
-
-const getCEFRLevel = (score) => {
-  if (score >= 75) return { level: 'C1', label: 'Advanced', color: '#059669', range: '75-100' };
-  if (score >= 50) return { level: 'B2', label: 'Upper Intermediate', color: '#0066CC', range: '50-74' };
-  if (score >= 25) return { level: 'B1', label: 'Intermediate', color: '#FF8C42', range: '25-49' };
-  if (score >= 15) return { level: 'A2', label: 'Elementary', color: '#F59E0B', range: '15-24' };
-  return { level: 'A1', label: 'Beginner', color: '#DC2626', range: '0-14' };
-};
-
-const READING_TIME = 3600;
-const LISTENING_TIME = 1800;
-const WARNING_TIME = 300;
-
-// ===== MODERN DROPDOWN COMPONENT =====
-const ModernDropdown = memo(({ examId, setExamId, isOpen, setIsOpen }) => {
-  const selectedExam = useMemo(() => EXAM_LIST.find(e => e.id === examId), [examId]);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-5 py-3.5 bg-white border-2 border-slate-200 rounded-xl text-left font-semibold flex items-center justify-between hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ease-out"
-        style={{ 
-          borderColor: isOpen ? COLORS.blue : '#e5e7eb',
-          boxShadow: isOpen ? `0 0 0 3px ${COLORS.blue}20` : 'none'
-        }}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-      >
-        <span className="text-slate-900 font-medium">{selectedExam?.title || 'Chọn bài thi'}</span>
-        <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && (
-        <div 
-          className="absolute top-full left-0 right-0 mt-3 bg-white border-2 rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-sm"
-          style={{ 
-            borderColor: COLORS.blue,
-            animation: 'slideDown 0.2s ease-out'
-          }}
-          role="listbox"
-        >
-          <div className="max-h-64 overflow-y-auto scrollbar-hide">
-            {EXAM_LIST.map((exam, idx) => (
-              <button
-                key={exam.id}
-                onClick={() => {
-                  setExamId(exam.id);
-                  setIsOpen(false);
-                }}
-                className="w-full px-5 py-3.5 text-left hover:bg-slate-50 flex items-center justify-between transition-colors duration-150 ease-out border-b border-slate-100 last:border-b-0 group"
-                role="option"
-                aria-selected={examId === exam.id}
-              >
-                <div className="flex-1">
-                  <span className="font-medium text-slate-900 group-hover:text-blue-600 transition-colors">{exam.title}</span>
-                  <p className="text-xs text-slate-500 mt-0.5">Cập nhật gần đây</p>
-                </div>
-                {examId === exam.id && (
-                  <div className="ml-3 flex-shrink-0 animate-in fade-in duration-200">
-                    <CheckCircle className="w-5 h-5" style={{ color: COLORS.blue }} />
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-    </div>
-  );
-});
-
-ModernDropdown.displayName = 'ModernDropdown';
-
-// ===== QUESTION CARD =====
-const QuestionCard = memo(({ 
-  question, 
-  questionNum, 
-  selectedAnswer, 
-  onAnswerSelect, 
-  questionKey 
-}) => {
-  const qText = question?.question || question?.text || '';
-  const opts = question?.options || [];
-
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-slate-300 transition-all duration-300 ease-out">
-      <div className="flex items-start justify-between mb-5">
-        <h4 className="text-base font-semibold text-slate-900 flex-1">
-          <span className="font-bold" style={{ color: COLORS.blue }}>Q{questionNum}:</span> {qText}
-        </h4>
-        {selectedAnswer !== undefined && (
-          <span 
-            className="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 ml-4 flex-shrink-0 animate-in fade-in duration-300" 
-            style={{ backgroundColor: `${COLORS.blue}15`, color: COLORS.blue }}
-          >
-            <CheckCircle className="w-3.5 h-3.5" /> Done
-          </span>
-        )}
-      </div>
-      
-      <div className="space-y-3">
-        {opts.map((opt, i) => {
-          const selected = selectedAnswer === i;
-          const letter = String.fromCharCode(65 + i);
-          
-          return (
-            <label 
-              key={i} 
-              className={`flex items-start cursor-pointer p-4 rounded-lg transition-all duration-200 ease-out group ${
-                selected 
-                  ? 'bg-blue-50 border-2 border-blue-500 shadow-md' 
-                  : 'bg-slate-50 border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
-              }`}
-            >
-              <input
-                type="radio"
-                name={questionKey}
-                checked={selected}
-                onChange={() => onAnswerSelect(questionNum, i)}
-                className="sr-only"
-              />
-              <div 
-                className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-200 ${
-                  selected 
-                    ? 'text-white shadow-md' 
-                    : 'text-slate-700 border-2 border-slate-300 group-hover:border-slate-400'
-                }`}
-                style={{
-                  backgroundColor: selected ? COLORS.blue : 'transparent',
-                  borderColor: selected ? COLORS.blue : '#d1d5db'
-                }}
-              >
-                {selected ? '✓' : letter}
-              </div>
-              <span className={`ml-4 text-sm font-medium leading-relaxed transition-colors duration-200 ${
-                selected ? 'text-slate-900 font-semibold' : 'text-slate-700 group-hover:text-slate-900'
-              }`}>
-                {opt}
-              </span>
-            </label>
-          );
-        })}
-      </div>
-    </div>
-  );
-}, (p, n) => p.selectedAnswer === n.selectedAnswer && p.questionNum === n.questionNum);
-
-QuestionCard.displayName = 'QuestionCard';
-
-// ===== PART NAVIGATION =====
-const PartNavigation = memo(({ 
-  currentPart, parts, answers, currentSection, questionsPerPart, onPartChange, lockedParts = []
-}) => {
-  const partStats = useMemo(() => {
-    const stats = {};
-    for (let i = 1; i <= parts; i++) {
-      const partNum = currentSection === 'listening' ? i : i + 4;
-      const count = Object.keys(answers).filter(key => key.startsWith(`${currentSection}-part${partNum}-`)).length;
-      stats[partNum] = count;
-    }
-    return stats;
-  }, [answers, currentSection, parts]);
-
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-      <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-5">Part Navigation</p>
-      <div className="grid grid-cols-4 gap-3">
-        {Array.from({ length: parts }, (_, i) => {
-          const partNum = currentSection === 'listening' ? i + 1 : i + 5;
-          const answered = partStats[partNum] || 0;
-          const isCurrent = currentPart === partNum;
-          const isComplete = answered === questionsPerPart;
-          const isLocked = lockedParts.includes(partNum);
-          
-          return (
-            <button
-              key={partNum}
-              onClick={() => !isLocked && onPartChange(partNum)}
-              disabled={isLocked}
-              className={`py-4 px-3 rounded-lg font-bold text-sm transition-all duration-200 ease-out border-2 text-center hover:shadow-md active:scale-95 relative ${
-                isLocked 
-                  ? 'opacity-50 cursor-not-allowed'
-                  : isCurrent 
-                  ? 'text-white border-blue-600 shadow-lg scale-100' 
-                  : isComplete 
-                  ? 'text-white border-blue-600 opacity-80' 
-                  : 'text-slate-700 border-slate-200 hover:border-slate-300'
-              }`}
-              style={{
-                backgroundColor: isLocked ? '#d1d5db' : (isCurrent || isComplete ? COLORS.blue : COLORS.white),
-              }}
-              title={isLocked ? 'Không thể quay lại part đã nghe' : `Part ${partNum}`}
-            >
-              {isLocked && <Lock className="w-3 h-3 absolute top-1 right-1" />}
-              <div className="font-bold">P{partNum}</div>
-              <div className="text-xs opacity-75 mt-1">{answered}/{questionsPerPart}</div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}, (p, n) => p.currentPart === n.currentPart && Object.keys(p.answers).length === Object.keys(n.answers).length);
-
-PartNavigation.displayName = 'PartNavigation';
-
-// ===== ANSWER REVIEW =====
-const SimpleAnswerReview = memo(({ examData, answers, sectionType, startPart, endPart }) => {
-  const [expandedParts, setExpandedParts] = useState(new Set([startPart]));
-
-  const reviewData = useMemo(() => {
-    const data = [];
-    for (let part = startPart; part <= endPart; part++) {
-      const partData = examData?.parts?.[`part${part}`];
-      if (!partData?.questions) continue;
-      partData.questions.forEach((q, i) => {
-        const key = `${sectionType}-part${part}-q${i + 1}`;
-        data.push({
-          partNum: part,
-          qNum: i + 1,
-          q,
-          userAns: answers[key],
-          correct: answers[key] === q.correct,
-          key
-        });
-      });
-    }
-    return data;
-  }, [examData, answers, sectionType, startPart, endPart]);
-
-  const togglePart = useCallback((partNum) => {
-    setExpandedParts(p => {
-      const n = new Set(p);
-      n.has(partNum) ? n.delete(partNum) : n.add(partNum);
-      return n;
-    });
-  }, []);
-
-  const parts = useMemo(() => [...new Set(reviewData.map(d => d.partNum))], [reviewData]);
-
-  return (
-    <div className="space-y-3">
-      {parts.map(part => {
-        const partItems = reviewData.filter(d => d.partNum === part);
-        const correct = partItems.filter(d => d.correct).length;
-        const isOpen = expandedParts.has(part);
-
-        return (
-          <div key={part} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
-            <button
-              onClick={() => togglePart(part)}
-              className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors duration-200 ease-out"
-            >
-              <span className="font-semibold text-slate-900">
-                Part {part} <span className="text-sm font-normal text-slate-600">({correct}/{partItems.length} correct)</span>
-              </span>
-              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isOpen && (
-              <div className="p-5 space-y-3 bg-slate-50 border-t border-slate-200 animate-in fade-in duration-200">
-                {partItems.map((item) => (
-                  <div key={item.key} className={`p-4 rounded-lg border-l-4 transition-colors duration-200 ${
-                    item.correct 
-                      ? 'bg-emerald-50 border-l-emerald-500' 
-                      : 'bg-rose-50 border-l-rose-500'
-                  }`}>
-                    <p className="font-medium text-sm text-slate-900 mb-2">Q{item.qNum}: {item.q.question}</p>
-                    <div className="space-y-1 text-xs">
-                      <p className={item.correct ? 'text-emerald-700' : 'text-rose-700'}>
-                        <span className="font-semibold">Your answer:</span> {item.userAns !== undefined ? String.fromCharCode(65 + item.userAns) + '. ' + item.q.options[item.userAns] : '(Not answered)'}
-                      </p>
-                      {!item.correct && (
-                        <p className="text-emerald-700 font-semibold">
-                          <span className="font-semibold">Correct:</span> {String.fromCharCode(65 + item.q.correct)}. {item.q.options[item.q.correct]}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-});
-
-SimpleAnswerReview.displayName = 'SimpleAnswerReview';
-
-// ===== MAIN COMPONENT =====
-const FullExamMode = ({ onComplete }) => {
-  const { saveProgress, currentUser, loading: progressLoading } = useUserProgress();
-  const [mode, setMode] = useState('setup');
-  const [section, setSection] = useState('listening');
-  const [part, setPart] = useState(1);
-  const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
-  const [examId, setExamId] = useState('exam1');
-  const [saved, setSaved] = useState(false);
-  const [examData, setExamData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [listeningPartsTouched, setListeningPartsTouched] = useState(new Set()); // Track parts that user played audio
-  
-  const audioEndCallbackRef = useRef(null);
-
-  const cfg = EXAM_STRUCTURE[section];
-
-  const fmt = useCallback((sec) => {
-    const mins = Math.floor(sec / 60);
-    const secs = sec % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }, []);
-
-  const handleAns = useCallback((qNum, opt) => {
-    const key = `${section}-part${part}-q${qNum}`;
-    setAnswers(p => ({ ...p, [key]: opt }));
-  }, [section, part]);
-
-  const nextSec = useCallback(() => {
-    if (section === 'listening') {
-      setSection('reading');
-      setPart(5);
-      setTimeLeft(READING_TIME);
-    } else {
-      setMode('results');
-    }
-  }, [section]);
-
-  // Handle auto move to next part when audio ends
-  const handleAudioEnd = useCallback(() => {
-    if (section === 'listening') {
-      // Mark current part as touched
-      setListeningPartsTouched(prev => new Set([...prev, part]));
-
-      // Move to next part or finish listening
-      if (part < 4) {
-        setPart(part + 1);
-      } else {
-        // Auto move to reading section
-        setSection('reading');
-        setPart(5);
-        setTimeLeft(READING_TIME);
-      }
-    }
-  }, [section, part]);
-
-  // Inject callback into ContentDisplay
-  useEffect(() => {
-    audioEndCallbackRef.current = handleAudioEnd;
-  }, [handleAudioEnd]);
-
-  const calcResults = useCallback(() => {
-    const res = {
-      listeningByPart: {},
-      readingByPart: {},
-      listening: { correct: 0, total: 20, points: 0 },
-      reading: { correct: 0, total: 40, points: 0 },
-      totalScore: 0,
-      averageScore: 0,
-      cefr: null,
-    };
-
-    if (!examData) return res;
-
-    [1,2,3,4].forEach(p => {
-      const qs = examData.parts?.[`part${p}`]?.questions || [];
-      let cnt = 0;
-      qs.forEach((q, i) => {
-        if (answers[`listening-part${p}-q${i + 1}`] === q.correct) {
-          res.listening.correct++;
-          cnt++;
-        }
-      });
-      res.listeningByPart[p] = cnt;
-    });
-
-    [5,6,7,8].forEach(p => {
-      const qs = examData.parts?.[`part${p}`]?.questions || [];
-      let cnt = 0;
-      qs.forEach((q, i) => {
-        if (answers[`reading-part${p}-q${i + 1}`] === q.correct) {
-          res.reading.correct++;
-          cnt++;
-        }
-      });
-      res.readingByPart[p - 4] = cnt;
-    });
-
-    res.listening.points = res.listening.correct * 5;
-    res.reading.points = res.reading.correct * 2.5;
-    res.totalScore = res.listening.points + res.reading.points;
-    res.averageScore = res.totalScore / 2;
-    res.cefr = getCEFRLevel(res.averageScore);
-
-    return res;
-  }, [examData, answers]);
-
-  const partData = useMemo(() => examData?.parts?.[`part${part}`] || null, [examData, part]);
-  const answeredCount = useMemo(() => Object.keys(answers).filter(k => k.startsWith(`${section}-`)).length, [answers, section]);
-  const progress = (answeredCount / cfg.totalQuestions) * 100;
-
-  useEffect(() => {
-    if (mode === 'setup') return;
-    setLoading(true);
-    getExamById(examId).then(data => {
-      setExamData(data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [examId, mode]);
-
-  useEffect(() => {
-    if (mode !== 'exam' || isPaused) return;
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        const newTime = prev - 1;
-        if (newTime === WARNING_TIME) setShowWarning(true);
-        if (newTime <= 0) {
-          if (section === 'listening') {
-            setSection('reading');
-            setPart(5);
-            setTimeLeft(READING_TIME);
-          } else {
-            setMode('results');
-          }
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [mode, isPaused, section]);
-
-  useEffect(() => {
-    if (mode === 'exam') {
-      setTimeLeft(section === 'listening' ? LISTENING_TIME : READING_TIME);
-      setPart(section === 'listening' ? 1 : 5);
-      setIsPaused(false);
-    }
-  }, [mode, section]);
-
-  useEffect(() => {
-    if (mode !== 'results' || !currentUser || saved || progressLoading) return;
-    
-    const results = calcResults();
-    
-    saveProgress({
-      exam: examId,
-      part: 'full',
-      score: results.averageScore,
-      answers,
-      correctAnswers: results.listening.correct + results.reading.correct,
-      listeningScore: results.listening.points,
-      readingScore: results.reading.points,
-      testType: 'full-exam',
-      listeningCorrect: results.listening.correct,
-      readingCorrect: results.reading.correct,
-      totalQuestions: 60,
-      totalScore: results.totalScore,
-      cefrLevel: results.cefr.level,
-      isDraft: false,
-    }).then(() => setSaved(true)).catch(err => console.error('Save failed:', err));
-  }, [mode, currentUser, saved, progressLoading, examId]);
-
-  // ===== SETUP SCREEN (unchanged) =====
-  if (mode === 'setup') {
-    return (
-      <div className="min-h-screen" style={{ backgroundColor: '#f0f9ff' }}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div 
-            className="absolute top-0 right-1/4 w-96 h-96 rounded-full opacity-10"
-            style={{ backgroundColor: COLORS.blue, filter: 'blur(40px)' }}
-          />
-          <div 
-            className="absolute -bottom-32 left-1/3 w-80 h-80 rounded-full opacity-10"
-            style={{ backgroundColor: COLORS.orange, filter: 'blur(40px)' }}
-          />
-        </div>
-
-        <div className="relative max-w-5xl mx-auto p-6">
-          <div className="text-center mb-12 pt-8">
-            <h1 className="text-5xl font-black mb-3" style={{ color: COLORS.darkBlue }}>
-              Chuẩn Đầu Ra HUFLIT
-            </h1>
-            <p className="text-lg font-semibold text-slate-600 flex items-center justify-center gap-2">
-              <Clock className="w-5 h-5" />
-              <span>90 phút</span>
-              <span>•</span>
-              <span>60 câu hỏi</span>
-              <span>•</span>
-              <span>Kiểm tra đầy đủ</span>
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-slate-100">
-            <div className="h-1.5" style={{ backgroundColor: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.orange} 100%)` }} />
-            
-            <div className="p-8">
-              <div className="grid grid-cols-4 gap-4 mb-8">
-                {[
-                  { num: '8', label: 'Parts' },
-                  { num: '60', label: 'Questions' },
-                  { num: '90', label: 'Minutes' },
-                  { num: '200', label: 'Max Points' }
-                ].map((item, idx) => (
-                  <div 
-                    key={idx}
-                    className="p-6 rounded-xl border border-slate-200 text-center hover:shadow-lg hover:border-slate-300 transition-all duration-300 ease-out hover:-translate-y-1"
-                  >
-                    <div className="text-3xl font-black" style={{ color: COLORS.blue }}>{item.num}</div>
-                    <p className="text-xs font-semibold text-slate-600 mt-3 uppercase tracking-wide">{item.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mb-8">
-                <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Chọn Bài Thi</label>
-                <ModernDropdown 
-                  examId={examId} 
-                  setExamId={setExamId} 
-                  isOpen={isOpen} 
-                  setIsOpen={setIsOpen}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="p-6 rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Headphones className="w-6 h-6" style={{ color: COLORS.blue }} />
-                    <h3 className="font-bold text-slate-900 uppercase tracking-wide">Listening</h3>
-                  </div>
-                  <div className="space-y-2.5 text-sm text-slate-600">
-                    <p className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      30 phút
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      20 câu (5 câu/part)
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      Nghe 1 lần
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Trophy className="w-4 h-4" />
-                      100 điểm (5 điểm/câu)
-                    </p>
-                  </div>
-                </div>
-                <div className="p-6 rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <BookOpen className="w-6 h-6" style={{ color: COLORS.blue }} />
-                    <h3 className="font-bold text-slate-900 uppercase tracking-wide">Reading</h3>
-                  </div>
-                  <div className="space-y-2.5 text-sm text-slate-600">
-                    <p className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      60 phút
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      40 câu (10 câu/part)
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4" />
-                      Đọc hiểu
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Trophy className="w-4 h-4" />
-                      100 điểm (2.5 điểm/câu)
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-8 p-6 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200">
-                <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Award className="w-5 h-5" style={{ color: COLORS.blue }} />
-                  Chuẩn CEFR
-                </h3>
-                <div className="grid grid-cols-5 gap-3 text-sm">
-                  {[
-                    { level: 'A1', range: '0-14', color: '#DC2626' },
-                    { level: 'A2', range: '15-24', color: '#F59E0B' },
-                    { level: 'B1', range: '25-49', color: COLORS.orange },
-                    { level: 'B2', range: '50-74', color: COLORS.blue },
-                    { level: 'C1', range: '75-100', color: '#059669' }
-                  ].map((item, idx) => (
-                    <div 
-                      key={idx}
-                      className="text-center p-3 rounded-lg border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out"
-                      style={{ backgroundColor: item.color + '10' }}
-                    >
-                      <p className="font-bold" style={{ color: item.color }}>{item.level}</p>
-                      <p className="text-xs mt-1" style={{ color: item.color + 'cc' }}>{item.range}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setMode('exam')}
-                disabled={!examId || loading}
-                className="w-full py-4 rounded-xl font-bold text-white text-lg transition-all duration-300 ease-out hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide flex items-center justify-center gap-3"
-                style={{
-                  backgroundColor: loading ? '#9ca3af' : '#FF7D00',
-                  background: loading 
-                    ? '#9ca3af' 
-                    : `linear-gradient(135deg, #FF7D00 0%, #E67E00 100%)`,
-                }}
-              >
-                {loading ? (
-                  <>
-                    <Clock className="w-5 h-5 animate-spin" />
-                    <span>Đang tải...</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" />
-                    <span>Bắt đầu</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-
-          body {
-            animation: fadeIn 0.3s ease-out;
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // ===== EXAM SCREEN =====
-  if (mode === 'exam') {
-    return (
-      <div className="min-h-screen" style={{ backgroundColor: '#f8fafc' }}>
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
-          <div className="max-w-6xl mx-auto p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="font-bold text-lg text-slate-900 flex items-center gap-2">
-                  {section === 'listening' ? (
-                    <>
-                      <Headphones className="w-5 h-5" style={{ color: COLORS.blue }} />
-                      <span>LISTENING</span>
-                    </>
-                  ) : (
-                    <>
-                      <BookOpen className="w-5 h-5" style={{ color: COLORS.blue }} />
-                      <span>READING</span>
-                    </>
-                  )}
-                </h2>
-                <p className="text-xs text-slate-600">Part {part} / {cfg.parts}</p>
-              </div>
-              <div className="text-right">
-                <div 
-                  className="text-3xl font-black transition-colors duration-500"
-                  style={{ color: timeLeft < 300 ? COLORS.orange : COLORS.blue }}
-                >
-                  {fmt(timeLeft)}
-                </div>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold text-slate-600">
-                <span>Tiến độ</span>
-                <span>{answeredCount}/{cfg.totalQuestions}</span>
-              </div>
-              <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full transition-all duration-500 ease-out" 
-                  style={{ width: `${progress}%`, backgroundColor: COLORS.blue }} 
-                />
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setIsPaused(!isPaused)}
-                className="px-5 py-2.5 rounded-lg font-semibold text-white flex items-center gap-2 text-sm transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
-                style={{ backgroundColor: COLORS.blue }}
-              >
-                {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {showWarning && (
-          <div className="max-w-6xl mx-auto p-4 mt-4 animate-in fade-in duration-300">
-            <div 
-              className="p-4 bg-orange-50 border-l-4 rounded-lg shadow-md flex items-center gap-3"
-              style={{ borderLeftColor: COLORS.orange }}
-            >
-              <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-              <p className="font-bold text-orange-700">Chỉ còn 5 phút!</p>
-            </div>
-          </div>
-        )}
-
-        {/* Main Content */}
-        <div className="max-w-6xl mx-auto p-4 space-y-6 pb-32">
-          {/* Content Display */}
-          {partData && (
-            <div className="relative z-20">
-              <ContentDisplay
-                partData={partData}
-                selectedPart={`part${part}`}
-                currentQuestionIndex={0}
-                testType={section}
-                examId={examId}
-                onAudioEnd={section === 'listening' && !listeningPartsTouched.has(part) ? handleAudioEnd : null}
-              />
-            </div>
-          )}
-
-          {/* Questions */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-            <h3 className="font-bold text-lg mb-6 text-slate-900">
-              Part {part}: Câu {(part - (section === 'listening' ? 1 : 5)) * cfg.questionsPerPart + 1} - {(part - (section === 'listening' ? 0 : 4)) * cfg.questionsPerPart}
-            </h3>
-            <div className="space-y-4">
-              {partData?.questions?.map((q, i) => (
-                <QuestionCard
-                  key={`${section}-part${part}-q${i + 1}`}
-                  question={q}
-                  questionNum={i + 1}
-                  selectedAnswer={answers[`${section}-part${part}-q${i + 1}`]}
-                  onAnswerSelect={handleAns}
-                  questionKey={`${section}-part${part}-q${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Part Navigation */}
-          <PartNavigation
-            currentPart={part}
-            parts={cfg.parts}
-            answers={answers}
-            currentSection={section}
-            questionsPerPart={cfg.questionsPerPart}
-            onPartChange={setPart}
-            lockedParts={section === 'listening' ? Array.from(listeningPartsTouched) : []}
-          />
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                if (section === 'listening') {
-                  // Cannot go back to previous listening parts once audio has been played
-                  if (listeningPartsTouched.has(part - 1)) {
-                    alert('Bạn không thể quay lại part đã nghe');
-                    return;
-                  }
-                }
-                setPart(p => Math.max(section === 'listening' ? 1 : 5, p - 1));
-              }}
-              disabled={part === (section === 'listening' ? 1 : 5) || (section === 'listening' && listeningPartsTouched.has(part - 1))}
-              className="flex-1 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
-              style={{ backgroundColor: COLORS.blue }}
-            >
-              <ChevronLeft className="w-5 h-5" /> 
-              <span>Phần trước</span>
-            </button>
-            <button
-              onClick={part === (section === 'listening' ? 4 : 8) ? nextSec : () => setPart(p => p + 1)}
-              className="flex-1 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
-              style={{ backgroundColor: part === (section === 'listening' ? 4 : 8) && section === 'reading' ? '#10B981' : (part === (section === 'listening' ? 4 : 8) ? '#FF7D00' : COLORS.blue) }}
-            >
-              {part === (section === 'listening' ? 4 : 8) 
-                ? (section === 'listening' 
-                  ? <>
-                      <ArrowRight className="w-5 h-5" /> 
-                      <span>Sang Reading</span>
-                    </>
-                  : <>
-                      <Flag className="w-5 h-5" /> 
-                      <span>Nộp bài</span>
-                    </>
-                )
-                : <>
-                    <span>Tiếp theo</span>
-                    <ChevronRight className="w-5 h-5" />
-                  </>
-              }
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ===== RESULTS SCREEN (unchanged) =====
-  if (mode === 'results') {
-    const res = calcResults();
-    const percentage = ((res.listening.correct + res.reading.correct) / 60) * 100;
-
-    return (
-      <div className="min-h-screen" style={{ backgroundColor: '#f0f9ff' }}>
-        {/* Gradient Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div 
-            className="absolute top-0 right-1/4 w-96 h-96 rounded-full opacity-10"
-            style={{ backgroundColor: COLORS.blue, filter: 'blur(40px)' }}
-          />
-        </div>
-
-        <div className="relative max-w-4xl mx-auto p-6">
-          {/* Results Header */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-slate-100">
-            <div className="h-1.5" style={{ backgroundColor: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.orange} 100%)` }} />
-            <div className="text-center py-12 px-6 animate-in fade-in duration-500">
-              <div className="inline-flex items-center justify-center mb-4">
-                <Trophy className="w-16 h-16" style={{ color: COLORS.orange }} />
-              </div>
-              <h1 className="text-4xl font-black text-slate-900 mb-2">Hoàn thành bài thi!</h1>
-              <p className="text-slate-600">Chuẩn đầu ra HUFLIT</p>
-              {saved && (
-                <p className="text-sm text-emerald-600 font-semibold mt-3 animate-in fade-in duration-500 flex items-center justify-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Kết quả đã được lưu</span>
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Main Score Card */}
-          <div 
-            className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border-t-4"
-            style={{ borderTopColor: res.cefr.color }}
-          >
-            <div className="p-8 text-center">
-              <p className="text-sm font-bold text-slate-600 uppercase tracking-wide mb-2">Điểm trung bình</p>
-              <div 
-                className="text-6xl font-black text-slate-900 mb-6 animate-in fade-in duration-700"
-              >
-                {res.averageScore.toFixed(1)}
-              </div>
-              <div className="flex items-center justify-center gap-6">
-                <div className="text-center">
-                  <div 
-                    className="w-16 h-16 rounded-full flex items-center justify-center font-black text-white text-2xl mb-3 shadow-lg"
-                    style={{ backgroundColor: res.cefr.color }}
-                  >
-                    {res.cefr.level}
-                  </div>
-                  <p className="text-lg font-bold text-slate-900">{res.cefr.label}</p>
-                  <p className="text-sm text-slate-600">({res.cefr.range})</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Score Breakdown */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {[
-              { label: 'Listening', points: res.listening.points.toFixed(0), correct: res.listening.correct, total: 20, pointPerQ: '5 điểm/câu' },
-              { label: 'Reading', points: res.reading.points.toFixed(0), correct: res.reading.correct, total: 40, pointPerQ: '2.5 điểm/câu' },
-              { label: 'Tổng điểm', points: res.totalScore.toFixed(0), correct: null, total: 200, pointPerQ: `(Trung bình: ${res.averageScore.toFixed(1)})`, isTotal: true }
-            ].map((item, idx) => (
-              <div 
-                key={idx}
-                className="bg-white rounded-xl p-6 border-t-4 shadow-sm hover:shadow-lg transition-shadow duration-300"
-                style={{ borderTopColor: item.isTotal ? COLORS.orange : COLORS.blue }}
-              >
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-3">{item.label}</p>
-                <div 
-                  className="text-3xl font-black text-slate-900 mb-2"
-                  style={{ color: item.isTotal ? COLORS.blue : 'inherit' }}
-                >
-                  {item.points}
-                </div>
-                <p className="text-sm text-slate-600">
-                  {item.correct !== null ? `${item.correct}/${item.total} câu` : `/${item.total} điểm`}
-                </p>
-                <p className="text-xs text-slate-500 mt-2">({item.pointPerQ})</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Overall Progress */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 mb-8">
-            <p className="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide">Tỷ lệ câu đúng</p>
-            <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden mb-3">
-              <div 
-                className="h-full transition-all duration-1000 ease-out" 
-                style={{ width: `${percentage}%`, backgroundColor: COLORS.blue }} 
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-semibold text-slate-600">{percentage.toFixed(0)}%</span>
-              <span className="text-sm font-semibold text-slate-600">{res.listening.correct + res.reading.correct}/60 câu</span>
-            </div>
-          </div>
-
-          {/* Detailed Reviews */}
-          <div className="space-y-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
-              <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent flex items-center gap-3">
-                <TrendingUp className="w-5 h-5" style={{ color: COLORS.blue }} />
-                <h3 className="font-bold text-lg text-slate-900">Chi tiết Listening</h3>
-              </div>
-              <div className="p-6">
-                <SimpleAnswerReview examData={examData} answers={answers} sectionType="listening" startPart={1} endPart={4} />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-100">
-              <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent flex items-center gap-3">
-                <TrendingUp className="w-5 h-5" style={{ color: COLORS.blue }} />
-                <h3 className="font-bold text-lg text-slate-900">Chi tiết Reading</h3>
-              </div>
-              <div className="p-6">
-                <SimpleAnswerReview examData={examData} answers={answers} sectionType="reading" startPart={5} endPart={8} />
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setMode('setup');
-                setAnswers({});
-                setSection('listening');
-                setPart(1);
-                setSaved(false);
-                setListeningPartsTouched(new Set());
-              }}
-              className="flex-1 py-4 rounded-xl font-bold text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95 uppercase tracking-wide flex items-center justify-center gap-2"
-              style={{ backgroundColor: COLORS.blue, background: `linear-gradient(135deg, ${COLORS.blue} 0%, ${COLORS.darkBlue} 100%)` }}
-            >
-              <RotateCcw className="w-5 h-5" />
-              <span>Làm lại</span>
-            </button>
-            <button
-              onClick={() => {
-                setMode('setup');
-                setAnswers({});
-                setSection('listening');
-                setPart(1);
-                setSaved(false);
-                setListeningPartsTouched(new Set());
-                onComplete?.();
-              }}
-              className="flex-1 py-4 rounded-xl font-bold text-slate-900 bg-white border-2 border-slate-300 transition-all duration-200 ease-out hover:bg-slate-50 hover:shadow-lg active:scale-95 uppercase tracking-wide flex items-center justify-center gap-2"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              <span>Quay lại</span>
-            </button>
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-
-          @keyframes slideDown {
-            from {
-              opacity: 0;
-              transform: translateY(-8px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-
-          .animate-in {
-            animation: fadeIn 0.4s ease-out;
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  return null;
-};
-
-export default FullExamMode;
-</file>
-
 <file path="src/index.css">
 @tailwind base;
 @tailwind components;
@@ -54745,6 +53561,793 @@ if (process.env.NODE_ENV === 'production') {
     // Send to error tracking service
   });
 }
+</file>
+
+<file path="src/components/FullExam/FullExamMode.jsx">
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import { Clock, Play, Pause, AlertCircle, BookOpen, ChevronRight, ChevronLeft, Trophy, Zap, CheckCircle, XCircle, Target, TrendingUp, Award, FileText, ChevronDown, Headphones, Send, ArrowRight, Flag, RotateCcw, Lock } from 'lucide-react';
+import ContentDisplay from '../Display/ContentDisplay';
+import { EXAM_LIST, getExamById } from '../../data/examData';
+import { useUserProgress } from '../../hooks/useUserProgress';
+import { useAutoSaveProgress } from '../../hooks/useAutoSaveProgress';
+
+// ===== THEME =====
+const COLORS = {
+  blue: '#0066CC',
+  darkBlue: '#004399',
+  lightBlue: '#E6F2FF',
+  orange: '#FF8C42',
+  lightOrange: '#FFF3E6',
+  slate: '#6B7280',
+  success: '#059669',
+  danger: '#DC2626',
+  white: '#FFFFFF',
+};
+
+// ===== EXAM CONFIGURATION =====
+const EXAM_STRUCTURE = {
+  listening: {
+    title: 'LISTENING',
+    totalTime: 1800,
+    parts: 4,
+    questionsPerPart: 5,
+    totalQuestions: 20,
+    totalPoints: 100,
+    pointsPerQuestion: 5,
+  },
+  reading: {
+    title: 'READING',
+    totalTime: 3600,
+    parts: 4,
+    questionsPerPart: 10,
+    totalQuestions: 40,
+    totalPoints: 100,
+    pointsPerQuestion: 2.5,
+  }
+};
+
+const getCEFRLevel = (score) => {
+  if (score >= 75) return { level: 'C1', label: 'Advanced', color: '#059669', range: '75-100' };
+  if (score >= 50) return { level: 'B2', label: 'Upper Intermediate', color: '#0066CC', range: '50-74' };
+  if (score >= 25) return { level: 'B1', label: 'Intermediate', color: '#FF8C42', range: '25-49' };
+  if (score >= 15) return { level: 'A2', label: 'Elementary', color: '#F59E0B', range: '15-24' };
+  return { level: 'A1', label: 'Beginner', color: '#DC2626', range: '0-14' };
+};
+
+const READING_TIME = 3600;
+const LISTENING_TIME = 1800;
+const WARNING_TIME = 300;
+
+// ===== MODERN DROPDOWN COMPONENT =====
+const ModernDropdown = memo(({ examId, setExamId, isOpen, setIsOpen }) => {
+  const selectedExam = useMemo(() => EXAM_LIST.find(e => e.id === examId), [examId]);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-5 py-3.5 bg-white border-2 border-slate-200 rounded-xl text-left font-semibold flex items-center justify-between hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ease-out"
+        style={{ 
+          borderColor: isOpen ? COLORS.blue : '#e5e7eb',
+          boxShadow: isOpen ? `0 0 0 3px ${COLORS.blue}20` : 'none'
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
+        <span className="text-slate-900 font-medium">{selectedExam?.title || 'Chọn bài thi'}</span>
+        <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div 
+          className="absolute top-full left-0 right-0 mt-3 bg-white border-2 rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-sm"
+          style={{ 
+            borderColor: COLORS.blue,
+            animation: 'slideDown 0.2s ease-out'
+          }}
+          role="listbox"
+        >
+          <div className="max-h-64 overflow-y-auto scrollbar-hide">
+            {EXAM_LIST.map((exam, idx) => (
+              <button
+                key={exam.id}
+                onClick={() => {
+                  setExamId(exam.id);
+                  setIsOpen(false);
+                }}
+                className="w-full px-5 py-3.5 text-left hover:bg-slate-50 flex items-center justify-between transition-colors duration-150 ease-out border-b border-slate-100 last:border-b-0 group"
+                role="option"
+                aria-selected={examId === exam.id}
+              >
+                <div className="flex-1">
+                  <span className="font-medium text-slate-900 group-hover:text-blue-600 transition-colors">{exam.title}</span>
+                  <p className="text-xs text-slate-500 mt-0.5">Cập nhật gần đây</p>
+                </div>
+                {examId === exam.id && (
+                  <div className="ml-3 flex-shrink-0 animate-in fade-in duration-200">
+                    <CheckCircle className="w-5 h-5" style={{ color: COLORS.blue }} />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+    </div>
+  );
+});
+
+// ===== QUESTION CARD =====
+const QuestionCard = memo(({ 
+  question, 
+  questionNum, 
+  selectedAnswer, 
+  onAnswerSelect, 
+  questionKey 
+}) => {
+  const qText = question?.question || question?.text || '';
+  const opts = question?.options || [];
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-slate-300 transition-all duration-300 ease-out">
+      <div className="flex items-start justify-between mb-5">
+        <h4 className="text-base font-semibold text-slate-900 flex-1">
+          <span className="font-bold" style={{ color: COLORS.blue }}>Q{questionNum}:</span> {qText}
+        </h4>
+        {selectedAnswer !== undefined && (
+          <span 
+            className="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 ml-4 flex-shrink-0 animate-in fade-in duration-300" 
+            style={{ backgroundColor: `${COLORS.blue}15`, color: COLORS.blue }}
+          >
+            <CheckCircle className="w-3.5 h-3.5" /> Done
+          </span>
+        )}
+      </div>
+      
+      <div className="space-y-3">
+        {opts.map((opt, i) => {
+          const selected = selectedAnswer === i;
+          const letter = String.fromCharCode(65 + i);
+          
+          return (
+            <label 
+              key={i} 
+              className={`flex items-start cursor-pointer p-4 rounded-lg transition-all duration-200 ease-out group ${
+                selected 
+                  ? 'bg-blue-50 border-2 border-blue-500 shadow-md' 
+                  : 'bg-slate-50 border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
+              }`}
+            >
+              <input
+                type="radio"
+                name={questionKey}
+                checked={selected}
+                onChange={() => onAnswerSelect(questionNum, i)}
+                className="sr-only"
+              />
+              <div 
+                className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-200 ${
+                  selected 
+                    ? 'text-white shadow-md' 
+                    : 'text-slate-700 border-2 border-slate-300 group-hover:border-slate-400'
+                }`}
+                style={{
+                  backgroundColor: selected ? COLORS.blue : 'transparent',
+                  borderColor: selected ? COLORS.blue : '#d1d5db'
+                }}
+              >
+                {selected ? '✓' : letter}
+              </div>
+              <span className={`ml-4 text-sm font-medium leading-relaxed transition-colors duration-200 ${
+                selected ? 'text-slate-900 font-semibold' : 'text-slate-700 group-hover:text-slate-900'
+              }`}>
+                {opt}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}, (p, n) => p.selectedAnswer === n.selectedAnswer && p.questionNum === n.questionNum);
+
+// ===== PART NAVIGATION =====
+const PartNavigation = memo(({ 
+  currentPart, parts, answers, currentSection, questionsPerPart, onPartChange, 
+  playedParts = []  // 👈 Parts đã nghe
+}) => {
+  const partStats = useMemo(() => {
+    const stats = {};
+    for (let i = 1; i <= parts; i++) {
+      const partNum = currentSection === 'listening' ? i : i + 4;
+      const count = Object.keys(answers).filter(key => key.startsWith(`${currentSection}-part${partNum}-`)).length;
+      stats[partNum] = count;
+    }
+    return stats;
+  }, [answers, currentSection, parts]);
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+      <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-5">Part Navigation</p>
+      <div className="grid grid-cols-4 gap-3">
+        {Array.from({ length: parts }, (_, i) => {
+          const partNum = currentSection === 'listening' ? i + 1 : i + 5;
+          const answered = partStats[partNum] || 0;
+          const isCurrent = currentPart === partNum;
+          const isComplete = answered === questionsPerPart;
+          const isPlayed = playedParts.includes(partNum);  // 👈 Check đã nghe
+          
+          return (
+            <button
+              key={partNum}
+              onClick={() => !isPlayed && onPartChange(partNum)}  // 👈 Disable nếu đã nghe
+              disabled={isPlayed}  // 👈 Disable button
+              className={`py-4 px-3 rounded-lg font-bold text-sm transition-all duration-200 ease-out border-2 text-center hover:shadow-md active:scale-95 relative ${
+                isPlayed  // 👈 Nếu đã nghe
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : isCurrent 
+                  ? 'text-white border-blue-600 shadow-lg scale-100' 
+                  : isComplete 
+                  ? 'text-white border-blue-600 opacity-80' 
+                  : 'text-slate-700 border-slate-200 hover:border-slate-300'
+              }`}
+              style={{
+                backgroundColor: isPlayed ? '#d1d5db' : (isCurrent || isComplete ? COLORS.blue : COLORS.white),
+              }}
+              title={isPlayed ? 'Đã nghe rồi, không thể quay lại' : `Part ${partNum}`}
+            >
+              {isPlayed && <Lock className="w-3 h-3 absolute top-1 right-1" />}  {/* 👈 Icon lock */}
+              <div className="font-bold">P{partNum}</div>
+              <div className="text-xs opacity-75 mt-1">{answered}/{questionsPerPart}</div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+// ===== MAIN COMPONENT =====
+const FullExamMode = ({ onComplete }) => {
+  const { saveProgress, currentUser, loading: progressLoading } = useUserProgress();
+  const [mode, setMode] = useState('setup');
+  const [section, setSection] = useState('listening');
+  const [part, setPart] = useState(1);
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const [examId, setExamId] = useState('exam1');
+  const [saved, setSaved] = useState(false);
+  const [examData, setExamData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // 🔴 KEY STATE: Track which parts have been listened to
+  const [playedListeningParts, setPlayedListeningParts] = useState(new Set());
+
+  const cfg = EXAM_STRUCTURE[section];
+
+  const fmt = useCallback((sec) => {
+    const mins = Math.floor(sec / 60);
+    const secs = sec % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }, []);
+
+  const handleAns = useCallback((qNum, opt) => {
+    const key = `${section}-part${part}-q${qNum}`;
+    setAnswers(p => ({ ...p, [key]: opt }));
+  }, [section, part]);
+
+  const nextSec = useCallback(() => {
+    if (section === 'listening') {
+      setSection('reading');
+      setPart(5);
+      setTimeLeft(READING_TIME);
+    } else {
+      setMode('results');
+    }
+  }, [section]);
+
+  // 🔴 KEY CALLBACK: Called when audio ends
+  const handleAudioEnd = useCallback(() => {
+    console.log(`🎵 Audio kết thúc ở Part ${part}`);
+    
+    if (section === 'listening') {
+      // Mark this part as played (listened to)
+      setPlayedListeningParts(prev => {
+        const newSet = new Set(prev);
+        newSet.add(part);
+        console.log(`✅ Marked Part ${part} as played. Now played: [${Array.from(newSet).join(', ')}]`);
+        return newSet;
+      });
+
+      // Auto advance to next part
+      if (part < 4) {
+        console.log(`➡️ Auto advancing: Part ${part} → Part ${part + 1}`);
+        setPart(part + 1);
+      } else {
+        // Last listening part - switch to reading
+        console.log(`🎯 Part 4 done! Switching to Reading Section`);
+        setSection('reading');
+        setPart(5);
+        setTimeLeft(READING_TIME);
+      }
+    }
+  }, [section, part]);
+
+  // Load exam data
+  useEffect(() => {
+    if (mode === 'setup') return;
+    setLoading(true);
+    getExamById(examId).then(data => {
+      setExamData(data);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [examId, mode]);
+
+  // Timer
+  useEffect(() => {
+    if (mode !== 'exam' || isPaused) return;
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        const newTime = prev - 1;
+        if (newTime === WARNING_TIME) setShowWarning(true);
+        if (newTime <= 0) {
+          if (section === 'listening') {
+            setSection('reading');
+            setPart(5);
+            setTimeLeft(READING_TIME);
+          } else {
+            setMode('results');
+          }
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [mode, isPaused, section]);
+
+  useEffect(() => {
+    if (mode === 'exam') {
+      setTimeLeft(section === 'listening' ? LISTENING_TIME : READING_TIME);
+      setPart(section === 'listening' ? 1 : 5);
+      setIsPaused(false);
+    }
+  }, [mode, section]);
+
+  // Save progress
+  useEffect(() => {
+    if (mode !== 'results' || !currentUser || saved || progressLoading) return;
+    const results = calcResults();
+    saveProgress({
+      exam: examId,
+      part: 'full',
+      score: results.averageScore,
+      answers,
+      correctAnswers: results.listening.correct + results.reading.correct,
+      listeningScore: results.listening.points,
+      readingScore: results.reading.points,
+      testType: 'full-exam',
+      listeningCorrect: results.listening.correct,
+      readingCorrect: results.reading.correct,
+      totalQuestions: 60,
+      totalScore: results.totalScore,
+      cefrLevel: results.cefr.level,
+      isDraft: false,
+    }).then(() => setSaved(true)).catch(err => console.error('Save failed:', err));
+  }, [mode, currentUser, saved, progressLoading, examId]);
+
+  const calcResults = useCallback(() => {
+    const res = {
+      listeningByPart: {},
+      readingByPart: {},
+      listening: { correct: 0, total: 20, points: 0 },
+      reading: { correct: 0, total: 40, points: 0 },
+      totalScore: 0,
+      averageScore: 0,
+      cefr: null,
+    };
+
+    if (!examData) return res;
+
+    [1,2,3,4].forEach(p => {
+      const qs = examData.parts?.[`part${p}`]?.questions || [];
+      let cnt = 0;
+      qs.forEach((q, i) => {
+        if (answers[`listening-part${p}-q${i + 1}`] === q.correct) {
+          res.listening.correct++;
+          cnt++;
+        }
+      });
+      res.listeningByPart[p] = cnt;
+    });
+
+    [5,6,7,8].forEach(p => {
+      const qs = examData.parts?.[`part${p}`]?.questions || [];
+      let cnt = 0;
+      qs.forEach((q, i) => {
+        if (answers[`reading-part${p}-q${i + 1}`] === q.correct) {
+          res.reading.correct++;
+          cnt++;
+        }
+      });
+      res.readingByPart[p - 4] = cnt;
+    });
+
+    res.listening.points = res.listening.correct * 5;
+    res.reading.points = res.reading.correct * 2.5;
+    res.totalScore = res.listening.points + res.reading.points;
+    res.averageScore = res.totalScore / 2;
+    res.cefr = getCEFRLevel(res.averageScore);
+
+    return res;
+  }, [examData, answers]);
+
+  const partData = useMemo(() => examData?.parts?.[`part${part}`] || null, [examData, part]);
+  const answeredCount = useMemo(() => Object.keys(answers).filter(k => k.startsWith(`${section}-`)).length, [answers, section]);
+  const progress = (answeredCount / cfg.totalQuestions) * 100;
+
+  // ===== SETUP SCREEN =====
+  if (mode === 'setup') {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#f0f9ff' }}>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div 
+            className="absolute top-0 right-1/4 w-96 h-96 rounded-full opacity-10"
+            style={{ backgroundColor: COLORS.blue, filter: 'blur(40px)' }}
+          />
+          <div 
+            className="absolute -bottom-32 left-1/3 w-80 h-80 rounded-full opacity-10"
+            style={{ backgroundColor: COLORS.orange, filter: 'blur(40px)' }}
+          />
+        </div>
+
+        <div className="relative max-w-5xl mx-auto p-6">
+          <div className="text-center mb-12 pt-8">
+            <h1 className="text-5xl font-black mb-3" style={{ color: COLORS.darkBlue }}>
+              Chuẩn Đầu Ra HUFLIT
+            </h1>
+            <p className="text-lg font-semibold text-slate-600 flex items-center justify-center gap-2">
+              <Clock className="w-5 h-5" />
+              <span>90 phút</span>
+              <span>•</span>
+              <span>60 câu hỏi</span>
+              <span>•</span>
+              <span>Kiểm tra đầy đủ</span>
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-slate-100">
+            <div className="h-1.5" style={{ backgroundColor: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.orange} 100%)` }} />
+            
+            <div className="p-8">
+              <div className="grid grid-cols-4 gap-4 mb-8">
+                {[
+                  { num: '8', label: 'Parts' },
+                  { num: '60', label: 'Questions' },
+                  { num: '90', label: 'Minutes' },
+                  { num: '200', label: 'Max Points' }
+                ].map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className="p-6 rounded-xl border border-slate-200 text-center hover:shadow-lg hover:border-slate-300 transition-all duration-300 ease-out hover:-translate-y-1"
+                  >
+                    <div className="text-3xl font-black" style={{ color: COLORS.blue }}>{item.num}</div>
+                    <p className="text-xs font-semibold text-slate-600 mt-3 uppercase tracking-wide">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-8">
+                <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Chọn Bài Thi</label>
+                <ModernDropdown 
+                  examId={examId} 
+                  setExamId={setExamId} 
+                  isOpen={isOpen} 
+                  setIsOpen={setIsOpen}
+                />
+              </div>
+
+              <button
+                onClick={() => setMode('exam')}
+                disabled={!examId || loading}
+                className="w-full py-4 rounded-xl font-bold text-white text-lg transition-all duration-300 ease-out hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide flex items-center justify-center gap-3"
+                style={{
+                  backgroundColor: loading ? '#9ca3af' : '#FF7D00',
+                  background: loading 
+                    ? '#9ca3af' 
+                    : `linear-gradient(135deg, #FF7D00 0%, #E67E00 100%)`,
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Clock className="w-5 h-5 animate-spin" />
+                    <span>Đang tải...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" />
+                    <span>Bắt đầu</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== EXAM SCREEN =====
+  if (mode === 'exam') {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#f8fafc' }}>
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+          <div className="max-w-6xl mx-auto p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                  {section === 'listening' ? (
+                    <>
+                      <Headphones className="w-5 h-5" style={{ color: COLORS.blue }} />
+                      <span>LISTENING</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="w-5 h-5" style={{ color: COLORS.blue }} />
+                      <span>READING</span>
+                    </>
+                  )}
+                </h2>
+                <p className="text-xs text-slate-600">Part {part} / {cfg.parts}</p>
+              </div>
+              <div className="text-right">
+                <div 
+                  className="text-3xl font-black transition-colors duration-500"
+                  style={{ color: timeLeft < 300 ? COLORS.orange : COLORS.blue }}
+                >
+                  {fmt(timeLeft)}
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-semibold text-slate-600">
+                <span>Tiến độ</span>
+                <span>{answeredCount}/{cfg.totalQuestions}</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full transition-all duration-500 ease-out" 
+                  style={{ width: `${progress}%`, backgroundColor: COLORS.blue }} 
+                />
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setIsPaused(!isPaused)}
+                className="px-5 py-2.5 rounded-lg font-semibold text-white flex items-center gap-2 text-sm transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
+                style={{ backgroundColor: COLORS.blue }}
+              >
+                {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {showWarning && (
+          <div className="max-w-6xl mx-auto p-4 mt-4 animate-in fade-in duration-300">
+            <div 
+              className="p-4 bg-orange-50 border-l-4 rounded-lg shadow-md flex items-center gap-3"
+              style={{ borderLeftColor: COLORS.orange }}
+            >
+              <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+              <p className="font-bold text-orange-700">Chỉ còn 5 phút!</p>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="max-w-6xl mx-auto p-4 space-y-6 pb-32">
+          {/* Content Display */}
+          {partData && (
+            <div className="relative z-20">
+              <ContentDisplay
+                partData={partData}
+                selectedPart={`part${part}`}
+                currentQuestionIndex={0}
+                testType={section}
+                examId={examId}
+                isPartPlayed={playedListeningParts.has(part)}  // 👈 Pass this
+                onAudioEnd={section === 'listening' && !playedListeningParts.has(part) ? handleAudioEnd : null}  // 👈 Only call if not played
+              />
+            </div>
+          )}
+
+          {/* Questions */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+            <h3 className="font-bold text-lg mb-6 text-slate-900">
+              Part {part}: Câu {(part - (section === 'listening' ? 1 : 5)) * cfg.questionsPerPart + 1} - {(part - (section === 'listening' ? 0 : 4)) * cfg.questionsPerPart}
+            </h3>
+            <div className="space-y-4">
+              {partData?.questions?.map((q, i) => (
+                <QuestionCard
+                  key={`${section}-part${part}-q${i + 1}`}
+                  question={q}
+                  questionNum={i + 1}
+                  selectedAnswer={answers[`${section}-part${part}-q${i + 1}`]}
+                  onAnswerSelect={handleAns}
+                  questionKey={`${section}-part${part}-q${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Part Navigation */}
+          <PartNavigation
+            currentPart={part}
+            parts={cfg.parts}
+            answers={answers}
+            currentSection={section}
+            questionsPerPart={cfg.questionsPerPart}
+            onPartChange={setPart}
+            playedParts={section === 'listening' ? Array.from(playedListeningParts) : []}  // 👈 Pass played parts
+          />
+
+          {/* Navigation Buttons */}
+          <div className="flex gap-4">
+            <button
+              onClick={() => {
+                if (section === 'listening' && playedListeningParts.has(part - 1)) {
+                  alert('❌ Bạn không thể quay lại part đã nghe');
+                  return;
+                }
+                setPart(p => Math.max(section === 'listening' ? 1 : 5, p - 1));
+              }}
+              disabled={part === (section === 'listening' ? 1 : 5) || (section === 'listening' && playedListeningParts.has(part - 1))}
+              className="flex-1 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
+              style={{ backgroundColor: COLORS.blue }}
+            >
+              <ChevronLeft className="w-5 h-5" /> 
+              <span>Phần trước</span>
+            </button>
+            <button
+              onClick={part === (section === 'listening' ? 4 : 8) ? nextSec : () => setPart(p => p + 1)}
+              className="flex-1 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95"
+              style={{ backgroundColor: part === (section === 'listening' ? 4 : 8) && section === 'reading' ? '#10B981' : (part === (section === 'listening' ? 4 : 8) ? '#FF7D00' : COLORS.blue) }}
+            >
+              {part === (section === 'listening' ? 4 : 8) 
+                ? (section === 'listening' 
+                  ? <>
+                      <ArrowRight className="w-5 h-5" /> 
+                      <span>Sang Reading</span>
+                    </>
+                  : <>
+                      <Flag className="w-5 h-5" /> 
+                      <span>Nộp bài</span>
+                    </>
+                )
+                : <>
+                    <span>Tiếp theo</span>
+                    <ChevronRight className="w-5 h-5" />
+                  </>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== RESULTS SCREEN =====
+  if (mode === 'results') {
+    const res = calcResults();
+    const percentage = ((res.listening.correct + res.reading.correct) / 60) * 100;
+
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#f0f9ff' }}>
+        <div className="relative max-w-4xl mx-auto p-6">
+          {/* Results Header */}
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-slate-100">
+            <div className="h-1.5" style={{ backgroundColor: `linear-gradient(90deg, ${COLORS.blue} 0%, ${COLORS.orange} 100%)` }} />
+            <div className="text-center py-12 px-6 animate-in fade-in duration-500">
+              <div className="inline-flex items-center justify-center mb-4">
+                <Trophy className="w-16 h-16" style={{ color: COLORS.orange }} />
+              </div>
+              <h1 className="text-4xl font-black text-slate-900 mb-2">Hoàn thành bài thi!</h1>
+              <p className="text-slate-600">Chuẩn đầu ra HUFLIT</p>
+              {saved && (
+                <p className="text-sm text-emerald-600 font-semibold mt-3 animate-in fade-in duration-500 flex items-center justify-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Kết quả đã được lưu</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Main Score Card */}
+          <div 
+            className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border-t-4"
+            style={{ borderTopColor: res.cefr.color }}
+          >
+            <div className="p-8 text-center">
+              <p className="text-sm font-bold text-slate-600 uppercase tracking-wide mb-2">Điểm trung bình</p>
+              <div className="text-6xl font-black text-slate-900 mb-6 animate-in fade-in duration-700">
+                {res.averageScore.toFixed(1)}
+              </div>
+              <div className="flex items-center justify-center gap-6">
+                <div className="text-center">
+                  <div 
+                    className="w-16 h-16 rounded-full flex items-center justify-center font-black text-white text-2xl mb-3 shadow-lg"
+                    style={{ backgroundColor: res.cefr.color }}
+                  >
+                    {res.cefr.level}
+                  </div>
+                  <p className="text-lg font-bold text-slate-900">{res.cefr.label}</p>
+                  <p className="text-sm text-slate-600">({res.cefr.range})</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <button
+              onClick={() => {
+                setMode('setup');
+                setAnswers({});
+                setSection('listening');
+                setPart(1);
+                setSaved(false);
+                setPlayedListeningParts(new Set());
+              }}
+              className="flex-1 py-4 rounded-xl font-bold text-white transition-all duration-200 ease-out hover:shadow-lg active:scale-95 uppercase tracking-wide flex items-center justify-center gap-2"
+              style={{ backgroundColor: COLORS.blue, background: `linear-gradient(135deg, ${COLORS.blue} 0%, ${COLORS.darkBlue} 100%)` }}
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span>Làm lại</span>
+            </button>
+            <button
+              onClick={() => {
+                setMode('setup');
+                setAnswers({});
+                setSection('listening');
+                setPart(1);
+                setSaved(false);
+                setPlayedListeningParts(new Set());
+                onComplete?.();
+              }}
+              className="flex-1 py-4 rounded-xl font-bold text-slate-900 bg-white border-2 border-slate-300 transition-all duration-200 ease-out hover:bg-slate-50 hover:shadow-lg active:scale-95 uppercase tracking-wide flex items-center justify-center gap-2"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              <span>Quay lại</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export default FullExamMode;
 </file>
 
 <file path="src/data/exams/exam6.js">
@@ -55860,7 +55463,7 @@ export default db;
 
   // Metadata cho tất cả các exams (lightweight)
   const EXAM_METADATA = {};
-  for (let i = 1; i <= 22; i++) {
+  for (let i = 1; i <= 1; i++) {
     EXAM_METADATA[`exam${i}`] = {
       id: `exam${i}`,
       title: `Đề thi ${i}`,
@@ -56747,8 +56350,8 @@ SAM BACH (12:16): Yes, sorry about that. See you then!`,
             "He is on a business trip.",
             "He works for Fly Right Airlines."
           ],
-          correct: 2,
-          explanation: "Bach nói 'our client meeting' → Anh ấy đang công tác kinh doanh."
+          correct: 2, // (C)
+          explanation: "Mr. Bach đề cập đến 'our client meeting' (cuộc họp khách hàng của chúng ta), điều này ngụ ý ông đang thực hiện một chuyến công tác. Không có thông tin về việc ông làm việc cho hãng hàng không hay đã đến Kansai trước đó."
         },
         {
           id: 52,
@@ -56759,8 +56362,8 @@ SAM BACH (12:16): Yes, sorry about that. See you then!`,
             "He agrees to wait at the door near the customs area.",
             "He knows Mr. Bach must pass through customs."
           ],
-          correct: 2,
-          explanation: "'Sure thing' là phản ứng đồng ý với yêu cầu 'Would you mind meeting me at the door after I go through customs?'"
+          correct: 2, // (C)
+          explanation: "'Sure thing' là câu trả lời đồng ý cho yêu cầu trước đó của Mr. Bach là 'Would you mind meeting me at the door after I go through customs?' (Bạn có phiền gặp tôi ở cửa sau khi tôi qua cửa hải quan không?)."
         },
         {
           id: 53,
@@ -56771,20 +56374,15 @@ SAM BACH (12:16): Yes, sorry about that. See you then!`,
             "The airline changed the departure time.",
             "He forgot to check in early."
           ],
-          correct: 1,
-          explanation: "Bach nói: 'My first flight was delayed, so I missed my connection in Beijing.'"
+          correct: 1, // (B)
+          explanation: "Trong tin nhắn lúc 11:59, Mr. Bach nói rõ: 'missed my connection in Beijing' (đã lỡ chuyến bay chuyển tiếp tại Bắc Kinh) do chuyến bay đầu tiên bị trễ."
         },
         {
           id: 54,
           question: "What time is Mr. Bach's new flight expected to arrive?",
-          options: [
-            "11:59",
-            "12:06",
-            "18:00",
-            "20:15"
-          ],
-          correct: 2,
-          explanation: "Bach nói: 'I'm going to be on a flight arriving in Kansai at 18:00.'"
+          options: ["11:59", "12:06", "18:00", "20:15"],
+          correct: 2, // (C)
+          explanation: "Mr. Bach thông báo ở tin nhắn lúc 12:00: 'arriving in Kansai at 18:00' (đến Kansai lúc 18 giờ)."
         },
         {
           id: 55,
@@ -56795,8 +56393,68 @@ SAM BACH (12:16): Yes, sorry about that. See you then!`,
             "Change his flight booking",
             "Help carry his luggage"
           ],
-          correct: 1,
-          explanation: "Otani: 'I'll confirm the arrival time. Do you have any checked bags?' → Anh ta sẽ đón Bach tại sân bay."
+          correct: 1, // (B)
+          explanation: "Bằng việc đồng ý gặp ở cửa sau hải quan và nói về việc tìm chỗ đậu xe, Mr. Otani đang đề nghị đón Mr. Bach tại sân bay."
+        },
+        {
+          id: 56,
+          question: "What can be inferred about the two men?",
+          options: [
+            "They are colleagues attending the same meeting.",
+            "They are family members traveling together.",
+            "They both work for Fly Right Airlines.",
+            "They have never met before."
+          ],
+          correct: 0, // (A)
+          explanation: "Việc sử dụng cụm từ 'our client meeting' (cuộc họp khách hàng của chúng ta) cho thấy họ là đồng nghiệp và cùng tham gia vào một sự kiện công việc chung."
+        },
+        {
+          id: 57,
+          question: "At 12:06, why does Mr. Bach mention 'still in time for our client meeting'?",
+          options: [
+            "To apologize for missing the meeting",
+            "To confirm he will not be late",
+            "To ask about the meeting location",
+            "To cancel his attendance"
+          ],
+          correct: 1, // (B)
+          explanation: "Ông muốn trấn an Mr. Otani rằng mặc dù chuyến bay bị trễ nhưng ông vẫn sẽ đến kịp giờ cho cuộc họp với khách hàng."
+        },
+        {
+          id: 58,
+          question: "What does Mr. Otani mean when he writes, 'I'll confirm the arrival time'?",
+          options: [
+            "He plans to check the airline's schedule.",
+            "He will change the meeting time.",
+            "He needs to contact the travel agent.",
+            "He will book another ticket for Mr. Bach."
+          ],
+          correct: 0, // (A)
+          explanation: "Ông sẽ kiểm tra lại lịch trình thực tế của hãng hàng không để chắc chắn thời gian hạ cánh chính xác trước khi đi đón."
+        },
+        {
+          id: 59,
+          question: "What is implied about Mr. Otani's travel to the airport?",
+          options: [
+            "He expects heavy traffic or limited parking.",
+            "He plans to take public transportation.",
+            "He works at the airport.",
+            "He has never been to Kansai Airport before."
+          ],
+          correct: 0, // (A)
+          explanation: "Ông nói 'Parking spots can be hard to find' (Chỗ đậu xe có thể khó tìm), điều này cho thấy ông dự đoán sẽ có khó khăn về bãi đỗ xe hoặc mật độ xe đông đúc."
+        },
+        {
+          id: 60,
+          question: "What does Mr. Bach express in his final message?",
+          options: [
+            "Thanks for the help",
+            "Regret about missing the meeting",
+            "Frustration with the airline",
+            "Request for flight confirmation"
+          ],
+          correct: 0, // (A)
+          explanation: "Dòng cuối 'Yes, sorry about that. See you then!' mang hàm ý cảm ơn vì sự giúp đỡ và kiên nhẫn của Mr. Otani khi phải thay đổi lịch đón."
         }
       ]
     }
@@ -56807,7 +56465,6 @@ export default EXAM1_DATA;
 </file>
 
 <file path="src/components/layout/MainLayout.jsx">
-// src/components/layout/MainLayout.jsx
 import React from 'react';
 import Navbar from '../Navbar';
 import Footer from '../footer/Footer';
@@ -56828,34 +56485,44 @@ const MainLayout = ({
   onAnswersClick
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-amber-50 flex flex-col overflow-visible">
+    <div className="min-h-screen bg-white flex flex-col">
       
-      {/* Navbar */}
-      <Navbar
-        testType={testType}
-        onTestTypeChange={onTestTypeChange}
-        practiceType={practiceType}
-        onPracticeTypeChange={onPracticeTypeChange}
-        user={user}
-        onAuthClick={onAuthClick}
-        onChatClick={onChatClick}
-        onProfileClick={onProfileClick}
-        viewMode={viewMode}
-        onlineCount={onlineCount}
-        totalUsers={totalUsers}
-        onAnswersClick={onAnswersClick}
-      />
+      {/* Navbar - Fixed at top */}
+      <div className="sticky top-0 z-50">
+        <Navbar
+          testType={testType}
+          onTestTypeChange={onTestTypeChange}
+          practiceType={practiceType}
+          onPracticeTypeChange={onPracticeTypeChange}
+          user={user}
+          onAuthClick={onAuthClick}
+          onChatClick={onChatClick}
+          onProfileClick={onProfileClick}
+          viewMode={viewMode}
+          onlineCount={onlineCount}
+          totalUsers={totalUsers}
+          onAnswersClick={onAnswersClick}
+        />
+      </div>
 
-      {/* Main Content - NO OVERFLOW RESTRICTIONS */}
-      <main className="flex-1 pt-20 pb-16 px-3 sm:px-4 md:px-6 lg:px-8 overflow-visible w-full relative z-0">
-        {children}
+      {/* Main Content Container */}
+      <main className="flex-1 w-full">
+        {/* Padding wrapper */}
+        <div className="h-full px-4 sm:px-6 md:px-8 lg:px-10 py-6 sm:py-8">
+          {/* Max width container */}
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
-      <Footer 
-        onlineCount={onlineCount}
-        totalUsers={totalUsers}
-      />
+      <footer className="w-full mt-auto border-t border-slate-200 bg-white">
+        <Footer 
+          onlineCount={onlineCount}
+          totalUsers={totalUsers}
+        />
+      </footer>
       
     </div>
   );
@@ -57907,11 +57574,16 @@ const PartTestContent = memo(({
     (selectedPart === 'part6' || selectedPart === 'part7' || selectedPart === 'part8');
 
   return (
-    <div className="space-y-6 w-full relative z-10">
-      {/* ✅ REMOVE HeaderSection from here - it's in PartSelector */}
-      {isSignedIn && <MemoizedUserProfile />}
+    <div className="w-full">
+      {/* User Profile - Compact */}
+      {isSignedIn && (
+        <div className="mb-4">
+          <MemoizedUserProfile />
+        </div>
+      )}
 
-      <div className="mt-3 w-full">
+      {/* Part Selector */}
+      <div className="mb-6">
         <MemoizedPartSelector
           selectedExam={selectedExam}
           onExamChange={handleExamChange}
@@ -57922,61 +57594,31 @@ const PartTestContent = memo(({
         />
       </div>
 
-      <div className="space-y-6 mt-6 w-full">
-        {isSplitLayoutPart ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-            {/* Left Column - Content */}
-            <div className="order-1 w-full">
-              <div className="space-y-3 w-full">
-                <div className="flex items-center gap-2 px-1">
-                  <div className="w-1 h-6 rounded-full bg-indigo-600" />
-                  <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
-                </div>
-                <div className="w-full relative z-20">
-                  <MemoizedContentDisplay
-                    partData={partData}
-                    selectedPart={selectedPart}
-                    currentQuestionIndex={currentQuestionIndex}
-                    testType={testType}
-                    examId={selectedExam}
-                  />
-                </div>
+      {/* Content & Questions Layout */}
+      {isSplitLayoutPart ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Left Column - Content */}
+          <div className="order-1 w-full">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-1 h-6 rounded-full bg-indigo-600" />
+                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
               </div>
-            </div>
-            
-            {/* Right Column - Questions */}
-            <div className="order-2 w-full">
-              <div className="space-y-3 w-full">
-                <MemoizedQuestionDisplay
-                  selectedPart={selectedPart}
-                  selectedExam={selectedExam}
+              <div className="relative z-20">
+                <MemoizedContentDisplay
                   partData={partData}
+                  selectedPart={selectedPart}
                   currentQuestionIndex={currentQuestionIndex}
-                  onQuestionChange={setCurrentQuestionIndex}
-                  answers={answers}
-                  onAnswerSelect={handleAnswerSelect}
-                  showResults={showResults}
-                  onSubmit={handleSubmit}
                   testType={testType}
+                  examId={selectedExam}
                 />
               </div>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Full Width - Content */}
-            <div className="space-y-3 w-full relative z-20">
-              <MemoizedContentDisplay
-                partData={partData}
-                selectedPart={selectedPart}
-                currentQuestionIndex={currentQuestionIndex}
-                testType={testType}
-                examId={selectedExam}
-              />
-            </div>
-
-            {/* Full Width - Questions */}
-            <div className="space-y-3 w-full">
+          
+          {/* Right Column - Questions */}
+          <div className="order-2 w-full">
+            <div className="space-y-3">
               <MemoizedQuestionDisplay
                 selectedPart={selectedPart}
                 selectedExam={selectedExam}
@@ -57990,12 +57632,42 @@ const PartTestContent = memo(({
                 testType={testType}
               />
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6 mb-6">
+          {/* Full Width - Content */}
+          <div className="space-y-3 relative z-20">
+            <MemoizedContentDisplay
+              partData={partData}
+              selectedPart={selectedPart}
+              currentQuestionIndex={currentQuestionIndex}
+              testType={testType}
+              examId={selectedExam}
+            />
+          </div>
 
+          {/* Full Width - Questions */}
+          <div className="space-y-3">
+            <MemoizedQuestionDisplay
+              selectedPart={selectedPart}
+              selectedExam={selectedExam}
+              partData={partData}
+              currentQuestionIndex={currentQuestionIndex}
+              onQuestionChange={setCurrentQuestionIndex}
+              answers={answers}
+              onAnswerSelect={handleAnswerSelect}
+              showResults={showResults}
+              onSubmit={handleSubmit}
+              testType={testType}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Results Section */}
       {showResults && (
-        <div className="space-y-3 mt-6 w-full">
+        <div className="mb-6">
           <MemoizedResultsDisplay
             score={score}
             partData={partData}
@@ -58005,9 +57677,8 @@ const PartTestContent = memo(({
         </div>
       )}
 
-      <div className="mt-6 w-full">
-        <StatsGrid score={score} isSignedIn={isSignedIn} />
-      </div>
+      {/* Stats Grid */}
+      <StatsGrid score={score} isSignedIn={isSignedIn} />
     </div>
   );
 });
@@ -58057,8 +57728,10 @@ const TestPage = memo(({
 TestPage.displayName = 'TestPage';
 
 const ProfilePage = memo(({ user, handleBackToTest }) => (
-  <div className="space-y-6 w-full">
-    <BackButton onClick={handleBackToTest} show={true} />
+  <div className="w-full">
+    <div className="mb-6">
+      <BackButton onClick={handleBackToTest} show={true} />
+    </div>
     <MemoizedUserProfile currentUser={user} />
   </div>
 ));
@@ -58126,8 +57799,10 @@ const VocabularyPage = memo(() => <VocabularyPractice />);
 VocabularyPage.displayName = 'VocabularyPage';
 
 const AnswersPage = memo(({ handleBackToMain }) => (
-  <div className="space-y-6 w-full">
-    <BackButton onClick={handleBackToMain} show={true} />
+  <div className="w-full">
+    <div className="mb-6">
+      <BackButton onClick={handleBackToMain} show={true} />
+    </div>
     <ExamAnswersPage />
   </div>
 ));
@@ -58241,46 +57916,43 @@ const AppContent = memo(() => {
 
   return (
     <MainLayout {...layoutProps}>
-      <div className="relative z-10 w-full">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 w-full">
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path={ROUTES.HOME} element={<HomePage />} />
-              <Route 
-                path={ROUTES.TEST} 
-                element={
-                  <TestPage 
-                    isSignedIn={isSignedIn} 
-                    user={user} 
-                    selectedExam={selectedExam} 
-                    handleExamChange={handleExamChange} 
-                    testType={testType} 
-                    handleTestTypeChange={handleTestTypeChange} 
-                    selectedPart={selectedPart} 
-                    handlePartChange={handlePartChange} 
-                    partData={partData} 
-                    currentQuestionIndex={currentQuestionIndex} 
-                    setCurrentQuestionIndex={setCurrentQuestionIndex} 
-                    answers={answers} 
-                    handleAnswerSelect={handleAnswerSelect} 
-                    showResults={showResults} 
-                    handleSubmit={handleSubmit} 
-                    handleReset={handleReset} 
-                    score={score} 
-                  />
-                } 
+      {/* Content - No extra padding (already handled in MainLayout) */}
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path={ROUTES.HOME} element={<HomePage />} />
+          <Route 
+            path={ROUTES.TEST} 
+            element={
+              <TestPage 
+                isSignedIn={isSignedIn} 
+                user={user} 
+                selectedExam={selectedExam} 
+                handleExamChange={handleExamChange} 
+                testType={testType} 
+                handleTestTypeChange={handleTestTypeChange} 
+                selectedPart={selectedPart} 
+                handlePartChange={handlePartChange} 
+                partData={partData} 
+                currentQuestionIndex={currentQuestionIndex} 
+                setCurrentQuestionIndex={setCurrentQuestionIndex} 
+                answers={answers} 
+                handleAnswerSelect={handleAnswerSelect} 
+                showResults={showResults} 
+                handleSubmit={handleSubmit} 
+                handleReset={handleReset} 
+                score={score} 
               />
-              <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
-              <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
-              <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
-              <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
-              <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-          {showAuthModal && <AuthModal onClose={handleAuthClose} />}
-        </div>
-      </div>
+            } 
+          />
+          <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
+          <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
+          <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
+          <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
+          <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+      {showAuthModal && <AuthModal onClose={handleAuthClose} />}
     </MainLayout>
   );
 });
