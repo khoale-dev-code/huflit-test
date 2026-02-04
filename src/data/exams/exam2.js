@@ -873,33 +873,31 @@ Chief Human Resources Officer`,
       title: "PART 8: Instant Message Conversation",
       description: "10 câu hỏi - Đọc cuộc trò chuyện nhắn tin, chọn đáp án tốt nhất.",
       type: "reading",
-      text: `INSTANT MESSAGE CONVERSATION - February 14, 2024
+     text: `SARAH T (2:15): Hi James! How's the project coming along?
 
-SARAH (2:15 PM): Hi James! How's the project coming along?
+JAMES (2:18): Hi Sarah! It's progressing well, but I hit a major obstacle yesterday. The client suddenly requested significant changes to the design.
 
-JAMES (2:18 PM): Hi Sarah! It's progressing well, but I hit a major obstacle yesterday. The client suddenly requested significant changes to the design.
+SARAH T (2:19): Oh no! What kind of changes?
 
-SARAH (2:19 PM): Oh no! What kind of changes?
+JAMES (2:22): They want to completely revamp the color scheme and add several new features that weren't in the original plan. I estimate these changes will require at least two more weeks of work.
 
-JAMES (2:22 PM): They want to completely revamp the color scheme and add several new features that weren't in the original plan. I estimate these changes will require at least two more weeks of work.
+SARAH T (2:23): That's frustrating. Have you informed the project manager yet?
 
-SARAH (2:23 PM): That's frustrating. Have you informed the project manager yet?
+JAMES (2:25): Not yet. I wanted to calculate the exact time and cost implications first. I'm planning to meet with Marcus tomorrow morning to discuss everything.
 
-JAMES (2:25 PM): Not yet. I wanted to calculate the exact time and cost implications first. I'm planning to meet with Marcus tomorrow morning to discuss everything.
+SARAH T (2:26): Smart thinking. Marcus will need to know the financial impact before deciding whether to proceed.
 
-SARAH (2:26 PM): Smart thinking. Marcus will need to know the financial impact before deciding whether to proceed.
+JAMES (2:30): Exactly. I'm also preparing documentation of the requested changes so we have everything in writing. I don't want any miscommunication later.
 
-JAMES (2:30 PM): Exactly. I'm also preparing documentation of the requested changes so we have everything in writing. I don't want any miscommunication later.
+SARAH T (2:32): That's a good precaution. Are you going to recommend that the client stick with the original plan, or are you open to negotiating?
 
-SARAH (2:32 PM): That's a good precaution. Are you going to recommend that the client stick with the original plan, or are you open to negotiating?
+JAMES (2:35): I think some of their requests are actually good improvements, especially the design changes. However, the new features seem unnecessary and would blow up our budget. I'll suggest we implement the design changes but defer the feature additions until a future phase.
 
-JAMES (2:35 PM): I think some of their requests are actually good improvements, especially the design changes. However, the new features seem unnecessary and would blow up our budget. I'll suggest we implement the design changes but defer the feature additions until a future phase.
+SARAH T (2:37): That sounds like a reasonable compromise. I hope Marcus agrees with your approach.
 
-SARAH (2:37 PM): That sounds like a reasonable compromise. I hope Marcus agrees with your approach.
+JAMES (2:40): Thanks for the support, Sarah. I'll let you know how the meeting goes tomorrow.
 
-JAMES (2:40 PM): Thanks for the support, Sarah. I'll let you know how the meeting goes tomorrow.
-
-SARAH (2:41 PM): Looking forward to it. Good luck! 👍`,
+SARAH T (2:41): Looking forward to it. Good luck!`,
 
       questions: [
         {

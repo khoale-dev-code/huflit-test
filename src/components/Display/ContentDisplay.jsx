@@ -1,9 +1,7 @@
-import React, { useMemo, memo, useEffect } from 'react';
-import { AlertCircle, Headphones, FileText, BookOpen, Zap, Target, Clock, BarChart3 } from 'lucide-react';
+import React, { useMemo, memo } from 'react';
+import { AlertCircle, Headphones, FileText, BookOpen } from 'lucide-react';
 
-import Part6Display from './ReadingPart6Display';
-import ReadingPart7Display from './ReadingPart7Display';
-import ReadingPart8Display from './ReadingPart8Display';
+import ReadingDisplay from './Readingdisplay';
 import ScriptDisplay from './ScriptDisplay';
 
 // Helper function để lấy audio path
@@ -24,13 +22,13 @@ const InfoCard = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   };
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-      <div className={`p-2 rounded-lg ${colorMap[color]}`}>
-        <Icon className={`w-4 h-4`} strokeWidth={2} />
+    <div className="flex items-center gap-2 p-2 md:p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+      <div className={`p-1.5 md:p-2 rounded-lg ${colorMap[color]}`}>
+        <Icon className={`w-3.5 h-3.5 md:w-4 md:h-4`} strokeWidth={2} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{label}</p>
-        <p className="text-sm font-bold text-slate-900 truncate">{value}</p>
+        <p className="text-xs md:text-sm font-bold text-slate-900 truncate">{value}</p>
       </div>
     </div>
   );
@@ -49,7 +47,7 @@ const ListeningContent = memo(({
 }) => {
   const partNumber = selectedPart.replace('part', '');
   
-  // Script extraction logic (unchanged)
+  // Script extraction logic
   const script = useMemo(() => {
     if (!partData) {
       console.warn('❌ partData is null');
@@ -95,24 +93,12 @@ const ListeningContent = memo(({
   const audioUrl = useMemo(() => {
     if (!examId) return null;
     
-    // Nếu partData đã có audioUrl, dùng nó
     if (partData?.audioUrl) {
       return partData.audioUrl;
     }
     
-    // Nếu không, tạo đường dẫn mặc định
     return getAudioPath(examId, selectedPart);
   }, [examId, selectedPart, partData]);
-  const DEBUG_ADDITION = `
-  // 🔍 DEBUG LOG
-  useEffect(() => {
-    console.log('📍 ListeningContent DEBUG:');
-    console.log('  examId:', examId);
-    console.log('  selectedPart:', selectedPart);
-    console.log('  partData?.audioUrl:', partData?.audioUrl);
-    console.log('  computed audioUrl:', audioUrl);
-  }, [examId, selectedPart, partData, audioUrl]);
-`;
 
   const partTitle = useMemo(() => {
     return partData?.title || `Part ${partNumber} - Phần Nghe`;
@@ -120,13 +106,13 @@ const ListeningContent = memo(({
 
   if (!script) {
     return (
-      <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-8 text-center">
-        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-          <Headphones className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
+      <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl md:rounded-2xl border-2 border-slate-200 p-6 md:p-8 text-center">
+        <div className="w-14 h-14 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3 md:mb-4">
+          <Headphones className="w-7 h-7 md:w-8 md:h-8 text-slate-400" strokeWidth={1.5} />
         </div>
-        <p className="text-slate-900 font-bold text-lg">Chưa có kịch bản</p>
-        <p className="text-slate-600 text-sm mt-2">Kịch bản cho phần này sẽ sớm có</p>
-        <p className="text-slate-500 text-xs mt-4">Part: {partNumber}</p>
+        <p className="text-slate-900 font-bold text-base md:text-lg">Chưa có kịch bản</p>
+        <p className="text-slate-600 text-sm mt-1 md:mt-2">Kịch bản cho phần này sẽ sớm có</p>
+        <p className="text-slate-500 text-xs mt-3">Part: {partNumber}</p>
       </div>
     );
   }
@@ -143,84 +129,6 @@ const ListeningContent = memo(({
 });
 
 ListeningContent.displayName = 'ListeningContent';
-
-// ========================================
-// MAIN COMPONENT: Reading Content
-// ========================================
-const ReadingContent = memo(({ partData, content, selectedPart }) => {
-  const partNumber = selectedPart.replace('part', '');
-  
-  const readingTime = useMemo(() => {
-    return Math.ceil(content.length / 1250);
-  }, [content.length]);
-
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500 w-full">
-      
-      {/* ===== READING SECTION HEADER ===== */}
-      <div className="flex items-center gap-3 px-1">
-        <div className="p-2.5 rounded-lg bg-emerald-100">
-          <BookOpen className="w-5 h-5 text-emerald-700" strokeWidth={2} />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">Phần Đọc</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Part {partNumber}</p>
-        </div>
-      </div>
-
-      {/* ===== INFO PANEL ===== */}
-      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-4 h-4 text-emerald-700" strokeWidth={2} />
-          <p className="text-sm font-bold text-emerald-900 uppercase tracking-wider">Thông tin</p>
-        </div>
-        <div className="space-y-2">
-          <InfoCard 
-            icon={Target} 
-            label="Part" 
-            value={partNumber}
-            color="indigo"
-          />
-          <InfoCard 
-            icon={FileText} 
-            label="Độ dài" 
-            value={`${content.length} ký tự`}
-            color="amber"
-          />
-          <InfoCard 
-            icon={Clock} 
-            label="Thời gian dự tính" 
-            value={`~${readingTime} phút`}
-            color="emerald"
-          />
-        </div>
-      </div>
-
-      {/* ===== READING CONTENT ===== */}
-      <div>
-        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Nội dung</p>
-        <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-visible w-full">
-          
-          {/* Content Title Bar */}
-          <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
-            <p className="text-sm font-bold text-slate-900">
-              {partData.title || `Nội dung Part ${partNumber}`}
-            </p>
-          </div>
-
-          {/* Text Container */}
-          <div className="p-6 max-h-[40rem] overflow-y-auto">
-            <p className="text-base leading-relaxed whitespace-pre-wrap text-slate-800 break-words font-medium">
-              {content}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-ReadingContent.displayName = 'ReadingContent';
 
 // ========================================
 // MAIN COMPONENT: Empty State
@@ -249,15 +157,15 @@ const EmptyState = memo(({ type = 'no-part' }) => {
   const Icon = state.icon;
 
   return (
-    <div className={`bg-gradient-to-br ${state.bgColor} rounded-2xl border-2 ${state.borderColor} p-8 sm:p-12 animate-in fade-in duration-300 w-full`}>
-      <div className="text-center py-12">
-        <div className="w-20 h-20 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center mx-auto mb-6 shadow-sm">
-          <Icon className={`w-10 h-10 ${state.iconColor}`} strokeWidth={1.5} />
+    <div className={`bg-gradient-to-br ${state.bgColor} rounded-xl md:rounded-2xl border-2 ${state.borderColor} p-6 md:p-12 animate-in fade-in duration-300 w-full`}>
+      <div className="text-center py-8 md:py-12">
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg md:rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-sm">
+          <Icon className={`w-8 h-8 md:w-10 md:h-10 ${state.iconColor}`} strokeWidth={1.5} />
         </div>
-        <p className="text-slate-900 font-bold text-xl mb-2">
+        <p className="text-slate-900 font-bold text-lg md:text-xl mb-1 md:mb-2">
           {state.title}
         </p>
-        <p className="text-slate-600 text-base">
+        <p className="text-slate-600 text-sm md:text-base">
           {state.description}
         </p>
       </div>
@@ -275,7 +183,7 @@ const ContentDisplay = memo(({
   selectedPart, 
   currentQuestionIndex, 
   testType,
-  examId  // 👈 Thêm props này
+  examId
 }) => {
   
   // Extract content
@@ -318,41 +226,11 @@ const ContentDisplay = memo(({
   }
 
   // ========================================
-  // RENDER: READING PARTS (Special Cases)
+  // RENDER: READING PARTS
   // ========================================
   if (testType === 'reading') {
-    
-    if (selectedPart === 'part6') {
-      return (
-        <div className="animate-in fade-in duration-300 overflow-visible w-full">
-          <Part6Display part6={partData} />
-        </div>
-      );
-    }
-
-    if (selectedPart === 'part7') {
-      return (
-        <div className="animate-in fade-in duration-300 overflow-visible w-full">
-          <ReadingPart7Display text={content} type="reading" />
-        </div>
-      );
-    }
-
-    if (selectedPart === 'part8') {
-      return (
-        <div className="animate-in fade-in duration-300 overflow-visible w-full">
-          <ReadingPart8Display text={content} type="reading" />
-        </div>
-      );
-    }
-    
-    // Default Reading Content (Part 1-4)
     return (
-      <ReadingContent 
-        partData={partData} 
-        content={content} 
-        selectedPart={selectedPart} 
-      />
+      <ReadingDisplay data={partData} />
     );
   }
 
@@ -365,7 +243,7 @@ const ContentDisplay = memo(({
         partData={partData}
         selectedPart={selectedPart}
         testType={testType}
-        examId={examId}  // 👈 Pass examId
+        examId={examId}
       />
     );
   }
