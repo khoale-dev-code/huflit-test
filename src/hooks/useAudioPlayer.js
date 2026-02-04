@@ -16,63 +16,75 @@ export const useAudioPlayer = (audioUrl) => {
   const audioRef = useRef(null);
 
   // Khởi tạo audio element
-  useEffect(() => {
-    if (!audioUrl) return;
+ useEffect(() => {
+  if (!audioUrl) return;
 
-    const audio = new Audio(audioUrl);
-    audioRef.current = audio;
+  // ✅ CHUẨN HÓA URL
+  let finalUrl = audioUrl;
 
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-      setIsLoading(false);
-    };
+  // Nếu là link tuyệt đối (http/https) → giữ nguyên
+  if (!/^https?:\/\//i.test(audioUrl)) {
+    // Đảm bảo luôn bắt đầu bằng /
+    finalUrl = audioUrl.startsWith('/') ? audioUrl : '/' + audioUrl;
+  }
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-    };
+  console.log("🎧 AUDIO LOAD:", finalUrl); // debug
 
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-      setCurrentTime(0);
-    };
+  const audio = new Audio(finalUrl);
+  audioRef.current = audio;
 
-    const handleError = (e) => {
-      setError('Failed to load audio');
-      setIsPlaying(false);
-      console.error('Audio error:', e);
-    };
+  const handleLoadedMetadata = () => {
+    setDuration(audio.duration);
+    setIsLoading(false);
+  };
 
-    const handlePlay = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-    };
+  const handleTimeUpdate = () => {
+    setCurrentTime(audio.currentTime);
+  };
 
-    const handlePause = () => {
-      setIsPlaying(false);
-      setIsPaused(true);
-    };
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setIsPaused(false);
+    setCurrentTime(0);
+  };
 
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
+  const handleError = (e) => {
+    setError('Failed to load audio');
+    setIsPlaying(false);
+    console.error('Audio error:', finalUrl, e);
+  };
 
-    audio.volume = volume;
+  const handlePlay = () => {
+    setIsPlaying(true);
+    setIsPaused(false);
+  };
 
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-    };
-  }, [audioUrl, volume]);
+  const handlePause = () => {
+    setIsPlaying(false);
+    setIsPaused(true);
+  };
+
+  audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+  audio.addEventListener('timeupdate', handleTimeUpdate);
+  audio.addEventListener('ended', handleEnded);
+  audio.addEventListener('error', handleError);
+  audio.addEventListener('play', handlePlay);
+  audio.addEventListener('pause', handlePause);
+
+  audio.volume = volume;
+
+  return () => {
+    audio.pause();
+    audio.currentTime = 0;
+    audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.removeEventListener('timeupdate', handleTimeUpdate);
+    audio.removeEventListener('ended', handleEnded);
+    audio.removeEventListener('error', handleError);
+    audio.removeEventListener('play', handlePlay);
+    audio.removeEventListener('pause', handlePause);
+  };
+}, [audioUrl, volume]);
+
 
   const play = useCallback(() => {
     if (audioRef.current && !isPlaying) {
