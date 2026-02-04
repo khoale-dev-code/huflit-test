@@ -22,13 +22,17 @@ export const useAudioPlayer = (audioUrl) => {
   // ✅ CHUẨN HÓA URL
   let finalUrl = audioUrl;
 
-  // Nếu là link tuyệt đối (http/https) → giữ nguyên
-  if (!/^https?:\/\//i.test(audioUrl)) {
-    // Đảm bảo luôn bắt đầu bằng /
-    finalUrl = audioUrl.startsWith('/') ? audioUrl : '/' + audioUrl;
-  }
+// Nếu là link ngoài thì giữ nguyên
+if (!/^https?:\/\//i.test(finalUrl)) {
+  // ❗ BỎ "public/" nếu có
+  finalUrl = finalUrl.replace(/^\/?public\//, '');
 
-  console.log("🎧 AUDIO LOAD:", finalUrl); // debug
+  // đảm bảo bắt đầu bằng /
+  finalUrl = finalUrl.startsWith('/') ? finalUrl : '/' + finalUrl;
+}
+
+console.log("🎧 AUDIO LOAD:", finalUrl);
+
 
   const audio = new Audio(finalUrl);
   audioRef.current = audio;
