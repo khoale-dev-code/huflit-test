@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    strictPort: false,
     open: true,
     cors: true,
   },
@@ -14,11 +13,18 @@ export default defineConfig({
     sourcemap: false,
     target: 'esnext',
     minify: 'terser',
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-  },
-  optimizeDeps: {
-    exclude: ['firebase', 'firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-  },
+    chunkSizeWarningLimit: 1000, // optional
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('firebase')) {
+            return 'firebase'
+          }
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+        }
+      }
+    }
+  }
 })
