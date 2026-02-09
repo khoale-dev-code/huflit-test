@@ -137,12 +137,20 @@ export const useUserProgress = () => {
   // Save or Update Progress to Firestore
   // ============================================
   const saveProgress = async (testData) => {
-    const user = getCurrentUser();
-    
-    if (!user) {
-      console.warn('⚠️ User not authenticated');
-      return false;
+  const user = getCurrentUser();
+  
+  if (!user) {
+    console.warn('⚠️ User not authenticated');
+    return false;
+  }
+
+  // ✅ Validate required fields trước
+  const requiredFields = ['exam', 'part', 'score', 'answers', 'totalQuestions'];
+  for (const field of requiredFields) {
+    if (testData[field] === undefined) {
+      throw new Error(`Missing required field: ${field}`);
     }
+  }
 
     try {
       setLoading(true);

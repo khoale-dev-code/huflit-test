@@ -43,7 +43,10 @@ const ListeningContent = memo(({
   partData, 
   selectedPart,
   testType,
-  examId
+  examId,
+  isPartPlayed,
+  onAudioStart,    // ← NEW PROP: Called when audio starts
+  onAudioEnd,      // ← EXISTING: Called when audio ends
 }) => {
   const partNumber = selectedPart.replace('part', '');
   
@@ -123,6 +126,9 @@ const ListeningContent = memo(({
         script={script}
         audioUrl={audioUrl}
         partTitle={partTitle}
+        isPartPlayed={isPartPlayed}              // ← NEW PROP
+        onAudioStart={onAudioStart}              // ← NEW PROP
+        onAudioEnd={onAudioEnd}                  // ← EXISTING PROP
       />
     </div>
   );
@@ -178,12 +184,28 @@ EmptyState.displayName = 'EmptyState';
 // ========================================
 // MAIN COMPONENT: ContentDisplay
 // ========================================
+/**
+ * ContentDisplay Component
+ * 
+ * Props:
+ * - partData: Object - Dữ liệu của phần thi
+ * - selectedPart: String - Phần được chọn (e.g., 'part1', 'part5')
+ * - currentQuestionIndex: Number - Index câu hỏi hiện tại
+ * - testType: String - Loại thi ('listening' hoặc 'reading')
+ * - examId: String - ID đề thi
+ * - isPartPlayed: Boolean - Có nghe xong audio phần này chưa
+ * - onAudioStart: Function - Callback khi audio bắt đầu phát
+ * - onAudioEnd: Function - Callback khi audio kết thúc
+ */
 const ContentDisplay = memo(({ 
   partData, 
   selectedPart, 
   currentQuestionIndex, 
   testType,
-  examId
+  examId,
+  isPartPlayed,        // ← NEW PROP
+  onAudioStart,        // ← NEW PROP: Callback when audio starts
+  onAudioEnd,          // ← EXISTING: Callback when audio ends
 }) => {
   
   // Extract content
@@ -244,6 +266,9 @@ const ContentDisplay = memo(({
         selectedPart={selectedPart}
         testType={testType}
         examId={examId}
+        isPartPlayed={isPartPlayed}              // ← PASS NEW PROP
+        onAudioStart={onAudioStart}              // ← PASS NEW PROP
+        onAudioEnd={onAudioEnd}                  // ← PASS EXISTING PROP
       />
     );
   }
