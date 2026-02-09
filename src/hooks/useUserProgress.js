@@ -255,4 +255,4 @@ export const useUserProgress = () => {
     currentUser, // User info from Firebase
     isLoaded: firebaseLoaded, // Auth state is loaded
   };
-};
+};  

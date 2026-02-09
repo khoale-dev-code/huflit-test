@@ -40,8 +40,8 @@ const MainLayout = ({
 
       {/* Main Content Container */}
       <main className="flex-1 w-full">
-        {/* Padding wrapper */}
-        <div className="h-full px-4 sm:px-6 md:px-8 lg:px-10 py-6 sm:py-8">
+        {/* Padding wrapper - Giảm padding top từ py-6 sm:py-8 */}
+        <div className="h-full px-4 sm:px-6 md:px-8 lg:px-10 pt-0 pb-6 sm:pb-8">
           {/* Max width container */}
           <div className="mx-auto max-w-7xl">
             {children}

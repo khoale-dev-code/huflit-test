@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Headphones, BookOpen, GraduationCap, Sparkles, 
-  ChevronDown, LogOut, User, Menu, X, Flame, Languages, Home
+  ChevronDown, LogOut, User, Menu, X, Flame, Languages, Home, FileText
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { useStreak } from './hooks/useStreak';
@@ -40,7 +40,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Kiểm tra nếu cuộn từ trên xuống hay từ dưới lên
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setScrollDirection('down');
       } else {
@@ -91,6 +90,13 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
   const handleProfileClick = useCallback(() => {
     navigate(ROUTES.PROFILE);
+    setShowProfileMenu(false);
+    setMobileOpen(false);
+  }, [navigate]);
+
+  // ✅ FIX: Thêm function handleAnswersClick
+  const handleAnswersClick = useCallback(() => {
+    navigate(ROUTES.ANSWERS);
     setShowProfileMenu(false);
     setMobileOpen(false);
   }, [navigate]);
@@ -235,6 +241,14 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                           >
                             <User className="w-4 h-4" />
                             <span>Trang cá nhân</span>
+                          </button>
+                          {/* ✅ FIX: Thêm nút Đáp Án */}
+                          <button 
+                            onClick={handleAnswersClick}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Đáp Án</span>
                           </button>
                           <div className="border-t border-slate-100 my-1" />
                           <button
@@ -382,6 +396,17 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                   >
                     <User className="w-4 h-4" />
                     <span>Trang cá nhân</span>
+                  </motion.button>
+                  
+                  {/* ✅ FIX: Thêm nút Đáp Án ở mobile */}
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleAnswersClick}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-blue-100 rounded-lg transition-colors font-semibold text-sm"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Đáp Án</span>
                   </motion.button>
 
                   <motion.button

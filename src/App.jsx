@@ -94,15 +94,7 @@ StatsGrid.displayName = 'StatsGrid';
 const BackButton = memo(({ onClick, show = true }) => {
   if (!show) return null;
   
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 rounded-xl text-slate-700 hover:text-slate-900 font-semibold transition-all duration-200 active:scale-95"
-    >
-      <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-      <span>Quay lại</span>
-    </button>
-  );
+ 
 });
 
 BackButton.displayName = 'BackButton';
@@ -365,6 +357,7 @@ VocabularyPage.displayName = 'VocabularyPage';
 
 const AnswersPage = memo(({ handleBackToMain }) => (
   <div className="w-full">
+    {/* Back Button - Thêm dòng này */}
     <div className="mb-6">
       <BackButton onClick={handleBackToMain} show={true} />
     </div>

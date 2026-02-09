@@ -1,236 +1,532 @@
-import React, { useState } from 'react';
-import { Trophy, Target, CheckCircle, XCircle, RotateCcw, Award, TrendingUp } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Trophy, Target, CheckCircle, XCircle, RotateCcw, Award, TrendingUp, Flame, Award as AwardIcon, ArrowRight } from 'lucide-react';
 import ExplanationSection from './ExplanationDisplay';
 
+/**
+ * ==========================================
+ * RESULTS DISPLAY - EXPERT PROFESSIONAL
+ * ==========================================
+ * 
+ * Design Philosophy:
+ * - Visual Hierarchy & Gestalt Principles
+ * - Color Psychology for emotional engagement
+ * - Minimalism with luxury refinement
+ * - Marketing Psychology & Conversion Optimization
+ * - Pixel-perfect responsive design
+ */
+
+// ==========================================
+// SUB-COMPONENT: Score Card
+// ==========================================
+const ScoreCard = ({ icon: Icon, label, value, suffix, accentColor, bgColor }) => (
+  <article className={`${bgColor} rounded-2xl border border-slate-200 p-6 md:p-8 text-center shadow-sm hover:shadow-md transition-shadow duration-300`}>
+    <div className="flex justify-center mb-4">
+      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${accentColor} flex items-center justify-center shadow-md`}>
+        <Icon className="w-7 h-7 text-white" strokeWidth={2} />
+      </div>
+    </div>
+    
+    <p className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-2">
+      {label}
+    </p>
+    
+    <p className="text-4xl md:text-5xl font-bold text-slate-900 mb-1">
+      {value}
+      <span className="text-2xl md:text-3xl text-slate-400 font-semibold ml-1.5">
+        {suffix}
+      </span>
+    </p>
+  </article>
+);
+
+// ==========================================
+// SUB-COMPONENT: Performance Badge
+// ==========================================
+const PerformanceBadge = ({ performance, score }) => {
+  const bgGradients = {
+    emerald: 'from-emerald-50 to-emerald-50/70 border-emerald-300',
+    teal: 'from-teal-50 to-teal-50/70 border-teal-300',
+    blue: 'from-blue-50 to-blue-50/70 border-blue-300',
+    amber: 'from-amber-50 to-amber-50/70 border-amber-300',
+    orange: 'from-orange-50 to-orange-50/70 border-orange-300',
+    red: 'from-red-50 to-red-50/70 border-red-300'
+  };
+
+  const textColors = {
+    emerald: 'text-emerald-900',
+    teal: 'text-teal-900',
+    blue: 'text-blue-900',
+    amber: 'text-amber-900',
+    orange: 'text-orange-900',
+    red: 'text-red-900'
+  };
+
+  const iconGradients = {
+    emerald: 'from-emerald-600 to-emerald-500',
+    teal: 'from-teal-600 to-teal-500',
+    blue: 'from-blue-600 to-blue-500',
+    amber: 'from-amber-600 to-amber-500',
+    orange: 'from-orange-600 to-orange-500',
+    red: 'from-red-600 to-red-500'
+  };
+
+  return (
+    <div className={`bg-gradient-to-br ${bgGradients[performance.color]} border-2 rounded-2xl p-6 md:p-8 text-center`}>
+      <div className="flex justify-center mb-4">
+        <div className={`text-5xl md:text-6xl filter drop-shadow-lg`}>
+          {performance.emoji}
+        </div>
+      </div>
+      
+      <p className={`text-2xl md:text-3xl font-bold ${textColors[performance.color]} mb-2`}>
+        {performance.label}
+      </p>
+      
+      <p className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
+        {score.percentage.toFixed(0)}% chính xác
+      </p>
+    </div>
+  );
+};
+
+// ==========================================
+// SUB-COMPONENT: Progress Ring
+// ==========================================
+const ProgressRing = ({ percentage, size = 120 }) => {
+  const radius = size / 2 - 8;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  const getColor = (pct) => {
+    if (pct >= 90) return '#10b981';
+    if (pct >= 80) return '#14b8a6';
+    if (pct >= 70) return '#0ea5e9';
+    if (pct >= 60) return '#f59e0b';
+    if (pct >= 50) return '#f97316';
+    return '#ef4444';
+  };
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="transform -rotate-90">
+        {/* Background circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#e2e8f0"
+          strokeWidth="8"
+          fill="none"
+        />
+        {/* Progress circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={getColor(percentage)}
+          strokeWidth="8"
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 1.2s ease-out' }}
+        />
+      </svg>
+      
+      {/* Center text */}
+      <div className="absolute text-center">
+        <p className="text-2xl md:text-3xl font-bold text-slate-900">
+          {percentage.toFixed(0)}%
+        </p>
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mt-1">
+          Đạt được
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// SUB-COMPONENT: Quick Stats
+// ==========================================
+const QuickStat = ({ icon: Icon, label, value, color }) => (
+  <div className={`bg-gradient-to-br from-${color}-50 to-${color}-50/70 rounded-xl border border-${color}-200 p-4 md:p-5`}>
+    <div className="flex items-center gap-3">
+      <div className={`w-10 h-10 rounded-lg bg-${color}-100 flex items-center justify-center flex-shrink-0`}>
+        <Icon className={`w-5 h-5 text-${color}-700`} strokeWidth={2.2} />
+      </div>
+      
+      <div>
+        <p className={`text-xs font-semibold text-${color}-700 uppercase tracking-wider`}>
+          {label}
+        </p>
+        <p className={`text-2xl md:text-3xl font-bold text-${color}-900 mt-0.5`}>
+          {value}
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+// ==========================================
+// SUB-COMPONENT: Answer Review Card
+// ==========================================
+const AnswerReviewCard = ({ question, isCorrect, userAnswer, correctAnswer, options }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const userAnswerText = userAnswer !== undefined ? String.fromCharCode(65 + userAnswer) : 'Chưa chọn';
+  const correctAnswerText = String.fromCharCode(65 + correctAnswer);
+
+  return (
+    <article 
+      className={`
+        rounded-xl border-2 overflow-hidden transition-all duration-200
+        ${isCorrect
+          ? 'bg-emerald-50/80 border-emerald-300 hover:shadow-md'
+          : 'bg-red-50/80 border-red-300 hover:shadow-md'
+        }
+      `}
+    >
+      {/* Header */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full p-4 md:p-5 flex items-start gap-4 text-left hover:bg-black/5 transition-colors"
+      >
+        {/* Status Icon */}
+        <div className={`
+          w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 
+          ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'}
+        `}>
+          {isCorrect ? (
+            <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />
+          ) : (
+            <XCircle className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2.5} />
+          )}
+        </div>
+
+        {/* Question Info */}
+        <div className="flex-1 min-w-0">
+          <p className={`font-bold text-sm md:text-base mb-2 ${isCorrect ? 'text-emerald-900' : 'text-red-900'}`}>
+            Câu {question.id}: {question.question}
+          </p>
+
+          {/* Answer Summary */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-slate-700">Bạn chọn:</span>
+            <span className={`
+              text-xs font-bold px-3 py-1 rounded-full text-white
+              ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'}
+            `}>
+              ({userAnswerText}) {options?.[userAnswer]?.substring(0, 20) || 'Chưa chọn'}
+            </span>
+
+            {!isCorrect && (
+              <>
+                <span className="text-xs font-semibold text-slate-700">| Đáp án:</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500 text-white">
+                  ({correctAnswerText}) {options?.[correctAnswer]?.substring(0, 20)}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Expand Indicator */}
+        <div className={`flex-shrink-0 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}>
+          <ArrowRight className="w-5 h-5 text-slate-400" strokeWidth={2} />
+        </div>
+      </button>
+
+      {/* Explanation Section */}
+      {expanded && question.explanation && (
+        <div className="border-t border-slate-300/50 px-4 md:px-5 py-4 md:py-5 bg-black/2.5">
+          <ExplanationSection 
+            explanation={question.explanation}
+            question={question.question}
+            userAnswer={userAnswer}
+            correctAnswer={correctAnswer}
+            isCorrect={isCorrect}
+            questionId={question.id}
+            options={question.options}
+          />
+        </div>
+      )}
+    </article>
+  );
+};
+
+// ==========================================
+// SUB-COMPONENT: Motivational Message
+// ==========================================
+const MotivationalMessage = ({ score }) => {
+  const getMotivation = (percentage) => {
+    if (percentage >= 90) {
+      return {
+        emoji: '🎉',
+        title: 'Xuất sắc!',
+        message: 'Bạn đã làm rất tuyệt vời! Kiến thức của bạn rất vững chắc.',
+        color: 'emerald'
+      };
+    }
+    if (percentage >= 80) {
+      return {
+        emoji: '👏',
+        title: 'Rất tốt!',
+        message: 'Tuyệt vời! Tiếp tục phát huy và cố gắng vượt qua 90%.',
+        color: 'teal'
+      };
+    }
+    if (percentage >= 70) {
+      return {
+        emoji: '👍',
+        title: 'Khá tốt!',
+        message: 'Bạn đang trên đường đúng. Hãy luyện tập thêm những phần yếu.',
+        color: 'blue'
+      };
+    }
+    if (percentage >= 60) {
+      return {
+        emoji: '📈',
+        title: 'Vẫn được!',
+        message: 'Mỗi lần luyện tập bạn sẽ tiến bộ hơn. Tiếp tục cố gắng!',
+        color: 'amber'
+      };
+    }
+    return {
+      emoji: '💪',
+      title: 'Đừng nản lòng!',
+      message: 'Đây là bước đầu tiên của hành trình. Cứ tiếp tục luyện tập!',
+      color: 'orange'
+    };
+  };
+
+  const motivation = getMotivation(score.percentage);
+
+  return (
+    <div className={`
+      bg-gradient-to-br from-${motivation.color}-50 to-${motivation.color}-50/70
+      border-2 border-${motivation.color}-300
+      rounded-2xl p-6 md:p-8 text-center
+    `}>
+      <p className="text-5xl md:text-6xl mb-3 filter drop-shadow-lg">
+        {motivation.emoji}
+      </p>
+      
+      <h3 className={`text-2xl md:text-3xl font-bold text-${motivation.color}-900 mb-2`}>
+        {motivation.title}
+      </h3>
+      
+      <p className={`text-base font-[450] text-${motivation.color}-800 mb-4`}>
+        {motivation.message}
+      </p>
+      
+      <p className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
+        Luyện tập đều đặn = Tiến bộ nhanh 🚀
+      </p>
+    </div>
+  );
+};
+
+// ==========================================
+// SUB-COMPONENT: Action Buttons
+// ==========================================
+const ActionButtons = ({ onReset }) => (
+  <div className="flex flex-col sm:flex-row gap-4">
+    <button
+      onClick={onReset}
+      className={`
+        flex-1 flex items-center justify-center gap-2.5
+        px-6 py-4 rounded-xl
+        bg-gradient-to-r from-blue-700 to-blue-600
+        hover:from-blue-800 hover:to-blue-700
+        text-white font-bold text-base
+        shadow-md hover:shadow-lg
+        transition-all duration-300
+        active:scale-95
+      `}
+    >
+      <RotateCcw className="w-5 h-5" strokeWidth={2.2} />
+      <span>Làm lại bài này</span>
+      <ArrowRight className="w-4 h-4 opacity-60" strokeWidth={2.2} />
+    </button>
+
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className={`
+        flex-1 flex items-center justify-center gap-2.5
+        px-6 py-4 rounded-xl
+        bg-white hover:bg-slate-50
+        text-slate-900 font-bold text-base
+        border-2 border-slate-200 hover:border-slate-300
+        shadow-sm hover:shadow-md
+        transition-all duration-300
+        active:scale-95
+      `}
+    >
+      <Target className="w-5 h-5" strokeWidth={2.2} />
+      <span>Chọn bài khác</span>
+    </button>
+  </div>
+);
+
+// ==========================================
+// MAIN COMPONENT: ResultsDisplay
+// ==========================================
 const ResultsDisplay = ({ score, partData, answers, onReset }) => {
   if (!partData) return null;
 
+  // ===== COMPUTED VALUES =====
   const getPerformanceLevel = (percentage) => {
     if (percentage >= 90) return { label: 'Xuất sắc', color: 'emerald', emoji: '🌟' };
     if (percentage >= 80) return { label: 'Rất tốt', color: 'teal', emoji: '🎯' };
-    if (percentage >= 70) return { label: 'Tốt', color: 'blue', emoji: '👍' };
+    if (percentage >= 70) return { label: 'Tốt', color: 'blue', emoji: '✨' };
     if (percentage >= 60) return { label: 'Khá', color: 'amber', emoji: '📈' };
     if (percentage >= 50) return { label: 'Trung bình', color: 'orange', emoji: '⚠️' };
     return { label: 'Cần cố gắng', color: 'red', emoji: '💪' };
   };
 
-  const performance = getPerformanceLevel(score.percentage);
-  const wrongCount = score.total - score.correct;
+  const performance = useMemo(() => getPerformanceLevel(score.percentage), [score.percentage]);
+  const wrongCount = useMemo(() => score.total - score.correct, [score.total, score.correct]);
 
+  // ===== RENDER =====
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-4 sm:p-6">
-      {/* Simplified Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-8rem] right-[-8rem] w-96 h-96 bg-orange-200/10 rounded-full blur-3xl" />
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden">
+      
+      {/* Ambient Background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-100/20 rounded-full blur-3xl" />
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-5xl mx-auto space-y-4">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-8 md:space-y-10">
         
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white text-center">
-          <Trophy className="w-16 h-16 mx-auto mb-3 text-yellow-200" />
-          <h2 className="text-3xl sm:text-4xl font-bold mb-2">KẾT QUẢ BÀI THI</h2>
-          <p className="text-lg opacity-90">Xem chi tiết và cải thiện kỹ năng!</p>
+        {/* ===== HERO SECTION ===== */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center mb-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-full blur-2xl opacity-20" />
+              <Trophy className="w-20 h-20 md:w-24 md:h-24 text-blue-700 relative" strokeWidth={1.5} />
+            </div>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
+            Kết quả bài thi
+          </h1>
+
+          <p className="text-base md:text-lg text-slate-600 font-[450] max-w-2xl mx-auto">
+            Xem chi tiết từng câu hỏi và những lĩnh vực cần cải thiện
+          </p>
         </div>
 
-        {/* Score Summary - 3 cards ngang */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Điểm số */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
-            <Target className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 font-medium mb-1">Kết quả</p>
-            <p className="text-4xl font-bold text-orange-600">
-              {score.correct}<span className="text-xl text-gray-400">/{score.total}</span>
-            </p>
-          </div>
+        {/* ===== SCORE CARDS - GRID ===== */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-6">
+          <ScoreCard
+            icon={CheckCircle}
+            label="Kết quả"
+            value={score.correct}
+            suffix={`/${score.total}`}
+            accentColor="from-blue-700 to-blue-600"
+            bgColor="bg-white"
+          />
 
-          {/* Phần trăm */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
-            <TrendingUp className="w-8 h-8 text-green-500 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 font-medium mb-1">Tỷ lệ chính xác</p>
-            <p className="text-4xl font-bold text-green-600">
-              {score.percentage.toFixed(0)}<span className="text-xl">%</span>
-            </p>
-          </div>
+          <ScoreCard
+            icon={TrendingUp}
+            label="Tỷ lệ"
+            value={score.percentage.toFixed(0)}
+            suffix="%"
+            accentColor="from-emerald-700 to-emerald-600"
+            bgColor="bg-white"
+          />
 
-          {/* Xếp loại */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 text-center">
-            <Award className={`w-8 h-8 text-${performance.color}-500 mx-auto mb-2`} />
-            <p className="text-sm text-gray-600 font-medium mb-1">Xếp loại</p>
-            <p className="text-3xl mb-1">{performance.emoji}</p>
-            <p className={`text-xl font-bold text-${performance.color}-600`}>
-              {performance.label}
-            </p>
-          </div>
+          <PerformanceBadge 
+            performance={performance}
+            score={score}
+          />
         </div>
 
-        {/* Progress Bar */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-semibold text-gray-800">Tiến độ hoàn thành</h3>
-            <span className="text-sm font-medium text-gray-600">
-              {score.correct}/{score.total} câu
-            </span>
+        {/* ===== PROGRESS RING & STATS ===== */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          
+          {/* Progress Ring */}
+          <div className="lg:col-span-1 flex justify-center items-center bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+            <ProgressRing percentage={score.percentage} size={160} />
           </div>
-          <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div
-              className="h-full transition-all duration-1000"
-              style={{
-                width: `${score.percentage}%`,
-                background: score.percentage >= 70 
-                  ? 'linear-gradient(to right, #10b981, #34d399)'
-                  : score.percentage >= 50 
-                  ? 'linear-gradient(to right, #f59e0b, #fbbf24)'
-                  : 'linear-gradient(to right, #ef4444, #f87171)'
-              }}
+
+          {/* Stats Grid */}
+          <div className="lg:col-span-2 grid grid-cols-2 gap-4 md:gap-5">
+            <QuickStat
+              icon={CheckCircle}
+              label="Đúng"
+              value={score.correct}
+              color="emerald"
+            />
+            <QuickStat
+              icon={XCircle}
+              label="Sai"
+              value={wrongCount}
+              color="red"
+            />
+            <QuickStat
+              icon={Award}
+              label="Xếp loại"
+              value={performance.label}
+              color={performance.color}
+            />
+            <QuickStat
+              icon={Flame}
+              label="Độ khó"
+              value={score.percentage >= 80 ? 'Dễ' : score.percentage >= 50 ? 'Vừa' : 'Khó'}
+              color={score.percentage >= 80 ? 'blue' : score.percentage >= 50 ? 'amber' : 'red'}
             />
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Thống kê nhanh</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm text-gray-600">Câu đúng</p>
-                <p className="text-2xl font-bold text-green-600">{score.correct}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-              <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
-              <div>
-                <p className="text-sm text-gray-600">Câu sai</p>
-                <p className="text-2xl font-bold text-red-600">{wrongCount}</p>
-              </div>
+        {/* ===== MOTIVATIONAL MESSAGE ===== */}
+        <MotivationalMessage score={score} />
+
+        {/* ===== ACTION BUTTONS ===== */}
+        <ActionButtons onReset={onReset} />
+
+        {/* ===== ANSWERS REVIEW SECTION ===== */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          
+          {/* Header */}
+          <div className="px-6 md:px-8 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
+                Chi tiết đáp án
+              </h2>
+              <span className="text-sm font-bold text-slate-600 bg-slate-100 px-4 py-2 rounded-full">
+                {partData.questions.length} câu
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={onReset}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg font-semibold transition-all text-base"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Làm lại bài này
-          </button>
-
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 rounded-lg font-semibold transition-all text-base"
-          >
-            <Target className="w-5 h-5" />
-            Chọn bài khác
-          </button>
-        </div>
-
-        {/* Answers Review - Tích hợp ExplanationSection */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900">Chi tiết đáp án</h3>
-            <span className="text-sm font-medium text-gray-600">
-              {partData.questions.length} câu hỏi
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            {partData.questions.map((q) => {
+          {/* Answers List */}
+          <div className="px-6 md:px-8 py-6 md:py-8 space-y-3 md:space-y-4">
+            {partData.questions.map((q, index) => {
               const isCorrect = answers[q.id] === q.correct;
               const userAnswer = answers[q.id];
 
               return (
-                <div
+                <AnswerReviewCard
                   key={q.id}
-                  className={`rounded-lg border-2 transition-all overflow-hidden ${
-                    isCorrect
-                      ? 'bg-green-50 border-green-300'
-                      : 'bg-red-50 border-red-300'
-                  }`}
-                >
-                  {/* Question Header */}
-                  <div className="p-4">
-                    <div className="flex items-start gap-3">
-                      {/* Icon */}
-                      <div className={`p-1.5 rounded-full flex-shrink-0 ${
-                        isCorrect ? 'bg-green-500' : 'bg-red-500'
-                      }`}>
-                        {isCorrect ? (
-                          <CheckCircle className="w-5 h-5 text-white" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-white" />
-                        )}
-                      </div>
-
-                      {/* Question Text */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-base">
-                          Câu {q.id}: {q.question}
-                        </p>
-                        
-                        {/* Answer Summary */}
-                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <span className="text-xs text-gray-600">Bạn chọn:</span>
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                            isCorrect
-                              ? 'bg-green-500 text-white'
-                              : 'bg-red-500 text-white'
-                          }`}>
-                            {userAnswer !== undefined 
-                              ? String.fromCharCode(65 + userAnswer)
-                              : 'Chưa chọn'}
-                          </span>
-                          
-                          {!isCorrect && (
-                            <>
-                              <span className="text-xs text-gray-600">| Đáp án:</span>
-                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-500 text-white">
-                                {String.fromCharCode(65 + q.correct)}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Explanation Section - Tích hợp component */}
-                  {q.explanation && (
-                    <div className="border-t border-gray-300 px-4 py-3">
-                      <ExplanationSection 
-                        explanation={q.explanation}
-                        question={q.question}
-                        userAnswer={userAnswer}
-                        correctAnswer={q.correct}
-                        isCorrect={isCorrect}
-                        questionId={q.id}
-                        options={q.options}
-                      />
-                    </div>
-                  )}
-                </div>
+                  question={q}
+                  isCorrect={isCorrect}
+                  userAnswer={userAnswer}
+                  correctAnswer={q.correct}
+                  options={q.options}
+                />
               );
             })}
           </div>
         </div>
 
-        {/* Motivational Message */}
-        <div className={`rounded-xl border-2 p-5 text-center ${
-          score.percentage >= 70 
-            ? 'bg-green-50 border-green-300' 
-            : 'bg-orange-50 border-orange-300'
-        }`}>
-          <p className="text-lg font-bold text-gray-800 mb-2">
-            {score.percentage >= 90 && '🎉 Xuất sắc! Bạn đã làm rất tốt!'}
-            {score.percentage >= 70 && score.percentage < 90 && '👏 Rất tốt! Tiếp tục phát huy nhé!'}
-            {score.percentage >= 50 && score.percentage < 70 && '💪 Khá tốt! Hãy luyện tập thêm!'}
-            {score.percentage < 50 && '📚 Đừng nản lòng! Cố gắng lên bạn nhé!'}
-          </p>
-          <p className="text-sm text-gray-700">
-            Luyện tập đều đặn sẽ giúp bạn tiến bộ nhanh hơn! 🚀
+        {/* ===== FOOTER ===== */}
+        <div className="text-center py-4 border-t border-slate-200">
+          <p className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
+            🎓 Luyện tập thêm để nâng cao điểm số
           </p>
         </div>
       </div>
