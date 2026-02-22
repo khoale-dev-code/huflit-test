@@ -18,6 +18,17 @@ export default {
         'purple-1': '#667eea',
         'purple-2': '#764ba2',
         'pink-1': '#f093fb',
+        // Grammar / Education module
+        grammar: {
+          primary: '#00358E',
+          'primary-hover': '#002a70',
+          accent: '#FF7D00',
+          'accent-hover': '#e67000',
+          'accent-soft': 'rgba(255, 125, 0, 0.12)',
+          blue: '#2563eb',
+          'blue-soft': 'rgba(37, 99, 235, 0.08)',
+          'blue-light': '#e0eaff',
+        },
       },
       backgroundImage: {
         'gradient-app': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
@@ -40,6 +51,8 @@ export default {
         'slide-down': 'slideDown 0.3s ease',
         'blob': 'blob 7s infinite', 
         'confetti': 'confetti 3s ease-out forwards',
+        'shimmer': 'shimmer 2s infinite',
+        'grammar-confetti': 'grammarConfetti 3s ease-out forwards',
       },
       keyframes: {
         float: {
@@ -70,6 +83,14 @@ export default {
         slideDown: {
           'from': { opacity: '0', transform: 'translateY(-10px)' },
           'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        grammarConfetti: {
+          '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' },
         },
       },
       spacing: {

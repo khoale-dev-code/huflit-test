@@ -36,6 +36,7 @@
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.563.0",
+    "mongodb": "^7.1.0",
     "react": "^19.1.1",
     "react-audio-player": "^0.17.0",
     "react-dom": "^19.1.1",

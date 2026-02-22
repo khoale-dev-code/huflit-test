@@ -2980,6 +2980,31 @@ export const getGrammarByLevel = (level) => {
   return null;
 };
 
+// Get all lesson IDs for a level (for progress per level)
+export const getLessonIdsByLevel = (level) => {
+  const data = getGrammarByLevel(level);
+  if (!data?.topics) return [];
+  const ids = [];
+  Object.values(data.topics).forEach(topic => {
+    (topic.lessons || []).forEach(lesson => ids.push(lesson.lessonId));
+  });
+  return ids;
+};
+
+// Get all lesson IDs for given topic ids across all levels (for quiz readiness)
+export const getLessonIdsForTopicIds = (topicIds) => {
+  const ids = new Set();
+  Object.values(GRAMMAR_DATA).forEach(level => {
+    if (!level.topics) return;
+    Object.values(level.topics).forEach(topic => {
+      if (topicIds.includes(topic.id) && topic.lessons) {
+        topic.lessons.forEach(lesson => ids.add(lesson.lessonId));
+      }
+    });
+  });
+  return Array.from(ids);
+};
+
 // Export helper function to get all topics
 export const getAllTopics = () => {
   const topics = [];

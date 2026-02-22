@@ -2,15 +2,15 @@ import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  BookOpen, 
-  Lightbulb, 
-  Award, 
-  CheckCircle, 
-  XCircle, 
-  Languages, 
+import {
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  Lightbulb,
+  Award,
+  CheckCircle,
+  XCircle,
+  Languages,
   Volume2,
   Star,
   Sparkles,
@@ -20,102 +20,98 @@ import {
   Brain,
   Play,
   Check,
-  Loader2
 } from 'lucide-react';
 import '../styles/GrammarTopicPage.css';
 
-// Lazy load components for better performance
 const ConfettiEffect = lazy(() => import('../ConfettiEffect'));
 
-// Memoized sub-components
 const ProgressBar = memo(({ percentage }) => (
   <div className="mt-6">
     <div className="flex items-center justify-between mb-2">
-      <span className="text-sm font-medium text-gray-700">Your Progress</span>
-      <span className="text-sm font-bold text-purple-600">{percentage}%</span>
+      <span className="text-sm font-medium text-slate-600">Your Progress</span>
+      <span className="text-sm font-bold text-grammar-accent">{percentage}%</span>
     </div>
-    <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
-      <div 
-        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out relative"
+    <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+      <div
+        className="h-full bg-gradient-to-r from-grammar-primary via-grammar-blue to-grammar-accent rounded-full transition-all duration-1000 ease-out relative"
         style={{ width: `${percentage}%` }}
       >
-        <div className="progress-bar-shimmer animate-shimmer"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
       </div>
     </div>
   </div>
 ));
-
 ProgressBar.displayName = 'ProgressBar';
 
-// Memoized Badge Component
 const Badge = memo(({ type, icon: Icon, children }) => {
-  const classMap = {
-    difficulty: 'badge-difficulty',
-    streak: 'badge-streak',
-    completion: 'badge-completion',
-    completed: 'badge-completed'
+  const styles = {
+    difficulty: 'bg-grammar-primary text-white',
+    streak: 'bg-grammar-accent text-white',
+    completion: 'bg-grammar-blue text-white',
+    completed: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
   };
-
   return (
-    <span className={`grammar-badge ${classMap[type]}`}>
-      <Icon className="w-4 h-4" />
+    <span
+      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-transform hover:scale-105 ${styles[type]}`}
+    >
+      <Icon className="w-4 h-4 shrink-0" />
       {children}
     </span>
   );
 });
-
 Badge.displayName = 'Badge';
 
-// Memoized Example Card
-const ExampleCard = memo(({ example, index }) => (
-  <div className="example-card group">
+const ExampleCard = memo(({ example }) => (
+  <div className="bg-white p-5 rounded-xl border-2 border-grammar-blue-light transition-all hover:border-grammar-blue hover:shadow-md hover:-translate-y-0.5">
     <div className="flex items-start gap-4 mb-4">
-      <span className="text-4xl group-hover:animate-bounce">💡</span>
-      <div className="flex-1">
-        <p className="font-semibold text-blue-900 text-lg mb-2">{example.example}</p>
-        <p className="text-gray-600 text-sm italic">{example.explanation}</p>
+      <span className="text-4xl">💡</span>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-grammar-primary text-lg mb-2">{example.example}</p>
+        <p className="text-slate-600 text-sm italic">{example.explanation}</p>
       </div>
     </div>
-    <div className="example-vietnamese">
-      <p className="font-semibold text-green-800 mb-1">{example.vietnamese.example}</p>
-      <p className="text-gray-600 text-sm">{example.vietnamese.explanation}</p>
+    <div className="p-3.5 bg-emerald-50 rounded-lg border border-emerald-200 mt-3.5 text-sm">
+      <p className="font-semibold text-emerald-800 mb-1">{example.vietnamese.example}</p>
+      <p className="text-slate-600">{example.vietnamese.explanation}</p>
     </div>
   </div>
 ));
-
 ExampleCard.displayName = 'ExampleCard';
 
-// Memoized Exercise Component
 const Exercise = memo(({ exercise, index, result, onSubmit }) => {
   const [localAnswer, setLocalAnswer] = useState('');
 
-  const handleInputBlur = useCallback((e) => {
-    const userAnswer = e.target.value.trim().toLowerCase();
-    const correct = userAnswer === exercise.correctAnswer.toLowerCase();
-    onSubmit(exercise.exerciseId, correct);
-  }, [exercise.exerciseId, exercise.correctAnswer, onSubmit]);
+  const handleInputBlur = useCallback(
+    (e) => {
+      const userAnswer = e.target.value.trim().toLowerCase();
+      const correct = userAnswer === exercise.correctAnswer.toLowerCase();
+      onSubmit(exercise.exerciseId, correct);
+    },
+    [exercise.exerciseId, exercise.correctAnswer, onSubmit]
+  );
 
-  const handleInputChange = useCallback((e) => {
-    setLocalAnswer(e.target.value);
-  }, []);
+  const handleInputChange = useCallback((e) => setLocalAnswer(e.target.value), []);
 
   return (
-    <div className="exercise-card">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white rounded-xl p-5 sm:p-6 border-2 border-grammar-blue-light transition-all hover:border-grammar-accent hover:shadow-md animate-[slideDown_0.3s_ease-out]">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <div className="exercise-number">{index + 1}</div>
+          <div className="w-10 h-10 rounded-full bg-grammar-accent text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md">
+            {index + 1}
+          </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-800">
+            <h3 className="text-xl font-bold text-slate-800">
               {exercise.type.replace('_', ' ').toUpperCase()}
             </h3>
-            <span className="text-sm text-gray-500">{exercise.difficulty}</span>
+            <span className="text-sm text-slate-500">{exercise.difficulty}</span>
           </div>
         </div>
-        
+
         {result !== undefined && (
-          <div 
-            className={`grammar-badge ${result ? 'badge-completed' : ''}`}
-            style={!result ? {backgroundColor: '#fee2e2', color: '#991b1b'} : {}}
+          <div
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold ${
+              result ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+            }`}
           >
             {result ? (
               <>
@@ -132,32 +128,40 @@ const Exercise = memo(({ exercise, index, result, onSubmit }) => {
         )}
       </div>
 
-      <div className="exercise-question">
-        <p className="text-lg font-medium text-gray-800">{exercise.question}</p>
+      <div className="p-4 rounded-lg bg-amber-50 border-2 border-amber-200 mb-4">
+        <p className="text-lg font-medium text-slate-800">{exercise.question}</p>
       </div>
 
       {exercise.type === 'multiple_choice' ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {exercise.options.map((option, idx) => (
-            <label key={idx} className="exercise-option group">
+            <label
+              key={idx}
+              className="flex items-center p-4 rounded-lg border-2 border-slate-200 bg-white cursor-pointer transition-colors hover:bg-grammar-blue-soft hover:border-grammar-blue"
+            >
               <input
                 type="radio"
                 name={exercise.exerciseId}
-                className="mr-4 w-5 h-5 text-blue-600"
+                className="mr-4 w-5 h-5 accent-[#00358E]"
                 onChange={() => onSubmit(exercise.exerciseId, option.isCorrect)}
               />
-              <span className="text-gray-800 font-medium group-hover:text-blue-700">
-                {option.text}
-              </span>
+              <span className="text-slate-800 font-medium">{option.text}</span>
             </label>
           ))}
           {result !== undefined && (
-            <div className={`exercise-feedback ${result ? 'correct' : 'incorrect'}`}>
-              <p className="font-bold mb-2 text-lg">
+            <div
+              className={`mt-4 p-4 rounded-lg border-2 text-sm ${
+                result
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              <p className="font-bold text-lg mb-2">
                 {result ? '✅ Excellent!' : '💡 Learn from this:'}
               </p>
               <p>
-                <strong>Explanation:</strong> {exercise.options.find((opt) => opt.isCorrect).explanation}
+                <strong>Explanation:</strong>{' '}
+                {exercise.options.find((opt) => opt.isCorrect).explanation}
               </p>
             </div>
           )}
@@ -169,19 +173,19 @@ const Exercise = memo(({ exercise, index, result, onSubmit }) => {
             value={localAnswer}
             onChange={handleInputChange}
             placeholder="Type your answer here..."
-            className="exercise-input"
+            className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg text-base bg-white transition-colors focus:outline-none focus:border-grammar-primary focus:ring-2 focus:ring-grammar-accent-soft placeholder:text-slate-400"
             onBlur={handleInputBlur}
           />
           {exercise.hints && (
-            <div className="hints-box">
-              <p className="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5" />
+            <div className="mt-4 p-4 bg-grammar-blue-soft border-2 border-grammar-blue-light rounded-lg text-sm">
+              <p className="font-bold text-grammar-primary mb-3 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-grammar-accent" />
                 Hints:
               </p>
               <div className="space-y-2">
                 {exercise.hints.map((hint, idx) => (
-                  <p key={idx} className="text-gray-700 flex items-start gap-2">
-                    <span className="text-blue-500">▸</span>
+                  <p key={idx} className="text-slate-700 flex items-start gap-2">
+                    <span className="text-grammar-accent">▸</span>
                     {hint}
                   </p>
                 ))}
@@ -189,7 +193,13 @@ const Exercise = memo(({ exercise, index, result, onSubmit }) => {
             </div>
           )}
           {result !== undefined && (
-            <div className={`exercise-feedback ${result ? 'correct' : 'incorrect'}`}>
+            <div
+              className={`mt-4 p-4 rounded-lg border-2 text-sm ${
+                result
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
               <p className="font-bold text-lg mb-2">
                 {result
                   ? '🎉 Perfect! Well done!'
@@ -205,10 +215,8 @@ const Exercise = memo(({ exercise, index, result, onSubmit }) => {
     </div>
   );
 });
-
 Exercise.displayName = 'Exercise';
 
-// Main Component
 const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) => {
   const [completedLessonsState, setCompletedLessons] = useState(completedLessons);
   const [exerciseResults, setExerciseResults] = useState({});
@@ -216,146 +224,138 @@ const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) =>
   const [expandedSections, setExpandedSections] = useState({});
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(() => {
-    // Load streak from localStorage
     const saved = localStorage.getItem('learningStreak');
     return saved ? parseInt(saved, 10) : 0;
   });
   const [animatingLesson, setAnimatingLesson] = useState(null);
 
-  // Save streak to localStorage
   useEffect(() => {
     localStorage.setItem('learningStreak', currentStreak.toString());
   }, [currentStreak]);
 
-  // Confetti cleanup
   useEffect(() => {
     if (showConfetti) {
-      const timer = setTimeout(() => setShowConfetti(false), 3000);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(t);
     }
   }, [showConfetti]);
 
-  // Save completed lessons to localStorage
   useEffect(() => {
     localStorage.setItem('completedLessons', JSON.stringify(completedLessonsState));
   }, [completedLessonsState]);
 
-  // Optimized handlers with useCallback
-  const handleLessonComplete = useCallback((lessonId) => {
-    setCompletedLessons(prev => {
-      const isCompleted = prev[lessonId];
-      const newState = { ...prev, [lessonId]: !isCompleted };
-      
-      if (!isCompleted) {
-        setAnimatingLesson(lessonId);
-        setCurrentStreak(prevStreak => prevStreak + 1);
-        setShowConfetti(true);
-        setTimeout(() => setAnimatingLesson(null), 1000);
-      }
-      
-      return newState;
-    });
-    
-    if (onLessonComplete) onLessonComplete(lessonId);
-  }, [onLessonComplete]);
+  const handleLessonComplete = useCallback(
+    (lessonId) => {
+      setCompletedLessons((prev) => {
+        const isCompleted = prev[lessonId];
+        const newState = { ...prev, [lessonId]: !isCompleted };
+        if (!isCompleted) {
+          setAnimatingLesson(lessonId);
+          setCurrentStreak((s) => s + 1);
+          setShowConfetti(true);
+          setTimeout(() => setAnimatingLesson(null), 1000);
+        }
+        return newState;
+      });
+      if (onLessonComplete) onLessonComplete(lessonId);
+    },
+    [onLessonComplete]
+  );
 
   const handleExerciseSubmit = useCallback((exerciseId, isCorrect) => {
-    setExerciseResults(prev => ({ ...prev, [exerciseId]: isCorrect }));
-    if (isCorrect) {
-      setShowConfetti(true);
-      // Play success sound (optional)
-      playSuccessSound();
-    }
+    setExerciseResults((prev) => ({ ...prev, [exerciseId]: isCorrect }));
+    if (isCorrect) setShowConfetti(true);
   }, []);
 
-  const toggleSection = useCallback((sectionId) => {
-    setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  const toggleSection = useCallback((id) => {
+    setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
-  const toggleLanguage = useCallback((lang) => {
-    setActiveLanguage(lang);
-  }, []);
+  const toggleLanguage = useCallback((lang) => setActiveLanguage(lang), []);
 
-  // Success sound (optional)
-  const playSuccessSound = useCallback(() => {
-    const audio = new Audio('/sounds/success.mp3');
-    audio.volume = 0.3;
-    audio.play().catch(() => {}); // Ignore errors
-  }, []);
+  const completionPercentage = useMemo(
+    () =>
+      Math.round(
+        (Object.values(completedLessonsState).filter(Boolean).length / topic.lessons.length) * 100
+      ),
+    [completedLessonsState, topic.lessons.length]
+  );
 
-  // Memoized completion percentage
-  const completionPercentage = useMemo(() => {
-    return Math.round(
-      (Object.values(completedLessonsState).filter(Boolean).length / topic.lessons.length) * 100
-    );
-  }, [completedLessonsState, topic.lessons.length]);
+  const components = useMemo(
+    () => ({
+      h2: ({ children }) => (
+        <h2 className="text-xl font-bold text-grammar-primary mb-3 mt-6 flex items-center gap-2">
+          <span className="text-3xl">📌</span>
+          {children}
+        </h2>
+      ),
+      h3: ({ children }) => (
+        <h3 className="text-lg font-semibold text-slate-800 mb-2 mt-5 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-grammar-accent shrink-0" />
+          {children}
+        </h3>
+      ),
+      p: ({ children }) => <p className="text-slate-600 leading-relaxed mb-3 text-[15px]">{children}</p>,
+      ul: ({ children }) => <ul className="mb-3 pl-0 list-none">{children}</ul>,
+      li: ({ children }) => (
+        <li className="flex items-start gap-2 mb-2 text-sm text-slate-600">
+          <span className="text-grammar-accent mt-0.5">▸</span>
+          <span>{children}</span>
+        </li>
+      ),
+      strong: ({ children }) => (
+        <strong className="font-semibold text-grammar-primary bg-grammar-blue-soft px-1 rounded">
+          {children}
+        </strong>
+      ),
+      code: ({ children }) => (
+        <code className="bg-grammar-blue-soft text-grammar-primary px-2 py-0.5 rounded text-sm font-mono border border-grammar-blue-light">
+          {children}
+        </code>
+      ),
+      blockquote: ({ children }) => (
+        <blockquote className="border-l-4 border-grammar-accent bg-grammar-accent-soft pl-4 py-2 my-3 italic text-slate-700 rounded-r text-sm">
+          <div className="flex items-start gap-2">
+            <Lightbulb className="w-5 h-5 text-grammar-accent shrink-0 mt-0.5" />
+            <div>{children}</div>
+          </div>
+        </blockquote>
+      ),
+    }),
+    []
+  );
 
-  // Memoized markdown components
-  const components = useMemo(() => ({
-    h2: ({ children }) => (
-      <h2 className="prose h2">
-        <span className="text-3xl">📌</span>
-        {children}
-      </h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="prose h3">
-        <Sparkles className="w-5 h-5 text-yellow-500" />
-        {children}
-      </h3>
-    ),
-    p: ({ children }) => <p className="prose p">{children}</p>,
-    ul: ({ children }) => <ul className="prose ul">{children}</ul>,
-    li: ({ children }) => (
-      <li className="prose li group">
-        <span className="text-blue-500 mt-1 group-hover:scale-125 transition-transform">▸</span>
-        <span>{children}</span>
-      </li>
-    ),
-    strong: ({ children }) => <strong className="prose strong">{children}</strong>,
-    code: ({ children }) => <code className="prose code">{children}</code>,
-    blockquote: ({ children }) => (
-      <blockquote className="prose blockquote">
-        <div className="flex items-start gap-3">
-          <Lightbulb className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
-          <div>{children}</div>
-        </div>
-      </blockquote>
-    ),
-  }), []);
-
-  // Optimized content filter
   const getFilteredContent = useCallback((content, lang) => {
     if (lang === 'English') {
       return content.replace(/\*\*Vietnamese Translation \(.*?\):\*\*(.*?)(\n\*\*|$)/gs, '').trim();
-    } else {
-      return content.replace(/\*\*English:\*\*(.*?)(\n\*\*Vietnamese Translation \(.*?\):\*\*|$)/gs, '').trim();
     }
+    return content
+      .replace(/\*\*English:\*\*(.*?)(\n\*\*Vietnamese Translation \(.*?\):\*\*|$)/gs, '')
+      .trim();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 sm:p-6 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="background-blobs">
-        <div className="background-blob background-blob-1 animate-blob"></div>
-        <div className="background-blob background-blob-2 animate-blob animation-delay-2000"></div>
-        <div className="background-blob background-blob-3 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-blue-50/30 to-grammar-blue-soft/50 p-4 sm:p-6 relative overflow-hidden">
+      {/* Background blobs - lightweight */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+        <div className="absolute top-0 -left-20 w-72 h-72 bg-grammar-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-grammar-accent/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Confetti Effect with Lazy Loading */}
       {showConfetti && (
         <Suspense fallback={null}>
-          <div className="confetti-container">
-            {[...Array(50)].map((_, i) => (
+          <div className="grammar-confetti-container">
+            {[...Array(40)].map((_, i) => (
               <div
                 key={i}
-                className="confetti-piece animate-confetti"
+                className="grammar-confetti-piece"
                 style={{
                   left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  backgroundColor: ['#3B82F6', '#8B5CF6', '#EC4899', '#10B981', '#F59E0B'][Math.floor(Math.random() * 5)],
+                  top: `${Math.random() * 40}%`,
+                  backgroundColor: ['#00358E', '#FF7D00', '#2563eb', '#10b981', '#f59e0b'][
+                    Math.floor(Math.random() * 5)
+                  ],
                   animationDelay: `${Math.random() * 0.5}s`,
-                  transform: `rotate(${Math.random() * 360}deg)`
                 }}
               />
             ))}
@@ -363,73 +363,73 @@ const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) =>
         </Suspense>
       )}
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Hero Header with Progress */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8 border-4 border-purple-200 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-full -mr-20 -mt-20 opacity-50"></div>
-          
-          <div className="flex items-start gap-6 relative z-10">
-            <div className="text-7xl animate-bounce-icon">{topic.icon}</div>
-            <div className="flex-1">
-              <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mb-3">
+      <div className="max-w-4xl mx-auto relative z-10">
+        {/* Hero header */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6 sm:mb-8 border-2 border-grammar-blue-light relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-grammar-accent/10 rounded-full -mr-16 -mt-16" />
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6 relative z-10">
+            <div className="text-6xl sm:text-7xl">{topic.icon}</div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-grammar-primary mb-2">
                 {topic.title}
               </h1>
-              <p className="text-gray-600 text-lg mb-4 italic">{topic.description}</p>
-              
-              <div className="flex items-center gap-4 flex-wrap">
+              <p className="text-slate-600 text-base sm:text-lg mb-4 italic">{topic.description}</p>
+              <div className="flex flex-wrap items-center gap-3">
                 <Badge type="difficulty" icon={Target}>
                   {topic.difficulty}
                 </Badge>
-                
                 <Badge type="streak" icon={Zap}>
                   {currentStreak} Streak
                 </Badge>
-
                 <Badge type="completion" icon={Trophy}>
                   {completionPercentage}% Complete
                 </Badge>
               </div>
-
               <ProgressBar percentage={completionPercentage} />
             </div>
           </div>
         </div>
 
-        {/* Lessons Section */}
-        <div className="mb-8">
-          <h2 className="section-header lessons">
-            <BookOpen className="w-8 h-8" />
+        {/* Lessons */}
+        <section className="mb-8">
+          <h2 className="flex items-center justify-center gap-3 text-xl sm:text-2xl font-bold text-white py-4 px-5 rounded-xl bg-gradient-to-r from-grammar-primary to-grammar-blue mb-6 shadow-md">
+            <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
             <span>Lessons • Bài Học</span>
-            <Sparkles className="w-8 h-8" />
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
           </h2>
 
           <div className="space-y-6">
             {topic.lessons.map((lesson, index) => (
-              <div 
-                key={lesson.lessonId} 
-                className={`lesson-card ${animatingLesson === lesson.lessonId ? 'animate-pulse-scale' : ''}`}
+              <article
+                key={lesson.lessonId}
+                className={`bg-white rounded-xl p-5 sm:p-6 border-2 border-grammar-blue-light transition-all hover:border-grammar-blue hover:shadow-md ${
+                  animatingLesson === lesson.lessonId ? 'animate-pulse' : ''
+                }`}
               >
-                {/* Lesson Header */}
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="lesson-number">{index + 1}</div>
+                    <div className="w-10 h-10 rounded-full bg-grammar-primary text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md">
+                      {index + 1}
+                    </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-800 mb-1">{lesson.title}</h3>
-                      <span className="text-sm text-gray-500 flex items-center gap-2">
+                      <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1">
+                        {lesson.title}
+                      </h3>
+                      <span className="text-sm text-slate-500 flex items-center gap-2">
                         <Play className="w-4 h-4" />
                         {lesson.duration}
                       </span>
                     </div>
                   </div>
-                  
                   {completedLessonsState[lesson.lessonId] ? (
                     <Badge type="completed" icon={CheckCircle}>
                       Completed!
                     </Badge>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => handleLessonComplete(lesson.lessonId)}
-                      className="btn-complete"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg shadow-md transition-colors min-h-[44px] focus:outline-none focus:ring-2 focus:ring-grammar-accent focus:ring-offset-2"
                       aria-label="Mark lesson as complete"
                     >
                       <Check className="w-5 h-5" />
@@ -438,25 +438,32 @@ const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) =>
                   )}
                 </div>
 
-                {/* Language Toggle */}
-                <div className="language-toggle-container" role="tablist">
+                <div
+                  className="flex bg-slate-100 rounded-xl p-1 mb-5 gap-1"
+                  role="tablist"
+                  aria-label="Content language"
+                >
                   {['English', 'Vietnamese'].map((lang) => (
                     <button
                       key={lang}
-                      onClick={() => toggleLanguage(lang)}
-                      className={`language-toggle-button ${activeLanguage === lang ? 'active' : ''}`}
+                      type="button"
                       role="tab"
                       aria-selected={activeLanguage === lang}
+                      onClick={() => toggleLanguage(lang)}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold min-h-[40px] transition-colors focus:outline-none focus:ring-2 focus:ring-grammar-primary ${
+                        activeLanguage === lang
+                          ? 'bg-grammar-primary text-white shadow'
+                          : 'text-slate-600 hover:bg-white'
+                      }`}
                       aria-label={`Switch to ${lang}`}
                     >
-                      <Languages className="w-5 h-5" />
+                      <Languages className="w-5 h-5 shrink-0" />
                       {lang === 'English' ? '🇬🇧 English' : '🇻🇳 Tiếng Việt'}
                     </button>
                   ))}
                 </div>
 
-                {/* Content Area */}
-                <div className="content-area prose prose-lg max-w-none">
+                <div className="bg-gradient-to-br from-white to-grammar-blue-soft/30 p-5 rounded-xl border-2 border-grammar-blue-light mb-6 prose-grammar">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
@@ -466,62 +473,64 @@ const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) =>
                   </ReactMarkdown>
                 </div>
 
-                {/* Examples */}
-                {lesson.examples && lesson.examples.length > 0 && (
-                  <div className="mt-8">
-                    <h4 className="font-bold mb-5 text-2xl flex items-center gap-3 text-gray-800">
-                      <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                {lesson.examples?.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="font-bold text-xl sm:text-2xl text-slate-800 mb-4 flex items-center gap-3">
+                      <span className="w-10 h-10 rounded-full bg-grammar-accent flex items-center justify-center shrink-0">
                         <Lightbulb className="w-6 h-6 text-white" />
-                      </div>
+                      </span>
                       Examples • Ví Dụ
                     </h4>
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       {lesson.examples.map((ex, idx) => (
-                        <ExampleCard key={idx} example={ex} index={idx} />
+                        <ExampleCard key={idx} example={ex} />
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Sub-Sections Accordion */}
-                {lesson.subSections && lesson.subSections.map((section, idx) => (
-                  <div key={idx} className="mt-6 border-t-2 border-gray-200 pt-6">
-                    <button
-                      onClick={() => toggleSection(`${lesson.lessonId}-section-${idx}`)}
-                      className="accordion-button"
-                      aria-expanded={expandedSections[`${lesson.lessonId}-section-${idx}`]}
-                      aria-label={`Toggle ${section.title}`}
-                    >
-                      <span className="font-bold text-gray-800 text-lg flex items-center gap-3">
-                        <Brain className="w-6 h-6 text-purple-500" />
-                        {section.title}
-                      </span>
-                      {expandedSections[`${lesson.lessonId}-section-${idx}`] ? (
-                        <ChevronUp className="w-6 h-6 text-blue-600" />
-                      ) : (
-                        <ChevronDown className="w-6 h-6 text-gray-400" />
+                {lesson.subSections?.map((section, idx) => {
+                  const sectionId = `${lesson.lessonId}-section-${idx}`;
+                  const isOpen = expandedSections[sectionId];
+                  return (
+                    <div key={idx} className="mt-6 pt-6 border-t-2 border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(sectionId)}
+                        className="w-full flex justify-between items-center p-4 rounded-lg border-2 border-slate-200 bg-white hover:bg-grammar-blue-soft hover:border-grammar-blue transition-colors text-left min-h-[48px] focus:outline-none focus:ring-2 focus:ring-grammar-primary"
+                        aria-expanded={isOpen}
+                        aria-label={`Toggle ${section.title}`}
+                      >
+                        <span className="font-bold text-slate-800 flex items-center gap-3">
+                          <Brain className="w-6 h-6 text-grammar-primary shrink-0" />
+                          {section.title}
+                        </span>
+                        {isOpen ? (
+                          <ChevronUp className="w-6 h-6 text-grammar-primary shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-6 h-6 text-slate-400 shrink-0" />
+                        )}
+                      </button>
+                      {isOpen && (
+                        <div className="mt-3 p-4 rounded-lg border-2 border-grammar-blue-light bg-white">
+                          <ReactMarkdown components={components}>{section.content}</ReactMarkdown>
+                        </div>
                       )}
-                    </button>
-                    {expandedSections[`${lesson.lessonId}-section-${idx}`] && (
-                      <div className="accordion-content animate-fade-in">
-                        <ReactMarkdown components={components}>{section.content}</ReactMarkdown>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    </div>
+                  );
+                })}
+              </article>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Exercises Section */}
-        <div className="mb-8">
-          <h2 className="section-header exercises">
-            <Award className="w-8 h-8" />
+        {/* Exercises */}
+        <section className="mb-8">
+          <h2 className="flex items-center justify-center gap-3 text-xl sm:text-2xl font-bold text-white py-4 px-5 rounded-xl bg-gradient-to-r from-grammar-accent to-grammar-primary mb-6 shadow-md">
+            <Award className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
             <span>Exercises • Bài Tập</span>
-            <Trophy className="w-8 h-8" />
+            <Trophy className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
           </h2>
-
           <div className="space-y-6">
             {topic.exercises.map((exercise, index) => (
               <Exercise
@@ -533,43 +542,57 @@ const GrammarTopicPage = ({ topic, completedLessons = {}, onLessonComplete }) =>
               />
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Vocabulary Section */}
-        <div className="mb-8">
-          <h2 className="section-header vocabulary">
-            <Volume2 className="w-8 h-8" />
+        {/* Vocabulary */}
+        <section className="mb-8">
+          <h2 className="flex items-center justify-center gap-3 text-xl sm:text-2xl font-bold text-white py-4 px-5 rounded-xl bg-gradient-to-r from-grammar-blue to-grammar-primary mb-6 shadow-md">
+            <Volume2 className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
             <span>Vocabulary • Từ Vựng</span>
-            <Star className="w-8 h-8" />
+            <Star className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />
           </h2>
-          
-          <div className="vocabulary-table">
-            <table className="min-w-full">
-              <thead>
-                <tr>
-                  <th>Word</th>
-                  <th>Meaning</th>
-                  <th>Example</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topic.vocabulary.map((vocab, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <span className="vocabulary-word">{vocab.word}</span>
-                    </td>
-                    <td className="text-gray-700 font-medium">{vocab.meaning}</td>
-                    <td>
-                      <code className="vocabulary-example">{vocab.example}</code>
-                    </td>
+          <div className="bg-white rounded-xl border-2 border-grammar-blue-light overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[320px]">
+                <thead>
+                  <tr className="bg-grammar-primary text-white">
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide">
+                      Word
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide">
+                      Meaning
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide">
+                      Example
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {topic.vocabulary.map((vocab, idx) => (
+                    <tr
+                      key={idx}
+                      className="border-b border-slate-200 transition-colors hover:bg-grammar-blue-soft/50"
+                    >
+                      <td className="px-4 py-3">
+                        <span className="inline-block px-2.5 py-1.5 rounded-md bg-emerald-100 text-emerald-800 font-semibold text-[15px]">
+                          {vocab.word}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-700 font-medium text-sm sm:text-base">
+                        {vocab.meaning}
+                      </td>
+                      <td className="px-4 py-3">
+                        <code className="block mt-1 px-2.5 py-1.5 rounded bg-slate-100 text-slate-700 text-sm font-mono border border-slate-200 break-words">
+                          {vocab.example}
+                        </code>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-
-       
+        </section>
       </div>
     </div>
   );
