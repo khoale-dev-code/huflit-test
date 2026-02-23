@@ -18,7 +18,7 @@ const StatCard = memo(({ Icon, value, label }) => (
       <Icon className="w-5 h-5 text-blue-600" />
     </div>
     <span className="text-3xl font-black text-slate-900">{value}</span>
-    <span className="text-xs font-bold text-slate-400 uppercase mt-1">{label}</span>
+    <span className="text-xs font-bold text-slate-700 uppercase mt-1">{label}</span>
   </div>
 ))
 

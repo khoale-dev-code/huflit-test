@@ -21,6 +21,8 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [scrollDirection, setScrollDirection] = useState('up');
   const [lastScrollY, setLastScrollY] = useState(0);
+  // ✅ NEW: Kiểm tra reduced motion preference
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const menuItems = [
     { id: 'listening', label: 'Luyện Nghe', icon: Headphones, type: 'test', path: ROUTES.TEST },
@@ -34,6 +36,16 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     { id: 'home', label: 'Trang chủ', icon: Home, path: ROUTES.HOME },
     ...menuItems.slice(0, 2),
   ];
+
+  // ✅ NEW: Check for reduced motion preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const listener = (e) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', listener);
+    return () => mediaQuery.removeEventListener('change', listener);
+  }, []);
 
   // Scroll effect - Navbar luôn hiển thị, không bị ẩn
   useEffect(() => {
@@ -94,7 +106,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     setMobileOpen(false);
   }, [navigate]);
 
-  // ✅ FIX: Thêm function handleAnswersClick
   const handleAnswersClick = useCallback(() => {
     navigate(ROUTES.ANSWERS);
     setShowProfileMenu(false);
@@ -106,13 +117,16 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     return (
       <button
         onClick={onClick}
+        // ✅ FIX: Add aria-label and aria-current
+        aria-label={item.label}
+        aria-current={isActive ? 'page' : undefined}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all whitespace-nowrap ${
           isActive
             ? 'bg-[#00358E] text-white shadow-md'
             : 'text-slate-700 hover:bg-slate-100'
         }`}
       >
-        <Icon className="w-4 h-4 flex-shrink-0" />
+        <Icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
         <span>{item.label}</span>
       </button>
     );
@@ -120,11 +134,15 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
   const BottomNavItem = ({ item, isActive, onClick }) => {
     const Icon = item.icon;
+    // ✅ FIX: Disable animation on mobile with prefersReducedMotion
+    const motionProps = prefersReducedMotion ? {} : { whileHover: { scale: 1.08 }, whileTap: { scale: 0.95 } };
+    
     return (
       <motion.button
         onClick={onClick}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
+        aria-label={item.label}
+        aria-current={isActive ? 'page' : undefined}
+        {...motionProps}
         className={`flex flex-col items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all relative group ${
           isActive
             ? 'text-[#00358E]'
@@ -136,13 +154,14 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             ? 'bg-blue-100'
             : 'group-hover:bg-slate-100'
         }`}>
-          <Icon className="w-5 h-5" />
+          <Icon className="w-5 h-5" aria-hidden="true" />
         </div>
         <span className="text-[10px] font-semibold text-center whitespace-nowrap">{item.label}</span>
         {isActive && (
           <motion.div
             layoutId="bottom-active"
             className="absolute bottom-0 h-1 w-8 bg-[#00358E] rounded-full"
+            aria-hidden="true"
           />
         )}
       </motion.button>
@@ -153,10 +172,13 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     <>
       {/* NAVBAR - LUÔN HIỂN THỊ, STICKY POSITION */}
       <nav
+        // ✅ FIX: Add role and aria-label
+        role="navigation"
+        aria-label="Thanh điều hướng chính"
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/70 backdrop-blur-xl shadow-md border-b border-white/40'
-            : 'bg-white/30 backdrop-blur-lg border-b border-white/20'
+            ? 'bg-white/70 md:backdrop-blur-xl shadow-md border-b border-white/40'
+            : 'bg-white/30 md:backdrop-blur-lg border-b border-white/20'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,10 +186,11 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             {/* Logo */}
             <button 
               onClick={handleLogoClick}
+              aria-label="HUFLIT - Về trang chủ"
               className="flex items-center gap-2 cursor-pointer group flex-shrink-0 hover:opacity-80 transition-opacity"
             >
               <div className="w-10 h-10 bg-[#00358E] rounded-lg flex items-center justify-center shadow-lg">
-                <img src={logo} alt="Logo" className="w-6 h-6 object-contain" />
+                <img src={logo} alt="" className="w-6 h-6 object-contain" aria-hidden="true" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-[#00358E] font-black text-lg leading-tight">HUFLIT</h1>
@@ -196,8 +219,8 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                   animate={{ opacity: 1, scale: 1 }}
                   className="hidden xs:flex items-center gap-1.5 bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100"
                 >
-                  <Flame className="w-4 h-4 text-[#FF7D00] fill-[#FF7D00] animate-pulse" />
-                  <span className="text-[#FF7D00] font-bold text-xs sm:text-sm">{streak} Ngày</span>
+                  <Flame className="w-4 h-4 text-[#FF7D00] fill-[#FF7D00] animate-pulse" aria-hidden="true" />
+                  <span className="text-[#FF7D00] font-bold text-xs sm:text-sm" aria-label={`${streak} ngày liên tiếp`}>{streak} Ngày</span>
                 </motion.div>
               )}
 
@@ -208,14 +231,18 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    // ✅ FIX: Add aria attributes
+                    aria-label="Menu hồ sơ người dùng"
+                    aria-expanded={showProfileMenu}
+                    aria-haspopup="menu"
                     className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition-colors"
                   >
                     <img
                       src={user?.photoURL}
-                      alt="Profile"
+                      alt={user?.displayName || 'Hồ sơ người dùng'}
                       className="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
                     />
-                    <ChevronDown className="hidden sm:block w-4 h-4 text-slate-400" />
+                    <ChevronDown className="hidden sm:block w-4 h-4 text-slate-400" aria-hidden="true" />
                   </motion.button>
 
                   {/* Profile Dropdown */}
@@ -233,29 +260,32 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
+                          role="menu"
                           className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 p-2 z-30"
                         >
                           <button 
                             onClick={handleProfileClick}
+                            role="menuitem"
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                           >
-                            <User className="w-4 h-4" />
+                            <User className="w-4 h-4" aria-hidden="true" />
                             <span>Trang cá nhân</span>
                           </button>
-                          {/* ✅ FIX: Thêm nút Đáp Án */}
                           <button 
                             onClick={handleAnswersClick}
+                            role="menuitem"
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                           >
-                            <FileText className="w-4 h-4" />
+                            <FileText className="w-4 h-4" aria-hidden="true" />
                             <span>Đáp Án</span>
                           </button>
                           <div className="border-t border-slate-100 my-1" />
                           <button
                             onClick={handleSignOut}
+                            role="menuitem"
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium"
                           >
-                            <LogOut className="w-4 h-4" />
+                            <LogOut className="w-4 h-4" aria-hidden="true" />
                             <span>Đăng xuất</span>
                           </button>
                         </motion.div>
@@ -277,15 +307,19 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
               {/* Mobile Menu Button */}
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={!prefersReducedMotion ? { scale: 1.1 } : {}}
+                whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
                 onClick={() => setMobileOpen(!mobileOpen)}
+                // ✅ FIX: Add aria attributes and aria-label
+                aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-menu"
                 className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
               >
                 {mobileOpen ? (
-                  <X className="w-5 h-5 text-slate-600" />
+                  <X className="w-5 h-5 text-slate-600" aria-hidden="true" />
                 ) : (
-                  <Menu className="w-5 h-5 text-slate-600" />
+                  <Menu className="w-5 h-5 text-slate-600" aria-hidden="true" />
                 )}
               </motion.button>
             </div>
@@ -312,18 +346,22 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              id="mobile-menu"
+              role="navigation"
+              aria-label="Menu di động"
               className="fixed right-0 top-0 h-full w-64 sm:w-72 bg-white/95 backdrop-blur-xl z-30 lg:hidden overflow-y-auto shadow-2xl"
             >
               {/* Header */}
               <div className="sticky top-0 flex items-center justify-between p-4 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
                 <h2 className="text-lg font-bold text-slate-800">Menu</h2>
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={!prefersReducedMotion ? { scale: 1.1 } : {}}
+                  whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
                   onClick={() => setMobileOpen(false)}
+                  aria-label="Đóng menu"
                   className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-slate-600" />
+                  <X className="w-5 h-5 text-slate-600" aria-hidden="true" />
                 </motion.button>
               </div>
 
@@ -336,15 +374,15 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => handleNavClick(item)}
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={!prefersReducedMotion ? { x: 4 } : {}}
+                    whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium text-sm ${
                       isItemActive(item)
                         ? 'bg-gradient-to-r from-[#00358E] to-[#002763] text-white shadow-lg'
                         : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    <item.icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                     <span>{item.label}</span>
                   </motion.button>
                 ))}
@@ -361,14 +399,14 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                   <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-br from-blue-50 to-slate-50 border border-slate-200">
                     <img
                       src={user.photoURL}
-                      alt="User"
+                      alt={user.displayName || 'Hồ sơ người dùng'}
                       className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-slate-800 truncate">
                         {user.displayName || 'User'}
                       </p>
-                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                      <p className="text-xs text-slate-600 truncate">{user.email}</p>
                     </div>
                   </div>
 
@@ -379,7 +417,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                       animate={{ opacity: 1, scale: 1 }}
                       className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-50 to-yellow-50 px-3 py-3 rounded-xl border border-orange-200"
                     >
-                      <Flame className="w-5 h-5 text-[#FF7D00] fill-[#FF7D00] animate-pulse flex-shrink-0" />
+                      <Flame className="w-5 h-5 text-[#FF7D00] fill-[#FF7D00] animate-pulse flex-shrink-0" aria-hidden="true" />
                       <div className="text-center">
                         <p className="text-[#FF7D00] font-bold text-sm">{streak}</p>
                         <p className="text-[#FF7D00] text-xs font-semibold">ngày liên tiếp</p>
@@ -389,33 +427,32 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
                   {/* Action Buttons */}
                   <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
+                    whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
                     onClick={handleProfileClick}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-blue-100 rounded-lg transition-colors font-semibold text-sm"
                   >
-                    <User className="w-4 h-4" />
+                    <User className="w-4 h-4" aria-hidden="true" />
                     <span>Trang cá nhân</span>
                   </motion.button>
                   
-                  {/* ✅ FIX: Thêm nút Đáp Án ở mobile */}
                   <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
+                    whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
                     onClick={handleAnswersClick}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-blue-100 rounded-lg transition-colors font-semibold text-sm"
                   >
-                    <FileText className="w-4 h-4" />
+                    <FileText className="w-4 h-4" aria-hidden="true" />
                     <span>Đáp Án</span>
                   </motion.button>
 
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
+                    whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
                     onClick={handleSignOut}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors font-semibold text-sm"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4" aria-hidden="true" />
                     <span>Đăng xuất</span>
                   </motion.button>
                 </motion.div>
@@ -427,7 +464,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
       {/* Bottom Navigation for Mobile - Luôn hiển thị */}
       <motion.div 
-        className="fixed bottom-0 left-0 right-0 sm:hidden bg-white/50 backdrop-blur-xl border-t border-white/30 shadow-lg z-30"
+        className="fixed bottom-0 left-0 right-0 sm:hidden bg-white/50 md:backdrop-blur-lg border-t border-white/30 shadow-lg z-30"
         animate={{ y: 0 }}
         transition={{ duration: 0.3 }}
       >
@@ -442,13 +479,14 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
           ))}
           {/* More Menu */}
           <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={!prefersReducedMotion ? { scale: 1.08 } : {}}
+            whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
             onClick={() => setMobileOpen(true)}
+            aria-label="Xem thêm tùy chọn"
             className="flex flex-col items-center justify-center gap-1.5 py-2 px-3 rounded-xl hover:bg-slate-100 transition-all"
           >
             <div className="p-2 rounded-lg hover:bg-slate-200">
-              <Menu className="w-5 h-5 text-slate-600" />
+              <Menu className="w-5 h-5 text-slate-600" aria-hidden="true" />
             </div>
             <span className="text-[10px] font-semibold text-slate-600">Thêm</span>
           </motion.button>

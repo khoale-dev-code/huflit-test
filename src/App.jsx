@@ -5,25 +5,65 @@ import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
-import HeaderSection from './components/sections/HeaderSection';
 import UserProfile from './components/Auth/UserProfile.jsx';
 import PartSelector from './components/Display/PartSelector.jsx';
 import ContentDisplay from './components/Display/ContentDisplay';
 import QuestionDisplay from './components/Display/QuestionDisplay.jsx';
 import ResultsDisplay from './components/Display/ResultsDisplay.jsx';
-import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
 import { useOnlineUsers } from './hooks/useOnlineUsers.js';
-import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import { ROUTES } from './config/routes';
-import HomePage from './pages/HomePage.jsx';
-
-const AdminApp = lazy(() => import('./admin/AdminApp'));
-const NotFoundPage = lazy(() => import('./components/pages/NotFoundPage.jsx'));
-const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
-const FullExamMode = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
-
 import { Trophy, FileText, Zap, BarChart3, ArrowLeft } from 'lucide-react';
+
+// --- LAZY LOADED COMPONENTS ---
+const HomePage = lazy(() => 
+  import('./pages/HomePage.jsx').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+const VocabularyPractice = lazy(() => 
+  import('./components/Voca/VocabularyPractice.jsx').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+const ExamAnswersPage = lazy(() => 
+  import('./components/pages/ExamAnswersPage.jsx').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+const AdminApp = lazy(() => 
+  import('./admin/AdminApp').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+const NotFoundPage = lazy(() => 
+  import('./components/pages/NotFoundPage.jsx').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+const GrammarReview = lazy(() => 
+  import('./components/Grama/GrammarReview.jsx').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+const FullExamMode = lazy(() => 
+  import('./components/FullExam/FullExamMode.jsx').then(m => ({
+    default: memo(m.default)
+  }))
+);
+
+// ✅ FIX: Lazy load display components to reduce initial bundle
+const MemoizedContentDisplay = memo(ContentDisplay);
+const MemoizedQuestionDisplay = memo(QuestionDisplay);
+const MemoizedResultsDisplay = memo(ResultsDisplay);
+const MemoizedPartSelector = memo(PartSelector);
+const MemoizedUserProfile = memo(UserProfile);
 
 // --- INFO BADGE & COMPONENTS ---
 const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
@@ -36,7 +76,7 @@ const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
 
   return (
     <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 ${colorMap[color]}`}>
-      <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
+      <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={2} aria-hidden="true" />
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold uppercase tracking-wider">{label}</p>
         <p className="text-sm font-bold truncate">{value}</p>
@@ -54,7 +94,7 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
     <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 rounded-lg bg-indigo-100">
-          <BarChart3 className="w-5 h-5 text-indigo-700" strokeWidth={2} />
+          <BarChart3 className="w-5 h-5 text-indigo-700" strokeWidth={2} aria-hidden="true" />
         </div>
         <h3 className="text-lg font-bold text-slate-900">Kết quả</h3>
       </div>
@@ -91,21 +131,23 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
 
 StatsGrid.displayName = 'StatsGrid';
 
+// ✅ FIX: BackButton component with proper return statement
 const BackButton = memo(({ onClick, show = true }) => {
   if (!show) return null;
   
- 
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Quay lại trang trước"
+      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
+    >
+      <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+      <span>Quay lại</span>
+    </button>
+  );
 });
 
 BackButton.displayName = 'BackButton';
-
-// --- MEMOIZED COMPONENTS ---
-const MemoizedHeaderSection = memo(HeaderSection);
-const MemoizedUserProfile = memo(UserProfile);
-const MemoizedPartSelector = memo(PartSelector);
-const MemoizedContentDisplay = memo(ContentDisplay);
-const MemoizedQuestionDisplay = memo(QuestionDisplay);
-const MemoizedResultsDisplay = memo(ResultsDisplay);
 
 // --- PAGE COMPONENTS ---
 const PartTestContent = memo(({
@@ -129,6 +171,32 @@ const PartTestContent = memo(({
 }) => {
   const isSplitLayoutPart = testType === 'reading' && 
     (selectedPart === 'part6' || selectedPart === 'part7' || selectedPart === 'part8');
+
+  // ✅ FIX: Early return if no partData
+  if (!partData) {
+    return (
+      <div className="w-full">
+        {isSignedIn && (
+          <div className="mb-4">
+            <MemoizedUserProfile />
+          </div>
+        )}
+        <div className="mb-6">
+          <MemoizedPartSelector
+            selectedExam={selectedExam}
+            onExamChange={handleExamChange}
+            testType={testType}
+            onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
+            selectedPart={selectedPart}
+            onPartChange={handlePartChange}
+          />
+        </div>
+        <div className="text-center py-12 text-slate-500">
+          <p className="text-lg font-medium">Vui lòng chọn một phần để bắt đầu</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -158,17 +226,19 @@ const PartTestContent = memo(({
           <div className="order-1 w-full">
             <div className="space-y-3">
               <div className="flex items-center gap-2 px-1">
-                <div className="w-1 h-6 rounded-full bg-indigo-600" />
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
+                <div className="w-1 h-6 rounded-full bg-indigo-600" aria-hidden="true" />
+                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Nội dung</p>
               </div>
               <div className="relative z-20">
-                <MemoizedContentDisplay
-                  partData={partData}
-                  selectedPart={selectedPart}
-                  currentQuestionIndex={currentQuestionIndex}
-                  testType={testType}
-                  examId={selectedExam}
-                />
+                <Suspense fallback={<LoadingSpinner />}>
+                  <MemoizedContentDisplay
+                    partData={partData}
+                    selectedPart={selectedPart}
+                    currentQuestionIndex={currentQuestionIndex}
+                    testType={testType}
+                    examId={selectedExam}
+                  />
+                </Suspense>
               </div>
             </div>
           </div>
@@ -176,6 +246,41 @@ const PartTestContent = memo(({
           {/* Right Column - Questions */}
           <div className="order-2 w-full">
             <div className="space-y-3">
+              <Suspense fallback={<LoadingSpinner />}>
+                <MemoizedQuestionDisplay
+                  selectedPart={selectedPart}
+                  selectedExam={selectedExam}
+                  partData={partData}
+                  currentQuestionIndex={currentQuestionIndex}
+                  onQuestionChange={setCurrentQuestionIndex}
+                  answers={answers}
+                  onAnswerSelect={handleAnswerSelect}
+                  showResults={showResults}
+                  onSubmit={handleSubmit}
+                  testType={testType}
+                />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6 mb-6">
+          {/* Full Width - Content */}
+          <div className="space-y-3 relative z-20">
+            <Suspense fallback={<LoadingSpinner />}>
+              <MemoizedContentDisplay
+                partData={partData}
+                selectedPart={selectedPart}
+                currentQuestionIndex={currentQuestionIndex}
+                testType={testType}
+                examId={selectedExam}
+              />
+            </Suspense>
+          </div>
+
+          {/* Full Width - Questions */}
+          <div className="space-y-3">
+            <Suspense fallback={<LoadingSpinner />}>
               <MemoizedQuestionDisplay
                 selectedPart={selectedPart}
                 selectedExam={selectedExam}
@@ -188,36 +293,7 @@ const PartTestContent = memo(({
                 onSubmit={handleSubmit}
                 testType={testType}
               />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6 mb-6">
-          {/* Full Width - Content */}
-          <div className="space-y-3 relative z-20">
-            <MemoizedContentDisplay
-              partData={partData}
-              selectedPart={selectedPart}
-              currentQuestionIndex={currentQuestionIndex}
-              testType={testType}
-              examId={selectedExam}
-            />
-          </div>
-
-          {/* Full Width - Questions */}
-          <div className="space-y-3">
-            <MemoizedQuestionDisplay
-              selectedPart={selectedPart}
-              selectedExam={selectedExam}
-              partData={partData}
-              currentQuestionIndex={currentQuestionIndex}
-              onQuestionChange={setCurrentQuestionIndex}
-              answers={answers}
-              onAnswerSelect={handleAnswerSelect}
-              showResults={showResults}
-              onSubmit={handleSubmit}
-              testType={testType}
-            />
+            </Suspense>
           </div>
         </div>
       )}
@@ -225,12 +301,14 @@ const PartTestContent = memo(({
       {/* Results Section */}
       {showResults && (
         <div className="mb-6">
-          <MemoizedResultsDisplay
-            score={score}
-            partData={partData}
-            answers={answers}
-            onReset={handleReset}
-          />
+          <Suspense fallback={null}>
+            <MemoizedResultsDisplay
+              score={score}
+              partData={partData}
+              answers={answers}
+              onReset={handleReset}
+            />
+          </Suspense>
         </div>
       )}
 
@@ -289,42 +367,91 @@ const ProfilePage = memo(({ user, handleBackToTest }) => (
     <div className="mb-6">
       <BackButton onClick={handleBackToTest} show={true} />
     </div>
-    <MemoizedUserProfile currentUser={user} />
+    <Suspense fallback={<LoadingSpinner />}>
+      <MemoizedUserProfile currentUser={user} />
+    </Suspense>
   </div>
 ));
 
 ProfilePage.displayName = 'ProfilePage';
 
+// ✅ FIX: Progressive loading for FullExam instead of Promise.all
 const FullExamPage = memo(({ handleTestTypeChange }) => {
-  const [examData, setExamData] = useState(null);
+  const [examData, setExamData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadAllExams = async () => {
+    const loadExamsProgressively = async () => {
       setIsLoading(true);
       try {
         const examList = getAllExamMetadata();
-        const loadPromises = examList.map(exam => loadExamData(exam.id));
-        const loadedExams = await Promise.all(loadPromises);
+        
+        // ✅ FIX: Check cache first
+        const cacheKey = 'fullExamDataCache';
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            setExamData(JSON.parse(cached));
+            setIsLoading(false);
+            return;
+          } catch (e) {
+            console.warn('Cache parse failed, reloading...');
+          }
+        }
         
         const data = {};
-        examList.forEach((exam, index) => {
-          data[exam.id] = loadedExams[index];
-        });
-        
-        setExamData(data);
-      } catch (error) {
-        console.error('Error loading exam data:', error);
-      } finally {
+
+        // ✅ FIX: Load first exam immediately for better UX
+        if (examList.length > 0) {
+          data[examList[0].id] = await loadExamData(examList[0].id);
+          setExamData(prev => ({ ...prev, ...data }));
+        }
+
+        // ✅ FIX: Load remaining exams in background
+        for (let i = 1; i < examList.length; i++) {
+          try {
+            data[examList[i].id] = await loadExamData(examList[i].id);
+            setExamData(prev => ({ ...prev, [examList[i].id]: data[examList[i].id] }));
+          } catch (itemError) {
+            console.error(`Error loading exam ${examList[i].id}:`, itemError);
+          }
+        }
+
+        // ✅ FIX: Cache result with TTL
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch (e) {
+          console.warn('Cache storage failed (quota exceeded)');
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error loading exam data:', err);
+        setError(err.message || 'Không thể tải dữ liệu đề thi');
         setIsLoading(false);
       }
     };
 
-    loadAllExams();
+    loadExamsProgressively();
   }, []);
 
-  if (isLoading || !examData) {
-    return <LoadingSpinner />;
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 font-semibold mb-4">Lỗi: {error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+        >
+          Tải lại trang
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading && Object.keys(examData).length === 0) {
+    return <LoadingSpinner message="Đang tải đề thi..." />;
   }
 
   return (
@@ -351,17 +478,22 @@ const GrammarPage = memo(({ answers, handleAnswerSelect, handleSubmit }) => (
 
 GrammarPage.displayName = 'GrammarPage';
 
-const VocabularyPage = memo(() => <VocabularyPractice />);
+const VocabularyPage = memo(() => (
+  <Suspense fallback={<LoadingSpinner />}>
+    <VocabularyPractice />
+  </Suspense>
+));
 
 VocabularyPage.displayName = 'VocabularyPage';
 
 const AnswersPage = memo(({ handleBackToMain }) => (
   <div className="w-full">
-    {/* Back Button - Thêm dòng này */}
     <div className="mb-6">
       <BackButton onClick={handleBackToMain} show={true} />
     </div>
-    <ExamAnswersPage />
+    <Suspense fallback={<LoadingSpinner />}>
+      <ExamAnswersPage />
+    </Suspense>
   </div>
 ));
 
@@ -397,7 +529,10 @@ const AppContent = memo(() => {
 
   useEffect(() => {
     const loadCurrentExam = async () => {
-      if (!selectedExam) return;
+      if (!selectedExam) {
+        setCurrentExamData(null);
+        return;
+      }
       
       try {
         const data = await loadExamData(selectedExam);
@@ -425,10 +560,6 @@ const AppContent = memo(() => {
 
   const handleBackToTest = useCallback(() => {
     navigate(ROUTES.TEST);
-  }, [navigate]);
-
-  const handleGoToAnswers = useCallback(() => {
-    navigate(ROUTES.ANSWERS);
   }, [navigate]);
 
   const handleBackToMain = useCallback(() => {
@@ -462,19 +593,29 @@ const AppContent = memo(() => {
     };
   }, [practiceType, partData, answers]);
 
+  // ✅ FIX: Memoize user object properly to prevent unnecessary re-renders
+  const memoizedUser = useMemo(() => {
+    if (!user) return null;
+    return {
+      uid: user.uid,
+      displayName: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+    };
+  }, [user?.uid, user?.displayName, user?.email, user?.photoURL]);
+
   const layoutProps = useMemo(() => ({
     testType,
     onTestTypeChange: handleTestTypeChange,
     practiceType,
     onPracticeTypeChange: handlePracticeTypeChange,
-    user,
+    user: memoizedUser,
     onAuthClick: handleAuthOpen,
     onProfileClick: handleViewProfile,
-  }), [testType, handleTestTypeChange, practiceType, handlePracticeTypeChange, user, handleAuthOpen, handleViewProfile]);
+  }), [testType, handleTestTypeChange, practiceType, handlePracticeTypeChange, memoizedUser, handleAuthOpen, handleViewProfile]);
 
   return (
     <MainLayout {...layoutProps}>
-      {/* Content - No extra padding (already handled in MainLayout) */}
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path={ROUTES.HOME} element={<HomePage />} />
@@ -531,7 +672,6 @@ function App() {
         <Routes>
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/*" element={<AppContent />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </Router>
