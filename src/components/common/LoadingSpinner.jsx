@@ -4,77 +4,84 @@ const LoadingSpinner = memo(({ message = "Loading..." }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
       <style>{`
+        /* ✅ OPTIMIZED: GPU acceleration + smooth animations */
+        
         @keyframes startround {
           0% {
-            filter: brightness(5);
-            box-shadow: none;
+            opacity: 0;
+            transform: scale(0.8);
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
           }
-          70% {
-            filter: brightness(5);
-            box-shadow: none;
+          50% {
+            opacity: 1;
+            filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5));
           }
           100% {
-            filter: brightness(1);
-            box-shadow: inset 0 0.5em rgba(255, 255, 255, 0.25),
-                        inset 0 -0.5em rgba(0, 0, 0, 0.25);
+            opacity: 1;
+            transform: scale(1);
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.3));
           }
         }
 
-        @keyframes round1 {
+        @keyframes orbitSlow {
           0% {
-            left: -2em;
+            transform: translateX(-3em) rotate(0deg);
+            opacity: 0.3;
+          }
+          25% {
             opacity: 1;
           }
-          30% {
-            left: -6em;
-            opacity: 1;
-            transform: skewX(-25deg) rotate(25deg);
-          }
-          31% {
-            opacity: 0;
-          }
-          35% {
-            left: 7em;
-            opacity: 0;
-          }
-          45% {
-            left: 7em;
-            opacity: 1;
-            transform: skewX(25deg) rotate(-25deg);
-          }
-          100% {
-            left: -2em;
-            opacity: 1;
-            transform: skewX(0deg) rotate(0deg);
-          }
-        }
-
-        @keyframes round2 {
-          0% {
-            left: 5em;
+          50% {
+            transform: translateX(3em) rotate(180deg);
             opacity: 1;
           }
           75% {
-            left: -7em;
-            opacity: 1;
-            transform: skewX(-25deg) rotate(25deg);
-          }
-          76% {
-            opacity: 0;
-          }
-          77% {
-            left: 8em;
-            opacity: 0;
-          }
-          80% {
-            left: 8em;
-            opacity: 1;
-            transform: skewX(25deg) rotate(-25deg);
+            opacity: 0.3;
           }
           100% {
-            left: 5em;
+            transform: translateX(-3em) rotate(360deg);
+            opacity: 0.3;
+          }
+        }
+
+        @keyframes orbitFast {
+          0% {
+            transform: translateX(3em) rotate(0deg);
+            opacity: 0.3;
+          }
+          25% {
+            opacity: 0.3;
+          }
+          50% {
+            transform: translateX(-3em) rotate(180deg);
             opacity: 1;
-            transform: skewX(0deg) rotate(0deg);
+          }
+          75% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(3em) rotate(360deg);
+            opacity: 0.3;
+          }
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% {
+            opacity: 0.6;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+          }
+          50% {
+            opacity: 1;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+          }
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
           }
         }
 
@@ -82,15 +89,24 @@ const LoadingSpinner = memo(({ message = "Loading..." }) => {
           position: relative;
           width: 6rem;
           height: 6rem;
-          background-color: #3344c1;
+          background: radial-gradient(circle at 35% 35%, #60A5FA, #3B82F6, #1E40AF);
           border-radius: 50%;
           overflow: hidden;
-          border: 3px solid white;
-          box-shadow: inset 0 0.5em rgba(255, 255, 255, 0.25),
-                      inset 0 -0.5em rgba(0, 0, 0, 0.25);
-          animation: startround 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+          border: 3px solid rgba(255, 255, 255, 0.2);
+          
+          /* ✅ GPU acceleration */
+          will-change: transform;
           transform: translate3d(0, 0, 0);
           backface-visibility: hidden;
+          perspective: 1000px;
+          
+          box-shadow: 
+            0 0 30px rgba(59, 130, 246, 0.4),
+            inset -2px -2px 5px rgba(0, 0, 0, 0.2),
+            inset 2px 2px 5px rgba(255, 255, 255, 0.1);
+          
+          animation: startround 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                    float 3s ease-in-out infinite 1.5s;
         }
 
         @media (min-width: 640px) {
@@ -107,113 +123,190 @@ const LoadingSpinner = memo(({ message = "Loading..." }) => {
           }
         }
 
-        .land-mass-1,
-        .land-mass-2,
-        .land-mass-3,
-        .land-mass-4 {
+        .land-mass {
           position: absolute;
-          width: 7em;
+          width: 6em;
           height: auto;
+          
+          /* ✅ GPU acceleration for smooth animations */
           will-change: transform, opacity;
           transform: translate3d(0, 0, 0);
           backface-visibility: hidden;
+          perspective: 1000px;
         }
 
         .land-mass-1 {
-          bottom: -2em;
-          animation: round1 5s linear infinite 2.75s;
+          bottom: -1.8em;
+          left: 0;
+          animation: orbitSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .land-mass-2 {
-          top: -3em;
-          animation: round1 5s linear infinite 2s;
+          top: -2.8em;
+          left: 0;
+          animation: orbitSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .land-mass-3 {
-          top: -2.5em;
-          animation: round2 5s linear infinite 2s;
+          top: -2.3em;
+          left: 0;
+          animation: orbitFast 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .land-mass-4 {
-          bottom: -2.2em;
-          animation: round2 5s linear infinite 2.75s;
+          bottom: -2em;
+          left: 0;
+          animation: orbitFast 4s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
+        /* ✅ SVG optimization */
+        .land-mass svg {
+          display: block;
+          width: 100%;
+          height: auto;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+        }
+
+        .loading-text {
+          animation: pulse-glow 2s ease-in-out infinite;
+          letter-spacing: 0.1em;
+          font-weight: 600;
+        }
+
+        .loading-dot {
+          display: inline-block;
+          animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        .loading-dot:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+
+        .loading-dot:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+
+        /* ✅ Accessibility - respect user preferences */
         @media (prefers-reduced-motion: reduce) {
           .earth-loader,
-          .land-mass-1,
-          .land-mass-2,
-          .land-mass-3,
-          .land-mass-4 {
+          .land-mass,
+          .loading-text,
+          .loading-dot {
             animation: none !important;
+            opacity: 1 !important;
+          }
+
+          .earth-loader {
+            filter: none;
+          }
+        }
+
+        /* ✅ Dark mode optimization */
+        @media (prefers-color-scheme: dark) {
+          .earth-loader {
+            box-shadow: 
+              0 0 40px rgba(59, 130, 246, 0.5),
+              inset -2px -2px 5px rgba(0, 0, 0, 0.4),
+              inset 2px 2px 5px rgba(255, 255, 255, 0.1);
+          }
+        }
+
+        /* ✅ Smooth transitions on slower devices */
+        @media (max-width: 640px) {
+          .earth-loader {
+            animation: startround 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                      float 3s ease-in-out infinite 1.2s;
+          }
+
+          .land-mass {
+            animation-duration: 3.5s !important;
           }
         }
       `}</style>
 
-      <div className="flex flex-col items-center justify-center gap-4">
-        {/* Earth Loader */}
-        <div className="earth-loader">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 200 200" 
-            className="land-mass-1"
-            aria-hidden="true"
-            role="presentation"
-          >
-            <path
-              transform="translate(100 100)"
-              d="M29.4,-17.4C33.1,1.8,27.6,16.1,11.5,31.6C-4.7,47,-31.5,63.6,-43,56C-54.5,48.4,-50.7,16.6,-41,-10.9C-31.3,-38.4,-15.6,-61.5,-1.4,-61C12.8,-60.5,25.7,-36.5,29.4,-17.4Z"
-              fill="#7CC133"
-            />
-          </svg>
+      <div className="flex flex-col items-center justify-center gap-6 sm:gap-8">
+        {/* Earth Loader Container */}
+        <div className="relative">
+          {/* Glow ring effect */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-blue-400/20 blur-2xl animate-pulse -m-4"></div>
 
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 200 200" 
-            className="land-mass-2"
-            aria-hidden="true"
-            role="presentation"
-          >
-            <path
-              transform="translate(100 100)"
-              d="M31.7,-55.8C40.3,-50,45.9,-39.9,49.7,-29.8C53.5,-19.8,55.5,-9.9,53.1,-1.4C50.6,7.1,43.6,14.1,41.8,27.6C40.1,41.1,43.4,61.1,37.3,67C31.2,72.9,15.6,64.8,1.5,62.2C-12.5,59.5,-25,62.3,-31.8,56.7C-38.5,51.1,-39.4,37.2,-49.3,26.3C-59.1,15.5,-78,7.7,-77.6,0.2C-77.2,-7.2,-57.4,-14.5,-49.3,-28.4C-41.2,-42.4,-44.7,-63,-38.5,-70.1C-32.2,-77.2,-16.1,-70.8,-2.3,-66.9C11.6,-63,23.1,-61.5,31.7,-55.8Z"
-              fill="#7CC133"
-            />
-          </svg>
+          {/* Earth Loader */}
+          <div className="earth-loader">
+            {/* Land masses - simplified and optimized */}
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 100 100" 
+              className="land-mass land-mass-1"
+              aria-hidden="true"
+              role="presentation"
+            >
+              <path
+                d="M50,20 Q60,25 65,35 Q62,45 50,50 Q40,48 35,40 Q40,25 50,20"
+                fill="#10B981"
+                opacity="0.9"
+              />
+            </svg>
 
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 200 200" 
-            className="land-mass-3"
-            aria-hidden="true"
-            role="presentation"
-          >
-            <path
-              transform="translate(100 100)"
-              d="M30.6,-49.2C42.5,-46.1,57.1,-43.7,67.6,-35.7C78.1,-27.6,84.6,-13.8,80.3,-2.4C76.1,8.9,61.2,17.8,52.5,29.1C43.8,40.3,41.4,53.9,33.7,64C26,74.1,13,80.6,2.2,76.9C-8.6,73.1,-17.3,59,-30.6,52.1C-43.9,45.3,-61.9,45.7,-74.1,38.2C-86.4,30.7,-92.9,15.4,-88.6,2.5C-84.4,-10.5,-69.4,-20.9,-60.7,-34.6C-52.1,-48.3,-49.8,-65.3,-40.7,-70C-31.6,-74.8,-15.8,-67.4,-3.2,-61.8C9.3,-56.1,18.6,-52.3,30.6,-49.2Z"
-              fill="#7CC133"
-            />
-          </svg>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 100 100" 
+              className="land-mass land-mass-2"
+              aria-hidden="true"
+              role="presentation"
+            >
+              <path
+                d="M50,20 Q55,18 62,22 Q68,28 65,38 Q58,42 50,40 Q48,30 50,20"
+                fill="#10B981"
+                opacity="0.85"
+              />
+            </svg>
 
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 200 200" 
-            className="land-mass-4"
-            aria-hidden="true"
-            role="presentation"
-          >
-            <path
-              transform="translate(100 100)"
-              d="M39.4,-66C48.6,-62.9,51.9,-47.4,52.9,-34.3C53.8,-21.3,52.4,-10.6,54.4,1.1C56.3,12.9,61.7,25.8,57.5,33.2C53.2,40.5,39.3,42.3,28.2,46C17,49.6,8.5,55.1,1.3,52.8C-5.9,50.5,-11.7,40.5,-23.6,37.2C-35.4,34,-53.3,37.5,-62,32.4C-70.7,27.4,-70.4,13.7,-72.4,-1.1C-74.3,-15.9,-78.6,-31.9,-73.3,-43C-68.1,-54.2,-53.3,-60.5,-39.5,-60.9C-25.7,-61.4,-12.9,-56,1.1,-58C15.1,-59.9,30.2,-69.2,39.4,-66Z"
-              fill="#7CC133"
-            />
-          </svg>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 100 100" 
+              className="land-mass land-mass-3"
+              aria-hidden="true"
+              role="presentation"
+            >
+              <path
+                d="M50,50 Q60,52 68,58 Q65,68 52,70 Q40,68 38,58 Q42,52 50,50"
+                fill="#059669"
+                opacity="0.8"
+              />
+            </svg>
+
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 100 100" 
+              className="land-mass land-mass-4"
+              aria-hidden="true"
+              role="presentation"
+            >
+              <path
+                d="M50,50 Q40,48 32,52 Q28,62 38,68 Q50,70 52,60 Q52,55 50,50"
+                fill="#059669"
+                opacity="0.75"
+              />
+            </svg>
+          </div>
         </div>
 
-        {/* Loading Text */}
-        <p className="text-white text-base sm:text-lg md:text-xl font-semibold tracking-wide animate-pulse">
-          {message}
-        </p>
+        {/* Loading Text with animated dots */}
+        <div className="text-center">
+          <p className="text-white text-base sm:text-lg md:text-xl font-semibold tracking-widest loading-text">
+            {message}
+            <span className="loading-dot">.</span>
+            <span className="loading-dot">.</span>
+            <span className="loading-dot">.</span>
+          </p>
+          <p className="text-blue-300 text-xs sm:text-sm mt-3 opacity-75">
+            Preparing your experience
+          </p>
+        </div>
       </div>
     </div>
   );

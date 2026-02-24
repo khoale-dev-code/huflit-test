@@ -1,11 +1,249 @@
-import React, { useState, useEffect } from 'react';
-import { Volume2, ChevronRight, ChevronLeft, RotateCcw, BookOpen, Brain, Zap, Settings, Download, Share2, BarChart3, Trash2, Copy, Check, X } from 'lucide-react';
-import { useSpeech } from '../hooks/useSpeech';
-import { vocabularyData } from '../../data/vocabularyData';
+/**
+ * VocabularyPractice — Material Design 3 · Light Theme
+ * Color System:
+ *   Navy    #1A237E   Blue    #1565C0   BlueLight  #E8F0FE
+ *   Orange  #E65100   OrangeL #FBE9E7   Surface    #FFFFFF
+ *   BG      #F8F9FA   Outline #DADCE0   TextHigh   #202124
+ */
 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  BarChart3, Settings, Trash2, Volume2, Heart, BookOpen,
+  CheckCircle, ChevronLeft, ChevronRight, Zap, Trophy,
+  Search, X, GraduationCap, Shuffle, RotateCcw,
+} from 'lucide-react';
+
+/* ── Google Font + CSS ─────────────────────────────────────── */
+const Styles = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #F8F9FA; margin: 0; }
+    .card-wrap { perspective: 1200px; }
+    .card-inner { position: relative; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(.4,0,.2,1); }
+    .card-inner.flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 24px; }
+    .card-back { transform: rotateY(180deg); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp .3s ease forwards; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; }
+    button { font-family: 'Plus Jakarta Sans', sans-serif; }
+    input { font-family: 'Plus Jakarta Sans', sans-serif; }
+  `}</style>
+);
+
+/* ── Level badge colors (Material) ─────────────────────────── */
+const LEVEL = {
+  A1: { bg: '#E8F5E9', color: '#2E7D32' },
+  A2: { bg: '#E3F2FD', color: '#1565C0' },
+  B1: { bg: '#EDE7F6', color: '#4527A0' },
+  B2: { bg: '#FFF3E0', color: '#E65100' },
+  C1: { bg: '#FFEBEE', color: '#C62828' },
+  C2: { bg: '#FCE4EC', color: '#880E4F' },
+};
+
+/* ── Design tokens ──────────────────────────────────────────── */
+const T = {
+  navy: '#1A237E',
+  blue: '#1565C0',
+  blueL: '#E8F0FE',
+  orange: '#E65100',
+  orangeL: '#FBE9E7',
+  surface: '#FFFFFF',
+  bg: '#F8F9FA',
+  outline: '#DADCE0',
+  hi: '#202124',
+  med: '#5F6368',
+  lo: '#9AA0A6',
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   VocabCard
+═══════════════════════════════════════════════════════════════ */
+const VocabCard = ({ word, flipped, onFlip }) => {
+  const lvl = LEVEL[word.level] || LEVEL.B1;
+  return (
+    <div
+      className="card-wrap w-full cursor-pointer select-none"
+      style={{ minHeight: 340 }}
+      onClick={onFlip}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onFlip()}
+      aria-label={flipped ? 'Show word' : 'Show meaning'}
+    >
+      <div className={`card-inner w-full`} style={{ minHeight: 340, transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
+
+        {/* FRONT — navy gradient */}
+        <div
+          className="card-face flex flex-col items-center justify-center p-8 shadow-lg overflow-hidden"
+          style={{ background: '#AEE4FF', minHeight: 340, border: '1.5px solid #7DD0F8' }}
+        >
+          {/* decorative rings */}
+          <div style={{ position:'absolute', top:-40, right:-40, width:160, height:160, borderRadius:'50%', border:'1.5px solid rgba(21,101,192,.14)' }} />
+          <div style={{ position:'absolute', bottom:-30, left:-30, width:110, height:110, borderRadius:'50%', border:'1.5px solid rgba(21,101,192,.10)' }} />
+
+          <span style={{ ...lvl, borderRadius:20, padding:'3px 12px', fontSize:11, fontWeight:700, letterSpacing:'.05em', marginBottom:20, position:'relative' }}>
+            {word.level}
+          </span>
+
+          <p style={{ fontSize:52, fontWeight:800, color:'#0D3C6E', textAlign:'center', lineHeight:1.1, marginBottom:10, letterSpacing:'-0.02em', position:'relative' }}>
+            {word.word}
+          </p>
+
+          <p style={{ color:'#1565C0', fontSize:16, fontStyle:'italic', marginBottom:28, position:'relative', fontWeight:500 }}>
+            {word.phonetic}
+          </p>
+
+          <div style={{ display:'flex', alignItems:'center', gap:8, color:'rgba(13,60,110,.5)', fontSize:12, fontWeight:500, position:'relative' }}>
+            <span style={{ width:20, height:1, background:'rgba(13,60,110,.2)' }} />
+            Tap to reveal meaning
+            <span style={{ width:20, height:1, background:'rgba(13,60,110,.2)' }} />
+          </div>
+        </div>
+
+        {/* BACK — white */}
+        <div
+          className="card-face card-back flex flex-col justify-center p-8"
+          style={{ background: T.surface, border:`1.5px solid ${T.outline}`, boxShadow:'0 4px 16px rgba(0,0,0,.10)', minHeight:340 }}
+        >
+          <p style={{ fontSize:11, fontWeight:700, color:T.lo, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:6 }}>Vietnamese</p>
+          <p style={{ fontSize:38, fontWeight:800, color:T.orange, marginBottom:20, lineHeight:1.15, letterSpacing:'-0.01em' }}>
+            {word.vietnamese}
+          </p>
+          <div style={{ background:T.bg, borderRadius:14, padding:'12px 16px', marginBottom:10, border:`1px solid ${T.outline}` }}>
+            <p style={{ fontSize:10, fontWeight:700, color:T.lo, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:4 }}>Part of speech</p>
+            <p style={{ fontSize:14, fontWeight:600, color:T.navy }}>{word.pos}</p>
+          </div>
+          <div style={{ background:T.orangeL, borderRadius:14, padding:'12px 16px', border:'1px solid #FFCCBC' }}>
+            <p style={{ fontSize:10, fontWeight:700, color:T.orange, textTransform:'uppercase', letterSpacing:'.1em', marginBottom:4 }}>Example</p>
+            <p style={{ fontSize:13, color:T.med, fontStyle:'italic', lineHeight:1.65 }}>{word.example}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   QuizMode
+═══════════════════════════════════════════════════════════════ */
+const QuizMode = ({ word, correctAnswer, options, onAnswer, answered, selectedAnswer }) => (
+  <div className="fade-up rounded-3xl p-6 md:p-10 shadow-md"
+    style={{ background:T.surface, border:`1.5px solid ${T.outline}`, minHeight:340 }}>
+    <div style={{ textAlign:'center', marginBottom:28 }}>
+      <span style={{ background:T.orangeL, color:T.orange, borderRadius:20, padding:'4px 14px', fontSize:11, fontWeight:700, letterSpacing:'.05em' }}>
+        ⚡ Quiz Mode
+      </span>
+      <p style={{ fontSize:34, fontWeight:800, color:T.hi, marginTop:16, marginBottom:6, lineHeight:1.2, letterSpacing:'-0.01em' }}>
+        {word.vietnamese}
+      </p>
+      <p style={{ fontSize:13, color:T.lo, fontWeight:500 }}>Choose the correct English word</p>
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {options.map((option, idx) => {
+        const isCorrect = option === correctAnswer;
+        const isSelected = option === selectedAnswer;
+        let bg = T.bg, border = T.outline, color = T.hi;
+        if (answered) {
+          if (isCorrect)       { bg='#E8F5E9'; border='#66BB6A'; color='#2E7D32'; }
+          else if (isSelected) { bg='#FFEBEE'; border='#EF5350'; color='#C62828'; }
+          else                 { bg=T.bg; border=T.outline; color=T.lo; }
+        }
+        return (
+          <button
+            key={idx}
+            onClick={() => !answered && onAnswer(option)}
+            disabled={answered}
+            style={{
+              padding:'14px 16px', borderRadius:14, fontSize:14, fontWeight:600,
+              textAlign:'left', background:bg, border:`1.5px solid ${border}`, color,
+              cursor:answered?'default':'pointer', transition:'all .15s',
+              boxShadow: answered && isCorrect ? '0 0 0 3px rgba(102,187,106,.2)' : 'none',
+            }}
+            onMouseEnter={e => { if (!answered) { e.currentTarget.style.borderColor=T.blue; e.currentTarget.style.background=T.blueL; } }}
+            onMouseLeave={e => { if (!answered) { e.currentTarget.style.borderColor=T.outline; e.currentTarget.style.background=T.bg; } }}
+          >
+            <span style={{ opacity:.4, fontSize:11, fontWeight:700, marginRight:8 }}>
+              {String.fromCharCode(65+idx)}.
+            </span>
+            {option}
+          </button>
+        );
+      })}
+    </div>
+
+    {answered && (
+      <p className="fade-up" style={{ textAlign:'center', marginTop:20, fontSize:14, fontWeight:700, color: selectedAnswer===correctAnswer?'#2E7D32':'#C62828' }}>
+        {selectedAnswer===correctAnswer ? '🎉 Correct! Well done!' : `❌ Correct answer: ${correctAnswer}`}
+      </p>
+    )}
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   TopicCard
+═══════════════════════════════════════════════════════════════ */
+const TopicCard = ({ onClick, title, sub, tags }) => (
+  <button
+    onClick={onClick}
+    style={{
+      display:'block', width:'100%', textAlign:'left', padding:'18px 20px', borderRadius:16,
+      background:T.surface, border:`1.5px solid ${T.outline}`, cursor:'pointer',
+      boxShadow:'0 1px 3px rgba(0,0,0,.08)', transition:'all .18s',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor=T.blue; e.currentTarget.style.boxShadow=`0 4px 14px rgba(21,101,192,.14)`; e.currentTarget.style.transform='translateY(-2px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor=T.outline; e.currentTarget.style.boxShadow='0 1px 3px rgba(0,0,0,.08)'; e.currentTarget.style.transform='translateY(0)'; }}
+  >
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: tags?12:0 }}>
+      <div>
+        <p style={{ fontWeight:700, fontSize:15, color:T.hi, marginBottom:3 }}>{title}</p>
+        <p style={{ fontSize:13, color:T.med, fontWeight:500 }}>{sub}</p>
+      </div>
+      <div style={{ width:32, height:32, borderRadius:10, background:T.blueL, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+        <ChevronRight style={{ width:15, height:15, color:T.blue }} />
+      </div>
+    </div>
+    {tags && (
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+        {tags.map(t => (
+          <span key={t} style={{ background:T.blueL, color:T.blue, borderRadius:20, padding:'2px 10px', fontSize:11, fontWeight:600 }}>{t}</span>
+        ))}
+      </div>
+    )}
+  </button>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   ActionBtn
+═══════════════════════════════════════════════════════════════ */
+const ActionBtn = ({ onClick, icon: Icon, label, active, activeBg }) => (
+  <button
+    onClick={onClick}
+    style={{
+      flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:6,
+      padding:'12px 4px', borderRadius:14, fontSize:11, fontWeight:700, cursor:'pointer',
+      transition:'all .15s',
+      background: active ? activeBg : T.surface,
+      color: active ? '#FFF' : T.med,
+      border: active ? 'none' : `1.5px solid ${T.outline}`,
+      boxShadow: active ? '0 4px 12px rgba(0,0,0,.15)' : '0 1px 3px rgba(0,0,0,.06)',
+    }}
+    onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor=T.blue; e.currentTarget.style.color=T.blue; } }}
+    onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor=T.outline; e.currentTarget.style.color=T.med; } }}
+  >
+    <Icon style={{ width:16, height:16 }} />
+    {label}
+  </button>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   Main Component
+═══════════════════════════════════════════════════════════════ */
 export default function VocabularyPractice() {
-  const { speak, sentenceId, playingId, rate, setRate, pitch, setPitch } = useSpeech();
-  const [mode, setMode] = useState('learn');
+  const [vocabularyData, setVocabularyData] = useState({});
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState(null);
   const [currentWords, setCurrentWords] = useState([]);
@@ -17,762 +255,411 @@ export default function VocabularyPractice() {
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredWords, setFilteredWords] = useState([]);
   const [quizMode, setQuizMode] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [quizAnswered, setQuizAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [quizOptions, setQuizOptions] = useState([]);
   const [quizCorrectAnswer, setQuizCorrectAnswer] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  const topics = Object.keys(vocabularyData);
-
+  /* load data */
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredWords(currentWords);
-    } else {
-      const query = searchQuery.toLowerCase();
-      setFilteredWords(
-        currentWords.filter(
-          w =>
-            w.word.toLowerCase().includes(query) ||
-            w.vietnamese.toLowerCase().includes(query) ||
-            w.example.toLowerCase().includes(query)
-        )
-      );
-    }
-    setCurrentIndex(0);
+    (async () => {
+      try {
+        const { vocabularyData: vData } = await import('../../data/vocabularyData');
+        setVocabularyData(vData);
+      } catch {
+        setVocabularyData({
+          'Daily Life': {
+            'Household': [
+              { word:'furniture', phonetic:'/ˈfɜːrnɪtʃər/', vietnamese:'đồ nội thất', pos:'noun', example:'The furniture in her apartment was modern.', level:'A2' },
+              { word:'appliance', phonetic:'/əˈplaɪəns/', vietnamese:'thiết bị gia dụng', pos:'noun', example:'The kitchen appliances were all stainless steel.', level:'B1' },
+              { word:'curtain', phonetic:'/ˈkɜːrtn/', vietnamese:'rèm cửa', pos:'noun', example:'She drew the curtains to block out the sunlight.', level:'A2' },
+            ],
+            'Food & Cooking': [
+              { word:'ingredient', phonetic:'/ɪnˈɡriːdiənt/', vietnamese:'nguyên liệu', pos:'noun', example:'The recipe requires only five simple ingredients.', level:'A2' },
+              { word:'marinate', phonetic:'/ˈmærɪneɪt/', vietnamese:'ướp', pos:'verb', example:'Marinate the chicken overnight for best flavor.', level:'B1' },
+            ],
+          },
+          'Academic': {
+            'Science': [
+              { word:'hypothesis', phonetic:'/haɪˈpɒθɪsɪs/', vietnamese:'giả thuyết', pos:'noun', example:'Scientists tested their hypothesis through careful experiments.', level:'B2' },
+              { word:'phenomenon', phonetic:'/fɪˈnɒmɪnən/', vietnamese:'hiện tượng', pos:'noun', example:'The aurora borealis is a stunning natural phenomenon.', level:'B2' },
+            ],
+          },
+        });
+      }
+      setDataLoaded(true);
+    })();
+  }, []);
+
+  const topics = useMemo(() => Object.keys(vocabularyData), [vocabularyData]);
+
+  const displayedWords = useMemo(() => {
+    if (!searchQuery.trim()) return currentWords;
+    const q = searchQuery.toLowerCase();
+    return currentWords.filter(w =>
+      w.word.toLowerCase().includes(q) || w.vietnamese.toLowerCase().includes(q) || w.example.toLowerCase().includes(q)
+    );
   }, [searchQuery, currentWords]);
 
-  // Shuffle array
-  const shuffleArray = (array) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
+  const currentWord = displayedWords[currentIndex];
+
+  const doShuffle = (arr) => {
+    const s = [...arr];
+    for (let i = s.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      [s[i], s[j]] = [s[j], s[i]];
     }
-    return shuffled;
+    return s;
   };
 
-  const handleSelectTopic = (topic) => {
-    setSelectedTopic(topic);
-    setSelectedSubtopic(null);
-    setCurrentWords([]);
-  };
+  const generateQuizOptions = useCallback((idx, list) => {
+    const words = list || displayedWords;
+    const correct = words[idx]?.word;
+    if (!correct) return;
+    const others = words.filter((_, i) => i !== idx).sort(() => .5 - Math.random()).slice(0, 3).map(w => w.word);
+    setQuizCorrectAnswer(correct);
+    setQuizOptions(doShuffle([correct, ...others]));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedWords]);
 
-  const handleSelectSubtopic = (subtopic) => {
-    const words = vocabularyData[selectedTopic][subtopic];
-    setSelectedSubtopic(subtopic);
-    setCurrentWords(words);
-    setFilteredWords(words);
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setQuizMode(false);
-  };
+  const navigate = useCallback((dir) => {
+    const next = currentIndex + dir;
+    if (next < 0 || next >= displayedWords.length) return;
+    setCurrentIndex(next); setIsFlipped(false); setQuizAnswered(false); setSelectedAnswer(null);
+    generateQuizOptions(next);
+  }, [currentIndex, displayedWords.length, generateQuizOptions]);
 
-  const handleSpeak = () => {
-    if (displayedWords[currentIndex]) {
-      const word = displayedWords[currentIndex];
-      speak(word.word, `word-${currentIndex}`);
-    }
-  };
+  useEffect(() => {
+    const fn = (e) => {
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'ArrowLeft') navigate(-1);
+      if (e.key === ' ' && currentWords.length) { e.preventDefault(); setIsFlipped(f => !f); }
+    };
+    window.addEventListener('keydown', fn);
+    return () => window.removeEventListener('keydown', fn);
+  }, [navigate, currentWords.length]);
 
-  const handleSpeakExample = () => {
-    if (displayedWords[currentIndex]) {
-      const word = displayedWords[currentIndex];
-      speak(word.example, `example-${currentIndex}`, 'en', true);
-    }
-  };
+  const toggle = (set, setFn, key) => { const n = new Set(set); n.has(key) ? n.delete(key) : n.add(key); setFn(n); };
 
-  const handleNext = () => {
-    if (currentIndex < displayedWords.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsFlipped(false);
-      setQuizAnswered(false);
-      setSelectedAnswer(null);
-      generateQuizOptions(currentIndex + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setIsFlipped(false);
-      setQuizAnswered(false);
-      setSelectedAnswer(null);
-      generateQuizOptions(currentIndex - 1);
-    }
-  };
-
-  const toggleFavorite = () => {
-    const word = displayedWords[currentIndex];
-    const newFavorited = new Set(favorited);
-    if (newFavorited.has(word.word)) {
-      newFavorited.delete(word.word);
-    } else {
-      newFavorited.add(word.word);
-    }
-    setFavorited(newFavorited);
-  };
-
-  const toggleLearned = () => {
-    const word = displayedWords[currentIndex];
-    const newLearned = new Set(learned);
-    if (newLearned.has(word.word)) {
-      newLearned.delete(word.word);
-    } else {
-      newLearned.add(word.word);
-    }
-    setLearned(newLearned);
-  };
-
-  const toggleMastered = () => {
-    const word = displayedWords[currentIndex];
-    const newMastered = new Set(masteredWords);
-    if (newMastered.has(word.word)) {
-      newMastered.delete(word.word);
-    } else {
-      newMastered.add(word.word);
-    }
-    setMasteredWords(newMastered);
-  };
-
-  const handleReset = () => {
-    setCurrentIndex(0);
-    setIsFlipped(false);
-  };
-
-  const generateQuizOptions = (index) => {
-    const currentWord = displayedWords[index];
-    const correctAnswer = currentWord.word;
-    
-    // Lấy 3 từ sai khác
-    const otherWords = displayedWords
-      .filter((w, idx) => idx !== index)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3)
-      .map(w => w.word);
-    
-    const options = [correctAnswer, ...otherWords];
-    setQuizCorrectAnswer(correctAnswer);
-    setQuizOptions(shuffleArray(options));
+  const handleSelectSubtopic = (sub) => {
+    const words = vocabularyData[selectedTopic][sub];
+    setSelectedSubtopic(sub); setCurrentWords(words); setCurrentIndex(0);
+    setIsFlipped(false); setQuizMode(false); setSearchQuery('');
   };
 
   const startQuiz = () => {
-    setQuizMode(true);
-    setQuizScore(0);
-    setCurrentIndex(0);
-    setQuizAnswered(false);
-    setSelectedAnswer(null);
-    generateQuizOptions(0);
+    setQuizMode(true); setQuizScore(0); setCurrentIndex(0);
+    setQuizAnswered(false); setSelectedAnswer(null); generateQuizOptions(0);
   };
 
-  const handleQuizAnswer = (selectedWord) => {
-    setSelectedAnswer(selectedWord);
-    setQuizAnswered(true);
-    
-    if (selectedWord === quizCorrectAnswer) {
-      setQuizScore(quizScore + 1);
-      toggleMastered();
+  const handleQuizAnswer = (opt) => {
+    setSelectedAnswer(opt); setQuizAnswered(true);
+    if (opt === quizCorrectAnswer) {
+      setQuizScore(s => s + 1);
+      setMasteredWords(p => { const n = new Set(p); n.add(currentWord.word); return n; });
     }
   };
 
-  const exportToCSV = () => {
-    const data = displayedWords.map(w => ({
-      Word: w.word,
-      Phonetic: w.phonetic,
-      Vietnamese: w.vietnamese,
-      PartOfSpeech: w.pos,
-      Example: w.example,
-      Level: w.level,
-      Favorite: favorited.has(w.word) ? 'Yes' : 'No',
-      Mastered: masteredWords.has(w.word) ? 'Yes' : 'No'
-    }));
-
-    const csv = [
-      Object.keys(data[0]).join(','),
-      ...data.map(row =>
-        Object.values(row)
-          .map(val => `"${val}"`)
-          .join(',')
-      )
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `vocabulary-${selectedSubtopic}.csv`;
-    a.click();
+  const speak = () => {
+    if (!currentWord || !('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(currentWord.word);
+    u.lang = 'en-US'; window.speechSynthesis.speak(u);
   };
 
-  const copyToClipboard = () => {
-    const word = displayedWords[currentIndex];
-    const text = `${word.word} (${word.phonetic}) - ${word.vietnamese}\nExample: ${word.example}`;
-    navigator.clipboard.writeText(text);
-    alert('Đã sao chép!');
-  };
-
-  const clearAllData = () => {
-    if (window.confirm('Bạn chắc chắn muốn xóa toàn bộ dữ liệu?')) {
-      setFavorited(new Set());
-      setLearned(new Set());
-      setMasteredWords(new Set());
-    }
-  };
-
-  const displayedWords = filteredWords.length > 0 ? filteredWords : currentWords;
-  const currentWord = displayedWords[currentIndex];
-  const isFavorited = currentWord && favorited.has(currentWord.word);
-  const isLearned = currentWord && learned.has(currentWord.word);
-  const isMastered = currentWord && masteredWords.has(currentWord.word);
-  const progressPercent = displayedWords.length > 0 ? ((currentIndex + 1) / displayedWords.length) * 100 : 0;
-
-  const stats = {
+  const stats = useMemo(() => ({
     total: currentWords.length,
-    mastered: Array.from(masteredWords).filter(w => currentWords.some(cw => cw.word === w)).length,
-    learned: Array.from(learned).filter(w => currentWords.some(cw => cw.word === w)).length,
-    favorited: Array.from(favorited).filter(w => currentWords.some(cw => cw.word === w)).length,
-    remaining: currentWords.length - Array.from(masteredWords).filter(w => currentWords.some(cw => cw.word === w)).length
-  };
+    mastered: [...masteredWords].filter(w => currentWords.some(c => c.word === w)).length,
+    learned: [...learned].filter(w => currentWords.some(c => c.word === w)).length,
+    favorited: [...favorited].filter(w => currentWords.some(c => c.word === w)).length,
+    remaining: currentWords.length - [...masteredWords].filter(w => currentWords.some(c => c.word === w)).length,
+  }), [currentWords, masteredWords, learned, favorited]);
 
+  const progress = displayedWords.length > 0 ? ((currentIndex + 1) / displayedWords.length) * 100 : 0;
+  const isFav = currentWord && favorited.has(currentWord.word);
+  const isLrn = currentWord && learned.has(currentWord.word);
+  const isMst = currentWord && masteredWords.has(currentWord.word);
+
+  /* ─── Render ──────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-orange-600 mb-2 drop-shadow-lg">
-            🎯 Vocabulary Master
-          </h1>
-          <p className="text-gray-700">Học từ vựng tiếng Anh từ A1 đến C2 một cách hiệu quả</p>
+    <div style={{ minHeight:'100vh', background:T.bg }}>
+      <Styles />
+
+      {/* App Bar */}
+      <header style={{
+        background:T.surface, borderBottom:`1px solid ${T.outline}`,
+        position:'sticky', top:0, zIndex:50, boxShadow:'0 1px 4px rgba(0,0,0,.08)',
+      }}>
+        <div style={{ maxWidth:720, margin:'0 auto', padding:'0 16px', height:60, display:'flex', alignItems:'center', gap:12 }}>
+          <div style={{ width:38, height:38, borderRadius:11, background:`linear-gradient(135deg,${T.navy},${T.blue})`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:`0 2px 8px rgba(26,35,126,.3)` }}>
+            <GraduationCap style={{ width:20, height:20, color:'#FFF' }} />
+          </div>
+          <div style={{ flex:1 }}>
+            <p style={{ fontWeight:800, fontSize:16, color:T.hi, lineHeight:1.1 }}>Vocabulary Master</p>
+            <p style={{ fontSize:11, color:T.med, fontWeight:500 }}>A1 → C2 · Smart Learning</p>
+          </div>
+          {/* breadcrumb chip */}
+          {selectedTopic && (
+            <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+              {selectedSubtopic && (
+                <span style={{ background:T.blueL, color:T.blue, borderRadius:20, padding:'3px 12px', fontSize:12, fontWeight:700 }}>
+                  {selectedSubtopic}
+                </span>
+              )}
+            </div>
+          )}
         </div>
+      </header>
 
-        {/* Mode Selection */}
-        {!selectedTopic && (
-          <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {[
-                { id: 'learn', icon: BookOpen, label: 'Học', color: 'from-blue-400 to-blue-500' },
-                { id: 'flashcard', icon: Brain, label: 'Flashcard', color: 'from-orange-400 to-orange-500' },
-                { id: 'quiz', icon: Zap, label: 'Quiz', color: 'from-amber-300 to-orange-400' }
-              ].map(m => (
-                <button
-                  key={m.id}
-                  onClick={() => setMode(m.id)}
-                  className={`p-6 rounded-2xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg ${
-                    mode === m.id
-                      ? `bg-gradient-to-r ${m.color} text-white shadow-xl`
-                      : `bg-white text-gray-700 shadow hover:shadow-md`
-                  }`}
-                >
-                  <m.icon className="w-8 h-8 mx-auto mb-2" />
-                  {m.label}
-                </button>
+      <main style={{ maxWidth:720, margin:'0 auto', padding:'24px 16px 80px' }}>
+
+        {/* Loading */}
+        {!dataLoaded && (
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:100, gap:16 }}>
+            <div className="spin" style={{ width:40, height:40, borderRadius:'50%', border:`3px solid ${T.outline}`, borderTopColor:T.blue }} />
+            <p style={{ color:T.med, fontSize:14 }}>Loading vocabulary data…</p>
+          </div>
+        )}
+
+        {/* ── Topic List ── */}
+        {dataLoaded && !selectedTopic && (
+          <div className="fade-up">
+            <div style={{ marginBottom:24 }}>
+              <p style={{ fontSize:24, fontWeight:800, color:T.hi, marginBottom:4, letterSpacing:'-0.01em' }}>Choose a Topic</p>
+              <p style={{ fontSize:14, color:T.med }}>Select a category to start learning</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {topics.map(topic => (
+                <TopicCard
+                  key={topic}
+                  onClick={() => setSelectedTopic(topic)}
+                  title={topic}
+                  sub={`${Object.keys(vocabularyData[topic] || {}).length} subtopics`}
+                  tags={Object.keys(vocabularyData[topic] || {}).slice(0, 3)}
+                />
               ))}
             </div>
           </div>
         )}
 
-        {/* Topic Selection */}
-        {selectedTopic === null && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {topics.map(topic => (
-              <button
-                key={topic}
-                onClick={() => handleSelectTopic(topic)}
-                className="p-6 bg-white hover:bg-amber-50 rounded-xl shadow-md hover:shadow-lg transition-all text-left hover:translate-y-[-2px] border-2 border-orange-200"
-              >
-                <h3 className="font-bold text-lg text-orange-600 mb-2">{topic}</h3>
-                <p className="text-sm text-gray-600">
-                  {Object.keys(vocabularyData[topic]).length} chủ đề
-                </p>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Subtopic Selection */}
-        {selectedTopic && selectedSubtopic === null && (
-          <div>
-            <button
-              onClick={() => setSelectedTopic(null)}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-semibold transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Quay lại
+        {/* ── Subtopic List ── */}
+        {dataLoaded && selectedTopic && !selectedSubtopic && vocabularyData[selectedTopic] && (
+          <div className="fade-up">
+            <button onClick={() => setSelectedTopic(null)} style={{ display:'flex', alignItems:'center', gap:4, color:T.blue, fontWeight:600, fontSize:14, marginBottom:20, background:'none', border:'none', cursor:'pointer', padding:0 }}>
+              <ChevronLeft style={{ width:16, height:16 }} /> All Topics
             </button>
-            <h2 className="text-2xl font-bold text-orange-600 mb-6">{selectedTopic}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.keys(vocabularyData[selectedTopic]).map(subtopic => (
-                <button
-                  key={subtopic}
-                  onClick={() => handleSelectSubtopic(subtopic)}
-                  className="p-6 bg-white hover:bg-amber-50 rounded-xl shadow-md hover:shadow-lg transition-all text-left hover:translate-y-[-2px] border-2 border-orange-200"
-                >
-                  <h3 className="font-bold text-lg text-orange-600 mb-2">{subtopic}</h3>
-                  <p className="text-sm text-gray-600">
-                    {vocabularyData[selectedTopic][subtopic].length} từ
-                  </p>
-                </button>
+            <p style={{ fontSize:24, fontWeight:800, color:T.hi, marginBottom:4 }}>{selectedTopic}</p>
+            <p style={{ fontSize:14, color:T.med, marginBottom:20 }}>Select a subtopic to study</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {Object.keys(vocabularyData[selectedTopic]).map(sub => (
+                <TopicCard
+                  key={sub}
+                  onClick={() => handleSelectSubtopic(sub)}
+                  title={sub}
+                  sub={`${vocabularyData[selectedTopic][sub]?.length || 0} words`}
+                />
               ))}
             </div>
           </div>
         )}
 
-        {/* Learning Interface */}
+        {/* ── Learning Interface ── */}
         {currentWords.length > 0 && currentWord && (
-          <div>
-            {/* Top Controls */}
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <div className="fade-up">
+
+            {/* Top bar */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:10 }}>
               <button
-                onClick={() => {
-                  setSelectedTopic(null);
-                  setSelectedSubtopic(null);
-                  setCurrentWords([]);
-                  setFilteredWords([]);
-                  setCurrentIndex(0);
-                  setSearchQuery('');
-                  setQuizMode(false);
-                }}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition"
+                onClick={() => { setSelectedSubtopic(null); setCurrentWords([]); setSearchQuery(''); setQuizMode(false); }}
+                style={{ display:'flex', alignItems:'center', gap:4, color:T.blue, fontWeight:600, fontSize:14, background:'none', border:'none', cursor:'pointer', padding:0 }}
               >
-                <ChevronLeft className="w-4 h-4" />
-                Quay lại
+                <ChevronLeft style={{ width:16, height:16 }} /> {selectedSubtopic}
               </button>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowStats(!showStats)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition shadow-md"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  Thống kê
-                </button>
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="flex items-center gap-2 px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg font-semibold transition shadow-md"
-                >
-                  <Settings className="w-4 h-4" />
-                  Cài đặt
-                </button>
+              <div style={{ display:'flex', gap:8 }}>
+                {[
+                  { label:'Stats', icon:BarChart3, active:showStats, setFn:()=>{ setShowStats(s=>!s); setShowSettings(false); }, activeColor:T.blue, activeBg:T.blueL },
+                  { label:'Settings', icon:Settings, active:showSettings, setFn:()=>{ setShowSettings(s=>!s); setShowStats(false); }, activeColor:T.orange, activeBg:T.orangeL },
+                ].map(({ label, icon:Icon, active, setFn, activeColor, activeBg }) => (
+                  <button
+                    key={label}
+                    onClick={setFn}
+                    style={{
+                      display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:10,
+                      fontSize:13, fontWeight:700, cursor:'pointer', transition:'all .15s',
+                      background: active ? activeBg : T.surface,
+                      color: active ? activeColor : T.med,
+                      border: `1.5px solid ${active ? activeColor : T.outline}`,
+                      boxShadow:'0 1px 3px rgba(0,0,0,.06)',
+                    }}
+                  >
+                    <Icon style={{ width:14, height:14 }} /> {label}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Settings Panel */}
             {showSettings && (
-              <div className="bg-white border-2 border-orange-400 rounded-xl p-6 mb-6 shadow-lg">
-                <h3 className="text-orange-600 font-bold mb-4">⚙️ Cài Đặt Phát Âm</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-gray-700 font-semibold block mb-2">Tốc độ: {rate.toFixed(1)}x</label>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2"
-                      step="0.1"
-                      value={rate}
-                      onChange={(e) => setRate(parseFloat(e.target.value))}
-                      className="w-full accent-orange-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-gray-700 font-semibold block mb-2">Cao độ: {pitch.toFixed(1)}</label>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2"
-                      step="0.1"
-                      value={pitch}
-                      onChange={(e) => setPitch(parseFloat(e.target.value))}
-                      className="w-full accent-orange-500"
-                    />
-                  </div>
+              <div className="fade-up" style={{ background:T.orangeL, border:`1.5px solid #FFCCBC`, borderRadius:16, padding:'18px 20px', marginBottom:14 }}>
+                <p style={{ fontWeight:700, fontSize:13, color:T.orange, marginBottom:14, display:'flex', alignItems:'center', gap:6 }}>
+                  <Settings style={{ width:14, height:14 }} /> Settings
+                </p>
+                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                  {[
+                    { label:'Shuffle', icon:Shuffle, bg:T.blue, color:'#FFF', fn:()=>{ setCurrentWords(w=>doShuffle(w)); setCurrentIndex(0); } },
+                    { label:'Restart', icon:RotateCcw, bg:T.surface, color:T.med, fn:()=>{ setCurrentIndex(0); setIsFlipped(false); }, border:T.outline },
+                    { label:'Clear Progress', icon:Trash2, bg:'#FFEBEE', color:'#C62828', fn:()=>{ if(window.confirm('Clear all progress?')){ setFavorited(new Set()); setLearned(new Set()); setMasteredWords(new Set()); } }, border:'#FFCDD2' },
+                  ].map(({ label, icon:Icon, bg, color, fn, border }) => (
+                    <button key={label} onClick={fn} style={{ display:'flex', alignItems:'center', gap:6, padding:'9px 16px', borderRadius:10, fontSize:13, fontWeight:700, cursor:'pointer', background:bg, color, border:`1.5px solid ${border||'transparent'}`, transition:'opacity .15s' }}
+                      onMouseEnter={e=>e.currentTarget.style.opacity='.85'} onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                      <Icon style={{ width:14, height:14 }} /> {label}
+                    </button>
+                  ))}
                 </div>
-                <button
-                  onClick={clearAllData}
-                  className="mt-4 flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition shadow-md"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Xóa toàn bộ dữ liệu
-                </button>
-              </div>
-            )}
-
-            {/* Search Bar */}
-            {!quizMode && (
-              <div className="mb-6">
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm từ, dịch nghĩa, hoặc ví dụ..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border-2 border-orange-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:border-orange-500 transition shadow-md"
-                />
+                <p style={{ marginTop:14, fontSize:12, color:T.med }}>
+                  <kbd style={{ background:T.surface, border:`1px solid ${T.outline}`, borderRadius:5, padding:'1px 6px', fontFamily:'monospace', fontSize:11 }}>←</kbd>{' '}
+                  <kbd style={{ background:T.surface, border:`1px solid ${T.outline}`, borderRadius:5, padding:'1px 6px', fontFamily:'monospace', fontSize:11 }}>→</kbd>{' '}
+                  Navigate &nbsp;·&nbsp;
+                  <kbd style={{ background:T.surface, border:`1px solid ${T.outline}`, borderRadius:5, padding:'1px 6px', fontFamily:'monospace', fontSize:11 }}>Space</kbd>{' '}
+                  Flip card
+                </p>
               </div>
             )}
 
             {/* Stats Panel */}
             {showStats && (
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-                <div className="bg-gradient-to-br from-blue-400 to-blue-500 p-4 rounded-lg text-center shadow-lg">
-                  <p className="text-2xl font-bold text-white">{stats.total}</p>
-                  <p className="text-xs text-blue-100">Tổng từ</p>
-                </div>
-                <div className="bg-gradient-to-br from-orange-400 to-orange-500 p-4 rounded-lg text-center shadow-lg">
-                  <p className="text-2xl font-bold text-white">{stats.mastered}</p>
-                  <p className="text-xs text-orange-100">Đã nắm vững</p>
-                </div>
-                <div className="bg-gradient-to-br from-amber-300 to-amber-400 p-4 rounded-lg text-center shadow-lg">
-                  <p className="text-2xl font-bold text-white">{stats.learned}</p>
-                  <p className="text-xs text-white">Đã học</p>
-                </div>
-                <div className="bg-gradient-to-br from-rose-400 to-rose-500 p-4 rounded-lg text-center shadow-lg">
-                  <p className="text-2xl font-bold text-white">{stats.favorited}</p>
-                  <p className="text-xs text-rose-100">Yêu thích</p>
-                </div>
-                <div className="bg-gradient-to-br from-gray-400 to-gray-500 p-4 rounded-lg text-center shadow-lg">
-                  <p className="text-2xl font-bold text-white">{stats.remaining}</p>
-                  <p className="text-xs text-gray-100">Còn lại</p>
-                </div>
-              </div>
-            )}
-
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-gray-700">
-                  {currentIndex + 1}/{displayedWords.length}
-                </span>
-                <span className="text-sm font-semibold text-gray-700">
-                  {Math.round(progressPercent)}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-300 rounded-full h-3 overflow-hidden shadow-md">
-                <div
-                  className="bg-gradient-to-r from-blue-500 via-orange-400 to-amber-300 h-full transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Quiz Mode */}
-            {quizMode ? (
-              <div className="mb-8">
-                <div className="bg-white border-4 border-orange-400 rounded-2xl p-8 text-center min-h-96 flex flex-col justify-center shadow-2xl">
-                  <p className="text-orange-500 text-sm mb-4 uppercase tracking-widest font-bold">Câu hỏi {currentIndex + 1}/{displayedWords.length}</p>
-                  <p className="text-4xl font-bold text-orange-600 mb-8">{currentWord.vietnamese}</p>
-                  <p className="text-gray-700 mb-6 font-semibold">Chọn đáp án đúng:</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {quizOptions.map((option, idx) => {
-                      const isCorrect = option === quizCorrectAnswer;
-                      const isSelected = option === selectedAnswer;
-                      
-                      let buttonClass = 'bg-white border-2 border-gray-300 text-gray-800 hover:border-orange-400';
-                      
-                      if (quizAnswered) {
-                        if (isCorrect) {
-                          buttonClass = 'bg-green-100 border-2 border-green-500 text-green-800';
-                        } else if (isSelected && !isCorrect) {
-                          buttonClass = 'bg-red-100 border-2 border-red-500 text-red-800';
-                        }
-                      }
-
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => !quizAnswered && handleQuizAnswer(option)}
-                          disabled={quizAnswered}
-                          className={`p-4 rounded-lg font-semibold transition ${buttonClass} ${quizAnswered ? 'cursor-default' : 'cursor-pointer'}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span>{option}</span>
-                            {quizAnswered && isCorrect && <Check className="w-5 h-5 text-green-600" />}
-                            {quizAnswered && isSelected && !isCorrect && <X className="w-5 h-5 text-red-600" />}
-                          </div>
-                        </button>
-                      );
-                    })}
+              <div className="fade-up grid grid-cols-2 sm:grid-cols-5 gap-3" style={{ marginBottom:14 }}>
+                {[
+                  { v:stats.total,     l:'Total',     grad:`linear-gradient(135deg,${T.navy},${T.blue})`,    Icon:BookOpen },
+                  { v:stats.mastered,  l:'Mastered',  grad:`linear-gradient(135deg,${T.orange},#FF6D00)`,   Icon:Trophy },
+                  { v:stats.learned,   l:'Learned',   grad:`linear-gradient(135deg,#1E88E5,#42A5F5)`,       Icon:CheckCircle },
+                  { v:stats.favorited, l:'Favorites', grad:`linear-gradient(135deg,#E53935,#F48FB1)`,        Icon:Heart },
+                  { v:stats.remaining, l:'Remaining', flat:true },
+                ].map(({ v, l, grad, flat, Icon }) => (
+                  <div key={l} style={{
+                    background: flat?T.surface:grad, borderRadius:16, padding:'16px 10px', textAlign:'center',
+                    boxShadow: flat?`0 1px 3px rgba(0,0,0,.08)`:'0 4px 14px rgba(0,0,0,.14)',
+                    border: flat?`1.5px solid ${T.outline}`:'none',
+                  }}>
+                    {Icon && <Icon style={{ width:15, height:15, color:flat?T.med:'rgba(255,255,255,.8)', margin:'0 auto 6px', display:'block' }} />}
+                    <p style={{ fontSize:26, fontWeight:800, color:flat?T.hi:'#FFF', lineHeight:1 }}>{v}</p>
+                    <p style={{ fontSize:11, color:flat?T.med:'rgba(255,255,255,.75)', marginTop:3, fontWeight:600 }}>{l}</p>
                   </div>
-
-                  {quizAnswered && (
-                    <div className={`mt-6 p-4 rounded-lg font-semibold text-lg ${
-                      selectedAnswer === quizCorrectAnswer
-                        ? 'bg-green-100 border-2 border-green-500 text-green-800'
-                        : 'bg-red-100 border-2 border-red-500 text-red-800'
-                    }`}>
-                      {selectedAnswer === quizCorrectAnswer ? (
-                        <div className="flex items-center gap-2">
-                          <Check className="w-6 h-6" />
-                          Chính xác! ✨
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <X className="w-6 h-6" />
-                            Sai rồi!
-                          </div>
-                          <p className="text-sm">Đáp án đúng: <span className="font-bold">{quizCorrectAnswer}</span></p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Card */
-              <div
-                onClick={() => setIsFlipped(!isFlipped)}
-                className="mb-8 cursor-pointer"
-              >
-                <div className={`min-h-96 bg-gradient-to-br from-white to-amber-50 rounded-2xl shadow-xl p-8 flex flex-col items-center justify-center transition-all duration-500 transform hover:shadow-2xl hover:scale-102 border-4 ${
-                  isMastered ? 'border-orange-400' : 'border-orange-200'
-                }`}>
-                  {!isFlipped ? (
-                    <div className="text-center w-full">
-                      <p className="text-gray-500 text-sm mb-4 uppercase tracking-widest">Từ Vựng</p>
-                      <p className="text-5xl md:text-6xl font-bold text-blue-600 mb-4 break-words">{currentWord.word}</p>
-                      <p className="text-gray-600 text-lg italic mb-8">{currentWord.phonetic}</p>
-                      <p className="text-gray-600 text-lg">Bấm để xem dịch nghĩa</p>
-                      <div className="mt-8 inline-block bg-amber-100 px-4 py-2 rounded-lg border-2 border-orange-300">
-                        <p className="text-xs text-gray-700">Level: <span className="text-orange-600 font-bold">{currentWord.level}</span></p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center w-full">
-                      <p className="text-orange-500 text-sm mb-4 uppercase tracking-widest">Dịch Nghĩa</p>
-                      <p className="text-4xl font-bold text-orange-600 mb-6 break-words">{currentWord.vietnamese}</p>
-                      <div className="bg-blue-50 p-4 rounded-lg mb-6 text-left border-2 border-blue-200">
-                        <p className="text-xs text-gray-700 mb-2 uppercase font-bold">Loại từ</p>
-                        <p className="text-gray-800 font-semibold">{currentWord.pos}</p>
-                      </div>
-                      <div className="bg-amber-100 p-4 rounded-lg text-left border-2 border-orange-300">
-                        <p className="text-xs text-gray-700 mb-2 uppercase font-bold">Ví dụ</p>
-                        <p className="text-gray-800 italic">{currentWord.example}</p>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSpeakExample();
-                          }}
-                          className={`mt-3 flex items-center gap-2 px-3 py-1 rounded text-sm font-semibold transition shadow-md ${
-                            sentenceId === `example-${currentIndex}`
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-blue-300 text-white hover:bg-blue-400'
-                          }`}
-                        >
-                          <Volume2 className="w-4 h-4" />
-                          Phát ví dụ
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
-              <button
-                onClick={handleSpeak}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition shadow-md ${
-                  playingId === `word-${currentIndex}`
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white'
-                }`}
-              >
-                <Volume2 className="w-5 h-5" />
-                <span className="hidden md:inline">Phát</span>
-              </button>
-              <button
-                onClick={toggleFavorite}
-                className={`px-4 py-3 rounded-lg font-semibold transition flex items-center justify-center shadow-md ${
-                  isFavorited
-                    ? 'bg-rose-500 text-white'
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                }`}
-              >
-                ❤️ <span className="hidden md:inline">Yêu</span>
-              </button>
-              <button
-                onClick={toggleLearned}
-                className={`px-4 py-3 rounded-lg font-semibold transition flex items-center justify-center shadow-md ${
-                  isLearned
-                    ? 'bg-amber-400 text-white'
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                }`}
-              >
-                📚 <span className="hidden md:inline">Học</span>
-              </button>
-              <button
-                onClick={toggleMastered}
-                className={`px-4 py-3 rounded-lg font-semibold transition flex items-center justify-center shadow-md ${
-                  isMastered
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                }`}
-              >
-                ✓ <span className="hidden md:inline">Nắm</span>
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center shadow-md"
-              >
-                <RotateCcw className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Secondary Actions */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-              {!quizMode && (
-                <>
-                  <button
-                    onClick={startQuiz}
-                    className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <Zap className="w-4 h-4" />
-                    <span className="hidden md:inline">Bắt đầu Quiz</span>
-                    <span className="md:hidden">Quiz</span>
-                  </button>
-                  <button
-                    onClick={copyToClipboard}
-                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <Copy className="w-4 h-4" />
-                    <span className="hidden md:inline">Sao chép</span>
-                  </button>
-                  <button
-                    onClick={exportToCSV}
-                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span className="hidden md:inline">Tải CSV</span>
-                  </button>
-                  <button
-                    onClick={() => alert('Chia sẻ tính năng sẽ sớm được cập nhật!')}
-                    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span className="hidden md:inline">Chia sẻ</span>
-                  </button>
-                </>
-              )}
-              {quizMode && (
-                <button
-                  onClick={() => setQuizMode(false)}
-                  className="col-span-2 md:col-span-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition shadow-md"
-                >
-                  Kết thúc Quiz (Điểm: {quizScore}/{displayedWords.length})
+            {/* Search */}
+            <div style={{ position:'relative', marginBottom:16 }}>
+              <Search style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', width:15, height:15, color:T.lo }} />
+              <input
+                type="search"
+                placeholder="Search words or meanings…"
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); setCurrentIndex(0); }}
+                style={{ width:'100%', padding:'11px 40px', borderRadius:12, border:`1.5px solid ${T.outline}`, background:T.surface, color:T.hi, fontSize:14, outline:'none', boxShadow:'0 1px 3px rgba(0,0,0,.06)', transition:'border .15s, box-shadow .15s' }}
+                onFocus={e => { e.target.style.borderColor=T.blue; e.target.style.boxShadow=`0 0 0 3px rgba(21,101,192,.1)`; }}
+                onBlur={e => { e.target.style.borderColor=T.outline; e.target.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'; }}
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:T.lo, padding:4, display:'flex' }}>
+                  <X style={{ width:15, height:15 }} />
                 </button>
               )}
             </div>
 
-           {/* Navigation */}
-            <div className="space-y-3">
-              {/* Progress Indicator */}
-              <div className="bg-white rounded-xl p-4 shadow-lg border border-orange-200">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-bold text-gray-700">{currentIndex + 1}/{displayedWords.length}</span>
-                  <span className="text-sm font-bold text-blue-600">{Math.round(progressPercent)}%</span>
-                </div>
-                
-                {/* Mini dots grid */}
-                <div className="grid grid-cols-8 md:grid-cols-12 gap-1.5">
-                  {displayedWords.map((_, idx) => {
-                    const isMasteredWord = displayedWords[idx] && masteredWords.has(displayedWords[idx].word);
-                    const isCurrentWord = idx === currentIndex;
-                    
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setCurrentIndex(idx);
-                          setIsFlipped(false);
-                          setQuizAnswered(false);
-                          setSelectedAnswer(null);
-                          if (quizMode) generateQuizOptions(idx);
-                        }}
-                        className={`relative w-full aspect-square rounded-lg transition-all font-semibold text-[10px] flex items-center justify-center ${
-                          isCurrentWord
-                            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg scale-110'
-                            : isMasteredWord
-                            ? 'bg-gradient-to-br from-green-400 to-green-500 text-white shadow-md hover:scale-105'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
-                        }`}
-                      >
-                        {idx + 1}
-                        {isMasteredWord && !isCurrentWord && (
-                          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-yellow-400 rounded-full"></div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Progress */}
+            <div style={{ marginBottom:20 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                <span style={{ fontSize:13, fontWeight:700, color:T.med }}>{currentIndex+1} <span style={{ color:T.lo }}>/ {displayedWords.length}</span></span>
+                {quizMode && (
+                  <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:12, fontWeight:700, color:T.orange }}>
+                    <Trophy style={{ width:12, height:12 }} /> {quizScore} pts
+                  </span>
+                )}
+                <span style={{ fontSize:13, fontWeight:800, color:T.blue }}>{Math.round(progress)}%</span>
               </div>
+              <div style={{ height:6, borderRadius:9999, background:'#E8EAED', overflow:'hidden', boxShadow:'inset 0 1px 2px rgba(0,0,0,.06)' }}>
+                <div style={{
+                  height:'100%', borderRadius:9999, transition:'width .5s cubic-bezier(.4,0,.2,1)',
+                  width:`${progress}%`,
+                  background:`linear-gradient(90deg,${T.navy} 0%,${T.blue} 50%,${T.orange} 100%)`,
+                }} />
+              </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-3 gap-2">
+            {/* Card or Quiz */}
+            {quizMode
+              ? <QuizMode word={currentWord} correctAnswer={quizCorrectAnswer} options={quizOptions} onAnswer={handleQuizAnswer} answered={quizAnswered} selectedAnswer={selectedAnswer} />
+              : <VocabCard word={currentWord} flipped={isFlipped} onFlip={() => setIsFlipped(f => !f)} />
+            }
+
+            {/* Navigation */}
+            <div style={{ marginTop:20 }}>
+              {/* Prev / Quiz / Next */}
+              <div className="grid grid-cols-3 gap-3" style={{ marginBottom:10 }}>
                 <button
-                  onClick={handlePrev}
+                  onClick={() => navigate(-1)}
                   disabled={currentIndex === 0}
-                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg font-semibold hover:from-gray-500 hover:to-gray-600 transition disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="text-sm">Trước</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (quizMode) {
-                      setQuizMode(false);
-                    } else {
-                      startQuiz();
-                    }
+                  style={{
+                    padding:'14px 0', borderRadius:14, fontSize:14, fontWeight:700, cursor: currentIndex===0?'not-allowed':'pointer',
+                    background:T.surface, color:T.med, border:`1.5px solid ${T.outline}`,
+                    boxShadow:'0 1px 3px rgba(0,0,0,.06)', opacity:currentIndex===0?.4:1,
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:4, transition:'all .15s',
                   }}
-                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg font-semibold hover:from-amber-500 hover:to-orange-600 transition shadow-md"
+                  onMouseEnter={e => { if(currentIndex>0){ e.currentTarget.style.borderColor=T.blue; } }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=T.outline; }}
                 >
-                  <Zap className="w-4 h-4" />
-                  <span className="text-sm">{quizMode ? 'Dừng' : 'Quiz'}</span>
+                  <ChevronLeft style={{ width:16, height:16 }} /> Prev
                 </button>
 
                 <button
-                  onClick={handleNext}
-                  disabled={currentIndex === displayedWords.length - 1}
-                  className="flex items-center justify-center gap-1 px-3 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
+                  onClick={quizMode ? ()=>{ setQuizMode(false); setQuizAnswered(false); setSelectedAnswer(null); } : startQuiz}
+                  style={{
+                    padding:'14px 0', borderRadius:14, fontSize:14, fontWeight:800, cursor:'pointer',
+                    background: quizMode ? `linear-gradient(135deg,#5F6368,#9AA0A6)` : `linear-gradient(135deg,${T.orange},#FF6D00)`,
+                    color:'#FFF', border:'none',
+                    boxShadow: quizMode ? '0 2px 8px rgba(0,0,0,.15)' : `0 4px 14px rgba(230,81,0,.3)`,
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:6, transition:'opacity .15s',
+                  }}
+                  onMouseEnter={e=>e.currentTarget.style.opacity='.9'} onMouseLeave={e=>e.currentTarget.style.opacity='1'}
                 >
-                  <span className="text-sm">Tiếp</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <Zap style={{ width:15, height:15 }} />
+                  {quizMode ? 'Stop' : 'Quiz'}
+                </button>
+
+                <button
+                  onClick={() => navigate(1)}
+                  disabled={currentIndex === displayedWords.length - 1}
+                  style={{
+                    padding:'14px 0', borderRadius:14, fontSize:14, fontWeight:800, cursor: currentIndex===displayedWords.length-1?'not-allowed':'pointer',
+                    background:`linear-gradient(135deg,${T.navy},${T.blue})`, color:'#FFF', border:'none',
+                    boxShadow:`0 4px 14px rgba(21,101,192,.25)`,
+                    opacity: currentIndex===displayedWords.length-1?.4:1,
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:4, transition:'opacity .15s',
+                  }}
+                  onMouseEnter={e => { if(currentIndex<displayedWords.length-1) e.currentTarget.style.opacity='.9'; }}
+                  onMouseLeave={e => e.currentTarget.style.opacity = currentIndex===displayedWords.length-1?'0.4':'1'}
+                >
+                  Next <ChevronRight style={{ width:16, height:16 }} />
                 </button>
               </div>
 
-              {/* Stats Footer */}
-              <div className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg p-3 border border-orange-200 shadow-md">
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  <div>
-                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-sm">✓</div>
-                    <p className="text-[10px] text-gray-600 mb-0.5">Nắm vững</p>
-                    <p className="text-sm font-bold text-blue-600">{stats.mastered}</p>
-                  </div>
-                  <div>
-                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm">📚</div>
-                    <p className="text-[10px] text-gray-600 mb-0.5">Đã học</p>
-                    <p className="text-sm font-bold text-amber-600">{stats.learned}</p>
-                  </div>
-                  <div>
-                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm">❤️</div>
-                    <p className="text-[10px] text-gray-600 mb-0.5">Yêu thích</p>
-                    <p className="text-sm font-bold text-rose-600">{stats.favorited}</p>
-                  </div>
-                  <div>
-                    <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-sm">⏳</div>
-                    <p className="text-[10px] text-gray-600 mb-0.5">Còn lại</p>
-                    <p className="text-sm font-bold text-gray-600">{stats.remaining}</p>
-                  </div>
-                </div>
-            
+              {/* Action Row */}
+              <div style={{ display:'flex', gap:8 }}>
+                <ActionBtn onClick={()=>currentWord&&toggle(favorited,setFavorited,currentWord.word)} icon={Heart}        label="Favorite" active={isFav} activeBg="#E53935" />
+                <ActionBtn onClick={()=>currentWord&&toggle(learned,setLearned,currentWord.word)}     icon={BookOpen}     label="Learned"  active={isLrn} activeBg={`linear-gradient(135deg,${T.navy},${T.blue})`} />
+                <ActionBtn onClick={()=>currentWord&&toggle(masteredWords,setMasteredWords,currentWord.word)} icon={CheckCircle} label="Mastered" active={isMst} activeBg={`linear-gradient(135deg,${T.orange},#FF6D00)`} />
+                <ActionBtn onClick={speak}                                                             icon={Volume2}      label="Speak"    active={false} />
               </div>
             </div>
+
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

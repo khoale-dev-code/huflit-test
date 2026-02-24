@@ -1,9 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // ✅ CRITICAL: Complete content paths for CSS purging
   content: [
     './index.html',
-    './src/**/*.{js,jsx,ts,tsx}', // Add all paths
+    './src/**/*.{js,jsx,ts,tsx}',
+    './src/components/**/*.{js,jsx}',
+    './src/pages/**/*.{js,jsx}',
+    './src/admin/**/*.{js,jsx}',
+    './src/hooks/**/*.{js,jsx}',
+    './src/layout/**/*.{js,jsx}',
+    './src/utils/**/*.{js,jsx}',
+    // Add any other directories with Tailwind classes
   ],
+  
   theme: {
     extend: {
       fontFamily: {
@@ -111,7 +120,7 @@ export default {
         'xl': '1280px',
         '2xl': '1536px',
       },
-      // Thêm max-width responsive
+      // Responsive max-width
       maxWidth: {
         'screen-xs': '320px',
         'screen-sm': '480px',
@@ -122,9 +131,18 @@ export default {
       },
     },
   },
+  
+  // ✅ Safelist dynamic classes that might not be detected
+  safelist: [
+    // Tailwind defaults
+    { pattern: /^text-(slate|gray|red|blue|green|yellow|purple)-(50|100|200|300|400|500|600|700|800|900)$/ },
+    { pattern: /^bg-(slate|gray|red|blue|green|yellow|purple)-(50|100|200|300|400|500|600|700|800|900)$/ },
+    { pattern: /^border-(slate|gray|red|blue|green|yellow|purple)-(50|100|200|300|400|500|600|700|800|900)$/ },
+  ],
+  
   plugins: [
     function ({ addBase, addComponents, addUtilities, theme }) {
-      // Add base styles to prevent overflow
+      // ✅ Add base styles to prevent overflow
       addBase({
         'html': {
           overflowX: 'hidden',
@@ -150,7 +168,7 @@ export default {
         },
       });
 
-      // Add custom utilities
+      // ✅ Add custom utilities
       addUtilities({
         '.letter-spacing-tight': {
           letterSpacing: '-0.3px',
@@ -230,7 +248,7 @@ export default {
         },
       });
 
-      // Add custom components with responsive improvements
+      // ✅ Add custom components with responsive improvements
       addComponents({
         '.btn-base': {
           '@apply px-4 py-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl font-bold cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 active:-translate-y-0.5 text-sm sm:text-base': {},
@@ -265,4 +283,4 @@ export default {
       });
     },
   ],
-};
+};  
