@@ -94,7 +94,15 @@ StatsGrid.displayName = 'StatsGrid';
 const BackButton = memo(({ onClick, show = true }) => {
   if (!show) return null;
   
- 
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Quay lại
+    </button>
+  );
 });
 
 BackButton.displayName = 'BackButton';
@@ -161,7 +169,7 @@ const PartTestContent = memo(({
                 <div className="w-1 h-6 rounded-full bg-indigo-600" />
                 <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
               </div>
-              <div className="relative z-20">
+              <div className="relative">
                 <MemoizedContentDisplay
                   partData={partData}
                   selectedPart={selectedPart}
@@ -194,7 +202,7 @@ const PartTestContent = memo(({
       ) : (
         <div className="space-y-6 mb-6">
           {/* Full Width - Content */}
-          <div className="space-y-3 relative z-20">
+          <div className="space-y-3 relative">
             <MemoizedContentDisplay
               partData={partData}
               selectedPart={selectedPart}

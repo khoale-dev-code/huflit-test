@@ -1,32 +1,28 @@
-import React, { useMemo, useCallback, useState, memo, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, memo } from 'react';
 import { 
   Save, CheckCircle, AlertCircle, Volume2, Check, 
-  ChevronRight, Sparkles, Clock, Zap, Lightbulb, X, Menu
+  Sparkles, Clock, Zap, Lightbulb, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useUnifiedAuth } from '../../hooks/useUnifiedAuth';
 
 // ==========================================
-// SUB-COMPONENT: Animated Progress Bar
+// Progress Bar (Simple)
 // ==========================================
 const ProgressBar = memo(({ percentage }) => (
-  <div className="relative h-2.5 w-full bg-slate-200 rounded-full overflow-hidden shadow-sm">
-    <div className="absolute inset-0 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200" />
-    
+  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
     <div
-      className="h-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 transition-all duration-900 ease-out rounded-full shadow-lg shadow-blue-500/30 relative overflow-hidden"
+      className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-500"
       style={{ width: `${percentage}%` }}
-    >
-      <div className="absolute inset-y-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[slide_3s_infinite] skew-x-12" />
-    </div>
+    />
   </div>
 ));
 
 ProgressBar.displayName = 'ProgressBar';
 
 // ==========================================
-// SUB-COMPONENT: Question Option
+// Question Option (Compact)
 // ==========================================
 const QuestionOption = memo(({ 
   option, 
@@ -38,50 +34,39 @@ const QuestionOption = memo(({
   const label = String.fromCharCode(65 + index);
 
   return (
-    <label className="block group cursor-pointer relative">
+    <label className="block cursor-pointer">
       <input
         type="radio"
         className="sr-only"
         name={`q-${questionId}`}
         checked={isSelected}
         onChange={onSelect}
-        aria-label={`${label}. ${option}`}
       />
       
       <div className={`
-        relative flex items-center gap-3 p-3 sm:p-3.5 rounded-lg border-2 
-        transition-all duration-300 ease-out overflow-hidden
+        flex items-center gap-3 p-3 rounded-lg border-2 transition-all
         ${isSelected 
-          ? 'border-blue-500 bg-gradient-to-r from-blue-50/80 to-cyan-50/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]' 
-          : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50 hover:shadow-md'}
+          ? 'border-blue-500 bg-blue-50' 
+          : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}
       `}>
-        {isSelected && (
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 animate-pulse" />
-        )}
-
         <div className={`
-          relative flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center 
-          text-xs font-bold transition-all duration-300
+          w-7 h-7 rounded-lg flex items-center justify-center font-semibold text-xs
           ${isSelected 
-            ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-md' 
-            : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'}
+            ? 'bg-blue-600 text-white' 
+            : 'bg-slate-100 text-slate-600'}
         `}>
           {label}
         </div>
         
         <span className={`
-          relative text-sm sm:text-[14px] leading-relaxed transition-colors duration-200 flex-1 line-clamp-2
-          ${isSelected ? 'text-slate-900 font-semibold' : 'text-slate-700 group-hover:text-slate-800'}
+          text-sm leading-snug flex-1
+          ${isSelected ? 'text-slate-900 font-semibold' : 'text-slate-700'}
         `}>
           {option}
         </span>
 
         {isSelected && (
-          <div className="relative animate-in zoom-in duration-300 flex-shrink-0">
-            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-500 flex items-center justify-center">
-              <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" strokeWidth={3} />
-            </div>
-          </div>
+          <Check className="w-5 h-5 text-blue-600 flex-shrink-0" />
         )}
       </div>
     </label>
@@ -91,24 +76,36 @@ const QuestionOption = memo(({
 QuestionOption.displayName = 'QuestionOption';
 
 // ==========================================
-// SUB-COMPONENT: Script Display
+// Script Display (Collapsible)
 // ==========================================
-const ScriptDisplay = memo(({ script }) => {
+const ScriptDisplay = memo(({ script, questionId }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   if (!script) return null;
 
   return (
-    <div className="mb-4 sm:mb-5 p-3 sm:p-4 bg-gradient-to-br from-blue-50/80 to-cyan-50/40 rounded-lg border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <div className="flex items-start gap-3">
-        <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" strokeWidth={2} />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">
-            📻 Bài nghe
-          </p>
-          <p className="text-[13px] sm:text-[13.5px] text-slate-700 leading-relaxed font-[450] break-words">
-            {script}
-          </p>
+    <div className="mb-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg p-4">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-start gap-3 text-left hover:opacity-70 transition-opacity"
+      >
+        <Volume2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <p className="font-bold text-blue-900 text-sm">🎧 Bài nghe</p>
+          {isExpanded && (
+            <p className="text-sm text-slate-700 leading-relaxed mt-2 break-words">
+              {script}
+            </p>
+          )}
         </div>
-      </div>
+        <div className="mt-0.5">
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-blue-600" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-blue-600" />
+          )}
+        </div>
+      </button>
     </div>
   );
 });
@@ -116,7 +113,7 @@ const ScriptDisplay = memo(({ script }) => {
 ScriptDisplay.displayName = 'ScriptDisplay';
 
 // ==========================================
-// SUB-COMPONENT: Question Card
+// Question Card (Larger, Better Spacing)
 // ==========================================
 const QuestionCard = memo(({ 
   question, 
@@ -127,35 +124,25 @@ const QuestionCard = memo(({
   questionNumber,
   totalQuestions 
 }) => {
-  const isAnswered = selectedAnswer !== undefined;
-
   return (
-    <article 
-      className="group relative bg-white border border-slate-200 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-blue-300 hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500 scroll-m-4"
-      role="region"
-      aria-label={`Question ${question.id}`}
-    >
-      <ScriptDisplay script={script} />
+    <article className="bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all">
+      <ScriptDisplay script={script} questionId={question.id} />
 
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-slate-200">
-        <div className="flex items-baseline gap-2 sm:gap-3 flex-1 min-w-0">
-          <span className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 text-white text-xs font-bold shadow-md">
-            {question.id}
-          </span>
-          
-          <h3 className="text-sm sm:text-[15px] font-semibold text-slate-900 leading-snug flex-1">
-            {question.question}
-          </h3>
-        </div>
+      <div className="flex items-baseline gap-3 mb-5">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white font-bold text-sm flex-shrink-0">
+          {question.id}
+        </span>
+        
+        <h3 className="text-base font-semibold text-slate-900 flex-1">
+          {question.question}
+        </h3>
 
-        <div className="flex-shrink-0">
-          <span className="inline-block text-[11px] sm:text-xs font-bold text-slate-500 bg-slate-100 px-2 sm:px-2.5 py-1 rounded-full whitespace-nowrap">
-            {questionNumber}/{totalQuestions}
-          </span>
-        </div>
+        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full flex-shrink-0">
+          {questionNumber}/{totalQuestions}
+        </span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5 mb-3">
         {options?.map((opt, i) => (
           <QuestionOption
             key={`${question.id}-${i}`}
@@ -168,10 +155,10 @@ const QuestionCard = memo(({
         ))}
       </div>
 
-      {isAnswered && selectedAnswer !== undefined && (
-        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="flex items-center gap-2 text-xs bg-emerald-50 p-2.5 sm:p-3 rounded-lg border border-emerald-200">
-            <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 flex-shrink-0" strokeWidth={2.5} />
+      {selectedAnswer !== undefined && (
+        <div className="pt-3 border-t border-slate-200 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 text-xs bg-emerald-50 p-2.5 rounded-lg border border-emerald-200">
+            <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             <span className="font-semibold text-emerald-900">
               ✓ Đã chọn: ({String.fromCharCode(65 + selectedAnswer)})
             </span>
@@ -185,458 +172,7 @@ const QuestionCard = memo(({
 QuestionCard.displayName = 'QuestionCard';
 
 // ==========================================
-// SUB-COMPONENT: Floating Progress Button (Mobile)
-// ==========================================
-const FloatingProgressButton = memo(({ 
-  onClick, 
-  answersCount, 
-  totalQuestions,
-  isAllAnswered 
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        fixed bottom-20 sm:bottom-16 md:bottom-12 right-6 lg:hidden z-40 
-        w-14 h-14 rounded-full shadow-lg transition-all duration-300
-        flex items-center justify-center font-bold text-sm
-        ${isAllAnswered
-          ? 'bg-gradient-to-br from-blue-600 to-cyan-500 hover:shadow-xl hover:scale-110 text-white'
-          : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-50'}
-      `}
-      aria-label="Show progress and submit"
-      disabled={!isAllAnswered}
-      title={`${answersCount}/${totalQuestions} answered`}
-    >
-      <span className="text-lg font-bold">
-        {answersCount}/{totalQuestions}
-      </span>
-    </button>
-  );
-});
-
-FloatingProgressButton.displayName = 'FloatingProgressButton';
-
-// ==========================================
-// SUB-COMPONENT: Mobile Sidebar Modal
-// ==========================================
-const MobileSidebarModal = memo(({ 
-  isOpen, 
-  onClose,
-  answersCount,
-  totalQuestions,
-  percentage,
-  isSignedIn,
-  handleSubmitWithSave,
-  isAllAnswered
-}) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-        onClick={onClose}
-        role="presentation"
-      />
-      
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 lg:hidden flex items-end">
-        <div className="w-full bg-white rounded-t-2xl shadow-2xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
-          {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="font-bold text-slate-900 text-lg">Tiến độ & Hành động</h2>
-            <button 
-              onClick={onClose} 
-              className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Close progress modal"
-            >
-              <X className="w-5 h-5 text-slate-600" />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
-            {/* Status Card */}
-            <div className="relative bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-white rounded-xl p-5 sm:p-6 shadow-lg overflow-hidden">
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-500/10 rounded-full blur-3xl" />
-
-              <div className="relative z-10 space-y-5">
-                <div>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    Trạng thái làm bài
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-                      {answersCount}
-                    </span>
-                    <span className="text-slate-400 text-sm font-semibold">/{totalQuestions} câu</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <ProgressBar percentage={percentage} />
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-                    <span>Hoàn thành: {Math.round(percentage)}%</span>
-                    <span>{totalQuestions - answersCount} còn lại</span>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg text-xs font-semibold text-center transition-all ${
-                  isAllAnswered 
-                    ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-200' 
-                    : 'bg-amber-500/20 border border-amber-400/50 text-amber-200'
-                }`}>
-                  {isAllAnswered 
-                    ? '✓ Sẵn sàng nộp bài!' 
-                    : `Cần trả lời thêm ${totalQuestions - answersCount} câu`}
-                </div>
-
-                <button
-                  disabled={!isAllAnswered}
-                  onClick={handleSubmitWithSave}
-                  className={`
-                    w-full group relative flex items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 px-3 sm:px-4 rounded-lg 
-                    font-bold text-xs sm:text-sm transition-all overflow-hidden
-                    ${isAllAnswered 
-                      ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-600/40 active:scale-95 cursor-pointer text-white' 
-                      : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-60'}
-                  `}
-                  aria-disabled={!isAllAnswered}
-                >
-                  {isAllAnswered && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-                  )}
-                  
-                  <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4 relative flex-shrink-0" strokeWidth={2} />
-                  <span className="relative whitespace-nowrap">
-                    {isSignedIn ? (
-                      <>
-                        <span className="inline sm:hidden">Nộp & Lưu</span>
-                        <span className="hidden sm:inline">Nộp & Lưu kết quả</span>
-                      </>
-                    ) : 'Nộp bài'}
-                  </span>
-                </button>
-
-                {!isSignedIn && (
-                  <div className="flex items-start gap-2 p-3 bg-amber-500/15 border border-amber-400/30 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                    <p className="text-xs text-amber-100/90 font-[450]">
-                      Đăng nhập để lưu kết quả và theo dõi tiến độ.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Tips Card */}
-            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-              <div className="flex items-center gap-2 mb-3">
-                <Lightbulb className="w-4 h-4 text-emerald-600" strokeWidth={2} />
-                <h4 className="text-sm font-bold text-slate-900">Mẹo làm bài</h4>
-              </div>
-              <ul className="space-y-2 text-xs text-slate-600 font-[450]">
-                <li className="flex gap-2">
-                  <span className="text-emerald-600 font-bold flex-shrink-0">•</span>
-                  <span>Chú ý từ khóa "trùng lặp" trong bài nghe</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-emerald-600 font-bold flex-shrink-0">•</span>
-                  <span>Đọc kỹ tất cả các đáp án trước khi chọn</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-emerald-600 font-bold flex-shrink-0">•</span>
-                  <span>Không để quá nhiều câu để cuối cùng</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Info Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white rounded-lg border border-slate-200 p-4 text-center">
-                <div className="flex justify-center mb-2">
-                  <Clock className="w-4 h-4 text-slate-600" strokeWidth={2} />
-                </div>
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                  Thời gian
-                </p>
-                <p className="text-sm font-bold text-slate-900">Tự do</p>
-              </div>
-
-              <div className="bg-white rounded-lg border border-slate-200 p-4 text-center">
-                <div className="flex justify-center mb-2">
-                  <Zap className="w-4 h-4 text-slate-600" strokeWidth={2} />
-                </div>
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                  Độ khó
-                </p>
-                <p className="text-sm font-bold text-slate-900">Trung bình</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-});
-
-MobileSidebarModal.displayName = 'MobileSidebarModal';
-
-// ==========================================
-// SUB-COMPONENT: Desktop Progress Sidebar
-// ==========================================
-const DesktopSidebar = memo(({ 
-  answersCount, 
-  totalQuestions, 
-  percentage,
-  isSignedIn,
-  handleSubmitWithSave,
-  isAllAnswered
-}) => {
-  return (
-    <aside className="hidden lg:flex flex-col w-80 h-screen sticky top-0 pt-4 pb-6 overflow-hidden">
-      {/* Scrollable Container */}
-      <div className="flex-1 overflow-y-auto pr-3 space-y-4 scroll-smooth scrollbar-hide">
-        {/* Status Card */}
-        <div className="relative bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-lg overflow-hidden flex-shrink-0">
-          <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-500/10 rounded-full blur-3xl" />
-
-          <div className="relative z-10 space-y-5">
-            <div>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
-                Trạng thái làm bài
-              </p>
-              <p className="text-2xl font-bold">Tiến độ</p>
-            </div>
-
-            <div className="text-center">
-              <span className="text-4xl font-black bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-                {answersCount}
-              </span>
-              <p className="text-slate-400 text-xs font-semibold mt-1">/{totalQuestions} câu</p>
-            </div>
-
-            <div className="space-y-2">
-              <ProgressBar percentage={percentage} />
-              <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-                <span>Hoàn thành: {Math.round(percentage)}%</span>
-                <span>{totalQuestions - answersCount} còn</span>
-              </div>
-            </div>
-
-            <div className={`p-3 rounded-lg text-xs font-semibold text-center transition-all ${
-              isAllAnswered 
-                ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-200' 
-                : 'bg-amber-500/20 border border-amber-400/50 text-amber-200'
-            }`}>
-              {isAllAnswered 
-                ? '✓ Sẵn sàng nộp!' 
-                : `Cần ${totalQuestions - answersCount} câu`}
-            </div>
-
-            <button
-              disabled={!isAllAnswered}
-              onClick={handleSubmitWithSave}
-              className={`
-                w-full group relative flex items-center justify-center gap-2 py-3 px-4 rounded-lg 
-                font-bold text-xs sm:text-sm transition-all overflow-hidden
-                ${isAllAnswered 
-                  ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-600/40 active:scale-95 cursor-pointer text-white' 
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-60'}
-              `}
-              aria-disabled={!isAllAnswered}
-            >
-              {isAllAnswered && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-              )}
-              
-              <Save className="w-4 h-4 relative flex-shrink-0" strokeWidth={2} />
-              <span className="relative text-xs">
-                {isSignedIn ? 'Nộp & Lưu' : 'Nộp'}
-              </span>
-            </button>
-
-            {!isSignedIn && (
-              <div className="flex items-start gap-2 p-2.5 bg-amber-500/15 border border-amber-400/30 rounded-lg">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                <p className="text-xs text-amber-100/90 font-[450] leading-snug">
-                  Đăng nhập để lưu.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Tips Card */}
-        <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm hover:shadow-md transition-shadow flex-shrink-0">
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
-            <h4 className="text-sm font-bold text-slate-900">Mẹo làm bài</h4>
-          </div>
-          <ul className="space-y-2.5 text-xs text-slate-600 font-[450]">
-            <li className="flex gap-2">
-              <span className="text-emerald-600 font-bold flex-shrink-0">•</span>
-              <span>Chú ý từ khóa trùng lặp</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-emerald-600 font-bold flex-shrink-0">•</span>
-              <span>Đọc kỹ tất cả đáp án</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-emerald-600 font-bold flex-shrink-0">•</span>
-              <span>Không để quá nhiều câu</span>
-            </li>
-          </ul>
-        </div>
-
-        {/* Info Cards */}
-        <div className="space-y-3 flex-shrink-0">
-          <div className="bg-white rounded-lg border border-slate-200 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-center mb-2">
-              <Clock className="w-4 h-4 text-slate-600" strokeWidth={2} />
-            </div>
-            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-              Thời gian
-            </p>
-            <p className="text-sm font-bold text-slate-900">Tự do</p>
-          </div>
-
-          <div className="bg-white rounded-lg border border-slate-200 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-center mb-2">
-              <Zap className="w-4 h-4 text-slate-600" strokeWidth={2} />
-            </div>
-            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-              Độ khó
-            </p>
-            <p className="text-sm font-bold text-slate-900">Trung bình</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Scrollbar Style */}
-      <style>{`
-        aside .scroll-smooth::-webkit-scrollbar {
-          width: 6px;
-        }
-        aside .scroll-smooth::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        aside .scroll-smooth::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 3px;
-        }
-        aside .scroll-smooth::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-      `}</style>
-    </aside>
-  );
-});
-
-DesktopSidebar.displayName = 'DesktopSidebar';
-
-// ==========================================
-// SUB-COMPONENT: Tablet Sidebar (for md breakpoint)
-// ==========================================
-const TabletSidebar = memo(({ 
-  answersCount, 
-  totalQuestions, 
-  percentage,
-  isSignedIn,
-  handleSubmitWithSave,
-  isAllAnswered
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  return (
-    <div className="hidden md:flex lg:hidden flex-col w-full">
-      {/* Collapsible Header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg mb-4 hover:shadow-md transition-shadow"
-      >
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-black text-blue-600">{Math.round(percentage)}%</span>
-          <span className="text-sm font-semibold text-slate-600">{answersCount}/{totalQuestions} câu</span>
-        </div>
-        <ChevronRight className={`w-5 h-5 text-blue-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-      </button>
-
-      {/* Expanded Content */}
-      {isExpanded && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 mb-8 pb-6">
-          {/* Status Card */}
-          <div className="relative bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-lg overflow-hidden">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl" />
-            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-cyan-500/10 rounded-full blur-3xl" />
-
-            <div className="relative z-10 space-y-4">
-              <div className="space-y-2">
-                <ProgressBar percentage={percentage} />
-                <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-                  <span>Hoàn thành: {Math.round(percentage)}%</span>
-                  <span>{totalQuestions - answersCount} còn</span>
-                </div>
-              </div>
-
-              <div className={`p-3 rounded-lg text-xs font-semibold text-center transition-all ${
-                isAllAnswered 
-                  ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-200' 
-                  : 'bg-amber-500/20 border border-amber-400/50 text-amber-200'
-              }`}>
-                {isAllAnswered 
-                  ? '✓ Sẵn sàng nộp!' 
-                  : `Cần ${totalQuestions - answersCount} câu`}
-              </div>
-
-              <button
-                disabled={!isAllAnswered}
-                onClick={handleSubmitWithSave}
-                className={`
-                  w-full group relative flex items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg 
-                  font-bold text-xs sm:text-sm transition-all overflow-hidden
-                  ${isAllAnswered 
-                    ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-600/40 active:scale-95 cursor-pointer text-white' 
-                    : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-60'}
-                `}
-                aria-disabled={!isAllAnswered}
-              >
-                {isAllAnswered && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-                )}
-                
-                <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4 relative flex-shrink-0" strokeWidth={2} />
-                <span className="relative whitespace-nowrap text-xs sm:text-xs">
-                  {isSignedIn ? 'Nộp & Lưu' : 'Nộp'}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
-
-TabletSidebar.displayName = 'TabletSidebar';
-
-// ==========================================
-// MAIN COMPONENT: QuestionDisplay
+// MAIN: QuestionDisplay (Optimized)
 // ==========================================
 const QuestionDisplay = memo(({
   selectedPart,
@@ -650,14 +186,14 @@ const QuestionDisplay = memo(({
 }) => {
   const { user: firebaseUser, isSignedIn } = useUnifiedAuth();
   const [submitStatus, setSubmitStatus] = useState({ show: false, message: '', success: false });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ===== COMPUTED VALUES =====
+  // Computed values
   const answersCount = useMemo(() => Object.keys(answers).length, [answers]);
   const totalQuestions = useMemo(() => partData?.questions?.length || 0, [partData?.questions?.length]);
   const percentage = useMemo(() => totalQuestions > 0 ? (answersCount / totalQuestions) * 100 : 0, [answersCount, totalQuestions]);
   const isAllAnswered = useMemo(() => answersCount === totalQuestions && totalQuestions > 0, [answersCount, totalQuestions]);
 
-  // ===== HELPERS =====
   const getUserIdentifier = useCallback(() => {
     if (firebaseUser) {
       return {
@@ -669,7 +205,6 @@ const QuestionDisplay = memo(({
     return null;
   }, [firebaseUser]);
 
-  // ===== SUBMIT HANDLER =====
   const handleSubmitWithSave = useCallback(async () => {
     try {
       onSubmit();
@@ -691,7 +226,6 @@ const QuestionDisplay = memo(({
           message: 'Không thể xác định người dùng',
           success: false
         });
-        setTimeout(() => setSubmitStatus({ show: false, message: '', success: false }), 3000);
         return;
       }
 
@@ -718,7 +252,7 @@ const QuestionDisplay = memo(({
 
       setSubmitStatus({
         show: true,
-        message: 'Đã lưu thành công!',
+        message: '✓ Đã lưu thành công!',
         success: true
       });
 
@@ -731,158 +265,208 @@ const QuestionDisplay = memo(({
         message: `Lỗi: ${error.message}`,
         success: false
       });
-      setTimeout(() => setSubmitStatus({ show: false, message: '', success: false }), 3000);
     }
   }, [isSignedIn, getUserIdentifier, onSubmit, selectedExam, selectedPart, answers, totalQuestions, testType]);
 
-  // ===== RENDER CONDITION =====
   if (!partData || showResults || !partData.questions) {
     return null;
   }
 
-  // ===== MAIN RENDER =====
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-x-hidden" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-      
-      {/* Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-0 right-0 w-60 h-60 md:w-96 md:h-96 bg-blue-100/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-60 h-60 md:w-96 md:h-96 bg-slate-100/20 rounded-full blur-3xl" />
-      </div>
-
-      {/* Header */}
-      <header className="relative z-20 sticky top-0 bg-white/80 backdrop-blur-lg border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 fill-blue-600 flex-shrink-0" />
-            <div className="min-w-0">
-              <h1 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 truncate">Practice Mode</h1>
-              <p className="text-[10px] sm:text-xs text-slate-600 font-[450]">
-                TOEIC {testType?.toUpperCase() || 'TRAINING'}
-              </p>
-            </div>
+    <div className="relative min-h-screen bg-white">
+      {/* Header - Sticky */}
+      <header className="sticky top-0 bg-white border-b border-slate-200 shadow-sm z-20">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Sparkles className="w-5 h-5 text-blue-600 fill-blue-600 flex-shrink-0" />
+            <h1 className="text-lg font-bold text-slate-900 truncate">Practice Mode</h1>
+            <span className="text-xs text-slate-600 hidden sm:inline">TOEIC {testType?.toUpperCase()}</span>
           </div>
           
-          {/* Desktop Progress Indicator */}
-          <div className="hidden sm:block text-right flex-shrink-0 ml-4">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-              Tiến độ
+          <div className="flex items-center gap-4">
+            {/* Progress Desktop */}
+            <div className="hidden sm:block text-right">
+              <div className="text-2xl font-bold text-blue-600">{Math.round(percentage)}%</div>
+              <p className="text-xs text-slate-600">{answersCount}/{totalQuestions}</p>
             </div>
-            <div className="text-2xl md:text-3xl font-black text-blue-600">
-              {Math.round(percentage)}%
+
+            {/* Mobile Progress */}
+            <div className="sm:hidden">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm font-bold text-blue-600"
+              >
+                {answersCount}/{totalQuestions}
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 pb-40 sm:pb-32 md:pb-24 lg:pb-8">
+      {/* Main Layout - No nested scroll */}
+      <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
         
-        {/* Questions Area */}
-        <div className="mb-6 md:mb-0 flex flex-col lg:flex-row gap-6">
-          
-          {/* Left: Questions (Main Content) */}
-          <div className="flex-1 min-w-0">
-            <div className="overflow-y-auto max-h-[calc(100vh-240px)] lg:max-h-[calc(100vh-180px)] scroll-smooth pr-2 sm:pr-4">
-              <div className="space-y-4 pb-8 sm:pb-6">
-                {partData.questions.map((q, idx) => (
-                  <QuestionCard
-                    key={q.id}
-                    question={q}
-                    script={q.script}
-                    options={q.options}
-                    selectedAnswer={answers[q.id]}
-                    onAnswerSelect={onAnswerSelect}
-                    questionNumber={idx + 1}
-                    totalQuestions={totalQuestions}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Scrollbar styling */}
-            <style>{`
-              div.overflow-y-auto::-webkit-scrollbar {
-                width: 6px;
-              }
-              div.overflow-y-auto::-webkit-scrollbar-track {
-                background: transparent;
-              }
-              div.overflow-y-auto::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 3px;
-              }
-              div.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-                background: #94a3b8;
-              }
-            `}</style>
-
-            {/* Mobile: Submit Button Below Questions */}
-            <div className="lg:hidden mt-4 pt-4 border-t border-slate-200">
-              <button
-                disabled={!isAllAnswered}
-                onClick={handleSubmitWithSave}
-                className={`
-                  w-full group relative flex items-center justify-center gap-2 py-3 px-4 rounded-lg 
-                  font-bold text-sm transition-all overflow-hidden
-                  ${isAllAnswered 
-                    ? 'bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-600/40 active:scale-95 cursor-pointer text-white' 
-                    : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-60'}
-                `}
-                aria-disabled={!isAllAnswered}
-              >
-                {isAllAnswered && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-                )}
-                
-                <Save className="w-4 h-4 relative flex-shrink-0" strokeWidth={2} />
-                <span className="relative">
-                  {isSignedIn ? 'Nộp & Lưu kết quả' : 'Nộp bài'}
-                </span>
-              </button>
-
-              {!isAllAnswered && (
-                <p className="text-xs text-slate-500 text-center mt-2 font-[450]">
-                  Vui lòng trả lời tất cả {totalQuestions - answersCount} câu còn lại
-                </p>
-              )}
-            </div>
+        {/* Left: Questions - Full scrollable area */}
+        <div className="flex-1 min-w-0">
+          <div className="space-y-4">
+            {partData.questions.map((q, idx) => (
+              <QuestionCard
+                key={q.id}
+                question={q}
+                script={q.script}
+                options={q.options}
+                selectedAnswer={answers[q.id]}
+                onAnswerSelect={onAnswerSelect}
+                questionNumber={idx + 1}
+                totalQuestions={totalQuestions}
+              />
+            ))}
           </div>
 
-          {/* Right: Desktop Sidebar (lg+) */}
-          <div className="hidden lg:block">
-            <DesktopSidebar
-              answersCount={answersCount}
-              totalQuestions={totalQuestions}
-              percentage={percentage}
-              isSignedIn={isSignedIn}
-              handleSubmitWithSave={handleSubmitWithSave}
-              isAllAnswered={isAllAnswered}
-            />
+          {/* Mobile Submit Button */}
+          <div className="mt-8 sm:hidden">
+            <button
+              disabled={!isAllAnswered}
+              onClick={handleSubmitWithSave}
+              className={`
+                w-full py-3 px-4 rounded-lg font-bold text-base transition-all
+                ${isAllAnswered 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' 
+                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'}
+              `}
+            >
+              <Save className="w-5 h-5 inline mr-2" />
+              {isSignedIn ? 'Nộp & Lưu' : 'Nộp bài'}
+            </button>
           </div>
         </div>
 
-        {/* Tablet Sidebar (md-lg) */}
-        <TabletSidebar
-          answersCount={answersCount}
-          totalQuestions={totalQuestions}
-          percentage={percentage}
-          isSignedIn={isSignedIn}
-          handleSubmitWithSave={handleSubmitWithSave}
-          isAllAnswered={isAllAnswered}
-        />
+        {/* Right: Sidebar (Desktop) */}
+        <aside className="hidden sm:block w-72 flex-shrink-0 sticky top-24 h-fit z-10">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+            {/* Status */}
+            <div className="text-center pb-4 border-b border-slate-200">
+              <p className="text-xs font-bold text-slate-600 uppercase mb-2">Tiến độ</p>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{Math.round(percentage)}%</div>
+              <ProgressBar percentage={percentage} />
+              <p className="text-xs text-slate-600 mt-2">{answersCount}/{totalQuestions} câu trả lời</p>
+            </div>
+
+            {/* Status Message */}
+            <div className={`p-3 rounded-lg text-xs font-semibold text-center ${
+              isAllAnswered 
+                ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' 
+                : 'bg-amber-50 border border-amber-200 text-amber-900'
+            }`}>
+              {isAllAnswered 
+                ? '✓ Sẵn sàng nộp bài!' 
+                : `Cần ${totalQuestions - answersCount} câu nữa`}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              disabled={!isAllAnswered}
+              onClick={handleSubmitWithSave}
+              className={`
+                w-full py-2.5 px-4 rounded-lg font-semibold text-sm transition-all
+                ${isAllAnswered 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' 
+                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'}
+              `}
+            >
+              <Save className="w-4 h-4 inline mr-2" />
+              {isSignedIn ? 'Nộp & Lưu' : 'Nộp'}
+            </button>
+
+            {!isSignedIn && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800">Đăng nhập để lưu kết quả</p>
+              </div>
+            )}
+
+            {/* Tips */}
+            <div className="pt-4 border-t border-slate-200 space-y-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Lightbulb className="w-4 h-4 text-blue-600" />
+                <h4 className="text-sm font-bold text-slate-900">Mẹo</h4>
+              </div>
+              <ul className="space-y-2 text-xs text-slate-600">
+                <li>• Chú ý từ khóa trùng</li>
+                <li>• Đọc kỹ tất cả đáp án</li>
+                <li>• Không để quá nhiều</li>
+              </ul>
+            </div>
+
+            {/* Info Cards */}
+            <div className="grid grid-cols-2 gap-2 pt-4 border-t border-slate-200">
+              <div className="text-center p-3 bg-slate-50 rounded-lg">
+                <Clock className="w-4 h-4 text-slate-600 mx-auto mb-1" />
+                <p className="text-xs font-bold text-slate-600">Thời gian</p>
+                <p className="text-xs font-semibold text-slate-900">Tự do</p>
+              </div>
+              <div className="text-center p-3 bg-slate-50 rounded-lg">
+                <Zap className="w-4 h-4 text-slate-600 mx-auto mb-1" />
+                <p className="text-xs font-bold text-slate-600">Độ khó</p>
+                <p className="text-xs font-semibold text-slate-900">Trung bình</p>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      {/* Mobile Floating Button - Hidden since we moved submit button below questions */}
-      {/* FloatingProgressButton will no longer be used on mobile */}
+      {/* Mobile Sidebar Modal */}
+      {sidebarOpen && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/30 z-40 sm:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-5 z-50 sm:hidden space-y-4 max-h-96 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-bold text-slate-900">Tiến độ</h2>
+              <button onClick={() => setSidebarOpen(false)}>×</button>
+            </div>
 
-      {/* Mobile Sidebar Modal - No longer needed, submit button is now below questions */}
-      {/* MobileSidebarModal will no longer be used */}
+            <div className="text-center pb-4 border-b border-slate-200">
+              <div className="text-4xl font-bold text-blue-600 mb-2">{Math.round(percentage)}%</div>
+              <ProgressBar percentage={percentage} />
+              <p className="text-sm text-slate-600 mt-2">{answersCount}/{totalQuestions} câu</p>
+            </div>
 
-      {/* Submit Status Notification */}
+            <div className={`p-3 rounded-lg text-sm font-semibold text-center ${
+              isAllAnswered 
+                ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' 
+                : 'bg-amber-50 border border-amber-200 text-amber-900'
+            }`}>
+              {isAllAnswered 
+                ? '✓ Sẵn sàng nộp!' 
+                : `Cần ${totalQuestions - answersCount} câu`}
+            </div>
+
+            <button
+              disabled={!isAllAnswered}
+              onClick={() => {
+                handleSubmitWithSave();
+                setSidebarOpen(false);
+              }}
+              className={`
+                w-full py-3 px-4 rounded-lg font-bold transition-all
+                ${isAllAnswered 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'}
+              `}
+            >
+              {isSignedIn ? 'Nộp & Lưu' : 'Nộp bài'}
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Status Notification */}
       {submitStatus.show && (
         <div className={`
-          fixed bottom-24 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm p-4 rounded-lg z-50
+          fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 p-4 rounded-lg z-50
           animate-in fade-in slide-in-from-bottom-4 duration-300
           ${submitStatus.success 
             ? 'bg-emerald-50 border border-emerald-300 text-emerald-900' 
@@ -890,9 +474,9 @@ const QuestionDisplay = memo(({
         `}>
           <div className="flex items-center gap-3">
             {submitStatus.success ? (
-              <CheckCircle className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
             ) : (
-              <AlertCircle className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
             )}
             <span className="text-sm font-semibold">{submitStatus.message}</span>
           </div>
