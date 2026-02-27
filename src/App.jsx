@@ -1,12 +1,16 @@
 import React, { useMemo, useState, lazy, Suspense, useCallback, memo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+
+// Data & Hooks
 import { loadExamData, getAllExamMetadata } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';  
+
+// Components
+import Dashboard from './components/Dashboard';
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
-import HeaderSection from './components/sections/HeaderSection';
 import UserProfile from './components/Auth/UserProfile.jsx';
 import PartSelector from './components/Display/PartSelector.jsx';
 import ContentDisplay from './components/Display/ContentDisplay';
@@ -16,17 +20,19 @@ import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
 import WelcomeModal from './components/modals/WelcomeModal.jsx';  
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
-import { ROUTES } from './config/routes';
 import HomePage from './pages/HomePage.jsx';
+import { ROUTES } from './config/routes';
 
+// Lazy Loaded Components
 const AdminApp = lazy(() => import('./admin/AdminApp'));
 const NotFoundPage = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
 const FullExamMode = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
 
-import { Trophy, FileText, Zap, BarChart3, ArrowLeft } from 'lucide-react';
+// Icons
+import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
 
-// --- INFO BADGE & COMPONENTS ---
+// --- SUB-COMPONENTS ---
 const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   const colorMap = {
     indigo: 'bg-indigo-50 border-indigo-200 text-indigo-700',
@@ -46,495 +52,177 @@ const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   );
 });
 
-InfoBadge.displayName = 'InfoBadge';
-
 const StatsGrid = memo(({ score, isSignedIn }) => {
   if (!isSignedIn || score.total === 0) return null;
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm">
+    <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm mt-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 rounded-lg bg-indigo-100">
           <BarChart3 className="w-5 h-5 text-indigo-700" strokeWidth={2} />
         </div>
-        <h3 className="text-lg font-bold text-slate-900">Kết quả</h3>
+        <h3 className="text-lg font-bold text-slate-900">Kết quả bài làm</h3>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <InfoBadge 
-          icon={FileText} 
-          label="Tổng câu" 
-          value={score.total}
-          color="indigo"
-        />
-        <InfoBadge 
-          icon={Trophy} 
-          label="Câu đúng" 
-          value={score.correct}
-          color="emerald"
-        />
-        <InfoBadge 
-          icon={FileText} 
-          label="Câu sai" 
-          value={score.total - score.correct}
-          color="amber"
-        />
-        <InfoBadge 
-          icon={Zap} 
-          label="Tỉ lệ" 
-          value={`${score.percentage.toFixed(0)}%`}
-          color="purple"
-        />
+        <InfoBadge icon={FileText} label="Tổng câu" value={score.total} color="indigo" />
+        <InfoBadge icon={Trophy} label="Câu đúng" value={score.correct} color="emerald" />
+        <InfoBadge icon={FileText} label="Câu sai" value={score.total - score.correct} color="amber" />
+        <InfoBadge icon={Zap} label="Tỉ lệ" value={`${score.percentage.toFixed(0)}%`} color="purple" />
       </div>
     </div>
   );
 });
 
-StatsGrid.displayName = 'StatsGrid';
-
-const BackButton = memo(({ onClick, show = true }) => {
-  if (!show) return null;
-  
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-    >
-      <ArrowLeft className="w-4 h-4" />
-      Back
-    </button>
-  );
-});
-
-BackButton.displayName = 'BackButton';
-
-// --- MEMOIZED COMPONENTS ---
-const MemoizedHeaderSection = memo(HeaderSection);
-const MemoizedUserProfile = memo(UserProfile);
-const MemoizedPartSelector = memo(PartSelector);
-const MemoizedContentDisplay = memo(ContentDisplay);
-const MemoizedQuestionDisplay = memo(QuestionDisplay);
-const MemoizedResultsDisplay = memo(ResultsDisplay);
-
-// --- PAGE COMPONENTS ---
+// --- CONTAINER COMPONENT FOR TESTING ---
 const PartTestContent = memo(({
-  isSignedIn,
-  user,
-  selectedExam,
-  handleExamChange,
-  testType,
-  handleTestTypeChange,
-  selectedPart,
-  handlePartChange,
-  partData,
-  currentQuestionIndex,
-  setCurrentQuestionIndex,
-  answers,
-  handleAnswerSelect,
-  showResults,
-  handleSubmit,
-  handleReset,
-  score,
+  isSignedIn, selectedExam, handleExamChange, testType, handleTestTypeChange,
+  selectedPart, handlePartChange, partData, currentQuestionIndex,
+  setCurrentQuestionIndex, answers, handleAnswerSelect, showResults,
+  handleSubmit, handleReset, score
 }) => {
-  const isSplitLayoutPart = testType === 'reading' && 
-    (selectedPart === 'part6' || selectedPart === 'part7' || selectedPart === 'part8');
+  const isSplitLayout = testType === 'reading' && ['part6', 'part7', 'part8'].includes(selectedPart);
+
+  // Auto-scroll to top when showing results
+  useEffect(() => {
+    if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [showResults]);
 
   return (
-    <div className="w-full">
-      {/* User Profile - Compact */}
-      {isSignedIn && (
-        <div className="mb-4">
-          <MemoizedUserProfile />
-        </div>
-      )}
+    <div className="w-full space-y-6">
+      {isSignedIn && <UserProfile />}
+      
+      <PartSelector
+        selectedExam={selectedExam}
+        onExamChange={handleExamChange}
+        testType={testType}
+        onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
+        selectedPart={selectedPart}
+        onPartChange={handlePartChange}
+      />
 
-      {/* Part Selector */}
-      <div className="mb-6">
-        <MemoizedPartSelector
-          selectedExam={selectedExam}
-          onExamChange={handleExamChange}
-          testType={testType}
-          onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
-          selectedPart={selectedPart}
-          onPartChange={handlePartChange}
-        />
-      </div>
-
-      {/* Content & Questions Layout */}
-      {isSplitLayoutPart ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Left Column - Content */}
-          <div className="order-1 w-full">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 px-1">
-                <div className="w-1 h-6 rounded-full bg-indigo-600" />
-                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nội dung</p>
-              </div>
-              <div className="relative">
-                <MemoizedContentDisplay
-                  partData={partData}
-                  selectedPart={selectedPart}
-                  currentQuestionIndex={currentQuestionIndex}
-                  testType={testType}
-                  examId={selectedExam}
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Right Column - Questions */}
-          <div className="order-2 w-full">
-            <div className="space-y-3">
-              <MemoizedQuestionDisplay
-                selectedPart={selectedPart}
-                selectedExam={selectedExam}
-                partData={partData}
-                currentQuestionIndex={currentQuestionIndex}
-                onQuestionChange={setCurrentQuestionIndex}
-                answers={answers}
-                onAnswerSelect={handleAnswerSelect}
-                showResults={showResults}
-                onSubmit={handleSubmit}
-                testType={testType}
-              />
-            </div>
-          </div>
+      {showResults ? (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <ResultsDisplay score={score} partData={partData} answers={answers} onReset={handleReset} />
+          <StatsGrid score={score} isSignedIn={isSignedIn} />
         </div>
       ) : (
-        <div className="space-y-6 mb-6">
-          {/* Full Width - Content */}
-          <div className="space-y-3 relative">
-            <MemoizedContentDisplay
-              partData={partData}
-              selectedPart={selectedPart}
-              currentQuestionIndex={currentQuestionIndex}
-              testType={testType}
-              examId={selectedExam}
+        <div className={isSplitLayout ? "grid grid-cols-1 lg:grid-cols-2 gap-8" : "max-w-4xl mx-auto space-y-8"}>
+          <div className={isSplitLayout ? "lg:sticky lg:top-24 h-fit" : ""}>
+            <ContentDisplay 
+              partData={partData} selectedPart={selectedPart}
+              currentQuestionIndex={currentQuestionIndex} testType={testType} examId={selectedExam}
             />
           </div>
-
-          {/* Full Width - Questions */}
-          <div className="space-y-3">
-            <MemoizedQuestionDisplay
-              selectedPart={selectedPart}
-              selectedExam={selectedExam}
-              partData={partData}
-              currentQuestionIndex={currentQuestionIndex}
-              onQuestionChange={setCurrentQuestionIndex}
-              answers={answers}
-              onAnswerSelect={handleAnswerSelect}
-              showResults={showResults}
-              onSubmit={handleSubmit}
-              testType={testType}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Results Section */}
-      {showResults && (
-        <div className="mb-6">
-          <MemoizedResultsDisplay
-            score={score}
-            partData={partData}
-            answers={answers}
-            onReset={handleReset}
+          <QuestionDisplay
+            selectedPart={selectedPart} selectedExam={selectedExam}
+            partData={partData} currentQuestionIndex={currentQuestionIndex}
+            onQuestionChange={setCurrentQuestionIndex} answers={answers}
+            onAnswerSelect={handleAnswerSelect} showResults={showResults}
+            onSubmit={handleSubmit} testType={testType}
           />
         </div>
       )}
-
-      {/* Stats Grid */}
-      <StatsGrid score={score} isSignedIn={isSignedIn} />
     </div>
   );
 });
 
-PartTestContent.displayName = 'PartTestContent';
-
-const TestPage = memo(({
-  isSignedIn,
-  user,
-  selectedExam,
-  handleExamChange,
-  testType,
-  handleTestTypeChange,
-  selectedPart,
-  handlePartChange,
-  partData,
-  currentQuestionIndex,
-  setCurrentQuestionIndex,
-  answers,
-  handleAnswerSelect,
-  showResults,
-  handleSubmit,
-  handleReset,
-  score,
-}) => (
-  <PartTestContent
-    isSignedIn={isSignedIn}
-    user={user}
-    selectedExam={selectedExam}
-    handleExamChange={handleExamChange}
-    testType={testType}
-    handleTestTypeChange={handleTestTypeChange}
-    selectedPart={selectedPart}
-    handlePartChange={handlePartChange}
-    partData={partData}
-    currentQuestionIndex={currentQuestionIndex}
-    setCurrentQuestionIndex={setCurrentQuestionIndex}
-    answers={answers}
-    handleAnswerSelect={handleAnswerSelect}
-    showResults={showResults}
-    handleSubmit={handleSubmit}
-    handleReset={handleReset}
-    score={score}
-  />
-));
-
-TestPage.displayName = 'TestPage';
-
-const ProfilePage = memo(({ user, handleBackToTest }) => (
-  <div className="w-full">
-    <div className="mb-6">
-      <BackButton onClick={handleBackToTest} show={true} />
-    </div>
-    <MemoizedUserProfile currentUser={user} />
-  </div>
-));
-
-ProfilePage.displayName = 'ProfilePage';
-
-const FullExamPage = memo(({ handleTestTypeChange }) => {
+// --- WRAPPER FOR FULL EXAM DATA LOADING ---
+const FullExamContainer = memo(({ onComplete }) => {
   const [examData, setExamData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadAllExams = async () => {
-      setIsLoading(true);
+    const loadAll = async () => {
       try {
-        const examList = getAllExamMetadata();
-        const loadPromises = examList.map(exam => loadExamData(exam.id));
-        const loadedExams = await Promise.all(loadPromises);
-        
-        const data = {};
-        examList.forEach((exam, index) => {
-          data[exam.id] = loadedExams[index];
-        });
-        
-        setExamData(data);
-      } catch (error) {
-        console.error('Error loading exam data:', error);
-      } finally {
-        setIsLoading(false);
-      }
+        const list = getAllExamMetadata();
+        const loaded = await Promise.all(list.map(ex => loadExamData(ex.id)));
+        const dataMap = {};
+        list.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
+        setExamData(dataMap);
+      } finally { setLoading(false); }
     };
-
-    loadAllExams();
+    loadAll();
   }, []);
 
-  if (isLoading || !examData) {
-    return <LoadingSpinner />;
-  }
-
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <FullExamMode
-        examData={examData}
-        onComplete={() => handleTestTypeChange('')}
-      />
-    </Suspense>
-  );
+  if (loading) return <LoadingSpinner message="Đang tải dữ liệu toàn bộ đề thi..." />;
+  return <FullExamMode examData={examData} onComplete={onComplete} />;
 });
 
-FullExamPage.displayName = 'FullExamPage';
-
-const GrammarPage = memo(({ answers, handleAnswerSelect, handleSubmit }) => (
-  <Suspense fallback={<LoadingSpinner />}>
-    <GrammarReview
-      answers={answers}
-      onAnswerSelect={handleAnswerSelect}
-      onSubmit={handleSubmit}
-    />
-  </Suspense>
-));
-
-GrammarPage.displayName = 'GrammarPage';
-
-const VocabularyPage = memo(() => <VocabularyPractice />);
-
-VocabularyPage.displayName = 'VocabularyPage';
-
-const AnswersPage = memo(({ handleBackToMain }) => (
-  <div className="w-full">
-    {/* Back Button */}
-    <div className="mb-6">
-      <BackButton onClick={handleBackToMain} show={true} />
-    </div>
-    <ExamAnswersPage />
-  </div>
-));
-
-AnswersPage.displayName = 'AnswersPage';
-
-// --- MAIN APP CONTENT ---
+// --- MAIN CONTENT LOGIC ---
 const AppContent = memo(() => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentExamData, setCurrentExamData] = useState(null);
-
-  // ✅ Welcome modal hook
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
   const {
-    selectedExam,
-    testType,
-    handleTestTypeChange,
-    practiceType,
-    handlePracticeTypeChange,
-    selectedPart,
-    currentQuestionIndex,
-    setCurrentQuestionIndex,
-    answers,
-    handleAnswerSelect,
-    handleSubmit,
-    showResults,
-    handleReset,
-    handleExamChange,
-    handlePartChange,
-    isSignedIn,
-    user,
+    selectedExam, testType, handleTestTypeChange, practiceType, handlePracticeTypeChange,
+    selectedPart, currentQuestionIndex, setCurrentQuestionIndex, answers,
+    handleAnswerSelect, handleSubmit, showResults, handleReset,
+    handleExamChange, handlePartChange, isSignedIn, user,
   } = useAppState();
 
   useEffect(() => {
-    const loadCurrentExam = async () => {
-      if (!selectedExam) return;
-      
-      try {
-        const data = await loadExamData(selectedExam);
-        setCurrentExamData(data);
-      } catch (error) {
-        console.error('Error loading exam:', error);
-        setCurrentExamData(null);
-      }
-    };
-
-    loadCurrentExam();
+    if (selectedExam) {
+      loadExamData(selectedExam).then(setCurrentExamData).catch(() => setCurrentExamData(null));
+    }
   }, [selectedExam]);
 
-  const handleAuthClose = useCallback(() => {
-    setShowAuthModal(false);
-  }, []);
-
-  const handleAuthOpen = useCallback(() => {
-    setShowAuthModal(true);
-  }, []);
-
-  const handleViewProfile = useCallback(() => {
-    navigate(ROUTES.PROFILE);
-  }, [navigate]);
-
-  const handleBackToTest = useCallback(() => {
-    navigate(ROUTES.TEST);
-  }, [navigate]);
-
-  const handleBackToMain = useCallback(() => {
-    navigate(ROUTES.TEST);
-  }, [navigate]);
-
-  const partData = useMemo(() => {
-    if (practiceType || !currentExamData) return null;
-    return currentExamData.parts?.[selectedPart] || null;
-  }, [practiceType, currentExamData, selectedPart]);
+  const partData = useMemo(() => 
+    (!practiceType && currentExamData) ? (currentExamData.parts?.[selectedPart] || null) : null
+  , [practiceType, currentExamData, selectedPart]);
 
   const score = useMemo(() => {
-    if (practiceType || !partData?.questions) {
-      return { correct: 0, total: 0, percentage: 0 };
-    }
-
-    let correct = 0;
+    if (!partData?.questions) return { correct: 0, total: 0, percentage: 0 };
     const total = partData.questions.length;
-
-    for (let i = 0; i < total; i++) {
-      const q = partData.questions[i];
-      if (answers[q.id] === q.correct) {
-        correct++;
-      }
-    }
-
-    return {
-      correct,
-      total,
-      percentage: total > 0 ? (correct / total) * 100 : 0
-    };
-  }, [practiceType, partData, answers]);
-
-  const layoutProps = useMemo(() => ({
-    testType,
-    onTestTypeChange: handleTestTypeChange,
-    practiceType,
-    onPracticeTypeChange: handlePracticeTypeChange,
-    user,
-    onAuthClick: handleAuthOpen,
-    onProfileClick: handleViewProfile,
-  }), [testType, handleTestTypeChange, practiceType, handlePracticeTypeChange, user, handleAuthOpen, handleViewProfile]);
+    const correct = partData.questions.filter(q => answers[q.id] === q.correct).length;
+    return { correct, total, percentage: total > 0 ? (correct / total) * 100 : 0 };
+  }, [partData, answers]);
 
   return (
     <>
-      <MainLayout {...layoutProps}>
-        {/* Content - No extra padding (already handled in MainLayout) */}
+      <MainLayout 
+        testType={testType} onTestTypeChange={handleTestTypeChange}
+        practiceType={practiceType} onPracticeTypeChange={handlePracticeTypeChange}
+        user={user} onAuthClick={() => setShowAuthModal(true)}
+        onProfileClick={() => navigate(ROUTES.PROFILE)}
+      >
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path={ROUTES.HOME} element={<HomePage />} />
-            <Route 
-              path={ROUTES.TEST} 
-              element={
-                <TestPage 
-                  isSignedIn={isSignedIn} 
-                  user={user} 
-                  selectedExam={selectedExam} 
-                  handleExamChange={handleExamChange} 
-                  testType={testType} 
-                  handleTestTypeChange={handleTestTypeChange} 
-                  selectedPart={selectedPart} 
-                  handlePartChange={handlePartChange} 
-                  partData={partData} 
-                  currentQuestionIndex={currentQuestionIndex} 
-                  setCurrentQuestionIndex={setCurrentQuestionIndex} 
-                  answers={answers} 
-                  handleAnswerSelect={handleAnswerSelect} 
-                  showResults={showResults} 
-                  handleSubmit={handleSubmit} 
-                  handleReset={handleReset} 
-                  score={score} 
-                />
-              } 
-            />
-            <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
-            <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
-            <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
-            <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
-            <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
+            <Route path={ROUTES.TEST} element={
+              <PartTestContent 
+                isSignedIn={isSignedIn} selectedExam={selectedExam}
+                handleExamChange={handleExamChange} testType={testType}
+                handleTestTypeChange={handleTestTypeChange} selectedPart={selectedPart}
+                handlePartChange={handlePartChange} partData={partData}
+                currentQuestionIndex={currentQuestionIndex} setCurrentQuestionIndex={setCurrentQuestionIndex}
+                answers={answers} handleAnswerSelect={handleAnswerSelect}
+                showResults={showResults} handleSubmit={handleSubmit}
+                handleReset={handleReset} score={score}
+              />
+            } />
+            <Route path={ROUTES.FULL_EXAM} element={<FullExamContainer onComplete={() => handleTestTypeChange('')} />} />
+            <Route path={ROUTES.GRAMMAR} element={<GrammarReview answers={answers} onAnswerSelect={handleAnswerSelect} onSubmit={handleSubmit} />} />
+            <Route path={ROUTES.VOCABULARY} element={<VocabularyPractice />} />
+            <Route path={ROUTES.PROFILE} element={<UserProfile currentUser={user} />} />
+            <Route path={ROUTES.ANSWERS} element={<ExamAnswersPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
-        {showAuthModal && <AuthModal onClose={handleAuthClose} />}
+        {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       </MainLayout>
-
-      {/* Welcome Modal */}
       <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
     </>
   );
 });
 
-AppContent.displayName = 'AppContent';
+// --- ROOT APP ---
+export default function App() {
+  const showSplash = useSplashScreen(2000);
 
-// --- MAIN APP WITH SPLASH SCREEN ---
-function App() {
-  const showSplash = useSplashScreen(3000); // 3 giây splash screen
-
-  if (showSplash) {
-    return <LoadingSpinner message="Loading..." />;
-  }
+  if (showSplash) return <LoadingSpinner message="Khởi động hệ thống..." />;
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -542,11 +230,8 @@ function App() {
         <Routes>
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/*" element={<AppContent />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </Router>
   );
 }
-
-export default App;
