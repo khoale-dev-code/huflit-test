@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { loadExamData, getAllExamMetadata } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
+import { useWelcomeModal } from './hooks/useWelcomeModal.js';  
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 import HeaderSection from './components/sections/HeaderSection';
@@ -13,6 +14,7 @@ import QuestionDisplay from './components/Display/QuestionDisplay.jsx';
 import ResultsDisplay from './components/Display/ResultsDisplay.jsx';
 import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
+import WelcomeModal from './components/modals/WelcomeModal.jsx';  
 import { useOnlineUsers } from './hooks/useOnlineUsers.js';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import { ROUTES } from './config/routes';
@@ -94,15 +96,7 @@ StatsGrid.displayName = 'StatsGrid';
 const BackButton = memo(({ onClick, show = true }) => {
   if (!show) return null;
   
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-    >
-      <ArrowLeft className="w-4 h-4" />
-      Quay lại
-    </button>
-  );
+ 
 });
 
 BackButton.displayName = 'BackButton';
@@ -365,7 +359,7 @@ VocabularyPage.displayName = 'VocabularyPage';
 
 const AnswersPage = memo(({ handleBackToMain }) => (
   <div className="w-full">
-    {/* Back Button - Thêm dòng này */}
+    {/* Back Button */}
     <div className="mb-6">
       <BackButton onClick={handleBackToMain} show={true} />
     </div>
@@ -380,6 +374,9 @@ const AppContent = memo(() => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentExamData, setCurrentExamData] = useState(null);
+
+  // ✅ NEW: Welcome modal hook
+  const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
   const { onlineCount, totalUsers } = useOnlineUsers();
 
@@ -481,45 +478,50 @@ const AppContent = memo(() => {
   }), [testType, handleTestTypeChange, practiceType, handlePracticeTypeChange, user, handleAuthOpen, handleViewProfile]);
 
   return (
-    <MainLayout {...layoutProps}>
-      {/* Content - No extra padding (already handled in MainLayout) */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          <Route path={ROUTES.HOME} element={<HomePage />} />
-          <Route 
-            path={ROUTES.TEST} 
-            element={
-              <TestPage 
-                isSignedIn={isSignedIn} 
-                user={user} 
-                selectedExam={selectedExam} 
-                handleExamChange={handleExamChange} 
-                testType={testType} 
-                handleTestTypeChange={handleTestTypeChange} 
-                selectedPart={selectedPart} 
-                handlePartChange={handlePartChange} 
-                partData={partData} 
-                currentQuestionIndex={currentQuestionIndex} 
-                setCurrentQuestionIndex={setCurrentQuestionIndex} 
-                answers={answers} 
-                handleAnswerSelect={handleAnswerSelect} 
-                showResults={showResults} 
-                handleSubmit={handleSubmit} 
-                handleReset={handleReset} 
-                score={score} 
-              />
-            } 
-          />
-          <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
-          <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
-          <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
-          <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
-          <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
-      {showAuthModal && <AuthModal onClose={handleAuthClose} />}
-    </MainLayout>
+    <>
+      <MainLayout {...layoutProps}>
+        {/* Content - No extra padding (already handled in MainLayout) */}
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path={ROUTES.HOME} element={<HomePage />} />
+            <Route 
+              path={ROUTES.TEST} 
+              element={
+                <TestPage 
+                  isSignedIn={isSignedIn} 
+                  user={user} 
+                  selectedExam={selectedExam} 
+                  handleExamChange={handleExamChange} 
+                  testType={testType} 
+                  handleTestTypeChange={handleTestTypeChange} 
+                  selectedPart={selectedPart} 
+                  handlePartChange={handlePartChange} 
+                  partData={partData} 
+                  currentQuestionIndex={currentQuestionIndex} 
+                  setCurrentQuestionIndex={setCurrentQuestionIndex} 
+                  answers={answers} 
+                  handleAnswerSelect={handleAnswerSelect} 
+                  showResults={showResults} 
+                  handleSubmit={handleSubmit} 
+                  handleReset={handleReset} 
+                  score={score} 
+                />
+              } 
+            />
+            <Route path={ROUTES.FULL_EXAM} element={<FullExamPage handleTestTypeChange={handleTestTypeChange} />} />
+            <Route path={ROUTES.GRAMMAR} element={<GrammarPage answers={answers} handleAnswerSelect={handleAnswerSelect} handleSubmit={handleSubmit} />} />
+            <Route path={ROUTES.VOCABULARY} element={<VocabularyPage />} />
+            <Route path={ROUTES.PROFILE} element={<ProfilePage user={user} handleBackToTest={handleBackToTest} />} />
+            <Route path={ROUTES.ANSWERS} element={<AnswersPage handleBackToMain={handleBackToMain} />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+        {showAuthModal && <AuthModal onClose={handleAuthClose} />}
+      </MainLayout>
+
+      {/* ✅ NEW: Welcome Modal */}
+      <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
+    </>
   );
 });
 

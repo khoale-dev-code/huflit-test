@@ -9,6 +9,7 @@ import {
   Bookmark,
   BookmarkCheck,
   RotateCcw,
+  Zap,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -22,7 +23,7 @@ import {
   REAL_WORLD_EXAMPLES,
 } from '../../data/grammarData';
 
-// ✅ LAZY LOAD: GrammarTopicPage (369 KiB) chỉ load khi cần
+// ✅ LAZY LOAD: GrammarTopicPage
 const GrammarTopicPage = lazy(() => import('./GrammarTopicPage'));
 
 import '../styles/GrammarReview.css';
@@ -42,6 +43,10 @@ const PRACTICE_SECTIONS = [
 
 const BOOKMARK_TIPS_KEY = 'grammar-bookmarked-tips';
 const BOOKMARK_EXAMPLES_KEY = 'grammar-bookmarked-examples';
+
+/* ──────────────────────────────────────
+   STYLES & HELPERS
+   ────────────────────────────────────── */
 
 const getDifficultyStyles = (diff) => {
   const d = (diff || '').toLowerCase();
@@ -72,7 +77,7 @@ const getDifficultyStyles = (diff) => {
 
 const cardClass =
   'bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-all duration-200';
-const cardClassInteractive = cardClass + ' hover:-translate-y-0.5 cursor-pointer';
+const cardClassInteractive = cardClass + ' hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-transform';
 
 const loadBookmarks = (key) => {
   try {
@@ -82,6 +87,7 @@ const loadBookmarks = (key) => {
     return new Set();
   }
 };
+
 const saveBookmarks = (key, set) => {
   try {
     localStorage.setItem(key, JSON.stringify([...set]));
@@ -146,105 +152,9 @@ const fireConfetti = (full = true) => {
 
 const MILESTONES = [25, 50, 75, 100];
 
-// ✅ LAZY LOAD: MistakeCard, TipCard, ExampleCard (small components)
-const MistakeCard = React.lazy(() => Promise.resolve({
-  default: ({ mistake, flipped, onToggle }) => (
-    <div
-      onClick={() => onToggle(mistake.id)}
-      className={`${cardClass} p-4 sm:p-5 cursor-pointer select-none`}
-      role="button"
-      tabIndex={0}
-    >
-      <div className="flex gap-4">
-        <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-        <div className="min-w-0 flex-1">
-          {!flipped ? (
-            <>
-              <h3 className="font-semibold text-slate-800 text-sm mb-2">
-                Common mistake:
-              </h3>
-              <p className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-800 text-sm font-medium">
-                ❌ {mistake.mistake}
-              </p>
-            </>
-          ) : (
-            <>
-              <h4 className="font-semibold text-slate-800 text-sm mb-1">Correct:</h4>
-              <p className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 text-sm font-medium mb-3">
-                ✓ {mistake.correct}
-              </p>
-              <h4 className="font-semibold text-slate-800 text-sm mb-1">Explanation:</h4>
-              <p className="text-slate-700 text-sm">{mistake.explanation}</p>
-              <span className="inline-block mt-3 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold">
-                Topic: {mistake.topic}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  ),
-}));
-
-// ✅ LAZY LOAD: Tips & Examples sections
-const TipsSection = React.lazy(() => Promise.resolve({
-  default: ({ tips, bookmarked, onToggle }) => (
-    <div className="flex flex-col gap-4">
-      {tips.map((tip) => {
-        const isBookmarked = bookmarked.has(tip.id);
-        return (
-          <article key={tip.id} className={`${cardClass} p-4 sm:p-5 relative`}>
-            <button
-              type="button"
-              onClick={() => onToggle(tip.id)}
-              className="absolute top-4 right-4 p-2 hover:bg-slate-100 transition"
-            >
-              {isBookmarked ? <BookmarkCheck className="w-5 h-5 text-grammar-accent" /> : <Bookmark className="w-5 h-5" />}
-            </button>
-            <div className="flex gap-4 pr-12">
-              <Lightbulb className="w-5 h-5 text-grammar-accent shrink-0 mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-slate-900 text-base mb-2">{tip.title}</h3>
-                <p className="text-slate-600 text-sm mb-3">{tip.description}</p>
-              </div>
-            </div>
-          </article>
-        );
-      })}
-    </div>
-  ),
-}));
-
-const ExamplesSection = React.lazy(() => Promise.resolve({
-  default: ({ examples, bookmarked, onToggle }) => (
-    <div className="flex flex-col gap-4">
-      {examples.map((example) => {
-        const isBookmarked = bookmarked.has(example.id);
-        return (
-          <article key={example.id} className={`${cardClass} p-4 sm:p-5 relative`}>
-            <button
-              type="button"
-              onClick={() => onToggle(example.id)}
-              className="absolute top-4 right-4 p-2 hover:bg-slate-100 transition"
-            >
-              {isBookmarked ? <BookmarkCheck className="w-5 h-5 text-grammar-accent" /> : <Bookmark className="w-5 h-5" />}
-            </button>
-            <div className="pr-12">
-              <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold mb-3">
-                {example.context}
-              </span>
-              <p className="text-xs font-semibold text-slate-600 mb-1">Example:</p>
-              <div className="bg-slate-50 rounded-lg p-3 font-mono text-sm text-slate-800 mb-3">
-                &quot;{example.original}&quot;
-              </div>
-              <p className="text-slate-600 text-sm">{example.explanation}</p>
-            </div>
-          </article>
-        );
-      })}
-    </div>
-  ),
-}));
+/* ──────────────────────────────────────
+   MAIN COMPONENT
+   ────────────────────────────────────── */
 
 const GrammarReview = () => {
   const [selectedLevel, setSelectedLevel] = useState('Beginner');
@@ -262,6 +172,7 @@ const GrammarReview = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLevelLoading, setIsLevelLoading] = useState(false);
+  const [completedTopics, setCompletedTopics] = useState([]);
   const mainRef = useRef(null);
   const scrollThrottleRef = useRef(null);
   const lastScrollYRef = useRef(0);
@@ -365,6 +276,7 @@ const GrammarReview = () => {
     });
   }, []);
 
+  // ✅ MILESTONE + TOPIC COMPLETION TRACKING
   useEffect(() => {
     progressPerLevel.forEach(({ level, pct }) => {
       const prev = prevPctRef.current[level] ?? 0;
@@ -375,6 +287,20 @@ const GrammarReview = () => {
       prevPctRef.current[level] = pct;
     });
   }, [progressPerLevel]);
+
+  // ✅ TRACK COMPLETED TOPICS
+  useEffect(() => {
+    if (!grammarData?.topics) return;
+    const newCompletedTopics = [];
+    for (const [, topic] of Object.entries(grammarData.topics)) {
+      const lessonIds = (topic.lessons || []).map((l) => l.lessonId);
+      const done = lessonIds.filter((id) => completedLessons.includes(id)).length;
+      if (done === lessonIds.length && lessonIds.length > 0) {
+        newCompletedTopics.push(topic.id);
+      }
+    }
+    setCompletedTopics(newCompletedTopics);
+  }, [grammarData, completedLessons]);
 
   const isEmptySearch =
     searchQuery.trim() &&
@@ -396,6 +322,7 @@ const GrammarReview = () => {
             Master English grammar with interactive lessons
           </p>
 
+          {/* Progress Card */}
           <div className={`${cardClass} p-4 mt-4 mb-4`}>
             <p className="text-xs font-semibold text-grammar-primary uppercase tracking-wide mb-3 leading-normal">
               Progress by level
@@ -428,6 +355,7 @@ const GrammarReview = () => {
             </div>
           </div>
 
+          {/* Level Buttons */}
           <div className="flex flex-wrap gap-2" role="group" aria-label="Level">
             {LEVELS.map((level) => {
               const style = getDifficultyStyles(level);
@@ -438,8 +366,13 @@ const GrammarReview = () => {
                   type="button"
                   onClick={() => handleLevelChange(level)}
                   aria-pressed={isActive}
-                  className={`px-4 py-2.5 rounded-xl font-semibold text-sm min-h-[44px] min-w-[44px] border-2 transition-all ${
-                    isActive ? style.buttonActive : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300'
+                  style={{
+                    borderWidth: '2px',
+                    borderStyle: 'solid',
+                    borderColor: isActive ? style.buttonActive.split(' ').find(c => c.includes('border')) : '#e2e8f0',
+                  }}
+                  className={`px-4 py-2.5 rounded-xl font-semibold text-sm min-h-[44px] min-w-[44px] transition-all ${
+                    isActive ? style.buttonActive : 'bg-white text-slate-800 hover:bg-slate-50'
                   }`}
                 >
                   {level}
@@ -448,6 +381,7 @@ const GrammarReview = () => {
             })}
           </div>
 
+          {/* Search & Filters */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" aria-hidden />
@@ -458,13 +392,23 @@ const GrammarReview = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search grammar"
                 className="w-full pl-10 pr-4 py-3 min-h-[44px] rounded-xl bg-white text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-grammar-accent/50 shadow-[0_4px_14px_rgb(0,0,0,0.04)] transition-shadow text-sm leading-relaxed"
+                style={{
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: '#e5e7eb',
+                }}
               />
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowFilters((f) => !f)}
-                className="flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-xl bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                style={{
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  borderColor: '#e2e8f0',
+                }}
                 aria-expanded={showFilters}
                 aria-label="Toggle filters"
               >
@@ -481,8 +425,13 @@ const GrammarReview = () => {
                         key={diff}
                         type="button"
                         onClick={() => setFilterDifficulty(diff)}
-                        className={`px-3 py-2 rounded-lg text-sm font-semibold min-h-[44px] min-w-[44px] border transition-all ${
-                          isActive ? style.buttonActive : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
+                        style={{
+                          borderWidth: '1px',
+                          borderStyle: 'solid',
+                          borderColor: isActive ? style.buttonActive.split(' ').find(c => c.includes('border')) : '#e2e8f0',
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm font-semibold min-h-[44px] min-w-[44px] transition-all ${
+                          isActive ? style.buttonActive : 'bg-white text-slate-800 hover:bg-slate-50'
                         }`}
                       >
                         {diff}
@@ -501,8 +450,13 @@ const GrammarReview = () => {
             isScrolled ? 'bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgb(0,0,0,0.06)]' : 'bg-transparent'
           }`}
           aria-label="Sections"
+          style={{
+            borderBottomWidth: '1px',
+            borderBottomStyle: 'solid',
+            borderBottomColor: '#e5e7eb',
+          }}
         >
-          <div className="flex gap-0 border-b border-slate-200" role="tablist">
+          <div className="flex gap-0" role="tablist">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -512,11 +466,17 @@ const GrammarReview = () => {
                 aria-controls={`grammar-panel-${tab.id}`}
                 id={`grammar-tab-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold text-sm border-b-[3px] -mb-px min-h-[44px] transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold text-sm min-h-[44px] transition-colors ${
                   activeTab === tab.id
-                    ? 'text-grammar-accent border-grammar-accent bg-transparent'
-                    : 'text-slate-600 border-transparent hover:text-slate-800'
+                    ? 'text-grammar-accent'
+                    : 'text-slate-600 hover:text-slate-800'
                 }`}
+                style={{
+                  borderBottomWidth: '3px',
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: activeTab === tab.id ? '#FF7D00' : 'transparent',
+                  marginBottom: '-3px',
+                }}
               >
                 <span aria-hidden>{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -538,19 +498,33 @@ const GrammarReview = () => {
                   type="button"
                   onClick={() => setSelectedTopic(null)}
                   className="mb-4 inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white text-slate-800 font-semibold rounded-xl shadow-[0_4px_14px_rgb(0,0,0,0.06)] hover:shadow-lg hover:bg-slate-50 transition-all focus:outline-none focus:ring-2 focus:ring-grammar-accent focus:ring-offset-2"
+                  style={{
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderColor: '#e5e7eb',
+                  }}
                 >
                   ← Back to Topics
                 </button>
-                
-                {/* ✅ LAZY LOAD GrammarTopicPage */}
+
                 <Suspense fallback={<div className="text-center py-8">Loading topic...</div>}>
                   <GrammarTopicPage
                     topic={selectedTopic}
                     completedLessons={completedLessons}
                     onLessonComplete={(lessonId) => {
-                      setCompletedLessons((prev) =>
-                        prev.includes(lessonId) ? prev.filter((id) => id !== lessonId) : [...prev, lessonId]
-                      );
+                      setCompletedLessons((prev) => {
+                        const isNew = !prev.includes(lessonId);
+                        const next = isNew
+                          ? [...prev, lessonId]
+                          : prev.filter((id) => id !== lessonId);
+
+                        // ✅ Fire confetti on lesson complete
+                        if (isNew) {
+                          fireConfetti(false);
+                        }
+
+                        return next;
+                      });
                     }}
                   />
                 </Suspense>
@@ -561,7 +535,12 @@ const GrammarReview = () => {
               <div className="flex flex-col gap-4">
                 {isLevelLoading ? (
                   [...Array(4)].map((_, i) => (
-                    <div key={i} className={`${cardClass} p-4 sm:p-5 animate-pulse min-h-[100px]`} role="status" aria-label="Loading">
+                    <div
+                      key={i}
+                      className={`${cardClass} p-4 sm:p-5 animate-pulse min-h-[100px]`}
+                      role="status"
+                      aria-label="Loading"
+                    >
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-200 shrink-0" />
@@ -582,18 +561,24 @@ const GrammarReview = () => {
                     const lessonIds = (topic.lessons || []).map((l) => l.lessonId);
                     const completedCount = lessonIds.filter((id) => completedLessons.includes(id)).length;
                     const isRecommended = recommendedTopicId === topic.id;
+                    const isCompleted = completedCount === lessonIds.length && lessonIds.length > 0;
                     const diffStyle = getDifficultyStyles(topic.difficulty);
                     return (
                       <div
                         key={topic.id}
-                        className={`${cardClassInteractive} overflow-hidden relative ${
-                          isRecommended ? 'ring-2 ring-grammar-accent/40' : ''
-                        }`}
+                        className={`${cardClassInteractive} overflow-hidden relative transition-all duration-300 ${
+                          isCompleted ? 'ring-2 ring-emerald-400/50 bg-emerald-50/40' : ''
+                        } ${isRecommended ? 'ring-2 ring-[#58CC02]/50 shadow-[0_0_0_4px_rgba(88,204,2,0.15)]' : ''}`}
                       >
                         {isRecommended && (
-                          <div className="absolute top-0 right-0 bg-grammar-accent text-white text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-xl z-10 flex items-center gap-1 shadow-md">
+                          <div className="absolute top-0 right-0 bg-[#58CC02] text-white text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-xl z-10 flex items-center gap-1 shadow-md">
                             <RotateCcw className="w-3 h-3" />
-                            Recommended next
+                            Quest!
+                          </div>
+                        )}
+                        {isCompleted && (
+                          <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-xl z-10 flex items-center gap-1 shadow-md animate-bounce">
+                            ✨ Completed!
                           </div>
                         )}
                         <button
@@ -613,19 +598,31 @@ const GrammarReview = () => {
                               <div className="flex items-center gap-2 mt-2">
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${
-                                    completedCount === lessonIds.length && lessonIds.length > 0
+                                    isCompleted && lessonIds.length > 0
                                       ? 'bg-emerald-100 text-emerald-800'
                                       : diffStyle.badge
                                   }`}
+                                  style={{
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: isCompleted && lessonIds.length > 0 ? '#10b981' : 'currentColor',
+                                  }}
                                 >
-                                  {completedCount === lessonIds.length && lessonIds.length > 0 ? '✓ ' : ''}
+                                  {isCompleted && lessonIds.length > 0 ? '✓ ' : ''}
                                   {completedCount}/{lessonIds.length} lessons
                                 </span>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${diffStyle.badge}`}>
+                            <span
+                              className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${diffStyle.badge}`}
+                              style={{
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: 'currentColor',
+                              }}
+                            >
                               {topic.difficulty}
                             </span>
                             <ChevronDown className="w-5 h-5 text-slate-500" />
@@ -661,130 +658,182 @@ const GrammarReview = () => {
 
                 {/* Mistakes Section */}
                 {activePracticeSection === 'mistakes' && (
-                  <Suspense fallback={<div>Loading mistakes...</div>}>
-                    <div className="flex flex-col gap-4">
-                      {COMMON_MISTAKES.map((mistake) => {
-                        const isFlipped = flippedMistakes.has(mistake.id);
-                        return (
-                          <div
-                            key={mistake.id}
-                            onClick={() => toggleMistakeFlip(mistake.id)}
-                            className={`${cardClass} p-4 sm:p-5 cursor-pointer select-none`}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <div className="flex gap-4">
-                              <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                              <div className="min-w-0 flex-1">
-                                {!isFlipped ? (
-                                  <>
-                                    <h3 className="font-semibold text-slate-800 text-sm mb-2">
-                                      Common mistake:
-                                    </h3>
-                                    <p className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-800 text-sm font-medium">
-                                      ❌ {mistake.mistake}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <>
-                                    <h4 className="font-semibold text-slate-800 text-sm mb-1">Correct:</h4>
-                                    <p className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 text-sm font-medium mb-3">
-                                      ✓ {mistake.correct}
-                                    </p>
-                                    <h4 className="font-semibold text-slate-800 text-sm mb-1">Explanation:</h4>
-                                    <p className="text-slate-700 text-sm">{mistake.explanation}</p>
-                                    <span className="inline-block mt-3 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold">
-                                      Topic: {mistake.topic}
-                                    </span>
-                                  </>
-                                )}
-                              </div>
+                  <div className="flex flex-col gap-4">
+                    {COMMON_MISTAKES.map((mistake) => {
+                      const isFlipped = flippedMistakes.has(mistake.id);
+                      return (
+                        <div
+                          key={mistake.id}
+                          onClick={() => toggleMistakeFlip(mistake.id)}
+                          className={`${cardClass} p-4 sm:p-5 cursor-pointer select-none`}
+                          role="button"
+                          tabIndex={0}
+                          style={{
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: '#e5e7eb',
+                          }}
+                        >
+                          <div className="flex gap-4">
+                            <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            <div className="min-w-0 flex-1">
+                              {!isFlipped ? (
+                                <>
+                                  <h3 className="font-semibold text-slate-800 text-sm mb-2">
+                                    Common mistake:
+                                  </h3>
+                                  <p
+                                    className="bg-red-50 rounded-lg p-3 text-red-800 text-sm font-medium"
+                                    style={{
+                                      borderWidth: '1px',
+                                      borderStyle: 'solid',
+                                      borderColor: '#fca5a5',
+                                    }}
+                                  >
+                                    ❌ {mistake.mistake}
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <h4 className="font-semibold text-slate-800 text-sm mb-1">Correct:</h4>
+                                  <p
+                                    className="bg-emerald-50 rounded-lg p-3 text-emerald-900 text-sm font-medium mb-3"
+                                    style={{
+                                      borderWidth: '1px',
+                                      borderStyle: 'solid',
+                                      borderColor: '#86efac',
+                                    }}
+                                  >
+                                    ✓ {mistake.correct}
+                                  </p>
+                                  <h4 className="font-semibold text-slate-800 text-sm mb-1">Explanation:</h4>
+                                  <p className="text-slate-700 text-sm">{mistake.explanation}</p>
+                                  <span
+                                    className="inline-block mt-3 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold"
+                                    style={{
+                                      borderWidth: '1px',
+                                      borderStyle: 'solid',
+                                      borderColor: '#e5e7eb',
+                                    }}
+                                  >
+                                    Topic: {mistake.topic}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </Suspense>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
 
                 {/* Tips Section */}
                 {activePracticeSection === 'tips' && (
-                  <Suspense fallback={<div>Loading tips...</div>}>
-                    <div className="flex flex-col gap-4">
-                      {STUDY_TIPS.map((tip) => {
-                        const isBookmarked = bookmarkedTips.has(tip.id);
-                        return (
-                          <article
-                            key={tip.id}
-                            className={`${cardClass} p-4 sm:p-5 relative`}
+                  <div className="flex flex-col gap-4">
+                    {STUDY_TIPS.map((tip) => {
+                      const isBookmarked = bookmarkedTips.has(tip.id);
+                      return (
+                        <article
+                          key={tip.id}
+                          className={`${cardClass} p-4 sm:p-5 relative`}
+                          style={{
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: '#e5e7eb',
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => toggleBookmarkTip(tip.id)}
+                            className="absolute top-4 right-4 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 hover:text-grammar-accent transition-colors"
+                            aria-label={isBookmarked ? 'Remove from saved' : 'Save for later'}
                           >
-                            <button
-                              type="button"
-                              onClick={() => toggleBookmarkTip(tip.id)}
-                              className="absolute top-4 right-4 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 hover:text-grammar-accent transition-colors"
-                              aria-label={isBookmarked ? 'Remove from saved' : 'Save for later'}
-                            >
-                              {isBookmarked ? (
-                                <BookmarkCheck className="w-5 h-5 text-grammar-accent" />
-                              ) : (
-                                <Bookmark className="w-5 h-5" />
-                              )}
-                            </button>
-                            <div className="flex gap-4 pr-12">
-                              <Lightbulb className="w-5 h-5 text-grammar-accent shrink-0 mt-0.5" />
-                              <div className="min-w-0 flex-1">
-                                <h3 className="font-semibold text-slate-900 text-base mb-2">{tip.title}</h3>
-                                <p className="text-slate-600 text-sm leading-relaxed mb-3">{tip.description}</p>
-                              </div>
+                            {isBookmarked ? (
+                              <BookmarkCheck className="w-5 h-5 text-grammar-accent" />
+                            ) : (
+                              <Bookmark className="w-5 h-5" />
+                            )}
+                          </button>
+                          <div className="flex gap-4 pr-12">
+                            <Lightbulb className="w-5 h-5 text-grammar-accent shrink-0 mt-0.5" />
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-semibold text-slate-900 text-base mb-2">{tip.title}</h3>
+                              <p className="text-slate-600 text-sm leading-relaxed mb-3">{tip.description}</p>
                             </div>
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </Suspense>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 )}
 
                 {/* Examples Section */}
                 {activePracticeSection === 'examples' && (
-                  <Suspense fallback={<div>Loading examples...</div>}>
-                    <div className="flex flex-col gap-4">
-                      {REAL_WORLD_EXAMPLES.map((example) => {
-                        const isBookmarked = bookmarkedExamples.has(example.id);
-                        return (
-                          <article
-                            key={example.id}
-                            className={`${cardClass} p-4 sm:p-5 relative`}
+                  <div className="flex flex-col gap-4">
+                    {REAL_WORLD_EXAMPLES.map((example) => {
+                      const isBookmarked = bookmarkedExamples.has(example.id);
+                      return (
+                        <article
+                          key={example.id}
+                          className={`${cardClass} p-4 sm:p-5 relative`}
+                          style={{
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: '#e5e7eb',
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => toggleBookmarkExample(example.id)}
+                            className="absolute top-4 right-4 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 hover:text-grammar-accent transition-colors"
+                            aria-label={isBookmarked ? 'Remove from saved' : 'Save for later'}
                           >
-                            <button
-                              type="button"
-                              onClick={() => toggleBookmarkExample(example.id)}
-                              className="absolute top-4 right-4 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 hover:text-grammar-accent transition-colors"
-                              aria-label={isBookmarked ? 'Remove from saved' : 'Save for later'}
+                            {isBookmarked ? (
+                              <BookmarkCheck className="w-5 h-5 text-grammar-accent" />
+                            ) : (
+                              <Bookmark className="w-5 h-5" />
+                            )}
+                          </button>
+                          <div className="pr-12">
+                            <span
+                              className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold mb-3"
+                              style={{
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: '#e5e7eb',
+                              }}
                             >
-                              {isBookmarked ? (
-                                <BookmarkCheck className="w-5 h-5 text-grammar-accent" />
-                              ) : (
-                                <Bookmark className="w-5 h-5" />
-                              )}
-                            </button>
-                            <div className="pr-12">
-                              <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold mb-3">
-                                {example.context}
-                              </span>
-                              <p className="text-xs font-semibold text-slate-600 mb-1">Example:</p>
-                              <div className="bg-slate-50 rounded-lg p-3 shadow-[0_2px_8px_rgb(0,0,0,0.03)] font-mono text-sm text-slate-800 mb-3">
-                                &quot;{example.original}&quot;
-                              </div>
-                              <p className="text-slate-600 text-sm leading-relaxed mb-3">{example.explanation}</p>
-                              <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold">
-                                Topic: {example.topic}
-                              </span>
+                              {example.context}
+                            </span>
+                            <p className="text-xs font-semibold text-slate-600 mb-1">Example:</p>
+                            <div
+                              className="rounded-lg p-3 shadow-[0_2px_8px_rgb(0,0,0,0.03)] font-mono text-sm text-slate-800 mb-3"
+                              style={{
+                                background: '#f8fafc',
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: '#e2e8f0',
+                              }}
+                            >
+                              &quot;{example.original}&quot;
                             </div>
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </Suspense>
+                            <p className="text-slate-600 text-sm leading-relaxed mb-3">{example.explanation}</p>
+                            <span
+                              className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold"
+                              style={{
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: '#e5e7eb',
+                              }}
+                            >
+                              Topic: {example.topic}
+                            </span>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             )}
@@ -801,6 +850,11 @@ const GrammarReview = () => {
                     <article
                       key={quiz.quizId}
                       className={`${cardClassInteractive} p-4 sm:p-5`}
+                      style={{
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderColor: '#e5e7eb',
+                      }}
                     >
                       <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
                         <div className="min-w-0">
@@ -811,12 +865,29 @@ const GrammarReview = () => {
                             {quiz.questions.length} questions • {quiz.duration} mins
                           </p>
                         </div>
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0 border ${getDifficultyStyles(quiz.difficulty).badge}`}>
+                        <span
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0 ${
+                            getDifficultyStyles(quiz.difficulty).badge
+                          }`}
+                          style={{
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: 'currentColor',
+                          }}
+                        >
                           {quiz.difficulty}
                         </span>
                       </div>
                       {showWarning && (
-                        <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
+                        <div
+                          className="mb-4 p-3 rounded-lg text-amber-800 text-sm flex items-start gap-2"
+                          style={{
+                            background: '#fffbeb',
+                            borderWidth: '1px',
+                            borderStyle: 'solid',
+                            borderColor: '#fde047',
+                          }}
+                        >
                           <Lightbulb className="w-5 h-5 shrink-0 mt-0.5" />
                           <div>
                             <strong>Tip:</strong> You've completed {completedInQuiz} of {quizLessonIds.length} lessons in topics covered by this quiz. Consider reviewing the related lessons first to improve your score.
@@ -826,6 +897,11 @@ const GrammarReview = () => {
                       <button
                         type="button"
                         className="w-full flex items-center justify-center gap-2 py-3 bg-grammar-accent hover:bg-grammar-accent-hover text-white font-bold rounded-xl shadow-[0_4px_14px_rgb(255,125,0,0.3)] hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-grammar-accent focus:ring-offset-2 min-h-[44px] active:scale-[0.98]"
+                        style={{
+                          borderWidth: '0px',
+                          borderStyle: 'solid',
+                          borderColor: 'transparent',
+                        }}
                       >
                         <PlayCircle className="w-5 h-5" />
                         Start Quiz
