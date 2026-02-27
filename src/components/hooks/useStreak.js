@@ -15,38 +15,49 @@ export const useStreak = () => {
       return;
     }
 
-    // Truy vấn dữ liệu progress của user (hỗ trợ cả Firebase UID và Clerk ID nếu cần)
+    // ✅ Query chỉ với 1 filter - KHÔNG cần orderBy (tránh composite index)
     const q = query(
       collection(db, 'userProgress'),
       where('firebaseUid', '==', user.uid)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const dates = snapshot.docs
-        .map(doc => doc.data().completedAt?.toDate?.() || new Date(doc.data().completedAt))
-        .filter(d => !isNaN(d.getTime()))
-        .sort((a, b) => b - a);
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const dates = snapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            const date = data.completedAt?.toDate?.() || new Date(data.completedAt);
+            return date instanceof Date ? date : new Date(date);
+          })
+          .filter(d => !isNaN(d.getTime()))
+          .sort((a, b) => b - a); // ✅ Sắp xếp trong JS thay vì Firestore
 
-      let currentStreak = 0;
-      if (dates.length > 0) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        let currentStreak = 0;
+        if (dates.length > 0) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
 
-        for (let i = 0; i < dates.length; i++) {
-          const date = new Date(dates[i]);
-          date.setHours(0, 0, 0, 0);
-          const daysDiff = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+          for (let i = 0; i < dates.length; i++) {
+            const date = new Date(dates[i]);
+            date.setHours(0, 0, 0, 0);
+            const daysDiff = Math.floor((today - date) / (1000 * 60 * 60 * 24));
 
-          if (daysDiff === currentStreak) {
-            currentStreak++;
-          } else if (daysDiff > currentStreak) {
-            break;
+            if (daysDiff === currentStreak) {
+              currentStreak++;
+            } else if (daysDiff > currentStreak) {
+              break;
+            }
           }
         }
+        setStreak(currentStreak);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('❌ Streak query error:', error.message);
+        setLoading(false);
       }
-      setStreak(currentStreak);
-      setLoading(false);
-    });
+    );
 
     return () => unsubscribe();
   }, [user]);

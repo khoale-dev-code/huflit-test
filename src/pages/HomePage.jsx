@@ -7,11 +7,10 @@ import {
 import { motion } from 'framer-motion'
 import { ROUTES } from '../config/routes'
 import { useAppState } from '../hooks/useAppState'
-import { useOnlineUsers } from '../hooks/useOnlineUsers'
 import MemoizedHeaderSection from '../components/sections/HeaderSection'
 
 // ==========================================
-// Static Data
+// Static Data - Memoized outside component
 // ==========================================
 const STATS = [
   { Icon: Users, value: '5K+', label: 'Học viên' },
@@ -52,10 +51,13 @@ const FEATURES = [
 ]
 
 // ==========================================
-// Stat Card
+// Stat Card - Memoized
 // ==========================================
 const StatCard = memo(({ Icon, value, label, onlineCount, isOnline }) => {
-  const displayValue = isOnline ? (onlineCount || '320') : value
+  const displayValue = useMemo(() => 
+    isOnline ? (onlineCount || '320') : value,
+    [isOnline, onlineCount, value]
+  )
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-2.5 xs:p-3 sm:p-4">
@@ -71,7 +73,7 @@ const StatCard = memo(({ Icon, value, label, onlineCount, isOnline }) => {
 StatCard.displayName = 'StatCard'
 
 // ==========================================
-// Feature Card
+// Feature Card - Memoized
 // ==========================================
 const FeatureCard = memo(({ Icon, title, desc, gradient, onClick }) => {
   return (
@@ -99,37 +101,49 @@ const FeatureCard = memo(({ Icon, title, desc, gradient, onClick }) => {
 FeatureCard.displayName = 'FeatureCard'
 
 // ==========================================
-// Main HomePage
+// Main HomePage - Fully Optimized
 // ==========================================
 const HomePage = memo(() => {
   const navigate = useNavigate()
-  const { onlineCount } = useOnlineUsers()
   const { isSignedIn, user, handleTestTypeChange } = useAppState()
 
-  // Handlers
+  // ✅ Memoized handlers
   const handleFullTest = useCallback(() => {
     navigate(ROUTES.FULL_EXAM)
   }, [navigate])
 
   const handleFeatureClick = useCallback((featureId) => {
-    if (featureId === 'listening') {
-      handleTestTypeChange('listening')
-      navigate(ROUTES.TEST)
-    } else if (featureId === 'reading') {
-      handleTestTypeChange('reading')
-      navigate(ROUTES.TEST)
-    } else if (featureId === 'grammar') {
-      handleTestTypeChange('grammar')
-      navigate(ROUTES.GRAMMAR)
-    } else if (featureId === 'vocabulary') {
-      handleTestTypeChange('vocabulary')
-      navigate(ROUTES.VOCABULARY)
+    switch (featureId) {
+      case 'listening':
+        handleTestTypeChange('listening')
+        navigate(ROUTES.TEST)
+        break
+      case 'reading':
+        handleTestTypeChange('reading')
+        navigate(ROUTES.TEST)
+        break
+      case 'grammar':
+        handleTestTypeChange('grammar')
+        navigate(ROUTES.GRAMMAR)
+        break
+      case 'vocabulary':
+        handleTestTypeChange('vocabulary')
+        navigate(ROUTES.VOCABULARY)
+        break
+      default:
+        break
     }
   }, [navigate, handleTestTypeChange])
 
+  // ✅ Memoized header props
+  const headerProps = useMemo(() => ({
+    isSignedIn,
+    user,
+  }), [isSignedIn, user])
+
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
-      <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
+      <MemoizedHeaderSection {...headerProps} />
 
       <main className="w-full">
         {/* ========== HERO ========== */}
@@ -190,7 +204,7 @@ const HomePage = memo(() => {
                 className="inline-flex items-center gap-1.5 bg-orange-50 px-2.5 xs:px-3 py-1.5 xs:py-2 rounded-lg border border-orange-200 text-xs"
               >
                 <Flame className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-orange-500 flex-shrink-0" aria-hidden="true" />
-                <span className="font-semibold text-slate-700">{onlineCount || 320}+ đang luyện</span>
+                <span className="font-semibold text-slate-700">320+ đang luyện</span>
               </motion.div>
             </motion.div>
           </div>
@@ -212,7 +226,7 @@ const HomePage = memo(() => {
                     Icon={stat.Icon}
                     value={stat.value}
                     label={stat.label}
-                    onlineCount={onlineCount}
+                    onlineCount={null}
                     isOnline={stat.Icon === Zap}
                   />
                 </motion.div>

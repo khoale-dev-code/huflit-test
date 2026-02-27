@@ -15,7 +15,6 @@ import ResultsDisplay from './components/Display/ResultsDisplay.jsx';
 import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
 import WelcomeModal from './components/modals/WelcomeModal.jsx';  
-import { useOnlineUsers } from './hooks/useOnlineUsers.js';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import { ROUTES } from './config/routes';
 import HomePage from './pages/HomePage.jsx';
@@ -96,7 +95,15 @@ StatsGrid.displayName = 'StatsGrid';
 const BackButton = memo(({ onClick, show = true }) => {
   if (!show) return null;
   
- 
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Back
+    </button>
+  );
 });
 
 BackButton.displayName = 'BackButton';
@@ -375,10 +382,8 @@ const AppContent = memo(() => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentExamData, setCurrentExamData] = useState(null);
 
-  // ✅ NEW: Welcome modal hook
+  // ✅ Welcome modal hook
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
-
-  const { onlineCount, totalUsers } = useOnlineUsers();
 
   const {
     selectedExam,
@@ -430,10 +435,6 @@ const AppContent = memo(() => {
 
   const handleBackToTest = useCallback(() => {
     navigate(ROUTES.TEST);
-  }, [navigate]);
-
-  const handleGoToAnswers = useCallback(() => {
-    navigate(ROUTES.ANSWERS);
   }, [navigate]);
 
   const handleBackToMain = useCallback(() => {
@@ -519,7 +520,7 @@ const AppContent = memo(() => {
         {showAuthModal && <AuthModal onClose={handleAuthClose} />}
       </MainLayout>
 
-      {/* ✅ NEW: Welcome Modal */}
+      {/* Welcome Modal */}
       <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
     </>
   );
