@@ -1,18 +1,9 @@
-/* src/components/FullExam/FullExamMode.jsx
- *
- * FIXES:
- * ✅ HMR: AnswersContext tách sang context/AnswersContext.js
- * ✅ Audio bug: isAudioPlaying reset TRƯỚC khi setPart
- * ✅ Navigation bug: dùng useRef cho playedParts tránh stale closure
- * ✅ handleNavigatePart chỉ block QUAY LẠI, không block TIẾN TỚI
- * ✅ Border styling: KHÔNG mix border shorthand với borderColor
- */
+/* src/components/FullExam/FullExamMode.js */
 
 import React, {
   useState, useEffect, useCallback, useMemo, useRef,
 } from 'react';
 import { useUserProgress } from '../../hooks/useUserProgress';
-import { COLORS } from './constants/colors';
 import { EXAM_STRUCTURE, EXAM_MODES, EXAM_SECTIONS } from './constants/examConfig';
 import { EXAM_TIMINGS } from './constants/timings';
 import { calculateFullResults, countUnansweredQuestions } from './utils/examHelpers';
@@ -22,7 +13,6 @@ import { useExamTimer } from './hooks/useExamTimer';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
 
-// ✅ FIX HMR: import từ file riêng — không export thêm trong file này
 import { AnswersContext } from './context/AnswersContext';
 
 import StepIndicator from './StepIndicator';
@@ -55,15 +45,13 @@ const FullExamMode = ({ onComplete }) => {
   const [saveError,       setSaveError]       = useState(null);
   const [submitRetrying,  setSubmitRetrying]  = useState(false);
 
-  // ✅ FIX: ref + state kép để tránh stale closure trong handlers
   const isAudioPlayingRef = useRef(false);
-  const [isAudioPlaying,  setIsAudioPlaying]  = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const setAudioPlaying = useCallback((val) => {
     isAudioPlayingRef.current = val;
     setIsAudioPlaying(val);
   }, []);
 
-  // ✅ FIX: playedParts qua ref để handleNavigatePart không bị stale closure
   const playedPartsRef = useRef(new Set());
   useEffect(() => {
     playedPartsRef.current = state.playedListeningParts || new Set();
@@ -71,18 +59,19 @@ const FullExamMode = ({ onComplete }) => {
 
   const mainContentRef = useRef(null);
 
-  /* ── beforeunload ── */
+  // ─── beforeunload ────────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (state.mode === EXAM_MODES.EXAM && Object.keys(state.answers).length > 0) {
-        e.preventDefault(); e.returnValue = '';
+        e.preventDefault();
+        e.returnValue = '';
       }
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [state.mode, state.answers]);
 
-  /* ── visibilitychange (mobile save) ── */
+  // ─── visibilitychange (mobile save) ──────────────────────────────────────────
   useEffect(() => {
     const save = () => {
       if (document.visibilityState === 'hidden' && state.examId) {
@@ -97,7 +86,7 @@ const FullExamMode = ({ onComplete }) => {
     return () => document.removeEventListener('visibilitychange', save);
   }, [state.examId, state.answers]);
 
-  /* ── Draft restore với examId guard ── */
+  // ─── Draft restore ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!state.examId) return;
     try {
@@ -108,7 +97,7 @@ const FullExamMode = ({ onComplete }) => {
     } catch (_) {}
   }, [state.examId, setAnswers]);
 
-  /* ── Persist answers ── */
+  // ─── Persist answers ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!state.examId) return;
     try {
@@ -118,7 +107,7 @@ const FullExamMode = ({ onComplete }) => {
     } catch (_) {}
   }, [state.answers, state.examId]);
 
-  /* ── Load exam data ── */
+  // ─── Load exam data ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (state.mode === EXAM_MODES.SETUP || !state.examId) return;
     getExamById(state.examId)
@@ -129,7 +118,7 @@ const FullExamMode = ({ onComplete }) => {
       .catch(err => { console.error(err); setSaveError(err.message); });
   }, [state.examId, state.mode, setExamData]);
 
-  /* ── Section timer ── */
+  // ─── Section timer reset ──────────────────────────────────────────────────────
   useEffect(() => {
     if (state.mode === EXAM_MODES.EXAM) {
       setTimeLeft(state.section === EXAM_SECTIONS.LISTENING
@@ -137,19 +126,25 @@ const FullExamMode = ({ onComplete }) => {
     }
   }, [state.section, state.mode, setTimeLeft]);
 
-  /* ── Focus on part change ── */
+  // ─── Focus main content on part change ───────────────────────────────────────
   useEffect(() => {
-    if (state.mode === EXAM_MODES.EXAM)
-      mainContentRef.current?.focus({ preventScroll: false });
+    if (state.mode === EXAM_MODES.EXAM) {
+      mainContentRef.current?.focus({ preventScroll: true });
+    }
   }, [state.part, state.mode]);
 
-  /* ── Timer callbacks — PHẢI dùng useCallback ──────────────────────────────
-   * Root cause "Maximum update depth":
-   *   inline arrow () => { ... } tạo reference mới mỗi render
-   *   → useEffect trong useExamTimer thấy deps thay đổi → chạy lại
-   *   → gọi setState → render → lặp vô tận
-   * Fix: stable reference bằng useCallback, deps rõ ràng.
-   * ──────────────────────────────────────────────────────────────────────── */
+  // ─── ✅ SCROLL TẬP TRUNG: chạy sau khi React render xong ─────────────────────
+  // Thay thế toàn bộ scrollToTop() rải rác trong handlers.
+  // setTimeout(0) đảm bảo DOM đã update trước khi scroll.
+  useEffect(() => {
+    if (state.mode !== EXAM_MODES.EXAM) return;
+    const id = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 0);
+    return () => clearTimeout(id);
+  }, [state.part, state.section, state.mode]);
+
+  // ─── Timer callbacks ──────────────────────────────────────────────────────────
   const handleTimerComplete = useCallback(() => {
     if (state.section === EXAM_SECTIONS.LISTENING) {
       setSection(EXAM_SECTIONS.READING);
@@ -162,7 +157,7 @@ const FullExamMode = ({ onComplete }) => {
 
   const handleTimerWarning = useCallback(() => setShowWarning(true), []);
 
-  /* ── Timer ── */
+  // ─── Timer ───────────────────────────────────────────────────────────────────
   useExamTimer({
     isActive: state.mode === EXAM_MODES.EXAM && !state.isPaused && !!state.examData,
     section:  state.section,
@@ -172,38 +167,46 @@ const FullExamMode = ({ onComplete }) => {
     onWarning:  handleTimerWarning,
   });
 
-  /* ── Autosave ── */
+  // ─── Autosave ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (state.mode !== EXAM_MODES.EXAM || !currentUser || progressLoading || !state.examData) return;
     const timer = setInterval(async () => {
       if (!isOnline) return;
       try {
-        setIsSaving(true); setSaveError(null);
+        setIsSaving(true);
+        setSaveError(null);
         const results = calculateFullResults(state.examData, state.answers);
         await saveProgress({
           exam: state.examId,
           part: state.section === EXAM_SECTIONS.LISTENING ? 'listening' : 'reading',
           score: parseFloat(results.averageScore),
-          answers: state.answers, timestamp: Date.now(),
+          answers: state.answers,
+          timestamp: Date.now(),
         });
         setLastSaved(Date.now());
-      } catch (err) { setSaveError(err.message); }
-      finally { setIsSaving(false); }
+      } catch (err) {
+        setSaveError(err.message);
+      } finally {
+        setIsSaving(false);
+      }
     }, EXAM_TIMINGS.AUTOSAVE);
     return () => clearInterval(timer);
   }, [state.mode, state.section, state.answers, state.examId, state.examData,
     currentUser, isOnline, progressLoading, saveProgress]);
 
-  /* ── Keyboard shortcuts ── */
+  // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
   useKeyboardShortcuts({
-    isActive: state.mode === EXAM_MODES.EXAM, isAudioPlaying,
+    isActive: state.mode === EXAM_MODES.EXAM,
+    isAudioPlaying,
     onNavigatePrev: () => {
       const min = state.section === EXAM_SECTIONS.LISTENING ? 1 : 5;
       if (state.part > min) setPart(state.part - 1);
+      // scroll handled by useEffect above
     },
     onNavigateNext: () => {
       const max = state.section === EXAM_SECTIONS.LISTENING ? 4 : 8;
       if (state.part < max) setPart(state.part + 1);
+      // scroll handled by useEffect above
     },
     onTogglePause: () => state.isPaused ? resumeTimer() : pauseTimer(),
     onSelectAnswer: (idx) => {
@@ -215,17 +218,20 @@ const FullExamMode = ({ onComplete }) => {
     },
     onExit: () => {
       if (window.confirm('Bạn chắc chắn muốn thoát? Tiến độ đã được lưu.')) {
-        resetExam(); onComplete?.();
+        resetExam();
+        onComplete?.();
       }
     },
   });
 
-  /* ─────────────────────────────────────────────
-     HANDLERS
-     ───────────────────────────────────────────── */
+  // ─── HANDLERS ─────────────────────────────────────────────────────────────────
+
   const handleStartExam = useCallback((examId) => {
-    setExamId(examId); setMode(EXAM_MODES.EXAM);
-    setTimeLeft(EXAM_TIMINGS.LISTENING); setShowWarning(false);
+    setExamId(examId);
+    setMode(EXAM_MODES.EXAM);
+    setTimeLeft(EXAM_TIMINGS.LISTENING);
+    setShowWarning(false);
+    // scroll handled by useEffect [state.mode]
   }, [setExamId, setMode, setTimeLeft]);
 
   const handleSelectAnswer = useCallback((questionNum, optionIndex) => {
@@ -233,59 +239,67 @@ const FullExamMode = ({ onComplete }) => {
     addAnswer(key, optionIndex);
   }, [state.section, state.part, addAnswer]);
 
-  // ✅ FIX: Chỉ block QUAY LẠI part đã nghe, KHÔNG block tiến tới
   const handleNavigatePart = useCallback((newPart) => {
     if (
       state.section === EXAM_SECTIONS.LISTENING &&
-      newPart < state.part &&                      // chỉ khi đi ngược
-      playedPartsRef.current.has(newPart)           // và part đó đã nghe
+      newPart < state.part &&
+      playedPartsRef.current.has(newPart)
     ) {
       alert('❌ Không thể quay lại phần nghe đã hoàn thành.');
       return;
     }
     setPart(newPart);
+    // scroll handled by useEffect [state.part]
   }, [state.section, state.part, setPart]);
 
   const handleNextSection = useCallback(() => {
-    setSection(EXAM_SECTIONS.READING); setPart(5); setTimeLeft(EXAM_TIMINGS.READING);
+    setSection(EXAM_SECTIONS.READING);
+    setPart(5);
+    setTimeLeft(EXAM_TIMINGS.READING);
+    // scroll handled by useEffect [state.section]
   }, [setSection, setPart, setTimeLeft]);
 
-  // ✅ FIX CHÍNH: setAudioPlaying(false) TRƯỚC setPart
-  // Giải thích: nếu setIsAudioPlaying(false) và setPart() gọi cùng lúc,
-  // React batch update nhưng ExamScreen nhận isAudioPlaying=true trong
-  // render đầu tiên → nút Next bị disabled. setTimeout(0) đảm bảo
-  // state audio flush xong trước khi chuyển part.
   const handleAudioEnd = useCallback(() => {
     if (state.section !== EXAM_SECTIONS.LISTENING) return;
     const currentPart = state.part;
 
-    // Bước 1: tắt audio ngay
     setAudioPlaying(false);
-
-    // Bước 2: mark played
     markPartPlayed(currentPart);
 
-    // Bước 3: chuyển part sau khi state flush
     setTimeout(() => {
-      if (currentPart < 4) setPart(currentPart + 1);
-      else handleNextSection();
+      if (currentPart < 4) {
+        setPart(currentPart + 1);
+        // scroll handled by useEffect [state.part]
+      } else {
+        handleNextSection();
+      }
     }, 0);
   }, [state.section, state.part, setAudioPlaying, markPartPlayed, setPart, handleNextSection]);
 
   const handleFinalSubmit = useCallback(async () => {
-    setSubmitRetrying(true); setSaveError(null);
+    setSubmitRetrying(true);
+    setSaveError(null);
     try {
       if (!state.examData) throw new Error('No exam data');
       const results = calculateFullResults(state.examData, state.answers);
+
       if (isOnline && currentUser) {
         await saveProgress({
           exam: state.examId,
-          part: state.section === EXAM_SECTIONS.LISTENING ? 'listening' : 'reading',
+          part: 'full-exam',
           score: parseFloat(results.averageScore),
           answers: state.answers,
           totalQuestions: state.examData?.totalQuestions || 0,
-          correctAnswers: results.correctAnswers || 0,
-          isDraft: false, testType: 'full-exam', timestamp: Date.now(),
+          correctAnswers: results.totalCorrect || 0,
+          isDraft: false,
+          testType: 'full-exam',
+          listeningAnswers: Object.fromEntries(
+            Object.entries(state.answers).filter(([k]) => k.startsWith(EXAM_SECTIONS.LISTENING))
+          ),
+          readingAnswers: Object.fromEntries(
+            Object.entries(state.answers).filter(([k]) => k.startsWith(EXAM_SECTIONS.READING))
+          ),
+          timestamp: Date.now(),
         });
       }
       localStorage.removeItem(EXAM_DRAFT_KEY);
@@ -294,13 +308,14 @@ const FullExamMode = ({ onComplete }) => {
     } catch (err) {
       console.error('Submit failed:', err);
       setSaveError(err.message || 'Failed to submit test');
-    } finally { setSubmitRetrying(false); }
-  }, [state.examData, state.answers, state.examId, state.section,
+    } finally {
+      setSubmitRetrying(false);
+    }
+  }, [state.examData, state.answers, state.examId,
     isOnline, currentUser, setMode, saveProgress]);
 
-  /* ─────────────────────────────────────────────
-     COMPUTED
-     ───────────────────────────────────────────── */
+  // ─── COMPUTED ─────────────────────────────────────────────────────────────────
+
   const unansweredCount = useMemo(() => {
     if (!state.examData) return 0;
     return countUnansweredQuestions(state.examData, state.answers, state.section);
@@ -318,16 +333,16 @@ const FullExamMode = ({ onComplete }) => {
     () => ({ answers: state.answers, addAnswer }),
     [state.answers, addAnswer]);
 
-  /* ─────────────────────────────────────────────
-     RENDER
-     ───────────────────────────────────────────── */
+  // ─── RENDER ───────────────────────────────────────────────────────────────────
+
   if (state.mode === EXAM_MODES.SETUP)
     return <ExamSetup onStartExam={handleStartExam} />;
 
   if (state.mode === EXAM_MODES.RESULTS)
     return (
       <ResultsScreen
-        examData={state.examData} answers={state.answers}
+        examData={state.examData}
+        answers={state.answers}
         onRetry={() => { resetExam(); setShowWarning(false); }}
         onExit={() => { resetExam(); localStorage.removeItem(EXAM_DRAFT_KEY); onComplete?.(); }}
       />
@@ -336,40 +351,53 @@ const FullExamMode = ({ onComplete }) => {
   return (
     <AnswersContext.Provider value={answersContextValue}>
       <div className="min-h-screen bg-white">
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-white" style={{
-          borderBottomWidth: '1px',
-          borderBottomStyle: 'solid',
-          borderBottomColor: '#cbd5e1',
-          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        }}>
+
+        {/* ── Header ── */}
+        <header
+          className="sticky top-0 z-30 bg-white"
+          style={{
+            borderBottom: '1px solid #cbd5e1',
+            boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)',
+          }}
+        >
           <div style={{
-            maxWidth: '1200px', margin: '0 auto',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             padding: 'clamp(8px,2vw,16px) clamp(12px,4vw,32px)',
-            gap: '12px', flexWrap: 'wrap',
+            gap: '12px',
+            flexWrap: 'wrap',
           }}>
             <div>
               <h2 style={{ fontSize: 'clamp(14px,2.5vw,17px)', fontWeight: 700, color: '#1A2330', margin: 0 }}>
                 {state.section.toUpperCase()} – Part {state.part}
               </h2>
-              <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Đề: {state.examId}</p>
+              <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>
+                Đề: {state.examId}
+              </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px,3vw,32px)' }}>
               <Timer timeLeft={state.timeLeft} isWarning={showWarning} />
-              <AutosaveIndicator isSaving={isSaving} lastSaved={lastSaved}
-                isOnline={isOnline} saveError={saveError} />
+              <AutosaveIndicator
+                isSaving={isSaving}
+                lastSaved={lastSaved}
+                isOnline={isOnline}
+                saveError={saveError}
+              />
             </div>
           </div>
         </header>
 
-        {/* Step Indicator */}
-        <div className="bg-slate-50" style={{
-          borderBottomWidth: '1px',
-          borderBottomStyle: 'solid',
-          borderBottomColor: '#e2e8f0',
-          padding: 'clamp(10px,2vw,24px) clamp(12px,4vw,32px)',
-        }}>
+        {/* ── Step Indicator ── */}
+        <div
+          className="bg-slate-50"
+          style={{
+            borderBottom: '1px solid #e2e8f0',
+            padding: 'clamp(10px,2vw,24px) clamp(12px,4vw,32px)',
+          }}
+        >
           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             <StepIndicator
               currentMode={EXAM_MODES.EXAM}
@@ -378,12 +406,21 @@ const FullExamMode = ({ onComplete }) => {
           </div>
         </div>
 
-        <TimeWarning visible={showWarning} section={state.section}
-          isLastListeningPart={isLastListeningPart} timeLeft={state.timeLeft} />
+        <TimeWarning
+          visible={showWarning}
+          section={state.section}
+          isLastListeningPart={isLastListeningPart}
+          timeLeft={state.timeLeft}
+        />
         <OfflineWarning isOnline={isOnline} />
 
-        <main id="main-content" ref={mainContentRef} tabIndex={-1}
-          aria-label={`${state.section} – Part ${state.part}`} style={{ outline: 'none' }}>
+        <main
+          id="main-content"
+          ref={mainContentRef}
+          tabIndex={-1}
+          aria-label={`${state.section} – Part ${state.part}`}
+          style={{ outline: 'none' }}
+        >
           {state.examData && (
             <ExamScreen
               examData={state.examData}
@@ -405,10 +442,16 @@ const FullExamMode = ({ onComplete }) => {
         </main>
 
         <SubmitModal
-          visible={showSubmitModal} unansweredCount={unansweredCount}
-          saveError={saveError} isOnline={isOnline} isSubmitting={submitRetrying}
-          examData={state.examData} answers={state.answers} section={state.section}
-          onConfirm={handleFinalSubmit} onCancel={() => setShowSubmitModal(false)}
+          visible={showSubmitModal}
+          unansweredCount={unansweredCount}
+          saveError={saveError}
+          isOnline={isOnline}
+          isSubmitting={submitRetrying}
+          examData={state.examData}
+          answers={state.answers}
+          section={state.section}
+          onConfirm={handleFinalSubmit}
+          onCancel={() => setShowSubmitModal(false)}
         />
       </div>
     </AnswersContext.Provider>

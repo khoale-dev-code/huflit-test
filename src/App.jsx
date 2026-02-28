@@ -15,7 +15,7 @@ import UserProfile from './components/Auth/UserProfile.jsx';
 import PartSelector from './components/Display/PartSelector.jsx';
 import ContentDisplay from './components/Display/ContentDisplay';
 import QuestionDisplay from './components/Display/QuestionDisplay.jsx';
-import ResultsDisplay from './components/Display/ResultsDisplay.jsx';
+import ResultsDisplay from './components/Display/Result/ResultsDisplay.jsx';
 import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
 import WelcomeModal from './components/modals/WelcomeModal.jsx';  
@@ -81,8 +81,6 @@ const PartTestContent = memo(({
   setCurrentQuestionIndex, answers, handleAnswerSelect, showResults,
   handleSubmit, handleReset, score
 }) => {
-  const isSplitLayout = testType === 'reading' && ['part6', 'part7', 'part8'].includes(selectedPart);
-
   // Auto-scroll to top when showing results
   useEffect(() => {
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -107,8 +105,8 @@ const PartTestContent = memo(({
           <StatsGrid score={score} isSignedIn={isSignedIn} />
         </div>
       ) : (
-        <div className={isSplitLayout ? "grid grid-cols-1 lg:grid-cols-2 gap-8" : "max-w-4xl mx-auto space-y-8"}>
-          <div className={isSplitLayout ? "lg:sticky lg:top-24 h-fit" : ""}>
+        <div className="w-full space-y-8">
+          <div>
             <ContentDisplay 
               partData={partData} selectedPart={selectedPart}
               currentQuestionIndex={currentQuestionIndex} testType={testType} examId={selectedExam}
@@ -183,9 +181,12 @@ const AppContent = memo(() => {
   return (
     <>
       <MainLayout 
-        testType={testType} onTestTypeChange={handleTestTypeChange}
-        practiceType={practiceType} onPracticeTypeChange={handlePracticeTypeChange}
-        user={user} onAuthClick={() => setShowAuthModal(true)}
+        testType={testType}
+        onTestTypeChange={handleTestTypeChange}
+        practiceType={practiceType}
+        onPracticeTypeChange={handlePracticeTypeChange}
+        user={user}
+        onAuthClick={() => setShowAuthModal(true)}
         onProfileClick={() => navigate(ROUTES.PROFILE)}
       >
         <Suspense fallback={<LoadingSpinner />}>

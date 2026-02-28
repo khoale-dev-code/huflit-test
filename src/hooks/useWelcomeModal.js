@@ -1,76 +1,107 @@
-import { useState, useEffect, useCallback } from 'react';
-
-const WELCOME_MODAL_KEY = 'huflit-welcome-shown';
-const WELCOME_VERSION = 'v1'; // Increment when changing modal content
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * useWelcomeModal Hook
- * 
- * Manages welcome modal display logic:
- * - Shows modal only on first visit (using localStorage)
- * - Provides open/close handlers
- * - Supports version-based re-display on content updates
+ * CONFIGURATION CONSTANTS
  */
-export const useWelcomeModal = () => {
+const MODAL_CONFIG = {
+  KEY: 'hub-study-welcome-status',
+  VERSION: '1.0.0',
+  DELAY: 800, // Đợi 0.8s sau khi mount mới hiện để UI mượt hơn
+  STORAGE_TYPE: 'session' // 'session' = hiện lại khi vào lại web, 'local' = hiện 1 lần duy nhất
+};
+
+export const useWelcomeModal = (options = {}) => {
+  const {
+    storageType = MODAL_CONFIG.STORAGE_TYPE,
+    delay = MODAL_CONFIG.DELAY,
+    version = MODAL_CONFIG.VERSION
+  } = options;
+
   const [isOpen, setIsOpen] = useState(false);
   const [hasChecked, setHasChecked] = useState(false);
+  const timerRef = useRef(null);
 
-  // Initialize modal state on mount
+  // Helper để lấy storage tương ứng
+  const getStorage = useCallback(() => {
+    return storageType === 'local' ? localStorage : sessionStorage;
+  }, [storageType]);
+
+  /**
+   * Khởi tạo và kiểm tra logic hiển thị
+   */
   useEffect(() => {
-    const checkWelcomeStatus = () => {
+    const checkStatus = () => {
       try {
-        const storedVersion = localStorage.getItem(WELCOME_MODAL_KEY);
+        const storage = getStorage();
+        const storedData = JSON.parse(storage.getItem(MODAL_CONFIG.KEY) || '{}');
         
-        // Show modal if:
-        // 1. First time visitor (no stored version)
-        // 2. OR version has changed (content updated)
-        const shouldShow = !storedVersion || storedVersion !== WELCOME_VERSION;
-        
-        setIsOpen(shouldShow);
-      } catch (error) {
-        console.warn('Failed to check welcome modal status:', error);
-        // Default to showing on error
-        setIsOpen(true);
+        // Điều kiện hiển thị: 
+        // 1. Chưa từng xem TRONG PHIÊN NÀY (nếu là session)
+        // 2. Hoặc Version cũ hơn version hiện tại
+        const shouldShow = !storedData || storedData.version !== version;
+
+        if (shouldShow) {
+          // Delay một chút để người dùng định hình giao diện web trước
+          timerRef.current = setTimeout(() => {
+            setIsOpen(true);
+          }, delay);
+        }
+      } catch (e) {
+        console.error("WelcomeModal Error:", e);
+        setIsOpen(true); // Fallback: Luôn hiện nếu lỗi storage
+      } finally {
+        setHasChecked(true);
       }
-      
-      setHasChecked(true);
     };
 
-    checkWelcomeStatus();
-  }, []);
+    checkStatus();
 
-  // Handle closing modal
+    // Cleanup timer khi component unmount
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [getStorage, delay, version]);
+
+  /**
+   * Đóng Modal và đánh dấu đã xem
+   */
   const handleClose = useCallback(() => {
     setIsOpen(false);
-    
     try {
-      localStorage.setItem(WELCOME_MODAL_KEY, WELCOME_VERSION);
-    } catch (error) {
-      console.warn('Failed to save welcome modal status:', error);
+      const storage = getStorage();
+      const statusData = {
+        version: version,
+        timestamp: new Date().getTime(),
+        seen: true
+      };
+      storage.setItem(MODAL_CONFIG.KEY, JSON.stringify(statusData));
+    } catch (e) {
+      console.warn("Could not save modal status:", e);
     }
-  }, []);
+  }, [getStorage, version]);
 
-  // Force show modal (for testing or admin)
-  const forceShow = useCallback(() => {
+  /**
+   * Mở lại thủ công (Dùng cho Admin hoặc Testing)
+   */
+  const handleOpen = useCallback(() => {
     setIsOpen(true);
   }, []);
 
-  // Reset modal (for debugging)
-  const reset = useCallback(() => {
-    try {
-      localStorage.removeItem(WELCOME_MODAL_KEY);
-      setIsOpen(true);
-    } catch (error) {
-      console.warn('Failed to reset welcome modal:', error);
-    }
+  /**
+   * Reset hoàn toàn trạng thái (Dùng cho Debug)
+   */
+  const handleReset = useCallback(() => {
+    localStorage.removeItem(MODAL_CONFIG.KEY);
+    sessionStorage.removeItem(MODAL_CONFIG.KEY);
+    setIsOpen(true);
   }, []);
 
   return {
     isOpen,
     hasChecked,
+    onOpen: handleOpen,
     onClose: handleClose,
-    forceShow,
-    reset,
+    reset: handleReset
   };
 };
 

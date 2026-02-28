@@ -1,25 +1,3 @@
-/**
- * ExamSetup.jsx – Google-level production grade
- *
- * ✅ #1  Meta viewport moved to index.html (note added)
- * ✅ #2  Landmark roles: banner / main / complementary / nav
- * ✅ #3  Virtualized listbox with full keyboard navigation (↑ ↓ Home End Enter Space)
- * ✅ #4  Focus management: selected item auto-focuses on arrow-key navigation
- * ✅ #5  Skeleton loading for async EXAM_LIST
- * ✅ #6  Enhanced empty-state with Clear Filters CTA
- * ✅ #7  WCAG AA contrast: slate-700 instead of slate-600 for body text
- * ✅ #8  Mobile safe-area inset for sticky header
- * ✅ #9  Micro-interactions: hover scale, selection ripple, staggered fade-in
- * ✅ #10 Analytics hooks (pluggable, no-op by default)
- *
- * Font: DM Sans via @fontsource/dm-sans  (distinctive yet clean for EdTech)
- *       Fallback chain handles zero-dependency cases gracefully.
- *
- * NOTE: Remove <meta name="viewport"> from this component
- * and place it in your public/index.html <head> instead:
- *   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- */
-
 import React, {
   useState,
   memo,
@@ -33,11 +11,10 @@ import StepIndicator from '../../StepIndicator';
 import { EXAM_LIST } from '../../../../data/examData';
 
 /* ─────────────────────────────────────────────────────────────
-   #10 Analytics – plug in your own provider; no-op by default
+   Analytics (unchanged)
    ───────────────────────────────────────────────────────────── */
 const analytics = {
   track: (event, props) => {
-    // Replace with: gtag('event', event, props) / mixpanel.track / etc.
     if (process.env.NODE_ENV === 'development') {
       console.debug('[analytics]', event, props);
     }
@@ -45,152 +22,33 @@ const analytics = {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Global styles (injected once)
+   Class maps (replace useMemo diffStyle objects)
    ───────────────────────────────────────────────────────────── */
-const STYLE_ID = '__examsetup_styles__';
-if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
-  const el = document.createElement('style');
-  el.id = STYLE_ID;
-  el.textContent = `
-    /* #9 Font – DM Sans; graceful fallback */
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
-
-    .examsetup-root {
-      font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* #8 Safe-area for notched mobiles */
-    .examsetup-header {
-      padding-top: max(12px, env(safe-area-inset-top));
-    }
-
-    /* #9 Staggered fade-in on mount */
-    @keyframes esFadeUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .es-fadein { animation: esFadeUp .35s cubic-bezier(.4,0,.2,1) both; }
-    .es-fadein-1 { animation-delay: .05s; }
-    .es-fadein-2 { animation-delay: .10s; }
-    .es-fadein-3 { animation-delay: .15s; }
-    .es-fadein-4 { animation-delay: .20s; }
-
-    /* #9 Exam item micro-interaction */
-    .es-exam-item {
-      transition: background .14s, transform .14s cubic-bezier(.4,0,.2,1),
-                  box-shadow .14s;
-      will-change: transform;
-    }
-    .es-exam-item:hover { transform: translateX(2px); }
-    .es-exam-item[aria-selected="true"] {
-      background: #EFF6FF;
-      border-left-color: #2563EB !important;
-    }
-
-    /* Ripple on selection */
-    @keyframes esRipple {
-      0%   { transform: scale(0); opacity: .35; }
-      100% { transform: scale(2.5); opacity: 0; }
-    }
-    .es-ripple-dot {
-      position: absolute; inset: 0; overflow: hidden; border-radius: inherit;
-      pointer-events: none;
-    }
-    .es-ripple-dot::after {
-      content: '';
-      position: absolute; top: 50%; left: 50%;
-      width: 40px; height: 40px;
-      margin: -20px 0 0 -20px;
-      background: #2563EB;
-      border-radius: 50%;
-      transform: scale(0);
-    }
-    .es-exam-item[aria-selected="true"] .es-ripple-dot::after {
-      animation: esRipple .35s cubic-bezier(.4,0,.2,1) forwards;
-    }
-
-    /* #9 Start button */
-    .es-start-btn {
-      transition: all .18s cubic-bezier(.4,0,.2,1);
-      position: relative; overflow: hidden;
-    }
-    .es-start-btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(37,99,235,.35);
-    }
-    .es-start-btn:active:not(:disabled) { transform: translateY(0); }
-    .es-start-btn:focus-visible {
-      outline: 3px solid #2563EB; outline-offset: 3px;
-    }
-    .es-start-btn:focus:not(:focus-visible) { outline: none; }
-
-    /* General focus ring */
-    .es-focus:focus-visible {
-      outline: 2.5px solid #2563EB; outline-offset: 2px; border-radius: 6px;
-    }
-    .es-focus:focus:not(:focus-visible) { outline: none; }
-
-    /* Skeleton shimmer */
-    @keyframes esShimmer {
-      0%   { background-position: -600px 0; }
-      100% { background-position: 600px 0; }
-    }
-    .es-skeleton {
-      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-      background-size: 1200px 100%;
-      animation: esShimmer 1.4s infinite linear;
-      border-radius: 6px;
-    }
-
-    /* #9 Badge pulse */
-    @keyframes esBadgePop {
-      0%   { transform: scale(.85); opacity: 0; }
-      70%  { transform: scale(1.05); }
-      100% { transform: scale(1);   opacity: 1; }
-    }
-    .es-badge { animation: esBadgePop .4s .25s cubic-bezier(.4,0,.2,1) both; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .es-fadein, .es-badge, .es-exam-item,
-      .es-start-btn, .es-ripple-dot::after, .es-skeleton {
-        animation: none !important;
-        transition: none !important;
-      }
-    }
-
-    /* #7 High-contrast mode support */
-    @media (forced-colors: active) {
-      .es-exam-item[aria-selected="true"] { border: 2px solid Highlight; }
-    }
-
-    /* Custom scrollbar */
-    .es-scroll::-webkit-scrollbar { width: 5px; }
-    .es-scroll::-webkit-scrollbar-track { background: transparent; }
-    .es-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
-    .es-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-  `;
-  document.head.appendChild(el);
-}
+const DIFFICULTY_CLASSES = {
+  beginner:     'text-green-700 bg-green-50 border border-green-200',
+  intermediate: 'text-yellow-700 bg-yellow-50 border border-yellow-200',
+  advanced:     'text-red-700   bg-red-50   border border-red-200',
+};
+const DIFFICULTY_LABELS = {
+  beginner:     'Cơ bản',
+  intermediate: 'Trung cấp',
+  advanced:     'Nâng cao',
+};
 
 /* ─────────────────────────────────────────────────────────────
-   #5 Skeleton list
+   SkeletonList
    ───────────────────────────────────────────────────────────── */
 const SkeletonList = memo(() => (
-  <div role="status" aria-label="Loading exams..." aria-busy="true"
-    style={{ padding: '12px 0' }}>
+  <div role="status" aria-label="Loading exams..." aria-busy="true" className="py-3">
     {[1, 2, 3, 4].map(i => (
-      <div key={i} style={{
-        display: 'flex', gap: '14px', alignItems: 'flex-start',
-        padding: '16px 24px', borderBottom: '1px solid #F1F5F9',
-      }}>
-        <div className="es-skeleton" style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0, marginTop: 2 }} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div className="es-skeleton" style={{ height: 14, width: '55%' }} />
-          <div className="es-skeleton" style={{ height: 11, width: '80%' }} />
-          <div style={{ display: 'flex', gap: 6 }}>
-            <div className="es-skeleton" style={{ height: 22, width: 70, borderRadius: 4 }} />
-            <div className="es-skeleton" style={{ height: 22, width: 60, borderRadius: 4 }} />
+      <div key={i} className="flex gap-3.5 items-start px-6 py-4 border-b border-slate-100">
+        <div className="animate-pulse bg-slate-200 rounded-full w-4 h-4 shrink-0 mt-0.5" />
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="animate-pulse bg-slate-200 rounded h-3.5 w-[55%]" />
+          <div className="animate-pulse bg-slate-200 rounded h-3 w-[80%]" />
+          <div className="flex gap-1.5">
+            <div className="animate-pulse bg-slate-200 rounded h-5 w-16" />
+            <div className="animate-pulse bg-slate-200 rounded h-5 w-14" />
           </div>
         </div>
       </div>
@@ -200,44 +58,31 @@ const SkeletonList = memo(() => (
 SkeletonList.displayName = 'SkeletonList';
 
 /* ─────────────────────────────────────────────────────────────
-   #6 Enhanced Empty State
+   EmptyState
    ───────────────────────────────────────────────────────────── */
 const EmptyState = memo(({ searchQuery, onClearFilters }) => (
-  <div role="status" style={{
-    padding: '48px 24px', textAlign: 'center',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-  }}>
-    {/* Inline SVG magnifier */}
+  <div role="status" className="py-12 px-6 text-center flex flex-col items-center gap-3">
     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <circle cx="18" cy="18" r="11" stroke="#CBD5E1" strokeWidth="2.5"/>
-      <path d="M27 27l7 7" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="18" cy="18" r="11" stroke="#CBD5E1" strokeWidth="2.5" />
+      <path d="M27 27l7 7" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round" />
     </svg>
-    <p style={{ fontSize: 15, fontWeight: 600, color: '#1E293B', margin: 0 }}>
+    <p className="text-[15px] font-semibold text-slate-800 m-0">
       Không tìm thấy đề thi
     </p>
-    <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.55 }}>
-      {searchQuery
-        ? <>Không có kết quả cho "<strong>{searchQuery}</strong>". Thử từ khóa khác.</>
-        : 'Không có đề thi phù hợp với bộ lọc hiện tại.'}
+    <p className="text-[13px] text-slate-500 m-0 leading-relaxed">
+      {searchQuery ? (
+        <>Không có kết quả cho "<strong>{searchQuery}</strong>". Thử từ khóa khác.</>
+      ) : (
+        'Không có đề thi phù hợp với bộ lọc hiện tại.'
+      )}
     </p>
     <button
       onClick={onClearFilters}
-      className="es-focus"
-      style={{
-        marginTop: 4,
-        padding: '8px 18px',
-        borderRadius: 8,
-        border: '1.5px solid #2563EB',
-        background: 'transparent',
-        color: '#2563EB',
-        fontFamily: 'inherit',
-        fontWeight: 600,
-        fontSize: 13,
-        cursor: 'pointer',
-        transition: 'background .15s',
-      }}
-      onMouseEnter={e => e.currentTarget.style.background = '#EFF6FF'}
-      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      className="mt-1 px-[18px] py-2 rounded-lg border-[1.5px] border-blue-600
+                 bg-transparent text-blue-600 font-semibold text-[13px] cursor-pointer
+                 hover:bg-blue-50 transition-colors
+                 focus-visible:outline focus-visible:outline-[2.5px] focus-visible:outline-blue-600 focus-visible:outline-offset-2
+                 focus:not-focus-visible:outline-none"
     >
       Xóa bộ lọc
     </button>
@@ -246,22 +91,14 @@ const EmptyState = memo(({ searchQuery, onClearFilters }) => (
 EmptyState.displayName = 'EmptyState';
 
 /* ─────────────────────────────────────────────────────────────
-   #3 #4 ExamListItem – keyboard-accessible option
+   ExamListItem
    ───────────────────────────────────────────────────────────── */
 const ExamListItem = memo(({ exam, isSelected, onSelect, id }) => {
   const itemRef = useRef(null);
 
-  /* #4 Auto-focus when selected via keyboard */
   useEffect(() => {
     if (isSelected) itemRef.current?.focus();
   }, [isSelected]);
-
-  const diffStyle = useMemo(() => ({
-    beginner:     { color: '#166534', background: '#F0FDF4', border: '1px solid #BBF7D0' },
-    intermediate: { color: '#92400E', background: '#FFFBEB', border: '1px solid #FDE68A' },
-    advanced:     { color: '#991B1B', background: '#FFF1F2', border: '1px solid #FECDD3' },
-  }[exam.difficulty] || { color: '#334155', background: '#F8FAFC', border: '1px solid #E2E8F0' }),
-  [exam.difficulty]);
 
   return (
     <div
@@ -271,97 +108,81 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id }) => {
       aria-selected={isSelected}
       tabIndex={isSelected ? 0 : -1}
       onClick={onSelect}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
-      className="es-exam-item es-focus"
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 14,
-        padding: 'clamp(12px,2vw,18px) clamp(14px,3vw,24px)',
-        cursor: 'pointer',
-        borderLeft: '3px solid transparent',
-        position: 'relative',
-        outline: 'none',
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
       }}
+      className={[
+        'relative flex items-start gap-3.5 cursor-pointer',
+        'px-[clamp(14px,3vw,24px)] py-[clamp(12px,2vw,18px)]',
+        /* border-l-width stays constant — only color changes, no shorthand conflict */
+        '[border-left-width:3px] [border-left-style:solid]',
+        'transition-all duration-150 will-change-transform',
+        'hover:translate-x-0.5',
+        'outline-none',
+        'focus-visible:outline focus-visible:outline-[2.5px] focus-visible:outline-blue-600 focus-visible:outline-offset-[-2px]',
+        isSelected
+          ? 'bg-blue-50 [border-left-color:#2563EB]'
+          : 'bg-white [border-left-color:transparent] hover:bg-slate-50',
+      ].join(' ')}
     >
-      {/* #9 Ripple dot */}
-      <span className="es-ripple-dot" aria-hidden="true" />
-
       {/* Radio indicator */}
-      <span style={{
-        flexShrink: 0, marginTop: 2,
-        width: 18, height: 18, borderRadius: '50%',
-        border: `2px solid ${isSelected ? '#2563EB' : '#CBD5E1'}`,
-        background: isSelected ? '#2563EB' : '#fff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all .15s',
-      }} aria-hidden="true">
-        {isSelected && (
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%', background: '#fff',
-          }} />
-        )}
+      <span
+        aria-hidden="true"
+        className={[
+          'shrink-0 mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-all duration-150',
+          isSelected ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white',
+        ].join(' ')}
+      >
+        {isSelected && <span className="w-[7px] h-[7px] rounded-full bg-white" />}
       </span>
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
-          <h3 style={{
-            fontSize: 'clamp(13px,2vw,15px)', fontWeight: 600,
-            color: '#0F172A', margin: 0,
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
+      <div className="flex-1 min-w-0">
+        {/* Title row */}
+        <div className="flex justify-between items-start gap-2 mb-1">
+          <h3 className="text-[clamp(13px,2vw,15px)] font-semibold text-slate-900 m-0 truncate">
             {exam.title || `Exam ${exam.id}`}
           </h3>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
-            {exam.isNew && (
-              <span style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '.05em',
-                color: '#1D4ED8', background: '#DBEAFE',
-                padding: '2px 7px', borderRadius: 4,
-              }}>NEW</span>
-            )}
-          </div>
+          {exam.isNew && (
+            <span className="text-[10px] font-bold tracking-[.05em] text-blue-700 bg-blue-100 px-[7px] py-[2px] rounded shrink-0">
+              NEW
+            </span>
+          )}
         </div>
 
-        <p style={{
-          fontSize: 12, color: '#475569', margin: '0 0 8px',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
+        {/* Description */}
+        <p className="text-xs text-slate-500 mb-2 m-0 truncate">
           {exam.description || 'Complete English proficiency assessment'}
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          <span style={{
-            fontSize: 11, padding: '3px 9px', borderRadius: 5,
-            background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569',
-          }}>
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-[11px] px-[9px] py-[3px] rounded-[5px] bg-slate-50 border border-slate-200 text-slate-500">
             {exam.questions || 60} câu
           </span>
-          <span style={{
-            fontSize: 11, padding: '3px 9px', borderRadius: 5,
-            background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569',
-          }}>
+          <span className="text-[11px] px-[9px] py-[3px] rounded-[5px] bg-slate-50 border border-slate-200 text-slate-500">
             {exam.duration || 90} phút
           </span>
           {exam.difficulty && (
-            <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 5, fontWeight: 600, ...diffStyle }}>
-              {{ beginner: 'Cơ bản', intermediate: 'Trung cấp', advanced: 'Nâng cao' }[exam.difficulty] || exam.difficulty}
+            <span className={`text-[11px] px-[9px] py-[3px] rounded-[5px] font-semibold ${DIFFICULTY_CLASSES[exam.difficulty] || 'bg-slate-50 border border-slate-200 text-slate-600'}`}>
+              {DIFFICULTY_LABELS[exam.difficulty] || exam.difficulty}
             </span>
           )}
           {exam.attempts > 0 && (
-            <span style={{ fontSize: 11, color: '#64748B' }}>
+            <span className="text-[11px] text-slate-400">
               {(exam.attempts || 0).toLocaleString()} lượt thi
             </span>
           )}
         </div>
       </div>
 
-      {/* Selected check */}
+      {/* Selected checkmark */}
       {isSelected && (
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="#2563EB"
-          aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }}>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="#2563EB" aria-hidden="true" className="shrink-0 mt-0.5">
           <path fillRule="evenodd" clipRule="evenodd"
-            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
         </svg>
       )}
     </div>
@@ -370,9 +191,9 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id }) => {
 ExamListItem.displayName = 'ExamListItem';
 
 /* ─────────────────────────────────────────────────────────────
-   #3 Virtualized listbox with keyboard navigation
+   ExamListBox — virtualized listbox with keyboard nav
    ───────────────────────────────────────────────────────────── */
-const ITEM_H = 112;
+const ITEM_H  = 112;
 const VISIBLE = 4;
 const BUFFER  = 2;
 
@@ -385,11 +206,9 @@ const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
     [exams, selectedExam],
   );
 
-  /* #3 Keyboard navigation */
   const handleKeyDown = useCallback((e) => {
     const len = exams.length;
     if (len === 0) return;
-
     let next = activeIdx;
     if      (e.key === 'ArrowDown') { e.preventDefault(); next = Math.min(activeIdx + 1, len - 1); }
     else if (e.key === 'ArrowUp')   { e.preventDefault(); next = Math.max(activeIdx - 1, 0); }
@@ -398,7 +217,6 @@ const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
     else return;
 
     onSelectExam(exams[next].id);
-    /* Scroll selected item into view */
     const itemTop = next * ITEM_H;
     const container = containerRef.current;
     if (!container) return;
@@ -423,12 +241,15 @@ const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
       tabIndex={0}
       onScroll={handleScroll}
       onKeyDown={handleKeyDown}
-      className="es-scroll es-focus"
-      style={{ maxHeight: VISIBLE * ITEM_H, overflowY: 'auto', outline: 'none' }}
+      className="outline-none overflow-y-auto
+                 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400
+                 focus-visible:outline focus-visible:outline-[2.5px] focus-visible:outline-blue-600 focus-visible:outline-offset-2"
+      style={{ maxHeight: VISIBLE * ITEM_H }}
     >
+      {/* Virtual scroll container — height must remain dynamic */}
       <div style={{ height: exams.length * ITEM_H, position: 'relative' }}>
         <div style={{ transform: `translateY(${startIdx * ITEM_H}px)` }}>
-          {exams.slice(startIdx, endIdx).map((exam) => (
+          {exams.slice(startIdx, endIdx).map(exam => (
             <ExamListItem
               key={exam.id}
               id={`exam-opt-${exam.id}`}
@@ -456,7 +277,6 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [sortBy,             setSortBy]             = useState('newest');
 
-  /* #5 Async EXAM_LIST support */
   const isLoading = !EXAM_LIST;
 
   /* Filtered + sorted */
@@ -479,34 +299,34 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
     });
   }, [searchQuery, selectedDifficulty, sortBy]);
 
-  const total  = EXAM_LIST?.length || 0;
-  const count  = filteredExams.length;
+  const total = EXAM_LIST?.length || 0;
+  const count = filteredExams.length;
 
   /* Handlers */
   const handleStart = useCallback(async () => {
     setIsStarting(true);
-    analytics.track('exam_started', { examId: selectedExam }); // #10
+    analytics.track('exam_started', { examId: selectedExam });
     try { onStartExam?.(selectedExam); } finally { setIsStarting(false); }
   }, [selectedExam, onStartExam]);
 
   const handleSearch = useCallback((e) => {
     setSearchQuery(e.target.value);
-    analytics.track('search_used', { query: e.target.value }); // #10
+    analytics.track('search_used', { query: e.target.value });
   }, []);
 
   const handleDifficulty = useCallback((e) => {
     setSelectedDifficulty(e.target.value);
-    analytics.track('filter_used', { filter: 'difficulty', value: e.target.value }); // #10
+    analytics.track('filter_used', { filter: 'difficulty', value: e.target.value });
   }, []);
 
   const handleSort = useCallback((e) => {
     setSortBy(e.target.value);
-    analytics.track('filter_used', { filter: 'sort', value: e.target.value }); // #10
+    analytics.track('filter_used', { filter: 'sort', value: e.target.value });
   }, []);
 
   const handleSelectExam = useCallback((id) => {
     setSelectedExam(id);
-    onExamHover?.(id); // prefetch hook from FullExamMode
+    onExamHover?.(id);
   }, [onExamHover]);
 
   const clearFilters = useCallback(() => {
@@ -515,71 +335,68 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
     setSortBy('newest');
   }, []);
 
-  return (
-    /* #2 role="document" wrapper + distinct font */
-    <div className="examsetup-root" style={{ minHeight: '100vh', background: '#fff' }}>
+  /* ── Select styling shared (no SVG arrow injection needed; use @tailwindcss/forms) ── */
+  const selectClass = [
+    'w-full px-3 py-2.5 rounded-lg',
+    'border border-slate-200',
+    'bg-slate-50 text-slate-900',
+    'font-medium text-[13px]',
+    'cursor-pointer appearance-none',
+    'transition-colors duration-150',
+    'focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none',
+    /* custom chevron via bg-image — kept as Tailwind arbitrary value */
+    "bg-[url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")] bg-no-repeat bg-[right_10px_center] bg-[length:16px]",
+    'pr-8',
+  ].join(' ');
 
-      {/* ── #1 #2 Header with landmark role="banner" ── */}
+  /* Test-structure rows */
+  const TEST_SECTIONS = [
+    { label: 'Listening', desc: '20 câu · 4 phần', time: '30 phút' },
+    { label: 'Reading',   desc: '40 câu · 4 phần', time: '60 phút' },
+  ];
+
+  const REQUIREMENTS = [
+    'Môi trường yên tĩnh, tập trung',
+    'Kết nối internet ổn định',
+    'Tiến độ lưu tự động liên tục',
+    'Không thể quay lại phần nghe đã làm',
+  ];
+
+  return (
+    <div className="examsetup-root min-h-screen bg-white font-[family-name:var(--font-dm-sans,'DM_Sans',system-ui,sans-serif)]">
+
+      {/* ── Header ── */}
       <header
         role="banner"
-        className="examsetup-header"
-        style={{
-          position: 'sticky', top: 0, zIndex: 40,
-          background: '#fff',
-          borderBottom: '1px solid #E2E8F0',
-          boxShadow: '0 1px 3px rgba(0,0,0,.06)',
-        }}
+        className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm
+                   pt-[max(12px,env(safe-area-inset-top))]"
       >
-        <div style={{
-          maxWidth: 1200, margin: '0 auto',
-          padding: 'clamp(10px,2vw,20px) clamp(14px,4vw,32px)',
-        }}>
+        <div className="max-w-[1200px] mx-auto px-[clamp(14px,4vw,32px)] py-[clamp(10px,2vw,20px)]">
           {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {/* #9 Official badge */}
-              <span className="es-badge" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                fontSize: 11, fontWeight: 700, letterSpacing: '.06em',
-                textTransform: 'uppercase',
-                color: '#4338CA',
-                background: '#EEF2FF',
-                border: '1px solid #C7D2FE',
-                padding: '3px 10px', borderRadius: 6,
-                marginBottom: 8,
-              }}>
-                {/* Inline shield icon */}
+          <div className="flex items-start gap-3 flex-wrap">
+            <div className="flex-1 min-w-0">
+              {/* Badge */}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-[.06em] uppercase
+                               text-indigo-600 bg-indigo-50 border border-indigo-200
+                               px-[10px] py-[3px] rounded-md mb-2 animate-[esBadgePop_.4s_.25s_cubic-bezier(.4,0,.2,1)_both]">
                 <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true">
-                  <path d="M5 0L10 2v5c0 2.5-2 4-5 5C2 11 0 9.5 0 7V2L5 0z" fill="#4338CA"/>
+                  <path d="M5 0L10 2v5c0 2.5-2 4-5 5C2 11 0 9.5 0 7V2L5 0z" fill="#4338CA" />
                 </svg>
                 Official Assessment
               </span>
 
-              <h1 style={{
-                fontSize: 'clamp(20px,4vw,32px)',
-                fontWeight: 600,
-                color: '#0F172A',
-                letterSpacing: '-.02em',
-                lineHeight: 1.2,
-                margin: 0,
-              }}>
+              <h1 className="text-[clamp(20px,4vw,32px)] font-semibold text-slate-900
+                             tracking-tight leading-tight m-0">
                 HUFLIT English Placement Test
               </h1>
-
-              {/* #7 slate-700 (contrast ≥ 4.5:1) */}
-              <p style={{
-                fontSize: 'clamp(12px,1.5vw,14px)',
-                color: '#334155', /* #7 was slate-600 → now slate-700 */
-                marginTop: 4, lineHeight: 1.5,
-              }}>
+              <p className="text-[clamp(12px,1.5vw,14px)] text-slate-700 mt-1 leading-relaxed">
                 Find your level and unlock your English potential
               </p>
             </div>
           </div>
 
           {/* Step indicator */}
-          <div style={{ marginTop: 'clamp(10px,2vw,20px)', paddingTop: 'clamp(10px,2vw,20px)', borderTop: '1px solid #F1F5F9' }}>
-            {/* #2 nav landmark for steps */}
+          <div className="mt-[clamp(10px,2vw,20px)] pt-[clamp(10px,2vw,20px)] border-t border-slate-100">
             <nav aria-label="Exam steps">
               <StepIndicator currentMode="setup" />
             </nav>
@@ -587,120 +404,92 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
         </div>
       </header>
 
-      {/* ── #2 main landmark ── */}
-      <main role="main" style={{
-        maxWidth: 1200, margin: '0 auto',
-        padding: 'clamp(20px,4vw,48px) clamp(14px,4vw,32px)',
-      }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
-          gap: 'clamp(16px,3vw,32px)',
-          alignItems: 'start',
-        }}>
+      {/* ── Main ── */}
+      <main
+        role="main"
+        className="max-w-[1200px] mx-auto px-[clamp(14px,4vw,32px)] py-[clamp(20px,4vw,48px)]"
+      >
+        <div className="grid gap-[clamp(16px,3vw,32px)] lg:grid-cols-[320px_1fr] items-start">
 
-          {/* ── #2 aside landmark ── */}
-          <aside role="complementary" aria-label="Test information"
-            className="es-fadein es-fadein-1"
-            style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* ── Aside ── */}
+          <aside
+            role="complementary"
+            aria-label="Test information"
+            className="flex flex-col gap-6 animate-[esFadeUp_.35s_.05s_cubic-bezier(.4,0,.2,1)_both]"
+          >
+            <div className="sticky top-24 bg-white border border-slate-200 rounded-[14px]
+                            p-[clamp(18px,3vw,28px)] shadow-sm">
 
-            {/* #9 Sticky info panel (desktop) */}
-            <div style={{
-              position: 'sticky', top: 100,
-              background: '#fff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 14,
-              padding: 'clamp(18px,3vw,28px)',
-              boxShadow: '0 1px 3px rgba(0,0,0,.07)',
-            }}>
               {/* Test structure */}
-              <p style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
-                textTransform: 'uppercase', color: '#64748B', marginBottom: 14,
-              }}>
+              <p className="text-[10px] font-bold tracking-[.1em] uppercase text-slate-400 mb-3.5">
                 Cấu trúc đề thi
               </p>
 
-              {[
-                { label: 'Listening', desc: '20 câu · 4 phần', time: '30 phút' },
-                { label: 'Reading',   desc: '40 câu · 4 phần', time: '60 phút' },
-              ].map((s, i) => (
+              {TEST_SECTIONS.map((s, i) => (
                 <div key={s.label}>
-                  {i > 0 && <div style={{ height: 1, background: '#F1F5F9', margin: '14px 0' }} />}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  {i > 0 && <div className="h-px bg-slate-100 my-3.5" />}
+                  <div className="flex justify-between items-start">
                     <div>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: '#0F172A', margin: 0 }}>{s.label}</p>
-                      <p style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>{s.desc}</p>
+                      <p className="text-sm font-semibold text-slate-900 m-0">{s.label}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{s.desc}</p>
                     </div>
-                    <span style={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>{s.time}</span>
+                    <span className="text-[13px] text-slate-400 font-medium">{s.time}</span>
                   </div>
                 </div>
               ))}
 
               {/* Total */}
-              <div style={{
-                marginTop: 20, paddingTop: 20, borderTop: '1px solid #F1F5F9',
-              }}>
-                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#64748B', marginBottom: 6 }}>
+              <div className="mt-5 pt-5 border-t border-slate-100">
+                <p className="text-[10px] font-bold tracking-[.1em] uppercase text-slate-400 mb-1.5">
                   Tổng thời gian
                 </p>
-                <p style={{ margin: 0 }}>
-                  <span style={{ fontSize: 36, fontWeight: 300, color: '#0F172A', letterSpacing: '-.02em' }}>90</span>
-                  <span style={{ fontSize: 13, color: '#64748B', marginLeft: 6 }}>phút</span>
+                <p className="m-0">
+                  <span className="text-[36px] font-light text-slate-900 tracking-tight">90</span>
+                  <span className="text-[13px] text-slate-400 ml-1.5">phút</span>
                 </p>
               </div>
 
               {/* Requirements */}
-              <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #F1F5F9' }}>
-                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#64748B', marginBottom: 10 }}>
+              <div className="mt-5 pt-5 border-t border-slate-100">
+                <p className="text-[10px] font-bold tracking-[.1em] uppercase text-slate-400 mb-2.5">
                   Lưu ý
                 </p>
-                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {[
-                    'Môi trường yên tĩnh, tập trung',
-                    'Kết nối internet ổn định',
-                    'Tiến độ lưu tự động liên tục',
-                    'Không thể quay lại phần nghe đã làm',
-                  ].map(item => (
-                    <li key={item} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                      <span style={{ color: '#2563EB', marginTop: 2, flexShrink: 0 }}>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                          <circle cx="6" cy="6" r="6" fill="#DBEAFE"/>
-                          <path d="M3.5 6.5l2 2 3-4" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <ul className="m-0 p-0 list-none flex flex-col gap-2">
+                  {REQUIREMENTS.map(item => (
+                    <li key={item} className="flex gap-2 items-start">
+                      <span className="text-blue-600 mt-0.5 shrink-0" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <circle cx="6" cy="6" r="6" fill="#DBEAFE" />
+                          <path d="M3.5 6.5l2 2 3-4" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </span>
-                      {/* #7 contrast improvement */}
-                      <span style={{ fontSize: 13, color: '#334155', lineHeight: 1.5 }}>{item}</span>
+                      <span className="text-[13px] text-slate-700 leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* Social proof */}
-              <div style={{
-                marginTop: 20, paddingTop: 20, borderTop: '1px solid #F1F5F9',
-                textAlign: 'center',
-              }}>
-                <p style={{ fontSize: 28, fontWeight: 300, color: '#0F172A', margin: 0 }}>4.9</p>
-                <p style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>500K+ học viên</p>
+              <div className="mt-5 pt-5 border-t border-slate-100 text-center">
+                <p className="text-[28px] font-light text-slate-900 m-0">4.9</p>
+                <p className="text-xs text-slate-500 mt-0.5">500K+ học viên</p>
               </div>
             </div>
           </aside>
 
-          {/* ── Right: Exam selection ── */}
-          <section aria-label="Chọn đề thi"
-            className="es-fadein es-fadein-2"
-            style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
+          {/* ── Exam selection ── */}
+          <section
+            aria-label="Chọn đề thi"
+            className="flex flex-col gap-5 animate-[esFadeUp_.35s_.10s_cubic-bezier(.4,0,.2,1)_both]"
+          >
             {/* Search & filters */}
-            <div className="es-fadein es-fadein-3" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Search */}
+            <div className="flex flex-col gap-3 animate-[esFadeUp_.35s_.15s_cubic-bezier(.4,0,.2,1)_both]">
+              {/* Search input — no JS state for focus */}
               <div>
-                <label htmlFor="exam-search" style={{
-                  display: 'block', fontSize: 10, fontWeight: 700,
-                  letterSpacing: '.1em', textTransform: 'uppercase',
-                  color: '#475569', marginBottom: 6,
-                }}>
+                <label
+                  htmlFor="exam-search"
+                  className="block text-[10px] font-bold tracking-[.1em] uppercase text-slate-500 mb-1.5"
+                >
                   Tìm kiếm
                 </label>
                 <input
@@ -710,117 +499,72 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
                   placeholder="Tìm theo tên hoặc mã đề…"
                   value={searchQuery}
                   onChange={handleSearch}
-                  className="es-focus"
                   aria-controls={listboxId}
                   aria-label="Tìm kiếm đề thi"
-                  style={{
-                    width: '100%', padding: '11px 14px',
-                    borderRadius: 8, border: '1.5px solid #E2E8F0',
-                    background: '#FAFBFC', color: '#0F172A',
-                    fontFamily: 'inherit', fontSize: 14,
-                    boxSizing: 'border-box',
-                    transition: 'border-color .15s',
-                  }}
-                  onFocus={e => e.target.style.borderColor = '#2563EB'}
-                  onBlur={e => e.target.style.borderColor = '#E2E8F0'}
+                  className="w-full px-3.5 py-2.5 rounded-lg
+                             border border-slate-200
+                             bg-slate-50 text-slate-900
+                             text-sm placeholder:text-slate-400
+                             transition-colors duration-150
+                             focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none
+                             focus-visible:border-blue-600"
                 />
               </div>
 
-              {/* Filters */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                gap: 10,
-              }}>
-                {[
-                  {
-                    id: 'difficulty', label: 'Độ khó', value: selectedDifficulty, onChange: handleDifficulty,
-                    options: [
-                      { v: 'all', l: 'Tất cả' }, { v: 'beginner', l: 'Cơ bản' },
-                      { v: 'intermediate', l: 'Trung cấp' }, { v: 'advanced', l: 'Nâng cao' },
-                    ],
-                  },
-                  {
-                    id: 'sort', label: 'Sắp xếp', value: sortBy, onChange: handleSort,
-                    options: [
-                      { v: 'newest', l: 'Mới nhất' }, { v: 'popular', l: 'Phổ biến nhất' },
-                      { v: 'difficulty', l: 'Theo độ khó' },
-                    ],
-                  },
-                ].map(f => (
-                  <div key={f.id}>
-                    <label htmlFor={f.id} style={{
-                      display: 'block', fontSize: 10, fontWeight: 700,
-                      letterSpacing: '.1em', textTransform: 'uppercase',
-                      color: '#475569', marginBottom: 6,
-                    }}>{f.label}</label>
-                    <select
-                      id={f.id}
-                      value={f.value}
-                      onChange={f.onChange}
-                      className="es-focus"
-                      style={{
-                        width: '100%', padding: '10px 32px 10px 12px',
-                        borderRadius: 8, border: '1.5px solid #E2E8F0',
-                        background: '#FAFBFC', color: '#0F172A',
-                        fontFamily: 'inherit', fontSize: 13, fontWeight: 500,
-                        cursor: 'pointer', appearance: 'none',
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 10px center',
-                        backgroundSize: '16px',
-                      }}
-                    >
-                      {f.options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-                    </select>
-                  </div>
-                ))}
+              {/* Filters row */}
+              <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+                {/* Difficulty */}
+                <div>
+                  <label htmlFor="difficulty" className="block text-[10px] font-bold tracking-[.1em] uppercase text-slate-500 mb-1.5">
+                    Độ khó
+                  </label>
+                  <select id="difficulty" value={selectedDifficulty} onChange={handleDifficulty} className={selectClass}>
+                    <option value="all">Tất cả</option>
+                    <option value="beginner">Cơ bản</option>
+                    <option value="intermediate">Trung cấp</option>
+                    <option value="advanced">Nâng cao</option>
+                  </select>
+                </div>
+
+                {/* Sort */}
+                <div>
+                  <label htmlFor="sort" className="block text-[10px] font-bold tracking-[.1em] uppercase text-slate-500 mb-1.5">
+                    Sắp xếp
+                  </label>
+                  <select id="sort" value={sortBy} onChange={handleSort} className={selectClass}>
+                    <option value="newest">Mới nhất</option>
+                    <option value="popular">Phổ biến nhất</option>
+                    <option value="difficulty">Theo độ khó</option>
+                  </select>
+                </div>
 
                 {/* Result count */}
                 <div>
-                  <p style={{
-                    fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
-                    textTransform: 'uppercase', color: '#475569', marginBottom: 6,
-                  }}>Kết quả</p>
-                  <div style={{
-                    padding: '10px 12px', borderRadius: 8,
-                    border: '1.5px solid #E2E8F0', background: '#F8FAFC',
-                    fontSize: 14, fontWeight: 600, color: '#0F172A',
-                  }}>
-                    {count !== total
-                      ? <><span style={{ color: '#2563EB' }}>{count}</span> / {total}</>
-                      : total.toLocaleString()
-                    }
+                  <p className="text-[10px] font-bold tracking-[.1em] uppercase text-slate-500 mb-1.5">
+                    Kết quả
+                  </p>
+                  <div className="px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900">
+                    {count !== total ? (
+                      <><span className="text-blue-600">{count}</span> / {total}</>
+                    ) : total.toLocaleString()}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Exam list box */}
-            <div className="es-fadein es-fadein-4" style={{
-              border: '1.5px solid #E2E8F0',
-              borderRadius: 12,
-              overflow: 'hidden',
-              background: '#fff',
-              boxShadow: '0 1px 4px rgba(0,0,0,.06)',
-            }}>
+            {/* Exam listbox card */}
+            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm
+                            animate-[esFadeUp_.35s_.20s_cubic-bezier(.4,0,.2,1)_both]">
               {/* List header */}
-              <div style={{
-                padding: 'clamp(10px,2vw,16px) clamp(14px,3vw,24px)',
-                borderBottom: '1px solid #F1F5F9',
-                background: '#F8FAFC',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#0F172A', margin: 0 }}>
-                  Chọn đề thi
-                </p>
-                <p style={{ fontSize: 12, color: '#64748B', margin: 0 }}>
-                  ↑ ↓ để điều hướng
-                </p>
+              <div className="flex justify-between items-center
+                              px-[clamp(14px,3vw,24px)] py-[clamp(10px,2vw,16px)]
+                              border-b border-slate-100 bg-slate-50">
+                <p className="text-[13px] font-semibold text-slate-900 m-0">Chọn đề thi</p>
+                <p className="text-xs text-slate-400 m-0">↑ ↓ để điều hướng</p>
               </div>
 
-              {/* Divider rows */}
-              <div style={{ divideY: '#F1F5F9' }}>
+              {/* Content — divide-y replaces old divideY style */}
+              <div className="divide-y divide-slate-100">
                 {isLoading ? (
                   <SkeletonList />
                 ) : filteredExams.length > 0 ? (
@@ -837,36 +581,26 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
             </div>
 
             {/* Start CTA */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="flex flex-col gap-2.5">
               <button
                 onClick={handleStart}
                 disabled={isStarting || !selectedExam}
-                className="es-start-btn"
                 aria-busy={isStarting}
                 aria-label={isStarting ? 'Đang bắt đầu...' : `Bắt đầu: ${selectedExam}`}
-                style={{
-                  width: '100%',
-                  padding: 'clamp(13px,2vw,16px) 24px',
-                  borderRadius: 10, border: 'none',
-                  fontFamily: 'inherit',
-                  fontSize: 'clamp(14px,2vw,16px)', fontWeight: 600,
-                  cursor: isStarting || !selectedExam ? 'not-allowed' : 'pointer',
-                  background: isStarting || !selectedExam
-                    ? '#F1F5F9'
-                    : 'linear-gradient(135deg, #1D4ED8, #2563EB)',
-                  color: isStarting || !selectedExam ? '#94A3B8' : '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                }}
+                className={[
+                  'w-full py-[clamp(13px,2vw,16px)] px-6 rounded-[10px] border-none',
+                  'font-semibold text-[clamp(14px,2vw,16px)]',
+                  'flex items-center justify-center gap-2.5',
+                  'transition-all duration-150',
+                  'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-blue-600 focus-visible:outline-offset-[3px]',
+                  isStarting || !selectedExam
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    : 'bg-gradient-to-br from-blue-700 to-blue-600 text-white cursor-pointer hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(37,99,235,.35)] active:translate-y-0',
+                ].join(' ')}
               >
                 {isStarting ? (
                   <>
-                    <span style={{
-                      width: 16, height: 16,
-                      border: '2.5px solid rgba(255,255,255,.35)',
-                      borderTopColor: '#fff', borderRadius: '50%',
-                      display: 'inline-block',
-                      animation: 'spin 1s linear infinite',
-                    }} />
+                    <span className="animate-spin w-4 h-4 border-2 border-white/40 border-t-white rounded-full inline-block" />
                     Đang bắt đầu…
                   </>
                 ) : (
@@ -874,24 +608,19 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
                     Bắt đầu thi
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M5 12h14m-7-7 7 7-7 7" stroke="currentColor" strokeWidth="2"
-                        strokeLinecap="round" strokeLinejoin="round"/>
+                        strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </>
                 )}
               </button>
 
-              <p style={{ fontSize: 12, color: '#64748B', textAlign: 'center', margin: 0 }}>
+              <p className="text-xs text-slate-400 text-center m-0">
                 Tiến độ lưu tự động · Không cần lo mất dữ liệu
               </p>
             </div>
           </section>
         </div>
       </main>
-
-      {/* #9 Spin keyframe for loading spinner */}
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 });

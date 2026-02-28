@@ -3,12 +3,12 @@
 
 import React, { memo, useCallback, useId } from 'react';
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
    Design tokens (MD3-aligned)
-   ───────────────────────────────────────────── */
+   ───────────────────────────────────────────────────────────── */
 const tokens = {
-  primary:       '#1565C0',   // MD3 primary
-  primaryLight:  '#E3F2FD',   // primary-container
+  primary:       '#1565C0',
+  primaryLight:  '#E3F2FD',
   primaryDark:   '#0D47A1',
   surface:       '#FFFFFF',
   surfaceVar:    '#F5F7FA',
@@ -26,28 +26,23 @@ const tokens = {
   transition:    'all .18s cubic-bezier(.4,0,.2,1)',
 };
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
    Global styles injected once
-   ───────────────────────────────────────────── */
+   ───────────────────────────────────────────────────────────── */
 const STYLE_ID = '__qcard_styles__';
 if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
   const style = document.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-    /* Respect motion preferences */
     @media (prefers-reduced-motion: reduce) {
       .qcard-opt { transition: none !important; }
       .qcard-opt:focus-visible { transition: none !important; }
     }
-
-    /* Keyboard focus ring — visible, never clipped */
     .qcard-opt:focus-visible {
       outline: 3px solid ${tokens.primary};
       outline-offset: 2px;
     }
     .qcard-opt:focus:not(:focus-visible) { outline: none; }
-
-    /* Ripple effect (MD) */
     .qcard-opt {
       position: relative;
       overflow: hidden;
@@ -62,8 +57,6 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
       transition: opacity .2s;
     }
     .qcard-opt:active::after { opacity: .08; }
-
-    /* State layer on selected */
     .qcard-opt[aria-pressed="true"]::before {
       content: '';
       position: absolute;
@@ -72,10 +65,7 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
       opacity: .05;
       pointer-events: none;
     }
-
-    /* Touch target – minimum 48 × 48 px (WCAG 2.5.5) */
     .qcard-opt { min-height: 56px; }
-
     @media (min-width: 640px) {
       .qcard-opt { min-height: 52px; }
     }
@@ -83,89 +73,101 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
   document.head.appendChild(style);
 }
 
-/* ─────────────────────────────────────────────
-   Inline-style helpers (no Tailwind dependency)
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   Inline-style helpers
+   ───────────────────────────────────────────────────────────── */
 const s = {
+  /* FIX: replace border shorthand with 3 separate properties so
+     React never sees shorthand + borderColor on the same element */
   card: {
-    background: tokens.surface,
-    border: `1px solid ${tokens.outline}`,
-    borderRadius: tokens.radius,
-    padding: '24px 20px',
-    boxShadow: tokens.elevation1,
-    transition: tokens.transition,
-    contain: 'content', // CWV: layout containment
+    background:    tokens.surface,
+    borderWidth:   '1px',
+    borderStyle:   'solid',
+    borderColor:   tokens.outline,       // ← non-shorthand only
+    borderRadius:  tokens.radius,
+    padding:       '24px 20px',
+    boxShadow:     tokens.elevation1,
+    transition:    tokens.transition,
+    contain:       'content',
   },
+  /* FIX: cardHover now only overrides the two properties that actually
+     change — no shorthand, no conflict */
   cardHover: {
-    boxShadow: tokens.elevation2,
-    borderColor: tokens.outlineHover,
+    boxShadow:   tokens.elevation2,
+    borderColor: tokens.outlineHover,   // ← same non-shorthand key, safe
   },
   badge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '11px',
-    fontWeight: 700,
-    letterSpacing: '.08em',
-    textTransform: 'uppercase',
-    color: tokens.primary,
-    background: tokens.primaryLight,
-    padding: '3px 10px',
-    borderRadius: '100px',
-    marginBottom: '12px',
-    userSelect: 'none',
+    display:        'inline-flex',
+    alignItems:     'center',
+    gap:            '6px',
+    fontSize:       '11px',
+    fontWeight:     700,
+    letterSpacing:  '.08em',
+    textTransform:  'uppercase',
+    color:          tokens.primary,
+    background:     tokens.primaryLight,
+    padding:        '3px 10px',
+    borderRadius:   '100px',
+    marginBottom:   '12px',
+    userSelect:     'none',
   },
   questionText: {
-    fontSize: 'clamp(15px, 2.5vw, 17px)',
+    fontSize:   'clamp(15px, 2.5vw, 17px)',
     fontWeight: 600,
     lineHeight: 1.55,
-    color: tokens.onSurface,
-    margin: '0 0 6px',
+    color:      tokens.onSurface,
+    margin:     '0 0 6px',
   },
   hint: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '6px',
-    fontSize: '13px',
-    color: tokens.onSurfaceLow,
-    fontStyle: 'italic',
-    marginTop: '10px',
-    padding: '8px 12px',
-    background: tokens.surfaceVar,
+    display:      'flex',
+    alignItems:   'flex-start',
+    gap:          '6px',
+    fontSize:     '13px',
+    color:        tokens.onSurfaceLow,
+    fontStyle:    'italic',
+    marginTop:    '10px',
+    padding:      '8px 12px',
+    background:   tokens.surfaceVar,
     borderRadius: tokens.radiusSm,
-    borderLeft: `3px solid ${tokens.outline}`,
-    lineHeight: 1.5,
+    /* FIX: borderLeft shorthand → 3 separate props */
+    borderLeftWidth: '3px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: tokens.outline,
+    lineHeight:   1.5,
   },
   divider: {
-    border: 'none',
-    borderTop: `1px solid ${tokens.outline}`,
-    margin: '20px 0 16px',
+    border:     'none',
+    /* FIX: borderTop shorthand → separate props */
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: tokens.outline,
+    margin:     '20px 0 16px',
   },
   optList: {
-    listStyle: 'none',
-    margin: 0,
-    padding: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
+    listStyle:      'none',
+    margin:         0,
+    padding:        0,
+    display:        'flex',
+    flexDirection:  'column',
+    gap:            '10px',
   },
   selectedTag: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '12px',
-    fontWeight: 700,
-    color: tokens.success,
-    padding: '8px 14px',
-    background: tokens.successLight,
+    display:      'flex',
+    alignItems:   'center',
+    gap:          '6px',
+    fontSize:     '12px',
+    fontWeight:   700,
+    color:        tokens.success,
+    padding:      '8px 14px',
+    background:   tokens.successLight,
     borderRadius: tokens.radiusSm,
-    marginTop: '18px',
+    marginTop:    '18px',
   },
 };
 
-/* ─────────────────────────────────────────────
-   SVG icons (inline – zero network request)
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   SVG icons
+   ───────────────────────────────────────────────────────────── */
 const IconCircle = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
     aria-hidden="true" focusable="false">
@@ -184,7 +186,7 @@ const IconChecked = () => (
 
 const IconHint = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-    aria-hidden="true" focusable="false" style={{flexShrink:0, marginTop:'2px'}}>
+    aria-hidden="true" focusable="false" style={{ flexShrink: 0, marginTop: '2px' }}>
     <circle cx="12" cy="12" r="10" stroke={tokens.onSurfaceLow} strokeWidth="2"/>
     <path d="M12 8v4m0 4h.01" stroke={tokens.onSurfaceLow} strokeWidth="2"
       strokeLinecap="round"/>
@@ -199,9 +201,9 @@ const IconCheck = () => (
   </svg>
 );
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
    OptionButton
-   ───────────────────────────────────────────── */
+   ───────────────────────────────────────────────────────────── */
 const OptionButton = memo(({
   option,
   isSelected,
@@ -210,27 +212,27 @@ const OptionButton = memo(({
   groupId,
   optionId,
 }) => {
+  /* FIX: no border shorthand — use borderWidth + borderStyle + borderColor */
   const optStyle = {
-    width: '100%',
-    padding: '14px 16px',
+    width:        '100%',
+    padding:      '14px 16px',
     borderRadius: tokens.radiusSm,
-    border: isSelected
-      ? `2px solid ${tokens.primary}`
-      : `2px solid ${tokens.outline}`,
-    background: isSelected ? tokens.primaryLight : tokens.surface,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-    textAlign: 'left',
-    transition: tokens.transition,
-    color: tokens.onSurface,
-    fontFamily: 'inherit',
+    borderWidth:  '2px',
+    borderStyle:  'solid',
+    borderColor:  isSelected ? tokens.primary : tokens.outline,  // ← only this changes
+    background:   isSelected ? tokens.primaryLight : tokens.surface,
+    cursor:       'pointer',
+    display:      'flex',
+    alignItems:   'center',
+    gap:          '14px',
+    textAlign:    'left',
+    transition:   tokens.transition,
+    color:        tokens.onSurface,
+    fontFamily:   'inherit',
   };
 
   return (
     <li role="none">
-      {/* Using <button> with role="radio" semantics via aria-pressed */}
       <button
         type="button"
         role="radio"
@@ -241,39 +243,38 @@ const OptionButton = memo(({
         onClick={onSelect}
         style={optStyle}
       >
-        {/* Icon */}
-        <span style={{ flexShrink: 0, lineHeight: 0 }}
-          aria-hidden="true">
+        <span style={{ flexShrink: 0, lineHeight: 0 }} aria-hidden="true">
           {isSelected ? <IconChecked /> : <IconCircle />}
         </span>
 
-        {/* Label */}
         <span style={{
-          flex: 1,
-          fontSize: 'clamp(13px, 2vw, 15px)',
+          flex:       1,
+          fontSize:   'clamp(13px, 2vw, 15px)',
           fontWeight: isSelected ? 600 : 400,
           lineHeight: 1.5,
-          color: isSelected ? tokens.primary : tokens.onSurface,
+          color:      isSelected ? tokens.primary : tokens.onSurface,
         }}>
           <span style={{
-            fontWeight: 700,
+            fontWeight:  700,
             marginRight: '6px',
-            color: isSelected ? tokens.primary : tokens.onSurfaceMed,
+            color:       isSelected ? tokens.primary : tokens.onSurfaceMed,
           }}>{optionLabel}.</span>
           {option}
         </span>
 
-        {/* Selected chip */}
         {isSelected && (
           <span style={{
-            flexShrink: 0,
-            fontSize: '11px',
-            fontWeight: 700,
-            color: tokens.primary,
-            background: tokens.surface,
-            border: `1px solid ${tokens.primary}`,
-            borderRadius: '100px',
-            padding: '2px 10px',
+            flexShrink:    0,
+            fontSize:      '11px',
+            fontWeight:    700,
+            color:         tokens.primary,
+            background:    tokens.surface,
+            /* FIX: border shorthand → separate props */
+            borderWidth:   '1px',
+            borderStyle:   'solid',
+            borderColor:   tokens.primary,
+            borderRadius:  '100px',
+            padding:       '2px 10px',
             letterSpacing: '.04em',
           }} aria-hidden="true">
             Selected
@@ -285,9 +286,9 @@ const OptionButton = memo(({
 });
 OptionButton.displayName = 'OptionButton';
 
-/* ─────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
    QuestionCard
-   ───────────────────────────────────────────── */
+   ───────────────────────────────────────────────────────────── */
 export const QuestionCard = memo(({
   question,
   questionNum,
@@ -314,7 +315,6 @@ export const QuestionCard = memo(({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* ── Question header ── */}
       <header>
         <div style={s.badge} aria-label={`Question ${questionNum}`}>
           <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
@@ -337,19 +337,17 @@ export const QuestionCard = memo(({
 
       <hr style={s.divider} aria-hidden="true" />
 
-      {/* ── Options ── */}
       <fieldset
         style={{ border: 'none', margin: 0, padding: 0 }}
         aria-labelledby={`${groupId}-heading`}
       >
-        {/* Hidden legend for SR */}
         <legend style={{
-          position: 'absolute',
-          width: '1px',
-          height: '1px',
-          overflow: 'hidden',
-          clip: 'rect(0 0 0 0)',
-          whiteSpace: 'nowrap',
+          position:  'absolute',
+          width:     '1px',
+          height:    '1px',
+          overflow:  'hidden',
+          clip:      'rect(0 0 0 0)',
+          whiteSpace:'nowrap',
         }}>
           Choose one answer for question {questionNum}
         </legend>
@@ -371,14 +369,12 @@ export const QuestionCard = memo(({
             ))}
           </ul>
         ) : (
-          <p style={{ color: tokens.onSurfaceLow, fontSize: '14px' }}
-            role="status">
+          <p style={{ color: tokens.onSurfaceLow, fontSize: '14px' }} role="status">
             No options available for this question.
           </p>
         )}
       </fieldset>
 
-      {/* ── Confirmation strip ── */}
       {selectedAnswer !== undefined && (
         <div style={s.selectedTag} role="status"
           aria-live="polite" aria-atomic="true">
