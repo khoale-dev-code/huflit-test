@@ -1,56 +1,55 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Headphones, BookOpen, GraduationCap, Sparkles, 
-  LogOut, User, Menu, X, Flame, Languages, Home, FileText
+import {
+  Headphones, BookOpen, GraduationCap, Sparkles,
+  LogOut, User, X, Flame, Languages, Home, FileText,
+  ChevronRight, Star,
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { useStreak } from './hooks/useStreak';
 import { ROUTES } from '../config/routes';
-import logo from '../assets/logo.png';
 
-// Menu items - Static
-const MENU_ITEMS = [
-  { id: 'listening', label: 'Nghe', icon: Headphones, type: 'test', path: '/test' },
-  { id: 'reading', label: 'Đọc', icon: BookOpen, type: 'test', path: '/test' },
-  { id: 'full', label: 'Thi Thử', icon: GraduationCap, type: 'exam', path: '/full-exam' },
-  { id: 'grammar', label: 'Ngữ Pháp', icon: Sparkles, type: 'practice', path: '/grammar' },
-  { id: 'vocabulary', label: 'Từ Vựng', icon: Languages, type: 'practice', path: '/vocabulary' },
+/* ─────────────────────────────────────────────────────────────
+   Route / menu config
+   ───────────────────────────────────────────────────────────── */
+const ALL_MENU_ITEMS = [
+  { id: 'home',       label: 'Trang chủ', icon: Home,          path: ROUTES.HOME,       type: 'link'     },
+  { id: 'listening',  label: 'Nghe',      icon: Headphones,    path: '/test',           type: 'test'     },
+  { id: 'reading',    label: 'Đọc',       icon: BookOpen,      path: '/test',           type: 'test'     },
+  { id: 'full',       label: 'Thi Thử',   icon: GraduationCap, path: '/full-exam',      type: 'exam'     },
+  { id: 'grammar',    label: 'Ngữ Pháp',  icon: Sparkles,      path: '/grammar',        type: 'practice' },
+  { id: 'vocabulary', label: 'Từ Vựng',   icon: Languages,     path: '/vocabulary',     type: 'practice' },
 ];
 
-const BOTTOM_MENU_ITEMS = [
-  { id: 'home', label: 'Trang chủ', icon: Home, path: ROUTES.HOME },
-  MENU_ITEMS[0],
-  MENU_ITEMS[1],
+// Bottom nav: 3 pinned items only — gọn hơn
+const BOTTOM_NAV_ITEMS = [
+  ALL_MENU_ITEMS[0], // Home
+  ALL_MENU_ITEMS[1], // Nghe
+  ALL_MENU_ITEMS[3], // Thi Thử
 ];
 
-// ==========================================
-// Animation presets - Optimize motion
-// ==========================================
-const menuVariants = {
-  hidden: { opacity: 0, x: '100%' },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { type: 'spring', damping: 28, stiffness: 300 }
-  },
-  exit: { opacity: 0, x: '100%', transition: { duration: 0.2 } }
+// Desktop nav: all except Home (shown via logo)
+const DESKTOP_MENU_ITEMS = ALL_MENU_ITEMS.slice(1);
+
+/* ─────────────────────────────────────────────────────────────
+   Animation presets
+   ───────────────────────────────────────────────────────────── */
+const drawerVariants = {
+  hidden:  { opacity: 0, y: '100%' },
+  visible: { opacity: 1, y: 0,      transition: { type: 'spring', damping: 32, stiffness: 320 } },
+  exit:    { opacity: 0, y: '100%', transition: { duration: 0.22, ease: 'easeIn' } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, x: 20 },
-  visible: (i) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.04, duration: 0.3 }
-  })
+  hidden:  { opacity: 0, y: 12 },
+  visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.045, duration: 0.28 } }),
 };
 
-// ==========================================
-// Nav Button Component
-// ==========================================
-const NavButton = ({ item, isActive, onClick }) => {
+/* ─────────────────────────────────────────────────────────────
+   Desktop NavButton
+   ───────────────────────────────────────────────────────────── */
+const DesktopNavBtn = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
   return (
     <button
@@ -58,8 +57,7 @@ const NavButton = ({ item, isActive, onClick }) => {
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
       className={`
-        flex items-center gap-2 px-3.5 py-2 rounded-lg font-bold text-sm transition-all
-        whitespace-nowrap
+        flex items-center gap-2 px-3.5 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap
         ${isActive
           ? 'bg-[#00358E] text-white shadow-md'
           : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200'}
@@ -71,190 +69,313 @@ const NavButton = ({ item, isActive, onClick }) => {
   );
 };
 
-// ==========================================
-// Bottom Nav Item
-// ==========================================
-const BottomNavItem = ({ item, isActive, onClick, prefersReducedMotion }) => {
+/* ─────────────────────────────────────────────────────────────
+   Bottom nav tab (mobile pinned)
+   ───────────────────────────────────────────────────────────── */
+const BottomTab = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
-  
   return (
-    <motion.button
+    <button
       onClick={onClick}
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
-      whileHover={!prefersReducedMotion ? { scale: 1.05 } : undefined}
-      whileTap={!prefersReducedMotion ? { scale: 0.95 } : undefined}
-      className={`
-        flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors relative
-        ${isActive ? 'text-[#00358E]' : 'text-slate-600 hover:text-[#00358E]'}
-      `}
+      className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 relative group"
     >
-      <div className={`p-2 rounded-lg transition-colors ${
-        isActive ? 'bg-blue-100' : 'bg-slate-100'
-      }`}>
+      <div className={`
+        p-1.5 rounded-xl transition-all duration-200
+        ${isActive ? 'bg-blue-100 text-[#00358E]' : 'text-slate-500 group-hover:text-[#00358E]'}
+      `}>
         <Icon className="w-5 h-5" aria-hidden="true" />
       </div>
-      <span className="text-[9px] font-bold text-center">{item.label}</span>
+      <span className={`text-[9px] font-bold tracking-tight transition-colors
+        ${isActive ? 'text-[#00358E]' : 'text-slate-500'}`}>
+        {item.label}
+      </span>
       {isActive && (
-        <motion.div
-          layoutId="bottom-active"
-          className="absolute bottom-0 h-1 w-6 bg-[#00358E] rounded-full"
+        <motion.span
+          layoutId="bottom-tab-indicator"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#00358E] rounded-full"
           aria-hidden="true"
         />
       )}
-    </motion.button>
+    </button>
   );
 };
 
-// ==========================================
-// Profile Dropdown
-// ==========================================
-const ProfileDropdown = ({ user, showMenu, setShowMenu, onProfileClick, onAnswersClick, onSignOut, prefersReducedMotion }) => {
-  if (!showMenu) return null;
+/* ─────────────────────────────────────────────────────────────
+   "More" drawer — slides up from bottom, shows all items
+   ───────────────────────────────────────────────────────────── */
+const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSignedIn, streak, onProfile, onAnswers, onSignOut, onSignIn }) => (
+  <AnimatePresence>
+    {open && (
+      <>
+        {/* Backdrop */}
+        <motion.div
+          key="backdrop"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+
+        {/* Drawer */}
+        <motion.div
+          key="drawer"
+          variants={drawerVariants}
+          initial="hidden" animate="visible" exit="exit"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu điều hướng"
+          className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl overflow-hidden"
+          style={{ maxHeight: '90vh' }}
+        >
+          {/* Handle */}
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-slate-200 rounded-full" aria-hidden="true" />
+          </div>
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+            <h2 className="font-bold text-slate-900 text-base">Menu</h2>
+            <button
+              onClick={onClose}
+              aria-label="Đóng menu"
+              className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-slate-500" />
+            </button>
+          </div>
+
+          <div className="overflow-y-auto pb-safe" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+
+            {/* ── User card (if signed in) ── */}
+            {isSignedIn && user ? (
+              <div className="px-4 pt-4 pb-2">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || 'User'}
+                    className="w-11 h-11 rounded-full border-2 border-white object-cover flex-shrink-0 shadow-sm"
+                    loading="lazy"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || 'Người dùng'}</p>
+                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                  </div>
+                  {streak > 0 && (
+                    <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 px-2 py-1 rounded-full flex-shrink-0">
+                      <Flame className="w-3 h-3 text-[#FF7D00]" />
+                      <span className="text-[#FF7D00] font-bold text-xs">{streak}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="px-4 pt-4 pb-2">
+                <button
+                  onClick={() => { onSignIn(); onClose(); }}
+                  className="w-full py-3 bg-[#00358E] text-white font-bold rounded-xl text-sm hover:bg-[#002763] transition-colors"
+                >
+                  Đăng nhập để lưu tiến trình
+                </button>
+              </div>
+            )}
+
+            {/* ── Navigation section ── */}
+            <div className="px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">
+                Luyện tập
+              </p>
+              <div className="space-y-1">
+                {allItems.map((item, i) => {
+                  const Icon = item.icon;
+                  const active = isItemActive(item);
+                  return (
+                    <motion.button
+                      key={item.id}
+                      custom={i}
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      onClick={() => { onNav(item); onClose(); }}
+                      className={`
+                        w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm
+                        ${active
+                          ? 'bg-[#00358E] text-white shadow-md'
+                          : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200'}
+                      `}
+                    >
+                      <div className={`p-1.5 rounded-lg ${active ? 'bg-white/20' : 'bg-slate-100'}`}>
+                        <Icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                      </div>
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {!active && <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Account section (if signed in) ── */}
+            {isSignedIn && (
+              <div className="px-4 pb-4">
+                <div className="h-px bg-slate-100 my-2" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">
+                  Tài khoản
+                </p>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => { onProfile(); onClose(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-semibold text-sm"
+                  >
+                    <div className="p-1.5 rounded-lg bg-slate-100">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <span className="flex-1 text-left">Trang cá nhân</span>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                  </button>
+
+                  <button
+                    onClick={() => { onAnswers(); onClose(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-semibold text-sm"
+                  >
+                    <div className="p-1.5 rounded-lg bg-slate-100">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <span className="flex-1 text-left">Đáp án của tôi</span>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                  </button>
+
+                  <button
+                    onClick={() => { onSignOut(); onClose(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-semibold text-sm"
+                  >
+                    <div className="p-1.5 rounded-lg bg-red-50">
+                      <LogOut className="w-4 h-4" />
+                    </div>
+                    <span className="flex-1 text-left">Đăng xuất</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* safe area spacer */}
+            <div className="h-4" />
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
+);
+
+/* ─────────────────────────────────────────────────────────────
+   Desktop Profile Dropdown
+   ───────────────────────────────────────────────────────────── */
+const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick, onSignOut }) => {
+  const ref = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setShowMenu(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showMenu, setShowMenu]);
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-20"
-        onClick={() => setShowMenu(false)}
-        aria-hidden="true"
-      />
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 8 }}
-        transition={{ duration: 0.2 }}
-        role="menu"
-        className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-30"
-      >
-        <button
-          onClick={onProfileClick}
-          role="menuitem"
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 transition-colors"
+    <AnimatePresence>
+      {showMenu && (
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 8, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 8, scale: 0.96 }}
+          transition={{ duration: 0.15 }}
+          role="menu"
+          className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-30"
         >
-          <User className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-          <span>Trang cá nhân</span>
-        </button>
-        <button
-          onClick={onAnswersClick}
-          role="menuitem"
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 transition-colors"
-        >
-          <FileText className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-          <span>Đáp án</span>
-        </button>
-        <div className="border-t border-slate-100 my-1" />
-        <button
-          onClick={onSignOut}
-          role="menuitem"
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
-        >
-          <LogOut className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-          <span>Đăng xuất</span>
-        </button>
-      </motion.div>
-    </>
+          {[
+            { label: 'Trang cá nhân', icon: User,     fn: onProfileClick, color: 'text-slate-700' },
+            { label: 'Đáp án',        icon: FileText, fn: onAnswersClick,  color: 'text-slate-700' },
+          ].map(({ label, icon: Icon, fn, color }) => (
+            <button key={label} onClick={fn} role="menuitem"
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm ${color} hover:bg-blue-50 transition-colors`}>
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              <span>{label}</span>
+            </button>
+          ))}
+          <div className="border-t border-slate-100 my-1" />
+          <button onClick={onSignOut} role="menuitem"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            <span>Đăng xuất</span>
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
-// ==========================================
-// Main Navbar Component
-// ==========================================
+/* ─────────────────────────────────────────────────────────────
+   MAIN Navbar
+   ───────────────────────────────────────────────────────────── */
 const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const { user, isSignedIn, signInWithGoogle, signOut } = useFirebaseAuth();
   const { streak } = useStreak();
-  
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const [isScrolled,      setIsScrolled]      = useState(false);
+  const [drawerOpen,      setDrawerOpen]      = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // Check motion preference
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-    
-    const listener = (e) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener('change', listener);
-    return () => mediaQuery.removeEventListener('change', listener);
-  }, []);
-
-  // Scroll listener - Passive, optimized
+  // Scroll listener
   useEffect(() => {
     let ticking = false;
-    
-    const handleScroll = () => {
+    const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 10);
-          ticking = false;
-        });
+        requestAnimationFrame(() => { setIsScrolled(window.scrollY > 10); ticking = false; });
         ticking = true;
       }
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Body overflow
+  // Lock body scroll when drawer open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileOpen]);
+    document.body.style.overflow = drawerOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [drawerOpen]);
 
-  // Check if item is active
+  // Close drawer on route change
+  useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
+
+  /* Active check */
   const isItemActive = useCallback((item) => {
     const pathMatch = location.pathname === item.path;
-    if (item.type === 'test') return pathMatch && testType === item.id;
+    if (item.type === 'test')     return pathMatch && testType    === item.id;
     if (item.type === 'practice') return pathMatch && practiceType === item.id;
     return pathMatch;
   }, [location.pathname, testType, practiceType]);
 
-  // Handlers
-  const handleNavClick = useCallback((item) => {
-    if (item.type === 'test') onTestTypeChange?.(item.id);
+  /* Navigate handler */
+  const handleNav = useCallback((item) => {
+    if (item.type === 'test')     onTestTypeChange?.(item.id);
     if (item.type === 'practice') onPracticeTypeChange?.(item.id);
     navigate(item.path);
-    setMobileOpen(false);
-    setShowProfileMenu(false);
   }, [navigate, onTestTypeChange, onPracticeTypeChange]);
 
-  const handleLogoClick = useCallback(() => {
-    navigate(ROUTES.HOME);
-    setMobileOpen(false);
-  }, [navigate]);
-
-  const handleSignOut = useCallback(() => {
-    signOut();
-    setShowProfileMenu(false);
-    setMobileOpen(false);
-  }, [signOut]);
-
-  const handleProfileClick = useCallback(() => {
-    navigate(ROUTES.PROFILE);
-    setShowProfileMenu(false);
-    setMobileOpen(false);
-  }, [navigate]);
-
-  const handleAnswersClick = useCallback(() => {
-    navigate(ROUTES.ANSWERS);
-    setShowProfileMenu(false);
-    setMobileOpen(false);
-  }, [navigate]);
+  const handleProfile = useCallback(() => { navigate(ROUTES.PROFILE);  setShowProfileMenu(false); }, [navigate]);
+  const handleAnswers = useCallback(() => { navigate(ROUTES.ANSWERS);  setShowProfileMenu(false); }, [navigate]);
+  const handleSignOut = useCallback(() => { signOut(); setShowProfileMenu(false); }, [signOut]);
 
   return (
     <>
-      {/* NAVBAR */}
+      {/* ════════════════════════════════════════
+          DESKTOP top nav
+          ════════════════════════════════════════ */}
       <nav
         role="navigation"
         aria-label="Điều hướng chính"
@@ -263,61 +384,53 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/50'
             : 'bg-white/80 backdrop-blur-sm border-b border-slate-100/30'
         }`}
-        style={{
-          WebkitBackdropFilter: 'blur(12px)',
-          willChange: 'transform'
-        }}
+        style={{ WebkitBackdropFilter: 'blur(12px)', willChange: 'transform' }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
+
             {/* Logo */}
             <button
-              onClick={handleLogoClick}
-              aria-label="HUFLIT - Trang chủ"
-              className="flex items-center gap-2 group flex-shrink-0 transition-opacity hover:opacity-75"
+              onClick={() => navigate(ROUTES.HOME)}
+              aria-label="HubStudy - Trang chủ"
+              className="flex items-center gap-2 flex-shrink-0 transition-opacity hover:opacity-75"
             >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#00358E] rounded-lg flex items-center justify-center shadow-md">
-                <img src={logo} alt="" className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+              <div className="w-9 h-9 bg-[#1A73E8] rounded-xl flex items-center justify-center shadow-lg">
+                <Star className="text-white w-5 h-5 fill-current" aria-hidden="true" />
               </div>
-              <div className="hidden xs:flex flex-col leading-tight">
-                <h1 className="text-[#00358E] font-black text-base sm:text-lg">HUFLIT</h1>
-                <p className="text-[#FF7D00] text-[9px] sm:text-[10px] font-bold uppercase tracking-wide">Exam</p>
-              </div>
+              <span className="font-bold text-xl tracking-tight text-slate-900">HubStudy</span>
             </button>
 
-            {/* Desktop Menu */}
+            {/* Desktop menu pills */}
             <div className="hidden lg:flex items-center gap-1 bg-slate-50 p-1 rounded-xl">
-              {MENU_ITEMS.map((item) => (
-                <NavButton
+              {DESKTOP_MENU_ITEMS.map(item => (
+                <DesktopNavBtn
                   key={item.id}
                   item={item}
                   isActive={isItemActive(item)}
-                  onClick={() => handleNavClick(item)}
+                  onClick={() => handleNav(item)}
                 />
               ))}
             </div>
 
-            {/* Right Actions */}
+            {/* Right actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Streak - Only show on desktop for performance */}
+              {/* Streak badge */}
               {isSignedIn && streak > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="hidden sm:flex items-center gap-1 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200"
-                >
-                  <Flame className="w-3.5 h-3.5 text-[#FF7D00]" aria-hidden="true" />
-                  <span className="text-[#FF7D00] font-bold text-xs" aria-label={`${streak} ngày`}>
-                    {streak}
+                <div className="flex items-center gap-1.5 bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
+                  <Flame className="w-4 h-4 text-[#FF9600] fill-current" />
+                  <span className="text-xs font-black text-orange-700 hidden sm:inline">
+                    {streak} Ngày liên tiếp
                   </span>
-                </motion.div>
+                  <span className="text-xs font-black text-orange-700 sm:hidden">{streak}</span>
+                </div>
               )}
 
-              {/* Auth Button */}
+              {/* Auth / avatar */}
               {isSignedIn ? (
                 <div className="relative">
                   <button
-                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    onClick={() => setShowProfileMenu(v => !v)}
                     aria-label="Menu người dùng"
                     aria-expanded={showProfileMenu}
                     aria-haspopup="menu"
@@ -330,204 +443,100 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                       loading="lazy"
                     />
                   </button>
-
-                  <AnimatePresence>
-                    <ProfileDropdown
-                      user={user}
-                      showMenu={showProfileMenu}
-                      setShowMenu={setShowProfileMenu}
-                      onProfileClick={handleProfileClick}
-                      onAnswersClick={handleAnswersClick}
-                      onSignOut={handleSignOut}
-                      prefersReducedMotion={prefersReducedMotion}
-                    />
-                  </AnimatePresence>
+                  <ProfileDropdown
+                    showMenu={showProfileMenu}
+                    setShowMenu={setShowProfileMenu}
+                    onProfileClick={handleProfile}
+                    onAnswersClick={handleAnswers}
+                    onSignOut={handleSignOut}
+                  />
                 </div>
               ) : (
-                <motion.button
-                  whileHover={!prefersReducedMotion ? { scale: 1.02 } : undefined}
-                  whileTap={!prefersReducedMotion ? { scale: 0.98 } : undefined}
+                <button
                   onClick={signInWithGoogle}
-                  className="bg-[#00358E] text-white px-3 sm:px-5 py-2 rounded-lg font-bold text-xs sm:text-sm transition-colors hover:bg-[#002763] active:bg-[#001d42]"
+                  className="bg-[#00358E] text-white px-3 sm:px-5 py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-[#002763] active:bg-[#001d42] transition-colors"
                 >
                   <span className="hidden sm:inline">Đăng nhập</span>
                   <span className="sm:hidden">Login</span>
-                </motion.button>
+                </button>
               )}
-
-              {/* Mobile Menu Button */}
-              <motion.button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                aria-label={mobileOpen ? 'Đóng menu' : 'Mở menu'}
-                aria-expanded={mobileOpen}
-                aria-controls="mobile-menu"
-                className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors active:bg-slate-200"
-              >
-                {mobileOpen ? (
-                  <X className="w-5 h-5 text-slate-700" aria-hidden="true" />
-                ) : (
-                  <Menu className="w-5 h-5 text-slate-700" aria-hidden="true" />
-                )}
-              </motion.button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 lg:hidden"
-              aria-hidden="true"
-            />
+      {/* Top nav spacer */}
+      <div className="h-14 sm:h-16 pointer-events-none" />
 
-            <motion.div
-              variants={menuVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              id="mobile-menu"
-              role="navigation"
-              aria-label="Menu di động"
-              className="fixed right-0 top-0 h-screen w-64 sm:w-72 bg-white z-30 lg:hidden overflow-y-auto shadow-2xl"
-            >
-              {/* Header */}
-              <div className="sticky top-0 flex items-center justify-between p-4 border-b border-slate-200 bg-white z-10">
-                <h2 className="text-lg font-bold text-slate-900">Menu</h2>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  aria-label="Đóng menu"
-                  className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-slate-600" aria-hidden="true" />
-                </button>
-              </div>
-
-              {/* Menu Items */}
-              <div className="p-2 space-y-1">
-                {MENU_ITEMS.map((item, i) => (
-                  <motion.button
-                    key={item.id}
-                    custom={i}
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    onClick={() => handleNavClick(item)}
-                    className={`
-                      w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-semibold text-sm
-                      ${isItemActive(item)
-                        ? 'bg-[#00358E] text-white shadow-md'
-                        : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200'}
-                    `}
-                  >
-                    <item.icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                    <span>{item.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-
-              {/* User Section */}
-              {isSignedIn && user && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="border-t border-slate-200 p-4 space-y-3"
-                >
-                  <div className="flex items-center gap-3 px-3 py-3 rounded-lg bg-blue-50 border border-blue-200">
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName || 'Người dùng'}
-                      className="w-10 h-10 rounded-full border-2 border-white object-cover flex-shrink-0"
-                      loading="lazy"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || 'User'}</p>
-                      <p className="text-xs text-slate-600 truncate">{user.email}</p>
-                    </div>
-                  </div>
-
-                  {streak > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center justify-center gap-2 bg-orange-50 px-3 py-3 rounded-lg border border-orange-200"
-                    >
-                      <Flame className="w-4 h-4 text-[#FF7D00] flex-shrink-0" aria-hidden="true" />
-                      <span className="text-[#FF7D00] font-bold text-sm">{streak} ngày liên tiếp</span>
-                    </motion.div>
-                  )}
-
-                  <button
-                    onClick={handleProfileClick}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-blue-100 rounded-lg transition-colors font-semibold text-sm"
-                  >
-                    <User className="w-4 h-4" aria-hidden="true" />
-                    <span>Trang cá nhân</span>
-                  </button>
-
-                  <button
-                    onClick={handleAnswersClick}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-blue-100 rounded-lg transition-colors font-semibold text-sm"
-                  >
-                    <FileText className="w-4 h-4" aria-hidden="true" />
-                    <span>Đáp án</span>
-                  </button>
-
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-semibold text-sm"
-                  >
-                    <LogOut className="w-4 h-4" aria-hidden="true" />
-                    <span>Đăng xuất</span>
-                  </button>
-                </motion.div>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Bottom Navigation - Mobile Only */}
-      <motion.div
-        className="fixed bottom-0 left-0 right-0 sm:hidden bg-white border-t border-slate-200 z-30"
-        animate={{ y: 0 }}
+      {/* ════════════════════════════════════════
+          MOBILE bottom nav (5 tabs: 4 pinned + "Thêm")
+          ════════════════════════════════════════ */}
+      <div
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="flex items-center justify-between px-1 py-2">
-          {BOTTOM_MENU_ITEMS.map((item) => (
-            <BottomNavItem
+        <div className="flex items-stretch h-16">
+          {BOTTOM_NAV_ITEMS.map(item => (
+            <BottomTab
               key={item.id}
               item={item}
               isActive={isItemActive(item)}
-              onClick={() => handleNavClick(item)}
-              prefersReducedMotion={prefersReducedMotion}
+              onClick={() => handleNav(item)}
             />
           ))}
-          <motion.button
-            onClick={() => setMobileOpen(true)}
-            aria-label="Xem thêm"
-            className="flex flex-col items-center gap-1 py-2 px-3 hover:bg-slate-100 rounded-lg transition-colors"
+
+          {/* "Thêm" button — opens the full drawer */}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            aria-label="Xem thêm tùy chọn"
+            aria-expanded={drawerOpen}
+            aria-haspopup="dialog"
+            className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 group"
           >
-            <div className="p-2 bg-slate-100 rounded-lg">
-              <Menu className="w-5 h-5 text-slate-600" aria-hidden="true" />
-            </div>
-            <span className="text-[9px] font-bold text-slate-700">Thêm</span>
-          </motion.button>
+            {/* Avatar if logged in, else dots icon */}
+            {isSignedIn && user?.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt=""
+                className="w-7 h-7 rounded-full border-2 border-slate-200 object-cover"
+                aria-hidden="true"
+              />
+            ) : (
+              <div className="p-1.5 rounded-xl text-slate-500 group-hover:text-[#00358E] transition-colors">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="5"  cy="12" r="1.5" />
+                  <circle cx="12" cy="12" r="1.5" />
+                  <circle cx="19" cy="12" r="1.5" />
+                </svg>
+              </div>
+            )}
+            <span className="text-[9px] font-bold tracking-tight text-slate-500 group-hover:text-[#00358E] transition-colors">
+              {isSignedIn ? 'Tôi' : 'Thêm'}
+            </span>
+          </button>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Spacer */}
-      <div className="h-14 sm:h-16 pointer-events-none" />
+      {/* Bottom nav spacer (mobile) */}
+      <div className="lg:hidden h-16 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
 
-      {/* Bottom spacer for mobile with bottom nav */}
-      <div className="sm:hidden h-20 pointer-events-none" />
+      {/* ════════════════════════════════════════
+          Full-screen "More" drawer
+          ════════════════════════════════════════ */}
+      <MoreDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        allItems={ALL_MENU_ITEMS}
+        isItemActive={isItemActive}
+        onNav={handleNav}
+        user={user}
+        isSignedIn={isSignedIn}
+        streak={streak}
+        onProfile={handleProfile}
+        onAnswers={handleAnswers}
+        onSignOut={handleSignOut}
+        onSignIn={signInWithGoogle}
+      />
     </>
   );
 };

@@ -1,37 +1,43 @@
-/* src/components/FullExam/components/Navigation/PartNavigation.jsx */
+/* src/components/FullExam/components/Navigation/PartNavigation.jsx
+ *
+ * FIX: countAnswersInPart dùng generateAnswerKey thay vì hardcode format
+ * Root cause: `${section}-part${part}-q${q}` ≠ generateAnswerKey output
+ */
 
 import React, { memo } from 'react';
 import { CheckCircle, Circle, Lock, AlertCircle } from 'lucide-react';
+import { generateAnswerKey } from '../../utils/answerKey'; // ✅ FIX
 
-/**
- * Part Navigation - Select which part to work on
- * Shows all parts with:
- * - Answered questions count
- * - Completion status
- * - Lock status (can't go back to listening parts)
- */
 export const PartNavigation = memo(({
   currentPart,
   totalParts,
-  startPartNumber,        // 1 for listening, 5 for reading
-  answers,                // All answers object
-  section,                // 'listening' or 'reading'
-  questionsPerPart,       // Questions per part
-  onPartChange,           // (newPart) => void
-  playedParts = [],       // Array of played listening parts (for listening only)
+  startPartNumber,
+  answers,
+  section,
+  questionsPerPart,
+  onPartChange,
+  playedParts = [],
   isAudioPlaying = false,
 }) => {
-  const canNavigateToListening = section === 'listening';
-
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-6">
-      <h3 className="font-bold text-lg text-slate-900 mb-4">
+    <div style={{
+      background: '#fff',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0',
+      padding: '24px',
+    }}>
+      <h3 style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', marginBottom: '16px' }}>
         {section === 'listening' ? 'Listening Parts' : 'Reading Parts'}
       </h3>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '12px',
+      }}>
         {Array.from({ length: totalParts }, (_, idx) => {
-          const partNumber = startPartNumber + idx;
+          const partNumber = startPartNumber + idx; // ABSOLUTE part number
+          // ✅ FIX: dùng generateAnswerKey để đếm đúng
           const answerCount = countAnswersInPart(answers, section, partNumber, questionsPerPart);
           const isCompleted = answerCount === questionsPerPart;
           const isCurrent = partNumber === currentPart;
@@ -58,31 +64,32 @@ export const PartNavigation = memo(({
       </div>
 
       {/* Legend */}
-      <div className="mt-6 pt-6 border-t border-slate-200 flex items-center gap-6 text-xs">
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-600" />
-          <span>Completed</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Circle className="w-4 h-4 text-blue-600" />
-          <span>Current</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-amber-600" />
-          <span>In Progress</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Lock className="w-4 h-4 text-slate-400" />
-          <span>Locked</span>
-        </div>
+      <div style={{
+        marginTop: '20px', paddingTop: '16px',
+        borderTop: '1px solid #e2e8f0',
+        display: 'flex', flexWrap: 'wrap', gap: '16px',
+        fontSize: '12px', color: '#64748b',
+      }}>
+        {[
+          { icon: <CheckCircle size={14} color="#16a34a" />, label: 'Completed' },
+          { icon: <Circle size={14} color="#2563eb" />,      label: 'Current' },
+          { icon: <AlertCircle size={14} color="#d97706" />, label: 'In Progress' },
+          { icon: <Lock size={14} color="#94a3b8" />,        label: 'Locked' },
+        ].map(({ icon, label }) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {icon} {label}
+          </div>
+        ))}
       </div>
 
-      {/* Help Text */}
       {section === 'listening' && (
-        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-xs text-amber-900">
-            <strong>Note:</strong> Once you finish a listening part, you cannot return to it. Make sure all answers are ready before moving on.
-          </p>
+        <div style={{
+          marginTop: '12px', padding: '10px 14px',
+          background: '#fffbeb', borderRadius: '8px',
+          border: '1px solid #fde68a',
+          fontSize: '12px', color: '#92400e',
+        }}>
+          <strong>Lưu ý:</strong> Sau khi nghe xong một phần, bạn không thể quay lại.
         </div>
       )}
     </div>
@@ -91,9 +98,7 @@ export const PartNavigation = memo(({
 
 PartNavigation.displayName = 'PartNavigation';
 
-/**
- * Part Button - Individual part selector
- */
+/* ── PartButton ── */
 const PartButton = memo(({
   partNumber,
   isCurrent,
@@ -104,81 +109,65 @@ const PartButton = memo(({
   onSelect,
   disabled,
 }) => {
-  let bgColor = 'bg-white border-slate-200';
-  let textColor = 'text-slate-900';
-  let icon = <Circle className="w-5 h-5" />;
+  let bg     = '#fff';
+  let border = '#e2e8f0';
+  let color  = '#0f172a';
+  let icon   = <Circle size={20} color="#2563eb" />;
 
   if (isLocked) {
-    bgColor = 'bg-slate-100 border-slate-300';
-    textColor = 'text-slate-400';
-    icon = <Lock className="w-5 h-5" />;
+    bg = '#f8fafc'; border = '#cbd5e1'; color = '#94a3b8';
+    icon = <Lock size={20} color="#94a3b8" />;
   } else if (isCompleted) {
-    bgColor = 'bg-emerald-50 border-emerald-300';
-    textColor = 'text-emerald-900';
-    icon = <CheckCircle className="w-5 h-5 text-emerald-600" />;
+    bg = '#f0fdf4'; border = '#86efac'; color = '#14532d';
+    icon = <CheckCircle size={20} color="#16a34a" />;
   } else if (isCurrent) {
-    bgColor = 'bg-blue-50 border-blue-600';
-    textColor = 'text-blue-900';
-    icon = <div className="w-5 h-5 rounded-full bg-blue-600" />;
+    bg = '#eff6ff'; border = '#2563eb'; color = '#1e3a8a';
+    icon = <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#2563eb' }} />;
   } else if (answerCount > 0) {
-    bgColor = 'bg-amber-50 border-amber-300';
-    textColor = 'text-amber-900';
-    icon = <AlertCircle className="w-5 h-5 text-amber-600" />;
+    bg = '#fffbeb'; border = '#fcd34d'; color = '#78350f';
+    icon = <AlertCircle size={20} color="#d97706" />;
   }
 
   return (
     <button
       onClick={onSelect}
       disabled={disabled}
-      className={`
-        p-3 rounded-lg border-2 transition-all duration-150
-        flex flex-col items-center gap-2
-        disabled:cursor-not-allowed
-        ${bgColor}
-        ${disabled ? 'opacity-50' : 'hover:border-blue-400 hover:shadow-sm'}
-      `}
+      style={{
+        padding: '12px 8px',
+        borderRadius: '10px',
+        border: `2px solid ${border}`,
+        background: bg,
+        color,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '6px',
+        transition: 'all 0.15s',
+        fontFamily: 'inherit',
+        width: '100%',
+      }}
     >
-      {/* Icon */}
-      <div className={`flex-shrink-0 ${textColor}`}>
-        {icon}
-      </div>
-
-      {/* Part Number */}
-      <div className={`font-bold text-sm ${textColor}`}>
-        Part {partNumber}
-      </div>
-
-      {/* Answer Count */}
-      <div className={`text-xs font-semibold ${textColor}`}>
-        {answerCount}/{totalQuestions}
-      </div>
-
-      {/* Status Badge */}
-      {isCompleted && (
-        <div className="text-xs text-emerald-600 font-bold">✓ Done</div>
-      )}
-      {isCurrent && (
-        <div className="text-xs text-blue-600 font-bold">Current</div>
-      )}
-      {isLocked && (
-        <div className="text-xs text-slate-400 font-bold">Locked</div>
-      )}
+      {icon}
+      <span style={{ fontWeight: 700, fontSize: '13px' }}>Part {partNumber}</span>
+      <span style={{ fontSize: '11px', fontWeight: 600 }}>{answerCount}/{totalQuestions}</span>
+      {isCompleted && <span style={{ fontSize: '10px', color: '#16a34a', fontWeight: 700 }}>✓ Done</span>}
+      {isCurrent && !isCompleted && <span style={{ fontSize: '10px', color: '#2563eb', fontWeight: 700 }}>Current</span>}
+      {isLocked && <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Locked</span>}
     </button>
   );
 });
 
 PartButton.displayName = 'PartButton';
 
-/**
- * Count answers in a specific part
- */
+/* ── FIX: countAnswersInPart dùng generateAnswerKey ── */
 function countAnswersInPart(answers, section, part, questionsPerPart) {
   let count = 0;
   for (let q = 1; q <= questionsPerPart; q++) {
-    const key = `${section}-part${part}-q${q}`;
-    if (answers[key] !== undefined) {
-      count++;
-    }
+    // ✅ FIX: generateAnswerKey thay vì `${section}-part${part}-q${q}`
+    const key = generateAnswerKey({ section, part, question: q });
+    if (answers[key] !== undefined) count++;
   }
   return count;
 }

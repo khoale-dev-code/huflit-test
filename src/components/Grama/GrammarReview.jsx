@@ -1,918 +1,498 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { 
+  useState, useCallback, useMemo, useEffect, useRef, lazy, Suspense, memo 
+} from 'react';
 import {
-  ChevronDown,
-  BookOpen,
-  Lightbulb,
-  PlayCircle,
-  XCircle,
-  Search,
-  Bookmark,
-  BookmarkCheck,
-  RotateCcw,
-  Zap,
+  ChevronDown, BookOpen, Lightbulb, PlayCircle, XCircle, Search,
+  Bookmark, BookmarkCheck, RotateCcw, Zap, ArrowRight, CheckCircle2,
+  Flame, Clock, AlertTriangle, Globe, Menu, X, ChevronLeft
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import {
-  getGrammarByLevel,
-  searchLessons,
-  getLessonIdsByLevel,
-  getLessonIdsForTopicIds,
-  GRAMMAR_QUIZZES,
-  COMMON_MISTAKES,
-  STUDY_TIPS,
-  REAL_WORLD_EXAMPLES,
-} from '../../data/grammarData';
 
-// ✅ LAZY LOAD: GrammarTopicPage
+import {
+  getGrammarByLevel, getLessonIdsByLevel, COMMON_MISTAKES, STUDY_TIPS, REAL_WORLD_EXAMPLES,
+} from '../../data/grammarData.js';
+
 const GrammarTopicPage = lazy(() => import('./GrammarTopicPage'));
 
-import '../styles/GrammarReview.css';
-
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
-const DIFFICULTIES = ['All', 'Easy', 'Medium', 'Hard'];
-const TABS = [
-  { id: 'topics', label: 'Topics', icon: '📖' },
-  { id: 'practice', label: 'Practice', icon: '💡' },
-  { id: 'quiz', label: 'Quizzes', icon: '🎯' },
-];
-const PRACTICE_SECTIONS = [
-  { id: 'mistakes', label: 'Mistakes', icon: '⚠️' },
-  { id: 'tips', label: 'Tips', icon: '💡' },
-  { id: 'examples', label: 'Examples', icon: '🌍' },
-];
-
-const BOOKMARK_TIPS_KEY = 'grammar-bookmarked-tips';
-const BOOKMARK_EXAMPLES_KEY = 'grammar-bookmarked-examples';
-
 /* ──────────────────────────────────────
-   STYLES & HELPERS
+   🛠️ UTILS & HOOKS
    ────────────────────────────────────── */
-
-const getDifficultyStyles = (diff) => {
-  const d = (diff || '').toLowerCase();
-  if (d === 'beginner' || d === 'easy')
-    return {
-      badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-      buttonActive: 'bg-emerald-600 text-white border-emerald-600 shadow-sm',
-      progress: 'from-emerald-500 to-emerald-600',
-    };
-  if (d === 'intermediate' || d === 'medium')
-    return {
-      badge: 'bg-sky-100 text-sky-800 border-sky-200',
-      buttonActive: 'bg-sky-600 text-white border-sky-600 shadow-sm',
-      progress: 'from-sky-500 to-sky-600',
-    };
-  if (d === 'advanced' || d === 'hard')
-    return {
-      badge: 'bg-violet-100 text-violet-800 border-violet-200',
-      buttonActive: 'bg-violet-600 text-white border-violet-600 shadow-sm',
-      progress: 'from-violet-500 to-violet-600',
-    };
-  return {
-    badge: 'bg-slate-100 text-slate-700 border-slate-200',
-    buttonActive: 'bg-grammar-primary text-white border-grammar-primary shadow-sm',
-    progress: 'from-grammar-primary to-grammar-accent',
-  };
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
 };
 
-const cardClass =
-  'bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-all duration-200';
-const cardClassInteractive = cardClass + ' hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-transform';
-
-const loadBookmarks = (key) => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch {
-    return new Set();
-  }
-};
-
-const saveBookmarks = (key, set) => {
-  try {
-    localStorage.setItem(key, JSON.stringify([...set]));
-  } catch {}
-};
-
-const searchAll = (query, filterDifficulty) => {
-  const q = query.trim().toLowerCase();
-  const topicsRaw = q ? searchLessons(query) : [];
-  const topicsDeduped = [...new Map((topicsRaw || []).map((r) => [r.id, { ...r, lesson: undefined }])).values()];
-  let topics = topicsDeduped;
-  if (filterDifficulty !== 'All') {
-    topics = topics.filter((t) => t.difficulty === filterDifficulty);
-  }
-
-  const mistakes = q
-    ? COMMON_MISTAKES.filter(
-        (m) =>
-          m.mistake.toLowerCase().includes(q) ||
-          m.correct.toLowerCase().includes(q) ||
-          m.explanation.toLowerCase().includes(q) ||
-          m.topic.toLowerCase().includes(q)
-      )
-    : [];
-  const tips = q
-    ? STUDY_TIPS.filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          t.description.toLowerCase().includes(q) ||
-          t.relatedTopics.some((r) => r.toLowerCase().includes(q))
-      )
-    : [];
-  const examples = q
-    ? REAL_WORLD_EXAMPLES.filter(
-        (e) =>
-          e.context.toLowerCase().includes(q) ||
-          e.original.toLowerCase().includes(q) ||
-          e.explanation.toLowerCase().includes(q) ||
-          e.topic.toLowerCase().includes(q)
-      )
-    : [];
-  const quizzes = q
-    ? GRAMMAR_QUIZZES.filter(
-        (z) =>
-          z.title.toLowerCase().includes(q) ||
-          z.topics.some((t) => t.toLowerCase().includes(q)) ||
-          z.difficulty.toLowerCase().includes(q)
-      )
-    : [];
-
-  return { topics, mistakes, tips, examples, quizzes };
-};
-
-const fireConfetti = (full = true) => {
-  confetti({
-    particleCount: full ? 80 : 40,
-    spread: full ? 60 : 45,
-    origin: { y: 0.6 },
-    colors: ['#00358E', '#FF7D00', '#2563eb'],
+const useResponsive = () => {
+  const [viewport, setViewport] = useState({
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 640 : false,
+    isTablet: typeof window !== 'undefined' ? window.innerWidth >= 640 && window.innerWidth < 1024 : false,
+    isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1024 : true,
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setViewport({
+        isMobile: width < 640,
+        isTablet: width >= 640 && width < 1024,
+        isDesktop: width >= 1024,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return viewport;
 };
 
-const MILESTONES = [25, 50, 75, 100];
+/* ──────────────────────────────────────
+   📌 CONSTANTS & STYLES
+   ────────────────────────────────────── */
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
+const TABS = [
+  { id: 'topics', label: 'Topics', icon: <BookOpen className="w-5 h-5" /> },
+  { id: 'practice', label: 'Practice', icon: <Zap className="w-5 h-5" /> },
+];
+
+const DIFF_CONFIG = {
+  Easy: { 
+    color: 'bg-green-500', 
+    text: 'text-green-700', 
+    bg: 'bg-green-50',
+    darkBg: 'dark:bg-green-950'
+  },
+  Medium: { 
+    color: 'bg-blue-500', 
+    text: 'text-blue-700', 
+    bg: 'bg-blue-50',
+    darkBg: 'dark:bg-blue-950'
+  },
+  Hard: { 
+    color: 'bg-purple-500', 
+    text: 'text-purple-700', 
+    bg: 'bg-purple-50',
+    darkBg: 'dark:bg-purple-950'
+  },
+};
 
 /* ──────────────────────────────────────
-   MAIN COMPONENT
+   📦 SUB-COMPONENTS
    ────────────────────────────────────── */
 
+const M3Progress = ({ pct, height = "h-1.5", color = "bg-[#0B57D0]" }) => (
+  <div className={`${height} w-full bg-slate-200/60 dark:bg-slate-700 rounded-full overflow-hidden`}>
+    <div 
+      className={`h-full ${color} transition-all duration-700 ease-out`}
+      style={{ width: `${Math.min(pct, 100)}%` }}
+    />
+  </div>
+);
+
+const ContinueCard = memo(({ topic, onSelect }) => (
+  <button
+    onClick={() => onSelect(topic)}
+    className="w-full mb-6 sm:mb-8 p-3 sm:p-4 lg:p-5 rounded-2xl bg-gradient-to-br from-[#D3E3FD] to-[#C5D9F1] border border-blue-200 dark:border-blue-700 dark:bg-blue-900/30 cursor-pointer active:scale-[0.98] transition-all shadow-sm hover:shadow-md group focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+  >
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 lg:gap-4 mb-2 sm:mb-3 lg:mb-4">
+      <span className="text-[10px] sm:text-[11px] font-bold text-[#041E49] dark:text-blue-200 uppercase tracking-wider bg-white/60 dark:bg-blue-950/50 px-2 py-0.5 rounded-md whitespace-nowrap">
+        Continue
+      </span>
+      <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 animate-pulse flex-shrink-0" />
+    </div>
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 lg:gap-4">
+      <div className="text-2xl sm:text-3xl flex-shrink-0">{topic.icon}</div>
+      <div className="flex-1 min-w-0 w-full">
+        <h3 className="font-bold text-sm sm:text-base lg:text-lg text-[#1F1F1F] dark:text-white group-hover:text-blue-700 transition-colors break-words line-clamp-2">
+          {topic.title}
+        </h3>
+        <p className="text-[11px] sm:text-xs lg:text-sm text-slate-600 dark:text-slate-400 mb-2 line-clamp-1">
+          Next: {topic.description.slice(0, 35)}...
+        </p>
+        <M3Progress pct={45} height="h-1" /> 
+      </div>
+      <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 hidden sm:block" />
+    </div>
+  </button>
+));
+
+const TopicItem = memo(({ topic, completedSet, onSelect }) => {
+  const lessonIds = (topic.lessons || []).map(l => l.lessonId);
+  const doneCount = lessonIds.filter(id => completedSet.has(id)).length;
+  const pct = lessonIds.length > 0 ? (doneCount / lessonIds.length) * 100 : 0;
+  const config = DIFF_CONFIG[topic.difficulty] || DIFF_CONFIG.Medium;
+
+  return (
+    <button
+      onClick={() => onSelect(topic)}
+      className="w-full p-3 sm:p-3.5 lg:p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-600 transition-all active:scale-[0.99] cursor-pointer group shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-left"
+    >
+      <div className="flex items-start gap-2.5 sm:gap-3 lg:gap-4 mb-2.5 sm:mb-3 lg:mb-3.5">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-base sm:text-lg lg:text-xl group-hover:scale-110 transition-transform flex-shrink-0">
+          {topic.icon}
+        </div>
+        <div className="flex-1 min-w-0 w-full">
+          <div className="flex items-start sm:items-center gap-1.5 sm:gap-2 flex-wrap">
+            <h3 className="font-bold text-xs sm:text-sm lg:text-base text-slate-900 dark:text-white break-words line-clamp-2 leading-tight">
+              {topic.title}
+            </h3>
+            {pct === 100 && (
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0 mt-0.5" />
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 text-[10px] sm:text-[11px] lg:text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
+            <div className="flex items-center gap-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${config.color}`} />
+              <span className="hidden xs:inline">{topic.difficulty}</span>
+              <span className="xs:hidden">{topic.difficulty.slice(0, 1)}</span>
+            </div>
+            <div className="hidden sm:flex items-center gap-0.5">
+              <Clock className="w-3 h-3" />
+              <span className="text-[10px] sm:text-[11px]">{topic.estimatedTime || '5m'}</span>
+            </div>
+            <span className="font-semibold text-blue-600 dark:text-blue-400 text-[10px] sm:text-[11px]">
+              {doneCount}/{lessonIds.length}
+            </span>
+          </div>
+        </div>
+      </div>
+      <M3Progress 
+        pct={pct} 
+        height="h-0.5 sm:h-1" 
+        color={pct === 100 ? "bg-green-500" : "bg-blue-600"} 
+      />
+    </button>
+  );
+});
+
+const SkeletonLoader = () => (
+  <div className="space-y-3 animate-pulse">
+    {[...Array(4)].map((_, i) => (
+      <div 
+        key={i} 
+        className="h-16 sm:h-18 lg:h-20 bg-slate-200 dark:bg-slate-700 rounded-2xl" 
+      />
+    ))}
+  </div>
+);
+
+/* ──────────────────────────────────────
+   🚀 MAIN COMPONENT
+   ────────────────────────────────────── */
 const GrammarReview = () => {
   const [selectedLevel, setSelectedLevel] = useState('Beginner');
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterDifficulty, setFilterDifficulty] = useState('All');
   const [activeTab, setActiveTab] = useState('topics');
-  const [completedLessons, setCompletedLessons] = useState([]);
-  const [flippedMistakes, setFlippedMistakes] = useState(() => new Set());
-  const [bookmarkedTips, setBookmarkedTips] = useState(() => loadBookmarks(BOOKMARK_TIPS_KEY));
-  const [bookmarkedExamples, setBookmarkedExamples] = useState(() =>
-    loadBookmarks(BOOKMARK_EXAMPLES_KEY)
-  );
-  const [activePracticeSection, setActivePracticeSection] = useState('mistakes');
-  const [showFilters, setShowFilters] = useState(false);
+  const [completedLessons, setCompletedLessons] = useState(() => new Set());
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLevelLoading, setIsLevelLoading] = useState(false);
-  const [completedTopics, setCompletedTopics] = useState([]);
-  const mainRef = useRef(null);
-  const scrollThrottleRef = useRef(null);
-  const lastScrollYRef = useRef(0);
-  const prevPctRef = useRef({ Beginner: 0, Intermediate: 0, Advanced: 0 });
+  const [showAll, setShowAll] = useState(false);
+
+  const viewport = useResponsive();
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      requestAnimationFrame(() => setIsScrolled(window.scrollY > 24));
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const grammarData = useMemo(() => getGrammarByLevel(selectedLevel), [selectedLevel]);
 
-  useEffect(() => {
-    const THRESHOLD = 24;
-    const onScroll = () => {
-      if (scrollThrottleRef.current) return;
-      scrollThrottleRef.current = requestAnimationFrame(() => {
-        const above = window.scrollY > THRESHOLD;
-        if (above !== lastScrollYRef.current) {
-          lastScrollYRef.current = above;
-          setIsScrolled(above);
-        }
-        scrollThrottleRef.current = null;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (scrollThrottleRef.current) cancelAnimationFrame(scrollThrottleRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    setIsLevelLoading(true);
-    const t = setTimeout(() => setIsLevelLoading(false), 400);
-    return () => clearTimeout(t);
-  }, [selectedLevel]);
-
   const progressPerLevel = useMemo(() => {
-    return LEVELS.map((level) => {
+    return LEVELS.map(level => {
       const lessonIds = getLessonIdsByLevel(level);
-      const completed = completedLessons.filter((id) => lessonIds.includes(id)).length;
-      const total = lessonIds.length;
-      return {
-        level,
-        completed,
-        total,
-        pct: total > 0 ? Math.round((completed / total) * 100) : 0,
+      const done = lessonIds.filter(id => completedLessons.has(id)).length;
+      return { 
+        level, 
+        pct: lessonIds.length > 0 ? Math.round((done / lessonIds.length) * 100) : 0 
       };
     });
   }, [completedLessons]);
 
-  const recommendedTopicId = useMemo(() => {
-    if (!grammarData?.topics) return null;
-    for (const [, topic] of Object.entries(grammarData.topics)) {
-      const lessonIds = (topic.lessons || []).map((l) => l.lessonId);
-      const done = lessonIds.filter((id) => completedLessons.includes(id)).length;
-      if (done < lessonIds.length) return topic.id;
-    }
-    return null;
+  const visibleTopics = useMemo(() => {
+    const all = Object.values(grammarData?.topics || {});
+    const filtered = debouncedSearch 
+      ? all.filter(t => t.title.toLowerCase().includes(debouncedSearch.toLowerCase()))
+      : all;
+    return showAll ? filtered : filtered.slice(0, viewport.isMobile ? 4 : 6);
+  }, [grammarData, debouncedSearch, showAll, viewport.isMobile]);
+
+  const lastIncompleteTopic = useMemo(() => {
+    return Object.values(grammarData?.topics || {}).find(t => {
+      const ids = t.lessons.map(l => l.lessonId);
+      const done = ids.filter(id => completedLessons.has(id)).length;
+      return done > 0 && done < ids.length;
+    });
   }, [grammarData, completedLessons]);
 
-  const hybridResults = useMemo(
-    () => searchAll(searchQuery, filterDifficulty),
-    [searchQuery, filterDifficulty]
-  );
-
-  const handleTopicSelect = useCallback((topic) => {
-    setSelectedTopic((prev) => (prev?.id === topic.id ? null : topic));
+  const handleLessonComplete = useCallback((id) => {
+    setCompletedLessons(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+    confetti({ 
+      particleCount: 40, 
+      spread: 60, 
+      origin: { y: 0.8 }, 
+      colors: ['#0B57D0', '#34A853'] 
+    });
   }, []);
 
-  const handleLevelChange = useCallback((level) => {
-    setSelectedLevel(level);
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
     setSelectedTopic(null);
-    setSearchQuery('');
-    setFilterDifficulty('All');
-  }, []);
-
-  const toggleMistakeFlip = useCallback((id) => {
-    setFlippedMistakes((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const toggleBookmarkTip = useCallback((id) => {
-    setBookmarkedTips((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      saveBookmarks(BOOKMARK_TIPS_KEY, next);
-      return next;
-    });
-  }, []);
-
-  const toggleBookmarkExample = useCallback((id) => {
-    setBookmarkedExamples((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      saveBookmarks(BOOKMARK_EXAMPLES_KEY, next);
-      return next;
-    });
-  }, []);
-
-  // ✅ MILESTONE + TOPIC COMPLETION TRACKING
-  useEffect(() => {
-    progressPerLevel.forEach(({ level, pct }) => {
-      const prev = prevPctRef.current[level] ?? 0;
-      const hit = MILESTONES.find((m) => pct >= m && prev < m);
-      if (hit) {
-        fireConfetti(hit === 100);
-      }
-      prevPctRef.current[level] = pct;
-    });
-  }, [progressPerLevel]);
-
-  // ✅ TRACK COMPLETED TOPICS
-  useEffect(() => {
-    if (!grammarData?.topics) return;
-    const newCompletedTopics = [];
-    for (const [, topic] of Object.entries(grammarData.topics)) {
-      const lessonIds = (topic.lessons || []).map((l) => l.lessonId);
-      const done = lessonIds.filter((id) => completedLessons.includes(id)).length;
-      if (done === lessonIds.length && lessonIds.length > 0) {
-        newCompletedTopics.push(topic.id);
-      }
-    }
-    setCompletedTopics(newCompletedTopics);
-  }, [grammarData, completedLessons]);
-
-  const isEmptySearch =
-    searchQuery.trim() &&
-    hybridResults.topics.length === 0 &&
-    hybridResults.mistakes.length === 0 &&
-    hybridResults.tips.length === 0 &&
-    hybridResults.examples.length === 0 &&
-    hybridResults.quizzes.length === 0;
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-blue-50/30 to-grammar-blue-soft/50 p-3 sm:p-5 lg:p-6" ref={mainRef}>
-      <div className="max-w-3xl mx-auto sm:max-w-4xl lg:max-w-[960px]">
-        {/* Header */}
-        <header className="mb-4" role="banner">
-          <h1 className="text-xl sm:text-2xl font-bold text-grammar-primary tracking-tight leading-tight">
-            📚 Grammar Review
-          </h1>
-          <p className="text-slate-700 text-sm sm:text-base mt-1 leading-relaxed">
-            Master English grammar with interactive lessons
-          </p>
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-slate-900 pb-24 sm:pb-20 lg:pb-16 font-['Inter',_sans-serif] leading-relaxed overflow-x-hidden">
+      {/* Search Header */}
+      <div className={`sticky top-0 z-30 transition-all duration-200 px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 ${
+        isScrolled 
+          ? 'bg-white dark:bg-slate-800 shadow-sm' 
+          : 'bg-[#F8F9FA] dark:bg-slate-900'
+      }`}>
+        <div className={`${viewport.isDesktop ? 'max-w-7xl' : 'max-w-2xl'} mx-auto relative group`}>
+          <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 transition-colors" />
+          <input
+            type="text"
+            placeholder="Search rules, tips..."
+            className="w-full pl-9 sm:pl-12 pr-4 sm:pr-6 py-2.5 sm:py-3 sm:py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-700 dark:text-white border-none focus:ring-2 focus:ring-blue-600/20 focus:bg-white dark:focus:bg-slate-600 transition-all text-xs sm:text-sm outline-none shadow-inner"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search grammar topics"
+          />
+        </div>
+      </div>
 
-          {/* Progress Card */}
-          <div className={`${cardClass} p-4 mt-4 mb-4`}>
-            <p className="text-xs font-semibold text-grammar-primary uppercase tracking-wide mb-3 leading-normal">
-              Progress by level
+      <div className={`${viewport.isDesktop ? 'max-w-7xl' : 'max-w-2xl'} mx-auto px-3 sm:px-4 lg:px-6 mt-3 sm:mt-4 lg:mt-6`}>
+        {/* Header Section */}
+        <header className="flex justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4 lg:mb-6 flex-col sm:flex-row">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black text-slate-900 dark:text-white tracking-tight break-words">
+              Grammar Hub
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] sm:text-xs lg:text-sm mt-0.5 sm:mt-1">
+              Master structure, master fluency.
             </p>
-            <div className="flex gap-2 sm:gap-4">
-              {progressPerLevel.map(({ level, completed, total, pct }) => {
-                const style = getDifficultyStyles(level);
-                return (
-                  <div key={level} className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1">
-                      <span
-                        className={`text-xs font-semibold truncate leading-tight ${
-                          selectedLevel === level ? 'text-grammar-primary' : 'text-slate-600'
-                        }`}
-                      >
-                        {level === 'Beginner' ? 'Beg.' : level === 'Intermediate' ? 'Int.' : 'Adv.'}
-                      </span>
-                      <span className="text-xs font-bold text-grammar-accent tabular-nums">{pct}%</span>
-                    </div>
-                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full bg-gradient-to-r ${style.progress} transition-all duration-500`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-slate-600 mt-0.5 leading-normal">{completed}/{total}</p>
-                  </div>
-                );
-              })}
-            </div>
           </div>
-
-          {/* Level Buttons */}
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Level">
-            {LEVELS.map((level) => {
-              const style = getDifficultyStyles(level);
-              const isActive = selectedLevel === level;
-              return (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => handleLevelChange(level)}
-                  aria-pressed={isActive}
-                  style={{
-                    borderWidth: '2px',
-                    borderStyle: 'solid',
-                    borderColor: isActive ? style.buttonActive.split(' ').find(c => c.includes('border')) : '#e2e8f0',
-                  }}
-                  className={`px-4 py-2.5 rounded-xl font-semibold text-sm min-h-[44px] min-w-[44px] transition-all ${
-                    isActive ? style.buttonActive : 'bg-white text-slate-800 hover:bg-slate-50'
-                  }`}
-                >
-                  {level}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search & Filters */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" aria-hidden />
-              <input
-                type="text"
-                placeholder="Search topics, mistakes, tips..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search grammar"
-                className="w-full pl-10 pr-4 py-3 min-h-[44px] rounded-xl bg-white text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-grammar-accent/50 shadow-[0_4px_14px_rgb(0,0,0,0.04)] transition-shadow text-sm leading-relaxed"
-                style={{
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: '#e5e7eb',
-                }}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowFilters((f) => !f)}
-                className="flex items-center gap-2 px-4 py-3 min-h-[44px] rounded-xl bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
-                style={{
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: '#e2e8f0',
-                }}
-                aria-expanded={showFilters}
-                aria-label="Toggle filters"
-              >
-                <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                Filters
-              </button>
-              {showFilters && (
-                <div className="flex flex-wrap gap-2">
-                  {DIFFICULTIES.map((diff) => {
-                    const style = getDifficultyStyles(diff);
-                    const isActive = filterDifficulty === diff;
-                    return (
-                      <button
-                        key={diff}
-                        type="button"
-                        onClick={() => setFilterDifficulty(diff)}
-                        style={{
-                          borderWidth: '1px',
-                          borderStyle: 'solid',
-                          borderColor: isActive ? style.buttonActive.split(' ').find(c => c.includes('border')) : '#e2e8f0',
-                        }}
-                        className={`px-3 py-2 rounded-lg text-sm font-semibold min-h-[44px] min-w-[44px] transition-all ${
-                          isActive ? style.buttonActive : 'bg-white text-slate-800 hover:bg-slate-50'
-                        }`}
-                      >
-                        {diff}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+          <div className="flex items-center gap-1 sm:gap-1.5 bg-orange-50 dark:bg-orange-950/30 px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 rounded-full border border-orange-100 dark:border-orange-800 shadow-sm whitespace-nowrap flex-shrink-0">
+            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-orange-600 dark:text-orange-400 fill-current" />
+            <span className="text-[10px] sm:text-xs lg:text-sm font-bold text-orange-700 dark:text-orange-300">
+              3 Day
+            </span>
           </div>
         </header>
 
-        {/* Sticky tabs */}
-        <nav
-          className={`sticky top-0 z-20 -mx-3 px-3 sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 py-0 mb-4 transition-shadow ${
-            isScrolled ? 'bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgb(0,0,0,0.06)]' : 'bg-transparent'
-          }`}
-          aria-label="Sections"
-          style={{
-            borderBottomWidth: '1px',
-            borderBottomStyle: 'solid',
-            borderBottomColor: '#e5e7eb',
-          }}
-        >
-          <div className="flex gap-0" role="tablist">
+        {/* Progress Level Chips */}
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-3 sm:pb-4 no-scrollbar -mx-3 sm:mx-0 px-3 sm:px-0 mb-3 sm:mb-4 lg:mb-6">
+          {progressPerLevel.map(({ level, pct }) => (
+            <button
+              key={level}
+              onClick={() => setSelectedLevel(level)}
+              className={`flex-shrink-0 px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 rounded-2xl text-[11px] sm:text-xs lg:text-sm font-bold transition-all border whitespace-nowrap text-center ${
+                selectedLevel === level 
+                  ? 'bg-[#0B57D0] text-white border-transparent shadow-md' 
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-100 dark:border-slate-700'
+              }`}
+              aria-pressed={selectedLevel === level}
+            >
+              <span className="hidden xs:inline">{level}</span>
+              <span className="xs:hidden">{level.slice(0, 3)}</span>
+              {' '}• {pct}%
+            </button>
+          ))}
+        </div>
+
+        {/* Continue Card */}
+        {lastIncompleteTopic && activeTab === 'topics' && !selectedTopic && (
+          <ContinueCard topic={lastIncompleteTopic} onSelect={setSelectedTopic} />
+        )}
+
+        {/* Tab Navigation */}
+        <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-5 lg:mb-6">
+          <div className="bg-slate-200/50 dark:bg-slate-700 p-0.5 sm:p-1 rounded-2xl flex flex-1 sm:flex-auto">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                aria-controls={`grammar-panel-${tab.id}`}
-                id={`grammar-tab-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold text-sm min-h-[44px] transition-colors ${
-                  activeTab === tab.id
-                    ? 'text-grammar-accent'
-                    : 'text-slate-600 hover:text-slate-800'
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex-1 sm:flex-auto flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 lg:py-2.5 px-2 sm:px-3 lg:px-4 rounded-xl text-[11px] sm:text-xs lg:text-sm font-bold transition-all ${
+                  activeTab === tab.id 
+                    ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm' 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
-                style={{
-                  borderBottomWidth: '3px',
-                  borderBottomStyle: 'solid',
-                  borderBottomColor: activeTab === tab.id ? '#FF7D00' : 'transparent',
-                  marginBottom: '-3px',
-                }}
+                aria-selected={activeTab === tab.id}
               >
-                <span aria-hidden>{tab.icon}</span>
-                <span>{tab.label}</span>
+                {tab.icon}
+                <span className="hidden xs:inline">{tab.label}</span>
               </button>
             ))}
           </div>
-        </nav>
+        </div>
 
-        <main role="main">
-          <div
-            id={`grammar-panel-${activeTab}`}
-            role="tabpanel"
-            aria-labelledby={`grammar-tab-${activeTab}`}
-          >
-            {/* Topics Tab */}
-            {activeTab === 'topics' && selectedTopic && (
-              <div className="animate-[slideDown_0.3s_ease-out]">
-                <button
-                  type="button"
-                  onClick={() => setSelectedTopic(null)}
-                  className="mb-4 inline-flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white text-slate-800 font-semibold rounded-xl shadow-[0_4px_14px_rgb(0,0,0,0.06)] hover:shadow-lg hover:bg-slate-50 transition-all focus:outline-none focus:ring-2 focus:ring-grammar-accent focus:ring-offset-2"
-                  style={{
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    borderColor: '#e5e7eb',
-                  }}
-                >
-                  ← Back to Topics
-                </button>
-
-                <Suspense fallback={<div className="text-center py-8">Loading topic...</div>}>
-                  <GrammarTopicPage
-                    topic={selectedTopic}
-                    completedLessons={completedLessons}
-                    onLessonComplete={(lessonId) => {
-                      setCompletedLessons((prev) => {
-                        const isNew = !prev.includes(lessonId);
-                        const next = isNew
-                          ? [...prev, lessonId]
-                          : prev.filter((id) => id !== lessonId);
-
-                        // ✅ Fire confetti on lesson complete
-                        if (isNew) {
-                          fireConfetti(false);
-                        }
-
-                        return next;
-                      });
-                    }}
-                  />
-                </Suspense>
-              </div>
-            )}
-
+        <main>
+          <Suspense fallback={<SkeletonLoader />}>
+            
             {activeTab === 'topics' && !selectedTopic && (
-              <div className="flex flex-col gap-4">
-                {isLevelLoading ? (
-                  [...Array(4)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`${cardClass} p-4 sm:p-5 animate-pulse min-h-[100px]`}
-                      role="status"
-                      aria-label="Loading"
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-200 shrink-0" />
-                          <div className="flex-1 space-y-2 min-w-0">
-                            <div className="h-5 bg-slate-200 rounded w-3/4" />
-                            <div className="h-4 bg-slate-100 rounded w-full" />
-                            <div className="h-4 bg-slate-100 rounded w-2/3" />
-                            <div className="h-6 w-20 bg-slate-100 rounded-lg mt-2" />
-                          </div>
-                        </div>
-                        <div className="w-16 h-8 bg-slate-100 rounded-lg shrink-0" />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  grammarData &&
-                  Object.entries(grammarData.topics).map(([, topic]) => {
-                    const lessonIds = (topic.lessons || []).map((l) => l.lessonId);
-                    const completedCount = lessonIds.filter((id) => completedLessons.includes(id)).length;
-                    const isRecommended = recommendedTopicId === topic.id;
-                    const isCompleted = completedCount === lessonIds.length && lessonIds.length > 0;
-                    const diffStyle = getDifficultyStyles(topic.difficulty);
-                    return (
-                      <div
-                        key={topic.id}
-                        className={`${cardClassInteractive} overflow-hidden relative transition-all duration-300 ${
-                          isCompleted ? 'ring-2 ring-emerald-400/50 bg-emerald-50/40' : ''
-                        } ${isRecommended ? 'ring-2 ring-[#58CC02]/50 shadow-[0_0_0_4px_rgba(88,204,2,0.15)]' : ''}`}
-                      >
-                        {isRecommended && (
-                          <div className="absolute top-0 right-0 bg-[#58CC02] text-white text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-xl z-10 flex items-center gap-1 shadow-md">
-                            <RotateCcw className="w-3 h-3" />
-                            Quest!
-                          </div>
-                        )}
-                        {isCompleted && (
-                          <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-bl-xl rounded-tr-xl z-10 flex items-center gap-1 shadow-md animate-bounce">
-                            ✨ Completed!
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleTopicSelect(topic)}
-                          className="w-full flex items-center justify-between gap-4 p-4 sm:p-5 text-left hover:bg-slate-50/80 transition-colors rounded-xl"
-                        >
-                          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                            <span className="text-2xl sm:text-3xl shrink-0">{topic.icon}</span>
-                            <div className="min-w-0">
-                              <h3 className="font-semibold text-slate-900 text-base sm:text-lg truncate">
-                                {topic.title}
-                              </h3>
-                              <p className="text-slate-700 text-sm mt-0.5 line-clamp-2 leading-relaxed">
-                                {topic.description}
-                              </p>
-                              <div className="flex items-center gap-2 mt-2">
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${
-                                    isCompleted && lessonIds.length > 0
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : diffStyle.badge
-                                  }`}
-                                  style={{
-                                    borderWidth: '1px',
-                                    borderStyle: 'solid',
-                                    borderColor: isCompleted && lessonIds.length > 0 ? '#10b981' : 'currentColor',
-                                  }}
-                                >
-                                  {isCompleted && lessonIds.length > 0 ? '✓ ' : ''}
-                                  {completedCount}/{lessonIds.length} lessons
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span
-                              className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${diffStyle.badge}`}
-                              style={{
-                                borderWidth: '1px',
-                                borderStyle: 'solid',
-                                borderColor: 'currentColor',
-                              }}
-                            >
-                              {topic.difficulty}
-                            </span>
-                            <ChevronDown className="w-5 h-5 text-slate-500" />
-                          </div>
-                        </button>
-                      </div>
-                    );
-                  })
+              <div className="grid gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in duration-500">
+                {visibleTopics.map(topic => (
+                  <TopicItem 
+                    key={topic.id} 
+                    topic={topic} 
+                    completedSet={completedLessons}
+                    onSelect={setSelectedTopic}
+                  />
+                ))}
+                {!showAll && !debouncedSearch && visibleTopics.length > 0 && (
+                  <button 
+                    onClick={() => setShowAll(true)}
+                    className="w-full py-2.5 sm:py-3 text-[11px] sm:text-xs lg:text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl transition-colors"
+                  >
+                    View all topics
+                  </button>
+                )}
+                {visibleTopics.length === 0 && (
+                  <div className="py-8 sm:py-10 lg:py-12 text-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
+                      No topics found. Try a different search.
+                    </p>
+                  </div>
                 )}
               </div>
             )}
 
-            {/* Practice Tab */}
             {activeTab === 'practice' && (
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-2 p-1 bg-slate-100 rounded-xl" role="tablist" aria-label="Practice type">
-                  {PRACTICE_SECTIONS.map((sec) => (
-                    <button
-                      key={sec.id}
-                      type="button"
-                      onClick={() => setActivePracticeSection(sec.id)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm min-h-[44px] transition-colors ${
-                        activePracticeSection === sec.id
-                          ? 'bg-white text-grammar-primary shadow-sm'
-                          : 'text-slate-700 hover:text-slate-900'
-                      }`}
-                    >
-                      <span aria-hidden>{sec.icon}</span>
-                      {sec.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Mistakes Section */}
-                {activePracticeSection === 'mistakes' && (
-                  <div className="flex flex-col gap-4">
-                    {COMMON_MISTAKES.map((mistake) => {
-                      const isFlipped = flippedMistakes.has(mistake.id);
-                      return (
-                        <div
-                          key={mistake.id}
-                          onClick={() => toggleMistakeFlip(mistake.id)}
-                          className={`${cardClass} p-4 sm:p-5 cursor-pointer select-none`}
-                          role="button"
-                          tabIndex={0}
-                          style={{
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            borderColor: '#e5e7eb',
-                          }}
-                        >
-                          <div className="flex gap-4">
-                            <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                            <div className="min-w-0 flex-1">
-                              {!isFlipped ? (
-                                <>
-                                  <h3 className="font-semibold text-slate-800 text-sm mb-2">
-                                    Common mistake:
-                                  </h3>
-                                  <p
-                                    className="bg-red-50 rounded-lg p-3 text-red-800 text-sm font-medium"
-                                    style={{
-                                      borderWidth: '1px',
-                                      borderStyle: 'solid',
-                                      borderColor: '#fca5a5',
-                                    }}
-                                  >
-                                    ❌ {mistake.mistake}
-                                  </p>
-                                </>
-                              ) : (
-                                <>
-                                  <h4 className="font-semibold text-slate-800 text-sm mb-1">Correct:</h4>
-                                  <p
-                                    className="bg-emerald-50 rounded-lg p-3 text-emerald-900 text-sm font-medium mb-3"
-                                    style={{
-                                      borderWidth: '1px',
-                                      borderStyle: 'solid',
-                                      borderColor: '#86efac',
-                                    }}
-                                  >
-                                    ✓ {mistake.correct}
-                                  </p>
-                                  <h4 className="font-semibold text-slate-800 text-sm mb-1">Explanation:</h4>
-                                  <p className="text-slate-700 text-sm">{mistake.explanation}</p>
-                                  <span
-                                    className="inline-block mt-3 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold"
-                                    style={{
-                                      borderWidth: '1px',
-                                      borderStyle: 'solid',
-                                      borderColor: '#e5e7eb',
-                                    }}
-                                  >
-                                    Topic: {mistake.topic}
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Tips Section */}
-                {activePracticeSection === 'tips' && (
-                  <div className="flex flex-col gap-4">
-                    {STUDY_TIPS.map((tip) => {
-                      const isBookmarked = bookmarkedTips.has(tip.id);
-                      return (
-                        <article
-                          key={tip.id}
-                          className={`${cardClass} p-4 sm:p-5 relative`}
-                          style={{
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            borderColor: '#e5e7eb',
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => toggleBookmarkTip(tip.id)}
-                            className="absolute top-4 right-4 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 hover:text-grammar-accent transition-colors"
-                            aria-label={isBookmarked ? 'Remove from saved' : 'Save for later'}
-                          >
-                            {isBookmarked ? (
-                              <BookmarkCheck className="w-5 h-5 text-grammar-accent" />
-                            ) : (
-                              <Bookmark className="w-5 h-5" />
-                            )}
-                          </button>
-                          <div className="flex gap-4 pr-12">
-                            <Lightbulb className="w-5 h-5 text-grammar-accent shrink-0 mt-0.5" />
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-semibold text-slate-900 text-base mb-2">{tip.title}</h3>
-                              <p className="text-slate-600 text-sm leading-relaxed mb-3">{tip.description}</p>
-                            </div>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Examples Section */}
-                {activePracticeSection === 'examples' && (
-                  <div className="flex flex-col gap-4">
-                    {REAL_WORLD_EXAMPLES.map((example) => {
-                      const isBookmarked = bookmarkedExamples.has(example.id);
-                      return (
-                        <article
-                          key={example.id}
-                          className={`${cardClass} p-4 sm:p-5 relative`}
-                          style={{
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            borderColor: '#e5e7eb',
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => toggleBookmarkExample(example.id)}
-                            className="absolute top-4 right-4 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 hover:text-grammar-accent transition-colors"
-                            aria-label={isBookmarked ? 'Remove from saved' : 'Save for later'}
-                          >
-                            {isBookmarked ? (
-                              <BookmarkCheck className="w-5 h-5 text-grammar-accent" />
-                            ) : (
-                              <Bookmark className="w-5 h-5" />
-                            )}
-                          </button>
-                          <div className="pr-12">
-                            <span
-                              className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold mb-3"
-                              style={{
-                                borderWidth: '1px',
-                                borderStyle: 'solid',
-                                borderColor: '#e5e7eb',
-                              }}
-                            >
-                              {example.context}
-                            </span>
-                            <p className="text-xs font-semibold text-slate-600 mb-1">Example:</p>
-                            <div
-                              className="rounded-lg p-3 shadow-[0_2px_8px_rgb(0,0,0,0.03)] font-mono text-sm text-slate-800 mb-3"
-                              style={{
-                                background: '#f8fafc',
-                                borderWidth: '1px',
-                                borderStyle: 'solid',
-                                borderColor: '#e2e8f0',
-                              }}
-                            >
-                              &quot;{example.original}&quot;
-                            </div>
-                            <p className="text-slate-600 text-sm leading-relaxed mb-3">{example.explanation}</p>
-                            <span
-                              className="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold"
-                              style={{
-                                borderWidth: '1px',
-                                borderStyle: 'solid',
-                                borderColor: '#e5e7eb',
-                              }}
-                            >
-                              Topic: {example.topic}
-                            </span>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <PracticeSection />
             )}
 
-            {/* Quiz Tab */}
-            {activeTab === 'quiz' && (
-              <div className="flex flex-col gap-4">
-                {GRAMMAR_QUIZZES.map((quiz) => {
-                  const quizLessonIds = getLessonIdsForTopicIds(quiz.topics);
-                  const completedInQuiz = quizLessonIds.filter((id) => completedLessons.includes(id)).length;
-                  const readiness = quizLessonIds.length > 0 ? completedInQuiz / quizLessonIds.length : 1;
-                  const showWarning = readiness < 0.5 && quizLessonIds.length > 0;
-                  return (
-                    <article
-                      key={quiz.quizId}
-                      className={`${cardClassInteractive} p-4 sm:p-5`}
-                      style={{
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor: '#e5e7eb',
-                      }}
-                    >
-                      <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-slate-900 text-base truncate">
-                            {quiz.title}
-                          </h3>
-                          <p className="text-slate-700 text-sm leading-relaxed">
-                            {quiz.questions.length} questions • {quiz.duration} mins
-                          </p>
-                        </div>
-                        <span
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0 ${
-                            getDifficultyStyles(quiz.difficulty).badge
-                          }`}
-                          style={{
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            borderColor: 'currentColor',
-                          }}
-                        >
-                          {quiz.difficulty}
-                        </span>
-                      </div>
-                      {showWarning && (
-                        <div
-                          className="mb-4 p-3 rounded-lg text-amber-800 text-sm flex items-start gap-2"
-                          style={{
-                            background: '#fffbeb',
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            borderColor: '#fde047',
-                          }}
-                        >
-                          <Lightbulb className="w-5 h-5 shrink-0 mt-0.5" />
-                          <div>
-                            <strong>Tip:</strong> You've completed {completedInQuiz} of {quizLessonIds.length} lessons in topics covered by this quiz. Consider reviewing the related lessons first to improve your score.
-                          </div>
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-grammar-accent hover:bg-grammar-accent-hover text-white font-bold rounded-xl shadow-[0_4px_14px_rgb(255,125,0,0.3)] hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-grammar-accent focus:ring-offset-2 min-h-[44px] active:scale-[0.98]"
-                        style={{
-                          borderWidth: '0px',
-                          borderStyle: 'solid',
-                          borderColor: 'transparent',
-                        }}
-                      >
-                        <PlayCircle className="w-5 h-5" />
-                        Start Quiz
-                      </button>
-                    </article>
-                  );
-                })}
+            {selectedTopic && (
+              <div className="animate-in slide-in-from-right-4 duration-300">
+                <button 
+                  onClick={() => setSelectedTopic(null)}
+                  className="mb-4 sm:mb-5 lg:mb-6 flex items-center gap-1.5 sm:gap-2 text-slate-500 dark:text-slate-400 font-bold text-[11px] sm:text-xs lg:text-sm hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Back to path
+                </button>
+                <GrammarTopicPage 
+                  topic={selectedTopic} 
+                  completedLessons={[...completedLessons]} 
+                  onLessonComplete={handleLessonComplete}
+                />
               </div>
             )}
-          </div>
+          </Suspense>
         </main>
+      </div>
+
+      {/* FAB */}
+      <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-8 z-20">
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-[#0B57D0] dark:bg-blue-700 text-white rounded-2xl shadow-lg flex items-center justify-center hover:shadow-2xl active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          aria-label="Scroll to top"
+        >
+          <Zap className="w-4.5 h-4.5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 fill-current" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ──────────────────────────────────────
+   📖 PRACTICE SECTION
+   ────────────────────────────────────── */
+const PracticeSection = () => {
+  const [activeSub, setActiveSub] = useState('mistakes');
+  const viewport = useResponsive();
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-5 lg:mb-6 overflow-x-auto no-scrollbar -mx-3 sm:mx-0 px-3 sm:px-0">
+        {['mistakes', 'tips', 'real-world'].map(sub => (
+          <button
+            key={sub}
+            onClick={() => setActiveSub(sub)}
+            className={`px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap border transition-all flex-shrink-0 ${
+              activeSub === sub 
+                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100' 
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }`}
+            aria-selected={activeSub === sub}
+          >
+            {sub === 'real-world' ? 'Examples' : sub.charAt(0).toUpperCase() + sub.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4">
+        {activeSub === 'mistakes' && COMMON_MISTAKES.map(m => (
+          <div 
+            key={m.id} 
+            className="p-2.5 sm:p-3 lg:p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-start gap-2 sm:gap-2.5 mb-2 sm:mb-2.5">
+              <AlertTriangle className="w-4 h-4 sm:w-4.5 sm:h-4.5 lg:w-5 lg:h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-[11px] font-bold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 px-1.5 sm:px-2 py-0.5 rounded inline-block mb-1">
+                  Error
+                </p>
+                <p className="text-[11px] sm:text-xs lg:text-sm text-slate-800 dark:text-slate-200 font-medium line-through decoration-red-300 break-words">
+                  "{m.mistake}"
+                </p>
+                <p className="text-green-700 dark:text-green-400 font-bold mt-1 text-[11px] sm:text-xs lg:text-sm break-words">
+                  ✓ "{m.correct}"
+                </p>
+              </div>
+            </div>
+            <p className="text-[10px] sm:text-[11px] lg:text-xs text-slate-500 dark:text-slate-400 italic">
+              {m.explanation}
+            </p>
+          </div>
+        ))}
+
+        {activeSub === 'tips' && STUDY_TIPS.map(t => (
+          <div 
+            key={t.id} 
+            className="p-2.5 sm:p-3 lg:p-4 bg-blue-50 dark:bg-blue-950/30 rounded-2xl border border-blue-100/50 dark:border-blue-800/50 flex gap-2 sm:gap-2.5 lg:gap-3"
+          >
+            <Lightbulb className="w-4 h-4 sm:w-4.5 sm:h-4.5 lg:w-5 lg:h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <h4 className="font-bold text-slate-900 dark:text-white mb-0.5 sm:mb-1 text-[11px] sm:text-xs lg:text-sm break-words">
+                {t.title}
+              </h4>
+              <p className="text-[10px] sm:text-[11px] lg:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {t.description}
+              </p>
+            </div>
+          </div>
+        ))}
+
+        {activeSub === 'real-world' && REAL_WORLD_EXAMPLES && (
+          REAL_WORLD_EXAMPLES.map(example => (
+            <div 
+              key={example.id} 
+              className="p-2.5 sm:p-3 lg:p-4 bg-purple-50 dark:bg-purple-950/30 rounded-2xl border border-purple-100/50 dark:border-purple-800/50 flex gap-2 sm:gap-2.5 lg:gap-3"
+            >
+              <Globe className="w-4 h-4 sm:w-4.5 sm:h-4.5 lg:w-5 lg:h-5 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <h4 className="font-bold text-slate-900 dark:text-white mb-0.5 sm:mb-1 text-[11px] sm:text-xs lg:text-sm break-words">
+                  {example.title}
+                </h4>
+                <p className="text-[10px] sm:text-[11px] lg:text-xs text-slate-600 dark:text-slate-300 italic break-words">
+                  "{example.example}"
+                </p>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

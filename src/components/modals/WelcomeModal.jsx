@@ -1,160 +1,191 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Sparkles, ArrowRight, Info, ShieldCheck, Globe } from 'lucide-react';
+import { X, Heart, Sparkles, ArrowRight, Info, ShieldCheck, Globe, Check } from 'lucide-react';
 
 /**
- * Material You (Google Style) Welcome Modal
+ * GOOGLE MATERIAL 3 DESIGN CONSTANTS
  */
+const MODAL_VARIANTS = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  visible: { 
+    opacity: 1, 
+    scale: 1, 
+    y: 0,
+    transition: { type: 'spring', damping: 25, stiffness: 300, staggerChildren: 0.1 }
+  },
+  exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } }
+};
 
-const FeatureItem = ({ icon: Icon, title, description, colorClass }) => (
-  <div className="flex gap-4 p-4 rounded-[24px] transition-colors hover:bg-slate-50">
-    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-      <Icon className="w-6 h-6" />
+const ITEM_VARIANTS = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 }
+};
+
+// --- Sub-components ---
+
+const FeatureItem = ({ icon: Icon, title, description, bgColor, iconColor }) => (
+  <motion.div 
+    variants={ITEM_VARIANTS}
+    className="group flex gap-4 p-4 rounded-[28px] transition-all duration-300 hover:bg-slate-50 active:scale-[0.98]"
+  >
+    <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-6 ${bgColor} ${iconColor}`}>
+      <Icon size={24} strokeWidth={2.5} />
     </div>
-    <div className="space-y-1">
-      <h3 className="text-sm font-bold text-slate-900 tracking-tight">{title}</h3>
-      <p className="text-sm text-slate-500 leading-relaxed">{description}</p>
+    <div className="flex flex-col justify-center">
+      <h3 className="text-[16px] font-semibold text-slate-900 leading-tight">{title}</h3>
+      <p className="text-[14px] text-slate-500 mt-1 leading-relaxed">{description}</p>
     </div>
-  </div>
+  </motion.div>
 );
 
-const WelcomeContent = memo(() => (
-  <div className="space-y-8">
-    {/* Hero Header */}
-    <div className="text-center space-y-3 pt-4">
-      <div className="inline-flex p-3 bg-blue-50 rounded-2xl mb-2">
-        <Sparkles className="w-6 h-6 text-blue-600" />
-      </div>
-      <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
-        Chào mừng bạn đến với Hub Study
-      </h2>
-      <p className="text-slate-500 max-w-sm mx-auto text-sm">
-        Nền tảng học tập cá nhân hóa được thiết kế để giúp bạn bứt phá giới hạn.
-      </p>
-    </div>
-
-    {/* Features List */}
-    <div className="grid gap-2">
-      <FeatureItem 
-        icon={Globe}
-        title="Học tập không giới hạn"
-        description="Truy cập kho bài thi và tài liệu hoàn toàn miễn phí, mọi lúc mọi nơi."
-        colorClass="bg-blue-50 text-blue-600"
-      />
-      <FeatureItem 
-        icon={ShieldCheck}
-        title="Dữ liệu minh bạch"
-        description="Tiến độ của bạn được lưu trữ an toàn và phân tích một cách khoa học."
-        colorClass="bg-emerald-50 text-emerald-600"
-      />
-      <FeatureItem 
-        icon={Heart}
-        title="Phát triển vì cộng đồng"
-        description="Dự án phi lợi nhuận nhằm mang lại giá trị giáo dục tốt nhất cho người Việt."
-        colorClass="bg-purple-50 text-purple-600"
-      />
-    </div>
-
-    {/* Support Card (Google Style Surface) */}
-    <div className="bg-[#F8F9FA] rounded-[32px] p-6 border border-slate-100 flex flex-col md:flex-row items-center gap-6">
-      <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 w-32 h-32 flex-shrink-0">
-        <img 
-          src="/src/assets/qr-code.png" 
-          alt="QR Code" 
-          className="w-full h-full object-contain"
-          onError={(e) => { e.target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SupportHubStudy"; }}
-        />
-      </div>
-      <div className="space-y-2 text-center md:text-left">
-        <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Ủng hộ dự án</p>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          Đóng góp của bạn giúp chúng tôi duy trì máy chủ và phát triển thêm nhiều bài học mới.
-        </p>
-      </div>
-    </div>
-
-    {/* Bottom Note */}
-    <div className="flex items-start gap-3 px-4 py-3 bg-blue-50/50 rounded-2xl border border-blue-100/50">
-      <Info className="w-5 h-5 text-blue-500 mt-0.5" />
-      <p className="text-xs text-blue-700/80 leading-relaxed italic">
-        "Sứ mệnh của chúng tôi là làm cho kiến thức trở nên dễ tiếp cận hơn cho tất cả mọi người."
-      </p>
-    </div>
-  </div>
-));
-
-const WelcomeModal = memo(({ isOpen = false, onClose }) => {
-  const [hasScrolled, setHasScrolled] = useState(false);
+const WelcomeModal = ({ isOpen = false, onClose }) => {
+  const [isScrolledToEnd, setIsScrolledToEnd] = useState(false);
 
   const handleScroll = useCallback((e) => {
-    const element = e.currentTarget;
-    const isAtBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 40;
-    if (isAtBottom && !hasScrolled) setHasScrolled(true);
-  }, [hasScrolled]);
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Ngưỡng 20px để kích hoạt button
+    if (scrollHeight - scrollTop <= clientHeight + 20) {
+      setIsScrolledToEnd(true);
+    }
+  }, []);
+
+  // Ngăn chặn scroll body khi modal mở
+  React.useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop (Darker & blurrer for focus) */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-6">
+          {/* Backdrop với độ mờ cao cấp */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xl"
           />
 
           {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"
+            variants={MODAL_VARIANTS}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="relative bg-white sm:rounded-[32px] rounded-t-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.18)] w-full max-w-[560px] max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden border border-white/20"
           >
-            {/* Minimal Header */}
-            <div className="absolute top-6 right-6 z-20">
+            {/* Header: Cố định để dễ dàng đóng */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">H</div>
+                <span className="font-medium text-slate-700">Hub Study</span>
+              </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400 hover:text-slate-600"
+                className="p-2 hover:bg-slate-100 active:bg-slate-200 rounded-full transition-colors text-slate-500"
               >
-                <X className="w-5 h-5" />
+                <X size={20} />
               </button>
             </div>
 
-            {/* Scroll Area */}
+            {/* Scrollable Content */}
             <div
               onScroll={handleScroll}
-              className="overflow-y-auto flex-1 px-8 md:px-12 pt-12 pb-8 custom-scrollbar"
+              className="overflow-y-auto flex-1 px-6 sm:px-10 py-8 scroll-smooth custom-scrollbar"
             >
-              <WelcomeContent />
+              {/* Hero Section */}
+              <div className="text-center mb-10">
+                <motion.div 
+                   animate={{ scale: [1, 1.1, 1] }}
+                   transition={{ repeat: Infinity, duration: 4 }}
+                   className="inline-flex p-4 bg-blue-50 rounded-[24px] mb-6 text-blue-600"
+                >
+                  <Sparkles size={32} fill="currentColor" fillOpacity={0.2} />
+                </motion.div>
+                <h2 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+                  Nâng tầm tri thức <br/><span className="text-blue-600">cùng Hub Study</span>
+                </h2>
+                <p className="mt-4 text-slate-500 text-[15px] leading-relaxed max-w-[320px] mx-auto">
+                  Khám phá kho tàng tài liệu học tập được cá nhân hóa hoàn toàn miễn phí.
+                </p>
+              </div>
+
+              {/* Features - M3 Grid */}
+              <div className="space-y-2 mb-10">
+                <FeatureItem 
+                  icon={Globe}
+                  title="Tài nguyên mở"
+                  description="Hàng ngàn đề thi từ các nguồn uy tín được cập nhật mỗi ngày."
+                  bgColor="bg-blue-50"
+                  iconColor="text-blue-600"
+                />
+                <FeatureItem 
+                  icon={ShieldCheck}
+                  title="An toàn & Riêng tư"
+                  description="Dữ liệu học tập của bạn được mã hóa và bảo mật tuyệt đối."
+                  bgColor="bg-emerald-50"
+                  iconColor="text-emerald-600"
+                />
+                <FeatureItem 
+                  icon={Heart}
+                  title="Vì cộng đồng"
+                  description="Dự án phi lợi nhuận, đồng hành cùng học sinh sinh viên Việt Nam."
+                  bgColor="bg-rose-50"
+                  iconColor="text-rose-600"
+                />
+              </div>
+
+              {/* QR Support Section - Glassmorphism style */}
+              <div className="bg-slate-50 rounded-[28px] p-6 border border-slate-100 flex flex-col items-center sm:flex-row gap-6">
+                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 group transition-transform hover:scale-105">
+                  <img 
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SupportHubStudy" 
+                    alt="Donate QR" 
+                    className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+                  />
+                </div>
+                <div className="text-center sm:text-left">
+                  <span className="inline-block px-3 py-1 bg-white rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200 mb-2">
+                    Donate
+                  </span>
+                  <p className="text-[14px] text-slate-600 leading-relaxed">
+                    Sự ủng hộ của bạn giúp duy trì máy chủ và đội ngũ phát triển nội dung.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Google Style Action Footer */}
-            <div className="p-8 pt-4 bg-white border-t border-slate-50 flex flex-col items-center gap-4">
+            {/* Footer Action */}
+            <div className="p-6 sm:p-8 bg-white border-t border-slate-50">
               <motion.button
                 onClick={onClose}
-                disabled={!hasScrolled}
-                whileHover={hasScrolled ? { scale: 1.02 } : {}}
-                whileTap={hasScrolled ? { scale: 0.98 } : {}}
-                className={`w-full py-4 rounded-full font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2 ${
-                  hasScrolled
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                disabled={!isScrolledToEnd}
+                whileHover={isScrolledToEnd ? { scale: 1.01, translateY: -2 } : {}}
+                whileTap={isScrolledToEnd ? { scale: 0.98 } : {}}
+                className={`w-full py-4 rounded-full font-semibold text-[15px] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg ${
+                  isScrolledToEnd
+                    ? 'bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
                 }`}
               >
-                KHÁM PHÁ NGAY
-                <ArrowRight className="w-4 h-4" />
+                {isScrolledToEnd ? (
+                  <>Bắt đầu ngay <ArrowRight size={18} /></>
+                ) : (
+                  <>Cuộn để tiếp tục <Check size={18} className="opacity-50" /></>
+                )}
               </motion.button>
               
-              {!hasScrolled && (
-                <motion.span 
+              {!isScrolledToEnd && (
+                <motion.p 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-[11px] font-black text-blue-500 uppercase tracking-widest animate-pulse"
+                  className="text-center text-[12px] text-blue-500 mt-4 font-medium animate-pulse"
                 >
-                  Cuộn xuống để đọc hết nội dung
-                </motion.span>
+                  Vui lòng đọc hết các điều khoản để tiếp tục
+                </motion.p>
               )}
             </div>
           </motion.div>
@@ -162,6 +193,6 @@ const WelcomeModal = memo(({ isOpen = false, onClose }) => {
       )}
     </AnimatePresence>
   );
-});
+};
 
 export default WelcomeModal;

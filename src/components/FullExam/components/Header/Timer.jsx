@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Clock } from 'lucide-react';
-import { formatTime } from '../../utils/examHelpers';
+import { formatTime } from '../../utils/examHelpers'; // ✅ FIX: dùng chung 1 nguồn
 
 export const Timer = memo(({ timeLeft, isWarning = false }) => {
   return (
