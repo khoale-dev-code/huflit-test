@@ -3,108 +3,71 @@ import { useUserProgress } from './useUserProgress';
 
 /**
  * Hook tự động lưu progress sau 30 giây không có thay đổi
- * Hỗ trợ cả Clerk và Firebase Authentication
  */
 export const useAutoSaveProgress = (answers, selectedExam, selectedPart, partData) => {
   const { saveProgress, currentUser } = useUserProgress();
-  const saveTimeoutRef = useRef(null);
-  const lastSavedAnswersRef = useRef('{}');
+  const saveTimeoutRef        = useRef(null);
+  const lastSavedAnswersRef   = useRef('{}');
 
   useEffect(() => {
-    // Clear previous timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
 
-    // ✅ FIX 1: Kiểm tra currentUser đúng cách
-    if (!currentUser || !currentUser.provider) {
-      console.log('⏸️ Auto-save skipped: User not logged in or provider missing', {
-        currentUser,
-      });
+    // ✅ FIX: chỉ cần check currentUser tồn tại và có id
+    // KHÔNG check .provider vì currentUser từ hook chỉ có id/email/name/photoURL
+    if (!currentUser?.id) {
+      console.log('⏸️ Auto-save skipped: not logged in');
       return;
     }
 
-    // Don't auto-save if no part data
-    if (!partData || !partData.questions) {
-      console.log('⏸️ Auto-save skipped: No part data');
+    if (!partData?.questions) {
+      console.log('⏸️ Auto-save skipped: no part data');
       return;
     }
 
-    // Check if answers changed
     const currentAnswersStr = JSON.stringify(answers);
-    const answersChanged = currentAnswersStr !== lastSavedAnswersRef.current;
-    const hasAnswers = Object.keys(answers).length > 0;
+    const answersChanged    = currentAnswersStr !== lastSavedAnswersRef.current;
+    const hasAnswers        = Object.keys(answers).length > 0;
 
-    console.log('🔍 Auto-save check:', {
-      hasAnswers,
-      answersChanged,
-      answerCount: Object.keys(answers).length,
-      userId: currentUser.id,
-      provider: currentUser.provider,
-      clerkId: currentUser.clerkId,
-      firebaseUid: currentUser.firebaseUid,
-    });
+    if (!answersChanged || !hasAnswers) return;
 
-    if (answersChanged && hasAnswers) {
-      console.log(`⏱️ Auto-save scheduled in 30 seconds (${currentUser.provider})...`);
+    console.log(`⏱️ Auto-save scheduled in 30s... (${Object.keys(answers).length} answers)`);
 
-      // Auto-save after 30 seconds of inactivity
-      saveTimeoutRef.current = setTimeout(async () => {
-        try {
-          // Calculate score
-          const correct = Object.entries(answers).filter(([questionId, answerIndex]) => {
-            const question = partData.questions.find(q => q.id === questionId);
-            return question && question.correct === answerIndex;
-          }).length;
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const correct = Object.entries(answers).filter(([questionId, answerIndex]) => {
+          const question = partData.questions.find((q) => q.id === questionId);
+          return question && question.correct === answerIndex;
+        }).length;
 
-          const total = partData.questions.length;
-          const percentage = total > 0 ? (correct / total) * 100 : 0;
-          const correctAnswers = correct;
+        const total      = partData.questions.length;
+        const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-          console.log(`💾 Auto-saving progress (${currentUser.provider})...`, {
-            exam: selectedExam,
-            part: selectedPart,
-            score: percentage,
-            correctAnswers,
-            totalQuestions: total,
-            answersCount: Object.keys(answers).length,
-            userId: currentUser.id,
-            clerkId: currentUser.clerkId,
-            firebaseUid: currentUser.firebaseUid,
-          });
+        console.log('💾 Auto-saving...', { exam: selectedExam, part: selectedPart, score: percentage });
 
-          // ✅ FIX 2: Pass correct data structure
-          const result = await saveProgress({
-            exam: selectedExam,
-            part: selectedPart,
-            score: percentage,
-            answers: answers,
-            totalQuestions: total,
-            correctAnswers: correctAnswers,
-            isDraft: true, // Mark as draft (not submitted)
-            testType: 'auto-save',
-          });
+        const result = await saveProgress({
+          exam:           selectedExam,
+          part:           selectedPart,
+          score:          percentage,   // số, không phải object
+          answers,
+          totalQuestions: total,
+          correctAnswers: correct,
+          isDraft:        true,
+          testType:       'auto-save',
+        });
 
-          if (result) {
-            lastSavedAnswersRef.current = currentAnswersStr;
-            console.log(`✅ Auto-save successful (${currentUser.provider})!`);
-          } else {
-            console.warn(`⚠️ Auto-save returned false (${currentUser.provider})`);
-          }
-        } catch (error) {
-          console.error('❌ Error auto-saving:', {
-            message: error.message,
-            code: error.code,
-            provider: currentUser.provider,
-          });
+        if (result) {
+          lastSavedAnswersRef.current = currentAnswersStr;
+          console.log('✅ Auto-save successful!');
+        } else {
+          console.warn('⚠️ Auto-save returned false');
         }
-      }, 30000); // 30 seconds
-    }
+      } catch (err) {
+        console.error('❌ Auto-save error:', err.message);
+      }
+    }, 30000);
 
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
   }, [answers, selectedExam, selectedPart, partData, saveProgress, currentUser]);
 };

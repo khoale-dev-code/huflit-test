@@ -1,275 +1,287 @@
 import React, { useCallback, useMemo, useState, memo, useEffect, useRef } from 'react';
-import { ChevronDown, BookOpen, Headphones, Zap, Target, Loader2, CheckCircle2, Search } from 'lucide-react';
-import { loadExamData, getAllExamMetadata, preloadExamData } from '../../data/examData';
+import {
+  ChevronDown, BookOpen, Headphones, Loader2,
+  CheckCircle2, ChevronRight, Info, Layers
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { loadExamData, getAllExamMetadata } from '../../data/examData';
 
-// ===== HEADER =====
-const HeaderSection = memo(() => (
-  <div className="mb-8">
-    <div className="flex items-center gap-3 mb-3">
-      <div className="p-2.5 bg-indigo-600 rounded-xl shadow-md flex-shrink-0">
-        <BookOpen className="w-5 h-5 text-white" />
-      </div>
-      <div>
-        <h1 className="text-2xl font-black text-slate-900">Luyện Tập</h1>
-        <p className="text-slate-500 text-sm mt-0.5">Chọn bài tập phù hợp với mục tiêu của bạn</p>
-      </div>
-    </div>
-    <div className="h-1 w-full bg-gradient-to-r from-indigo-600 via-indigo-400 to-transparent rounded-full" />
-  </div>
-));
+/* ─── Helpers ────────────────────────────────────────────── */
+const partLabel = (key) => key.replace(/part(\d+)/i, 'Part $1');
 
-// ===== EXAM DROPDOWN =====
-const ExamDropdown = ({ isOpen, onClose, examList, selectedExam, onSelect, isLoading }) => {
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const scrollContainerRef = useRef(null);
+/* ─── ExamPopover (Optimized) ────────────────────────────── */
+const ExamPopover = memo(({ isOpen, onClose, examList, selectedExam, onSelect, isLoading }) => {
+  const [active, setActive] = useState(-1);
   const itemsRef = useRef([]);
 
   useEffect(() => {
-    if (isOpen) {
-      const currentIdx = examList.findIndex(e => e.id === selectedExam);
-      setActiveIndex(currentIdx);
-    }
+    if (isOpen) setActive(examList.findIndex(e => e.id === selectedExam));
   }, [isOpen, examList, selectedExam]);
 
   useEffect(() => {
-    if (activeIndex >= 0 && itemsRef.current[activeIndex]) {
-      itemsRef.current[activeIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-  }, [activeIndex]);
+    if (active >= 0) itemsRef.current[active]?.scrollIntoView({ block: 'nearest' });
+  }, [active]);
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowDown') { e.preventDefault(); setActiveIndex(prev => Math.min(prev + 1, examList.length - 1)); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveIndex(prev => Math.max(prev - 1, 0)); }
-      else if (e.key === 'Enter' && activeIndex >= 0) onSelect(examList[activeIndex].id);
+    const kd = (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(p => Math.min(p + 1, examList.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(p => Math.max(p - 1, 0)); }
+      else if (e.key === 'Enter' && active >= 0) { onSelect(examList[active].id); onClose(); }
       else if (e.key === 'Escape') onClose();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, activeIndex, examList, onSelect, onClose]);
-
-  if (!isOpen) return null;
+    window.addEventListener('keydown', kd);
+    return () => window.removeEventListener('keydown', kd);
+  }, [isOpen, active, examList, onSelect, onClose]);
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-      <div className="px-3 py-2 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Danh sách bộ đề</span>
-        <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-mono">↑↓ Enter</span>
-      </div>
-      <ul ref={scrollContainerRef} className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-        {examList.map((exam, index) => (
-          <li key={exam.id} ref={el => itemsRef.current[index] = el}>
-            <button
-              onClick={() => onSelect(exam.id)}
-              disabled={isLoading}
-              className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between transition-all ${
-                activeIndex === index ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-slate-50 text-slate-700'
-              } ${selectedExam === exam.id ? 'font-bold' : 'font-medium'}`}
-            >
-              <div className="flex flex-col min-w-0">
-                <span className="truncate text-sm">{exam.title}</span>
-                <span className="text-[10px] opacity-60 mt-0.5">Mã đề: {exam.id}</span>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Mobile Overlay */}
+          <div className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px] md:hidden" onClick={onClose} />
+          
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="absolute top-full left-0 right-0 md:right-auto md:w-80 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
+          >
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Danh sách bộ đề</span>
+              <div className="hidden md:flex gap-1">
+                <kbd className="px-1.5 py-0.5 text-[10px] font-sans bg-white border border-slate-200 rounded text-slate-400">↑↓</kbd>
+                <kbd className="px-1.5 py-0.5 text-[10px] font-sans bg-white border border-slate-200 rounded text-slate-400">↵</kbd>
               </div>
-              {selectedExam === exam.id && <CheckCircle2 className="w-4 h-4 text-indigo-600 ml-2 flex-shrink-0" />}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+            </div>
 
-// ===== CONTROL BAR =====
-const ControlBar = memo(({
-  selectedExam, isDropdownOpen, isLoading,
-  onToggleDropdown, onCloseDropdown, onSelectExam,
-  examList, testType, onTestTypeChange
-}) => {
-  const dropdownRef = useRef(null);
+            <ul className="max-h-[320px] overflow-y-auto p-2 custom-scrollbar">
+              {examList.map((exam, i) => {
+                const isSelected = exam.id === selectedExam;
+                const isHighlighted = i === active;
+                return (
+                  <li key={exam.id} ref={el => itemsRef.current[i] = el}>
+                    <button
+                      onClick={() => { onSelect(exam.id); onClose(); }}
+                      className={`
+                        w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all
+                        ${isHighlighted ? 'bg-blue-50 ring-1 ring-inset ring-blue-100' : 'hover:bg-slate-50'}
+                      `}
+                    >
+                      <div className="min-w-0 pr-4">
+                        <div className={`text-sm ${isSelected ? 'font-bold text-blue-600' : 'font-medium text-slate-700'}`}>
+                          {exam.title}
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-0.5 uppercase tracking-tighter">ID: {exam.id}</div>
+                      </div>
+                      {isSelected && <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+});
+
+/* ─── PartChips (Modern Scrollable) ───────────────────────── */
+const PartChips = memo(({ parts, selected, onSelect, isLoading }) => {
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) onCloseDropdown();
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onCloseDropdown]);
+    const el = scrollRef.current?.querySelector(`[data-part="${selected}"]`);
+    el?.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+  }, [selected]);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
-
-        {/* Exam Selection */}
-        <div className="p-5 relative" ref={dropdownRef}>
-          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-            <Target className="w-3.5 h-3.5 text-indigo-600" />
-            Bộ Đề
-          </label>
-          <button
-            onClick={onToggleDropdown}
-            disabled={isLoading}
-            className={`w-full flex items-center justify-between bg-slate-50 border-2 transition-all rounded-xl px-4 py-3 text-sm focus:outline-none ${
-              isDropdownOpen ? 'border-indigo-500 ring-4 ring-indigo-50 bg-white' : 'border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <span className="truncate text-slate-900 font-semibold flex items-center gap-2">
-              {isLoading
-                ? <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                : <Search className="w-4 h-4 text-slate-400" />}
-              {selectedExam ? examList.find(e => e.id === selectedExam)?.title : '-- Chọn bộ đề --'}
-            </span>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <ExamDropdown
-            isOpen={isDropdownOpen}
-            onClose={onCloseDropdown}
-            examList={examList}
-            selectedExam={selectedExam}
-            onSelect={onSelectExam}
-            isLoading={isLoading}
-          />
-        </div>
-
-        {/* Test Type */}
-        <div className="p-5">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-            <Zap className="w-3.5 h-3.5 text-indigo-600" />
-            Loại Bài
-          </label>
-          <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl">
-            {['listening', 'reading'].map(type => (
+    <div className="relative flex items-center group">
+      {/* Scroll Shadow Indicators */}
+      <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div
+        ref={scrollRef}
+        className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth w-full"
+      >
+        {isLoading ? (
+          [...Array(5)].map((_, i) => <div key={i} className="h-9 w-20 rounded-xl bg-slate-100 animate-pulse" />)
+        ) : (
+          parts.map(({ key, count }) => {
+            const isActive = selected === key;
+            return (
               <button
-                key={type}
-                onClick={() => onTestTypeChange(type)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg font-bold text-sm transition-all ${
-                  testType === type
-                    ? 'bg-white text-indigo-700 shadow-sm border border-slate-200'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
+                key={key}
+                data-part={key}
+                onClick={() => onSelect(key)}
+                className={`
+                  relative shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all
+                  ${isActive 
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200 scale-105 z-10' 
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}
+                `}
               >
-                {type === 'listening' ? <Headphones className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
-                <span>{type === 'listening' ? 'Nghe' : 'Đọc'}</span>
+                {isActive && <motion.div layoutId="active-dot" className="w-1 h-1 bg-blue-400 rounded-full" />}
+                <span>{partLabel(key)}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${isActive ? 'bg-white/20' : 'bg-slate-100 text-slate-400'}`}>
+                  {count}
+                </span>
               </button>
-            ))}
-          </div>
-        </div>
+            );
+          })
+        )}
       </div>
+
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 });
 
-// ===== PART BUTTON — Card list style =====
-const PartButton = memo(({ partKey, info, isActive, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-200 border-2 text-left ${
-      isActive
-        ? 'bg-white border-indigo-600 shadow-md ring-4 ring-indigo-50'
-        : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-sm'
-    }`}
-  >
-    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0 ${
-      isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
-    }`}>
-      {partKey.replace(/part(\d+)/i, 'P$1')}
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className={`text-sm font-bold truncate ${isActive ? 'text-slate-900' : 'text-slate-700'}`}>
-        {info.title}
-      </p>
-      <p className="text-xs text-slate-400 mt-0.5">{info.questions} câu hỏi</p>
-    </div>
-    {isActive && <CheckCircle2 className="w-5 h-5 text-indigo-600 flex-shrink-0" />}
-  </button>
-));
-
-// ===== MAIN COMPONENT =====
-const PartSelector = React.memo(({
+/* ─── Main Component ─────────────────────────────────────── */
+const PartSelector = memo(({
   selectedExam = 'exam1',
   onExamChange = () => {},
   testType = 'listening',
   onTestTypeChange = () => {},
   selectedPart = 'part1',
-  onPartChange = () => {}
+  onPartChange = () => {},
 }) => {
-  const [isExamDropdownOpen, setIsExamDropdownOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [examData, setExamData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const popoverRef = useRef(null);
   const examList = useMemo(() => getAllExamMetadata(), []);
 
   useEffect(() => {
-    let cancelled = false;
-    const loadData = async () => {
-      if (!selectedExam) return;
-      setIsLoading(true);
-      try {
-        const data = await loadExamData(selectedExam);
-        if (!cancelled) setExamData(data);
-      } catch (err) { console.error(err); }
-      finally { if (!cancelled) setIsLoading(false); }
+    if (!popoverOpen) return;
+    const handler = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) setPopoverOpen(false);
     };
-    loadData();
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [popoverOpen]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    loadExamData(selectedExam)
+      .then(data => { if (!cancelled) setExamData(data); })
+      .catch(console.error)
+      .finally(() => { if (!cancelled) setIsLoading(false); });
     return () => { cancelled = true; };
   }, [selectedExam]);
 
-  const partInfoMap = useMemo(() => {
-    if (!examData?.parts) return {};
+  const parts = useMemo(() => {
+    if (!examData?.parts) return [];
     return Object.entries(examData.parts)
-      .filter(([_, data]) => data.type === testType)
-      .reduce((acc, [key, data]) => ({
-        ...acc, [key]: { title: data.title || key, questions: data.questions?.length || 0 }
-      }), {});
+      .filter(([, d]) => d.type === testType)
+      .map(([key, d]) => ({ key, count: d.questions?.length || 0 }));
   }, [examData, testType]);
 
-  const availableParts = useMemo(() => Object.keys(partInfoMap), [partInfoMap]);
+  const currentExam = examList.find(e => e.id === selectedExam);
+  const currentPartData = examData?.parts?.[selectedPart];
 
   return (
-    // ✅ No self-contained max-width, no min-h-screen — MainLayout controls all of that
-    <div className="relative space-y-2">
-      <HeaderSection />
+    <div className="w-full max-w-5xl mx-auto space-y-4 px-2 sm:px-0">
+      <div className="bg-white border border-slate-200 rounded-[24px] shadow-sm overflow-visible p-1.5">
+        
+        {/* Row 1: Selectors */}
+        <div className="flex flex-col md:flex-row gap-2 md:items-center">
+          
+          {/* Exam Dropdown */}
+          <div className="relative flex-1" ref={popoverRef}>
+            <button
+              onClick={() => setPopoverOpen(!popoverOpen)}
+              disabled={isLoading}
+              className={`
+                w-full h-12 flex items-center gap-3 px-4 rounded-2xl border transition-all text-sm font-bold
+                ${popoverOpen ? 'bg-blue-50 border-blue-200 ring-4 ring-blue-50 text-blue-700' : 'bg-slate-50 border-transparent text-slate-700 hover:bg-white hover:border-slate-200'}
+              `}
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : <Layers className="w-4 h-4 text-slate-400" />}
+              <span className="flex-1 text-left truncate">{currentExam?.title || 'Chọn bộ đề'}</span>
+              <ChevronDown size={16} className={`text-slate-400 transition-transform ${popoverOpen ? 'rotate-180' : ''}`} />
+            </button>
 
-      <ControlBar
-        selectedExam={selectedExam}
-        isDropdownOpen={isExamDropdownOpen}
-        isLoading={isLoading}
-        onToggleDropdown={() => setIsExamDropdownOpen(v => !v)}
-        onCloseDropdown={() => setIsExamDropdownOpen(false)}
-        onSelectExam={(id) => {
-          onExamChange({ target: { value: id } });
-          setIsExamDropdownOpen(false);
-        }}
-        examList={examList}
-        testType={testType}
-        onTestTypeChange={(type) => onTestTypeChange({ target: { value: type } })}
-      />
-
-      {/* ✅ Single-column part list instead of multi-column grid */}
-      {availableParts.length > 0 && (
-        <div className="space-y-2">
-          {availableParts.map(partKey => (
-            <PartButton
-              key={partKey}
-              partKey={partKey}
-              info={partInfoMap[partKey]}
-              isActive={selectedPart === partKey}
-              onClick={() => onPartChange({ target: { value: partKey } })}
+            <ExamPopover
+              isOpen={popoverOpen}
+              onClose={() => setPopoverOpen(false)}
+              examList={examList}
+              selectedExam={selectedExam}
+              onSelect={(id) => onExamChange({ target: { value: id } })}
+              isLoading={isLoading}
             />
-          ))}
-        </div>
-      )}
+          </div>
 
-      {/* Part detail panel */}
-      {examData?.parts?.[selectedPart] && (
-        <div className="mt-4 p-5 bg-white border border-slate-200 rounded-2xl shadow-sm animate-in fade-in duration-200">
-          <h3 className="text-base font-bold text-slate-900 mb-1">
-            {examData.parts[selectedPart].title}
-          </h3>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            {examData.parts[selectedPart].description}
-          </p>
+          {/* Type Switcher */}
+          <div className="bg-slate-100 p-1 rounded-2xl flex gap-1 h-12">
+            {[
+              { id: 'listening', icon: Headphones, label: 'Listening' },
+              { id: 'reading', icon: BookOpen, label: 'Reading' },
+            ].map((type) => {
+              const active = testType === type.id;
+              return (
+                <button
+                  key={type.id}
+                  onClick={() => onTestTypeChange({ target: { value: type.id } })}
+                  className={`
+                    flex-1 md:flex-none flex items-center justify-center gap-2 px-5 rounded-[14px] text-xs font-bold transition-all
+                    ${active ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}
+                  `}
+                >
+                  <type.icon size={14} />
+                  <span>{type.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
+
+        {/* Row 2: Parts */}
+        <div className="mt-2 px-2 pb-1 border-b border-slate-50">
+          <PartChips
+            parts={parts}
+            selected={selectedPart}
+            onSelect={(key) => onPartChange({ target: { value: key } })}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* Row 3: Detail Info (Redesigned) */}
+        <AnimatePresence mode="wait">
+          {currentPartData && (
+            <motion.div
+              key={selectedPart}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="flex items-center gap-4 px-4 py-3 bg-gradient-to-r from-slate-50 to-white rounded-b-[18px]"
+            >
+              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                <Info size={16} />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-bold text-slate-800 truncate">{currentPartData.title}</h4>
+                <p className="text-xs text-slate-500 truncate">{currentPartData.description || "Bắt đầu làm bài thi của bạn ngay bây giờ."}</p>
+              </div>
+              <div className="ml-auto hidden sm:flex items-center gap-2">
+                 <span className="text-[11px] font-bold text-slate-400 uppercase">Ques:</span>
+                 <span className="px-2 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-lg leading-none">
+                  {currentPartData.questions?.length || 0}
+                 </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+      `}</style>
     </div>
   );
 });

@@ -14,23 +14,24 @@ import { ROUTES } from '../config/routes';
    Route / menu config
    ───────────────────────────────────────────────────────────── */
 const ALL_MENU_ITEMS = [
-  { id: 'home',       label: 'Trang chủ', icon: Home,          path: ROUTES.HOME,       type: 'link'     },
-  { id: 'listening',  label: 'Nghe',      icon: Headphones,    path: '/test',           type: 'test'     },
-  { id: 'reading',    label: 'Đọc',       icon: BookOpen,      path: '/test',           type: 'test'     },
-  { id: 'full',       label: 'Thi Thử',   icon: GraduationCap, path: '/full-exam',      type: 'exam'     },
-  { id: 'grammar',    label: 'Ngữ Pháp',  icon: Sparkles,      path: '/grammar',        type: 'practice' },
-  { id: 'vocabulary', label: 'Từ Vựng',   icon: Languages,     path: '/vocabulary',     type: 'practice' },
+  { id: 'home',       label: 'Trang chủ', icon: Home,          path: ROUTES.HOME,   type: 'link'     },
+  { id: 'listening',  label: 'Nghe',      icon: Headphones,    path: '/test',       type: 'test'     },
+  { id: 'reading',    label: 'Đọc',       icon: BookOpen,      path: '/test',       type: 'test'     },
+  { id: 'full',       label: 'Thi Thử',   icon: GraduationCap, path: '/full-exam',  type: 'exam'     },
+  { id: 'grammar',    label: 'Ngữ Pháp',  icon: Sparkles,      path: '/grammar',    type: 'practice' },
+  { id: 'vocabulary', label: 'Từ Vựng',   icon: Languages,     path: '/vocabulary', type: 'practice' },
 ];
 
-// Bottom nav: 3 pinned items only — gọn hơn
-const BOTTOM_NAV_ITEMS = [
-  ALL_MENU_ITEMS[0], // Home
-  ALL_MENU_ITEMS[1], // Nghe
-  ALL_MENU_ITEMS[3], // Thi Thử
-];
-
-// Desktop nav: all except Home (shown via logo)
+const BOTTOM_NAV_ITEMS  = [ALL_MENU_ITEMS[0], ALL_MENU_ITEMS[1], ALL_MENU_ITEMS[3]];
 const DESKTOP_MENU_ITEMS = ALL_MENU_ITEMS.slice(1);
+
+/* ─────────────────────────────────────────────────────────────
+   Scroll to top helper
+   Dùng 'instant' thay vì 'smooth' để tránh conflict với
+   page-transition animation (nếu có). Đổi thành 'smooth'
+   nếu không dùng page transition.
+   ───────────────────────────────────────────────────────────── */
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' });
 
 /* ─────────────────────────────────────────────────────────────
    Animation presets
@@ -70,7 +71,7 @@ const DesktopNavBtn = ({ item, isActive, onClick }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Bottom nav tab (mobile pinned)
+   Bottom nav tab
    ───────────────────────────────────────────────────────────── */
 const BottomTab = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
@@ -103,13 +104,16 @@ const BottomTab = ({ item, isActive, onClick }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   "More" drawer — slides up from bottom, shows all items
+   "More" Drawer
    ───────────────────────────────────────────────────────────── */
-const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSignedIn, streak, onProfile, onAnswers, onSignOut, onSignIn }) => (
+const MoreDrawer = ({
+  open, onClose, allItems, isItemActive, onNav,
+  user, isSignedIn, streak,
+  onProfile, onAnswers, onSignOut, onSignIn,
+}) => (
   <AnimatePresence>
     {open && (
       <>
-        {/* Backdrop */}
         <motion.div
           key="backdrop"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -119,7 +123,6 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
           aria-hidden="true"
         />
 
-        {/* Drawer */}
         <motion.div
           key="drawer"
           variants={drawerVariants}
@@ -130,12 +133,10 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
           className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl overflow-hidden"
           style={{ maxHeight: '90vh' }}
         >
-          {/* Handle */}
           <div className="flex justify-center pt-3 pb-1">
             <div className="w-10 h-1 bg-slate-200 rounded-full" aria-hidden="true" />
           </div>
 
-          {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
             <h2 className="font-bold text-slate-900 text-base">Menu</h2>
             <button
@@ -149,7 +150,6 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
 
           <div className="overflow-y-auto pb-safe" style={{ maxHeight: 'calc(90vh - 80px)' }}>
 
-            {/* ── User card (if signed in) ── */}
             {isSignedIn && user ? (
               <div className="px-4 pt-4 pb-2">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
@@ -182,7 +182,6 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
               </div>
             )}
 
-            {/* ── Navigation section ── */}
             <div className="px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">
                 Luyện tập
@@ -217,7 +216,6 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
               </div>
             </div>
 
-            {/* ── Account section (if signed in) ── */}
             {isSignedIn && (
               <div className="px-4 pb-4">
                 <div className="h-px bg-slate-100 my-2" />
@@ -229,9 +227,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
                     onClick={() => { onProfile(); onClose(); }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-semibold text-sm"
                   >
-                    <div className="p-1.5 rounded-lg bg-slate-100">
-                      <User className="w-4 h-4" />
-                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-100"><User className="w-4 h-4" /></div>
                     <span className="flex-1 text-left">Trang cá nhân</span>
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                   </button>
@@ -240,9 +236,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
                     onClick={() => { onAnswers(); onClose(); }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors font-semibold text-sm"
                   >
-                    <div className="p-1.5 rounded-lg bg-slate-100">
-                      <FileText className="w-4 h-4" />
-                    </div>
+                    <div className="p-1.5 rounded-lg bg-slate-100"><FileText className="w-4 h-4" /></div>
                     <span className="flex-1 text-left">Đáp án của tôi</span>
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                   </button>
@@ -251,16 +245,13 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
                     onClick={() => { onSignOut(); onClose(); }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-semibold text-sm"
                   >
-                    <div className="p-1.5 rounded-lg bg-red-50">
-                      <LogOut className="w-4 h-4" />
-                    </div>
+                    <div className="p-1.5 rounded-lg bg-red-50"><LogOut className="w-4 h-4" /></div>
                     <span className="flex-1 text-left">Đăng xuất</span>
                   </button>
                 </div>
               </div>
             )}
 
-            {/* safe area spacer */}
             <div className="h-4" />
           </div>
         </motion.div>
@@ -275,7 +266,6 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
 const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick, onSignOut }) => {
   const ref = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
     if (!showMenu) return;
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setShowMenu(false); };
@@ -296,11 +286,11 @@ const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick
           className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-30"
         >
           {[
-            { label: 'Trang cá nhân', icon: User,     fn: onProfileClick, color: 'text-slate-700' },
-            { label: 'Đáp án',        icon: FileText, fn: onAnswersClick,  color: 'text-slate-700' },
-          ].map(({ label, icon: Icon, fn, color }) => (
+            { label: 'Trang cá nhân', icon: User,     fn: onProfileClick },
+            { label: 'Đáp án',        icon: FileText, fn: onAnswersClick  },
+          ].map(({ label, icon: Icon, fn }) => (
             <button key={label} onClick={fn} role="menuitem"
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm ${color} hover:bg-blue-50 transition-colors`}>
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 transition-colors">
               <Icon className="w-4 h-4 flex-shrink-0" />
               <span>{label}</span>
             </button>
@@ -352,24 +342,43 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 
-  /* Active check */
+  /* ── Active check ── */
   const isItemActive = useCallback((item) => {
     const pathMatch = location.pathname === item.path;
-    if (item.type === 'test')     return pathMatch && testType    === item.id;
+    if (item.type === 'test')     return pathMatch && testType     === item.id;
     if (item.type === 'practice') return pathMatch && practiceType === item.id;
     return pathMatch;
   }, [location.pathname, testType, practiceType]);
 
-  /* Navigate handler */
+  /* ── Navigate + scroll to top ──────────────────────────────────────────────
+     scrollToTop() được gọi SAU navigate() để React Router cập nhật DOM trước,
+     tránh trường hợp scroll bị reset bởi page render tiếp theo.
+     Dùng behavior: 'instant' để không tranh với page-transition animation.
+  ──────────────────────────────────────────────────────────────────────────── */
   const handleNav = useCallback((item) => {
     if (item.type === 'test')     onTestTypeChange?.(item.id);
     if (item.type === 'practice') onPracticeTypeChange?.(item.id);
     navigate(item.path);
+    scrollToTop();
   }, [navigate, onTestTypeChange, onPracticeTypeChange]);
 
-  const handleProfile = useCallback(() => { navigate(ROUTES.PROFILE);  setShowProfileMenu(false); }, [navigate]);
-  const handleAnswers = useCallback(() => { navigate(ROUTES.ANSWERS);  setShowProfileMenu(false); }, [navigate]);
-  const handleSignOut = useCallback(() => { signOut(); setShowProfileMenu(false); }, [signOut]);
+  // Profile / answers cũng scroll to top
+  const handleProfile = useCallback(() => {
+    navigate(ROUTES.PROFILE);
+    scrollToTop();
+    setShowProfileMenu(false);
+  }, [navigate]);
+
+  const handleAnswers = useCallback(() => {
+    navigate(ROUTES.ANSWERS);
+    scrollToTop();
+    setShowProfileMenu(false);
+  }, [navigate]);
+
+  const handleSignOut = useCallback(() => {
+    signOut();
+    setShowProfileMenu(false);
+  }, [signOut]);
 
   return (
     <>
@@ -389,9 +398,9 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
 
-            {/* Logo */}
+            {/* Logo → home + scroll to top */}
             <button
-              onClick={() => navigate(ROUTES.HOME)}
+              onClick={() => { navigate(ROUTES.HOME); scrollToTop(); }}
               aria-label="HubStudy - Trang chủ"
               className="flex items-center gap-2 flex-shrink-0 transition-opacity hover:opacity-75"
             >
@@ -415,7 +424,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
             {/* Right actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Streak badge */}
               {isSignedIn && streak > 0 && (
                 <div className="flex items-center gap-1.5 bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
                   <Flame className="w-4 h-4 text-[#FF9600] fill-current" />
@@ -426,7 +434,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                 </div>
               )}
 
-              {/* Auth / avatar */}
               {isSignedIn ? (
                 <div className="relative">
                   <button
@@ -469,7 +476,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
       <div className="h-14 sm:h-16 pointer-events-none" />
 
       {/* ════════════════════════════════════════
-          MOBILE bottom nav (5 tabs: 4 pinned + "Thêm")
+          MOBILE bottom nav
           ════════════════════════════════════════ */}
       <div
         className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200"
@@ -485,7 +492,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             />
           ))}
 
-          {/* "Thêm" button — opens the full drawer */}
+          {/* "Thêm" button */}
           <button
             onClick={() => setDrawerOpen(true)}
             aria-label="Xem thêm tùy chọn"
@@ -493,7 +500,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             aria-haspopup="dialog"
             className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 group"
           >
-            {/* Avatar if logged in, else dots icon */}
             {isSignedIn && user?.photoURL ? (
               <img
                 src={user.photoURL}
@@ -517,7 +523,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         </div>
       </div>
 
-      {/* Bottom nav spacer (mobile) */}
+      {/* Bottom nav spacer */}
       <div className="lg:hidden h-16 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
 
       {/* ════════════════════════════════════════

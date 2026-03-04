@@ -1,44 +1,40 @@
 import React, { useMemo, useCallback, useState, memo } from 'react';
-import { 
-  Save, CheckCircle, AlertCircle, Volume2, Check, 
-  Sparkles, ChevronDown, ChevronUp, Lightbulb
+import {
+  Save, CheckCircle, AlertCircle, Volume2, Check,
+  Sparkles, ChevronDown, ChevronUp, Lightbulb, Send,
 } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../config/firebase';
 import { useUnifiedAuth } from '../../hooks/useUnifiedAuth';
 
-// ==========================================
-// Progress Bar (Sleek)
-// ==========================================
+// ─────────────────────────────────────────────
+// ProgressBar
+// ─────────────────────────────────────────────
 const ProgressBar = memo(({ percentage }) => (
-  <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
     <div
-      className="h-full bg-blue-600 transition-all duration-500 ease-out"
-      style={{ width: `${percentage}%` }}
+      className="h-full rounded-full transition-all duration-500 ease-out"
+      style={{
+        width: `${percentage}%`,
+        background: percentage === 100
+          ? 'linear-gradient(90deg, #059669, #10B981)'
+          : 'linear-gradient(90deg, #2563EB, #60A5FA)',
+      }}
     />
   </div>
 ));
 ProgressBar.displayName = 'ProgressBar';
 
-// ==========================================
-// Question Option (Optimized Density)
-// ==========================================
+// ─────────────────────────────────────────────
+// QuestionOption
+// ─────────────────────────────────────────────
 const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId }) => {
   const label = String.fromCharCode(65 + index);
-
   return (
     <label className="block cursor-pointer group">
-      <input
-        type="radio"
-        className="sr-only"
-        name={`q-${questionId}`}
-        checked={isSelected}
-        onChange={onSelect}
-      />
+      <input type="radio" className="sr-only" name={`q-${questionId}`} checked={isSelected} onChange={onSelect} />
       <div className={`
-        flex items-center gap-3 p-3 rounded-xl border-2 transition-all
+        flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-150
         ${isSelected
-          ? 'border-blue-500 bg-blue-50/50 shadow-sm'
+          ? 'border-blue-500 bg-blue-50 shadow-sm'
           : 'border-slate-100 bg-white hover:border-slate-300 hover:bg-slate-50'}
       `}>
         <div className={`
@@ -57,31 +53,27 @@ const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId }
 });
 QuestionOption.displayName = 'QuestionOption';
 
-// ==========================================
-// Script Display (Mobile Friendly)
-// ==========================================
+// ─────────────────────────────────────────────
+// ScriptDisplay
+// ─────────────────────────────────────────────
 const ScriptDisplay = memo(({ script }) => {
-  // Mặc định đóng để tiết kiệm diện tích
-  const [isExpanded, setIsExpanded] = useState(false); 
+  const [open, setOpen] = useState(false);
   if (!script) return null;
-
   return (
-    <div className="mb-3 border border-blue-100 bg-blue-50/30 rounded-xl overflow-hidden">
+    <div className="mb-3 border border-blue-100 bg-blue-50/40 rounded-xl overflow-hidden">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-2.5 text-left active:bg-blue-100/50 transition-colors"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors"
       >
         <div className="flex items-center gap-2">
           <Volume2 className="w-4 h-4 text-blue-600" />
           <span className="font-bold text-blue-900 text-xs uppercase tracking-wider">Audio Script</span>
         </div>
-        {isExpanded ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />}
+        {open ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />}
       </button>
-      {isExpanded && (
-        <div className="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
-          <p className="text-[14.5px] text-slate-700 leading-relaxed italic border-t border-blue-100 pt-2">
-            "{script}"
-          </p>
+      {open && (
+        <div className="px-4 pb-4 border-t border-blue-100 pt-2">
+          <p className="text-[14.5px] text-slate-700 leading-relaxed italic">"{script}"</p>
         </div>
       )}
     </div>
@@ -89,24 +81,18 @@ const ScriptDisplay = memo(({ script }) => {
 });
 ScriptDisplay.displayName = 'ScriptDisplay';
 
-// ==========================================
-// Question Card (Material Style)
-// ==========================================
-const QuestionCard = memo(({
-  question, script, options, selectedAnswer, onAnswerSelect, questionNumber, totalQuestions
-}) => (
-  <article className="bg-white border border-slate-200 rounded-2xl p-4 mb-4">
-    <ScriptDisplay script={script} />
-
-    <div className="flex items-start gap-3 mb-5">
+// ─────────────────────────────────────────────
+// QuestionCard
+// ─────────────────────────────────────────────
+const QuestionCard = memo(({ question, options, selectedAnswer, onAnswerSelect }) => (
+  <article className="bg-white border border-slate-200 rounded-2xl p-4 mb-3">
+    <ScriptDisplay script={question.script} />
+    <div className="flex items-start gap-3 mb-4">
       <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 text-white font-bold text-[13px] flex-shrink-0 mt-0.5">
         {question.id}
       </span>
-      <h3 className="text-base font-bold text-slate-900 leading-snug">
-        {question.question}
-      </h3>
+      <h3 className="text-base font-bold text-slate-900 leading-snug">{question.question}</h3>
     </div>
-
     <div className="space-y-2">
       {options?.map((opt, i) => (
         <QuestionOption
@@ -123,146 +109,239 @@ const QuestionCard = memo(({
 ));
 QuestionCard.displayName = 'QuestionCard';
 
-// ==========================================
-// MAIN: QuestionDisplay (Single Column Layout)
-// ==========================================
-const QuestionDisplay = memo(({
-  selectedPart, selectedExam, partData, answers, onAnswerSelect, showResults, onSubmit, testType
-}) => {
-  const { user: firebaseUser, isSignedIn } = useUnifiedAuth();
-  const [submitStatus, setSubmitStatus] = useState({ show: false, message: '', success: false });
-
-  const answersCount = useMemo(() => Object.keys(answers).length, [answers]);
-  const totalQuestions = useMemo(() => partData?.questions?.length || 0, [partData?.questions?.length]);
-  const percentage = useMemo(() => totalQuestions > 0 ? (answersCount / totalQuestions) * 100 : 0, [answersCount, totalQuestions]);
-  const isAllAnswered = useMemo(() => answersCount === totalQuestions && totalQuestions > 0, [answersCount, totalQuestions]);
-
-  // Logic nộp bài linh hoạt hơn
-  const handleFinalSubmit = useCallback(async () => {
-    if (!isAllAnswered) {
-      const confirmSubmit = window.confirm(`Bạn mới hoàn thành ${answersCount}/${totalQuestions} câu. Bạn có chắc chắn muốn nộp bài?`);
-      if (!confirmSubmit) return;
-    }
-
-    try {
-      onSubmit();
-      if (!isSignedIn) {
-        setSubmitStatus({ show: true, message: 'Vui lòng đăng nhập để lưu kết quả', success: false });
-        return;
-      }
-
-      setSubmitStatus({ show: true, message: 'Đang lưu kết quả...', success: false });
-      
-      await addDoc(collection(db, 'userProgress'), {
-        firebaseUid: firebaseUser.uid,
-        exam: selectedExam,
-        part: selectedPart,
-        answers,
-        totalQuestions,
-        testType,
-        createdAt: serverTimestamp(),
-      });
-
-      setSubmitStatus({ show: true, message: '✓ Kết quả đã được lưu!', success: true });
-      setTimeout(() => setSubmitStatus({ show: false, success: false }), 3000);
-    } catch (e) {
-      setSubmitStatus({ show: true, message: 'Lỗi khi lưu: ' + e.message, success: false });
-    }
-  }, [answers, answersCount, totalQuestions, isAllAnswered, isSignedIn, firebaseUser, onSubmit, selectedExam, selectedPart, testType]);
-
-  if (!partData || showResults || !partData.questions) return null;
+// ─────────────────────────────────────────────
+// SubmitBar — responsive layout
+//
+// MOBILE  (< md): fixed bottom, padding-bottom = navbar height (env safe-area + 64px)
+// DESKTOP (≥ md): sticky, nằm dưới cùng bên phải trong flow bình thường,
+//                 luôn visible vì nó theo scroll
+// ─────────────────────────────────────────────
+const SubmitBar = memo(({ answersCount, totalQuestions, isAllAnswered, isSignedIn, onSubmit, status }) => {
+  const remaining = totalQuestions - answersCount;
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
-      {/* ── Header: Compact Single Column ── */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200 z-30">
-        <div className="w-full px-4 py-2.5">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-600" />
-              <h1 className="text-[15px] font-bold text-slate-900">Practice</h1>
-            </div>
-            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-              {answersCount}/{totalQuestions} COMPLETED
-            </span>
-          </div>
-          <ProgressBar percentage={percentage} />
-        </div>
-      </header>
+    <>
+      {/*
+        MOBILE: fixed, bottom = navbar height
+        Dùng CSS env(safe-area-inset-bottom) để tránh home-indicator iOS.
+        Nếu navbar của bạn cao hơn/thấp hơn 64px, đổi giá trị `--nav-h`.
+      */}
+      <style>{`
+        :root { --nav-h: 64px; }
+        .submit-bar-mobile {
+          display: flex;
+          position: fixed;
+          left: 0; right: 0;
+          bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+          z-index: 50;
+          background: #fff;
+          border-top: 1.5px solid #E2E8F0;
+          box-shadow: 0 -4px 24px rgba(0,0,0,0.07);
+          padding: 12px 16px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        @media (min-width: 768px) {
+          .submit-bar-mobile { display: none; }
+        }
 
-      {/* ── Main Content: Single Column ── */}
-      <main className="w-full px-4 pt-4 pb-40">
-        <div className="space-y-1 mb-6">
-          {partData.questions.map((q, idx) => (
-            <QuestionCard
-              key={q.id}
-              question={q}
-              script={q.script}
-              options={q.options}
-              selectedAnswer={answers[q.id]}
-              onAnswerSelect={onAnswerSelect}
-              questionNumber={idx + 1}
-              totalQuestions={totalQuestions}
-            />
-          ))}
-        </div>
+        .submit-bar-desktop {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .submit-bar-desktop {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: #fff;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-top: 8px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+          }
+        }
+      `}</style>
 
-        <details className="bg-white border border-slate-200 rounded-2xl overflow-hidden group mb-8">
-            <summary className="flex items-center gap-2 px-4 py-4 cursor-pointer font-bold text-sm text-slate-700 list-none">
-              <Lightbulb className="w-4 h-4 text-amber-500" />
-              Mẹo làm bài chuyên gia
-              <ChevronDown className="w-4 h-4 ml-auto text-slate-400 group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="px-4 pb-4 text-[14px] text-slate-600 leading-relaxed space-y-2 border-t border-slate-50 pt-3">
-              <p>• <b>Scanning:</b> Đọc câu hỏi trước khi nghe/đọc đoạn văn.</p>
-              <p>• <b>Elimination:</b> Loại bỏ đáp án gây nhiễu có từ vựng tiêu cực.</p>
-            </div>
-        </details>
-      </main>
-
-      {/* ── Bottom Submit Bar: Fixed Position ── */}
-      <div className="fixed left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] bottom-0 px-4 py-3">
-        <div className="w-full flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <span className="text-[15px] font-bold text-slate-900 tabular-nums">
-               Đã chọn {answersCount} câu
-            </span>
-            <span className={`text-[12px] font-medium ${isAllAnswered ? 'text-emerald-600' : 'text-slate-400'}`}>
-              {isAllAnswered ? '● Sẵn sàng nộp bài' : `● Còn thiếu ${totalQuestions - answersCount} câu`}
-            </span>
-          </div>
-
-          <button
-            onClick={handleFinalSubmit}
-            className={`
-              flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 flex-shrink-0
-              ${isAllAnswered 
-                ? 'bg-blue-600 text-white shadow-blue-200 shadow-lg' 
-                : 'bg-slate-800 text-white opacity-90'}
-            `}
-          >
-            <Save className="w-4 h-4" />
-            <span>{isSignedIn ? 'Nộp & Lưu' : 'Nộp bài'}</span>
-          </button>
-        </div>
+      {/* ── MOBILE BAR ── */}
+      <div className="submit-bar-mobile">
+        <BarContent
+          answersCount={answersCount}
+          totalQuestions={totalQuestions}
+          isAllAnswered={isAllAnswered}
+          isSignedIn={isSignedIn}
+          onSubmit={onSubmit}
+          remaining={remaining}
+          compact
+        />
       </div>
 
-      {/* ── Toast: Floating Toast ── */}
-      {submitStatus.show && (
+      {/* ── DESKTOP BAR (in-flow, không fixed) ── */}
+      <div className="submit-bar-desktop">
+        <BarContent
+          answersCount={answersCount}
+          totalQuestions={totalQuestions}
+          isAllAnswered={isAllAnswered}
+          isSignedIn={isSignedIn}
+          onSubmit={onSubmit}
+          remaining={remaining}
+          compact={false}
+        />
+      </div>
+
+      {/* Toast */}
+      {status.show && (
         <div className={`
-          fixed left-4 right-4 p-4 rounded-2xl z-50 shadow-2xl animate-in slide-in-from-bottom-10
-          bottom-28
-          ${submitStatus.success ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white'}
+          fixed left-4 right-4 md:left-auto md:right-6 md:w-80
+          p-4 rounded-2xl z-[60] shadow-2xl
+          animate-in slide-in-from-bottom-6 duration-300
+          ${status.success ? 'bg-emerald-600' : 'bg-slate-900'}
+          text-white
+          /* mobile: di bottom = navbar + submit bar + gap */
+          bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom,0px)+72px)]
+          md:bottom-8
         `}>
           <div className="flex items-center gap-3">
-            {submitStatus.success ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5 text-amber-400" />}
-            <p className="text-sm font-bold">{submitStatus.message}</p>
+            {status.success
+              ? <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              : <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />}
+            <p className="text-sm font-bold">{status.message}</p>
           </div>
         </div>
       )}
+    </>
+  );
+});
+
+const BarContent = memo(({ answersCount, totalQuestions, isAllAnswered, isSignedIn, onSubmit, remaining, compact }) => (
+  <>
+    {/* Left: progress info */}
+    <div className="flex flex-col min-w-0">
+      <span className="text-[15px] font-bold text-slate-900 tabular-nums leading-tight">
+        {answersCount}/{totalQuestions} câu
+      </span>
+      <span className={`text-[12px] font-semibold leading-tight mt-0.5 ${isAllAnswered ? 'text-emerald-600' : 'text-slate-400'}`}>
+        {isAllAnswered ? '✓ Sẵn sàng nộp' : `Còn ${remaining} câu chưa chọn`}
+      </span>
+    </div>
+
+    {/* Right: submit button */}
+    <button
+      onClick={onSubmit}
+      className={`
+        flex items-center gap-2 rounded-xl font-bold text-sm
+        transition-all duration-150 active:scale-95 flex-shrink-0
+        ${compact ? 'px-5 py-2.5' : 'px-7 py-3 text-base'}
+        ${isAllAnswered
+          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200'
+          : 'bg-slate-800 hover:bg-slate-700 text-white'}
+      `}
+    >
+      <Send className="w-4 h-4" />
+      {isSignedIn ? 'Nộp & Lưu' : 'Nộp bài'}
+    </button>
+  </>
+));
+
+// ─────────────────────────────────────────────
+// MAIN
+// ─────────────────────────────────────────────
+const QuestionDisplay = memo(({
+  selectedPart, selectedExam, partData, answers,
+  onAnswerSelect, showResults, onSubmit, testType,
+}) => {
+  const { user: firebaseUser, isSignedIn } = useUnifiedAuth();
+  const [status, setStatus] = useState({ show: false, message: '', success: false });
+
+  const answersCount   = useMemo(() => Object.keys(answers).length, [answers]);
+  const totalQuestions = useMemo(() => partData?.questions?.length || 0, [partData]);
+  const percentage     = useMemo(() => totalQuestions > 0 ? (answersCount / totalQuestions) * 100 : 0, [answersCount, totalQuestions]);
+  const isAllAnswered  = answersCount === totalQuestions && totalQuestions > 0;
+
+  const handleSubmit = useCallback(async () => {
+    if (!isAllAnswered) {
+      const ok = window.confirm(`Bạn mới hoàn thành ${answersCount}/${totalQuestions} câu. Tiếp tục nộp?`);
+      if (!ok) return;
+    }
+
+    // Gọi onSubmit (App.jsx đã bake partData vào, tự tính điểm + saveProgress)
+    onSubmit();
+
+    if (!isSignedIn) {
+      setStatus({ show: true, message: 'Đăng nhập để lưu kết quả', success: false });
+      setTimeout(() => setStatus({ show: false, message: '', success: false }), 3000);
+      return;
+    }
+
+    setStatus({ show: true, message: '✓ Kết quả đã được lưu!', success: true });
+    setTimeout(() => setStatus({ show: false, message: '', success: false }), 3000);
+  }, [isAllAnswered, answersCount, totalQuestions, onSubmit, isSignedIn]);
+
+  if (!partData?.questions || showResults) return null;
+
+  return (
+    <div className="w-full">
+      {/* ── Sticky header ── */}
+      <header className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-slate-200 z-30 px-4 py-3">
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-blue-600" />
+            <span className="text-[15px] font-bold text-slate-900">Practice</span>
+          </div>
+          <span className={`
+            text-xs font-bold px-2.5 py-1 rounded-lg
+            ${isAllAnswered ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}
+          `}>
+            {answersCount}/{totalQuestions}
+          </span>
+        </div>
+        <ProgressBar percentage={percentage} />
+      </header>
+
+      {/* ── Questions ── */}
+      <div className="px-4 pt-4
+        pb-[calc(var(--nav-h)+env(safe-area-inset-bottom,0px)+80px)]
+        md:pb-4
+      ">
+        {partData.questions.map((q) => (
+          <QuestionCard
+            key={q.id}
+            question={q}
+            options={q.options}
+            selectedAnswer={answers[q.id]}
+            onAnswerSelect={onAnswerSelect}
+          />
+        ))}
+
+        {/* Tips */}
+        <details className="bg-white border border-slate-200 rounded-2xl overflow-hidden group mb-4">
+          <summary className="flex items-center gap-2 px-4 py-3.5 cursor-pointer font-bold text-sm text-slate-700 list-none select-none">
+            <Lightbulb className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            Mẹo làm bài
+            <ChevronDown className="w-4 h-4 ml-auto text-slate-400 group-open:rotate-180 transition-transform" />
+          </summary>
+          <div className="px-4 pb-4 text-[14px] text-slate-600 leading-relaxed space-y-2 border-t border-slate-100 pt-3">
+            <p>• <b>Scanning:</b> Đọc câu hỏi trước khi nghe/đọc đoạn văn.</p>
+            <p>• <b>Elimination:</b> Loại bỏ đáp án có từ vựng tiêu cực hoặc gây nhiễu.</p>
+          </div>
+        </details>
+
+        {/* ── Desktop submit bar (in-flow) ── */}
+        <SubmitBar
+          answersCount={answersCount}
+          totalQuestions={totalQuestions}
+          isAllAnswered={isAllAnswered}
+          isSignedIn={isSignedIn}
+          onSubmit={handleSubmit}
+          status={status}
+        />
+      </div>
     </div>
   );
 });
 
 QuestionDisplay.displayName = 'QuestionDisplay';
-export default QuestionDisplay;
+export default QuestionDisplay; 
