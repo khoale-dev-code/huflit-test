@@ -1,14 +1,13 @@
-import React, { useMemo, useState, lazy, Suspense, useCallback, memo, useEffect } from 'react';
+import React, { useMemo, useState, lazy, Suspense, memo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
 import { loadExamData, getAllExamMetadata } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
-import { useWelcomeModal } from './hooks/useWelcomeModal.js';  
+import { useWelcomeModal } from './hooks/useWelcomeModal.js';
 
 // Components
-import Dashboard from './components/Dashboard';
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 import UserProfile from './components/Auth/UserProfile.jsx';
@@ -18,29 +17,30 @@ import QuestionDisplay from './components/Display/QuestionDisplay.jsx';
 import ResultsDisplay from './components/Display/Result/ResultsDisplay.jsx';
 import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
-import WelcomeModal from './components/modals/WelcomeModal.jsx';  
+import WelcomeModal from './components/modals/WelcomeModal.jsx';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import { ROUTES } from './config/routes';
 
-// Lazy Loaded Components
-const AdminApp = lazy(() => import('./admin/AdminApp'));
-const NotFoundPage = lazy(() => import('./components/pages/NotFoundPage.jsx'));
-const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
-const FullExamMode = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
-
 // Icons
 import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
 
-// --- SUB-COMPONENTS ---
+// Lazy Loaded Components
+const AdminApp      = lazy(() => import('./admin/AdminApp'));
+const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
+const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
+const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
+
+// ─────────────────────────────────────────────
+// InfoBadge
+// ─────────────────────────────────────────────
 const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   const colorMap = {
-    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+    indigo:  'bg-indigo-50 border-indigo-200 text-indigo-700',
     emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    amber: 'bg-amber-50 border-amber-200 text-amber-700',
-    purple: 'bg-purple-50 border-purple-200 text-purple-700',
+    amber:   'bg-amber-50 border-amber-200 text-amber-700',
+    purple:  'bg-purple-50 border-purple-200 text-purple-700',
   };
-
   return (
     <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 ${colorMap[color]}`}>
       <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
@@ -52,9 +52,11 @@ const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   );
 });
 
+// ─────────────────────────────────────────────
+// StatsGrid
+// ─────────────────────────────────────────────
 const StatsGrid = memo(({ score, isSignedIn }) => {
   if (!isSignedIn || score.total === 0) return null;
-
   return (
     <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm mt-6">
       <div className="flex items-center gap-3 mb-4">
@@ -63,33 +65,39 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
         </div>
         <h3 className="text-lg font-bold text-slate-900">Kết quả bài làm</h3>
       </div>
-
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <InfoBadge icon={FileText} label="Tổng câu" value={score.total} color="indigo" />
-        <InfoBadge icon={Trophy} label="Câu đúng" value={score.correct} color="emerald" />
-        <InfoBadge icon={FileText} label="Câu sai" value={score.total - score.correct} color="amber" />
-        <InfoBadge icon={Zap} label="Tỉ lệ" value={`${score.percentage.toFixed(0)}%`} color="purple" />
+        <InfoBadge icon={FileText} label="Tổng câu" value={score.total}                       color="indigo"  />
+        <InfoBadge icon={Trophy}   label="Câu đúng" value={score.correct}                     color="emerald" />
+        <InfoBadge icon={FileText} label="Câu sai"  value={score.total - score.correct}       color="amber"   />
+        <InfoBadge icon={Zap}      label="Tỉ lệ"    value={`${score.percentage.toFixed(0)}%`} color="purple"  />
       </div>
     </div>
   );
 });
 
-// --- CONTAINER COMPONENT FOR TESTING ---
+// ─────────────────────────────────────────────
+// PartTestContent — chỉ chứa phần làm bài
+// ✅ UserProfile đã được xóa khỏi đây
+// ─────────────────────────────────────────────
 const PartTestContent = memo(({
-  isSignedIn, selectedExam, handleExamChange, testType, handleTestTypeChange,
-  selectedPart, handlePartChange, partData, currentQuestionIndex,
-  setCurrentQuestionIndex, answers, handleAnswerSelect, showResults,
-  handleSubmit, handleReset, score
+  isSignedIn,
+  selectedExam, handleExamChange,
+  testType, handleTestTypeChange,
+  selectedPart, handlePartChange,
+  partData,
+  currentQuestionIndex, setCurrentQuestionIndex,
+  answers, handleAnswerSelect,
+  showResults, handleSubmit, handleReset,
+  score,
 }) => {
-  // Auto-scroll to top when showing results
   useEffect(() => {
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [showResults]);
 
   return (
     <div className="w-full space-y-6">
-      {isSignedIn && <UserProfile />}
-      
+      {/* ✅ KHÔNG còn <UserProfile /> ở đây nữa */}
+
       <PartSelector
         selectedExam={selectedExam}
         onExamChange={handleExamChange}
@@ -106,18 +114,19 @@ const PartTestContent = memo(({
         </div>
       ) : (
         <div className="w-full space-y-8">
-          <div>
-            <ContentDisplay 
-              partData={partData} selectedPart={selectedPart}
-              currentQuestionIndex={currentQuestionIndex} testType={testType} examId={selectedExam}
-            />
-          </div>
+          <ContentDisplay
+            partData={partData} selectedPart={selectedPart}
+            currentQuestionIndex={currentQuestionIndex}
+            testType={testType} examId={selectedExam}
+          />
           <QuestionDisplay
             selectedPart={selectedPart} selectedExam={selectedExam}
             partData={partData} currentQuestionIndex={currentQuestionIndex}
-            onQuestionChange={setCurrentQuestionIndex} answers={answers}
-            onAnswerSelect={handleAnswerSelect} showResults={showResults}
-            onSubmit={handleSubmit} testType={testType}
+            onQuestionChange={setCurrentQuestionIndex}
+            answers={answers} onAnswerSelect={handleAnswerSelect}
+            showResults={showResults}
+            onSubmit={handleSubmit}
+            testType={testType}
           />
         </div>
       )}
@@ -125,20 +134,24 @@ const PartTestContent = memo(({
   );
 });
 
-// --- WRAPPER FOR FULL EXAM DATA LOADING ---
+// ─────────────────────────────────────────────
+// FullExamContainer
+// ─────────────────────────────────────────────
 const FullExamContainer = memo(({ onComplete }) => {
   const [examData, setExamData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const list = getAllExamMetadata();
-        const loaded = await Promise.all(list.map(ex => loadExamData(ex.id)));
+        const list   = getAllExamMetadata();
+        const loaded = await Promise.all(list.map((ex) => loadExamData(ex.id)));
         const dataMap = {};
         list.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
         setExamData(dataMap);
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     };
     loadAll();
   }, []);
@@ -147,40 +160,55 @@ const FullExamContainer = memo(({ onComplete }) => {
   return <FullExamMode examData={examData} onComplete={onComplete} />;
 });
 
-// --- MAIN CONTENT LOGIC ---
+// ─────────────────────────────────────────────
+// AppContent
+// ─────────────────────────────────────────────
 const AppContent = memo(() => {
   const navigate = useNavigate();
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAuthModal, setShowAuthModal]     = useState(false);
   const [currentExamData, setCurrentExamData] = useState(null);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
   const {
-    selectedExam, testType, handleTestTypeChange, practiceType, handlePracticeTypeChange,
-    selectedPart, currentQuestionIndex, setCurrentQuestionIndex, answers,
-    handleAnswerSelect, handleSubmit, showResults, handleReset,
-    handleExamChange, handlePartChange, isSignedIn, user,
+    selectedExam, testType, handleTestTypeChange,
+    practiceType, handlePracticeTypeChange,
+    selectedPart, currentQuestionIndex, setCurrentQuestionIndex,
+    answers, handleAnswerSelect,
+    handleSubmit, showResults, handleReset,
+    handleExamChange, handlePartChange,
+    isSignedIn, user,
   } = useAppState();
 
   useEffect(() => {
     if (selectedExam) {
-      loadExamData(selectedExam).then(setCurrentExamData).catch(() => setCurrentExamData(null));
+      loadExamData(selectedExam)
+        .then(setCurrentExamData)
+        .catch(() => setCurrentExamData(null));
     }
   }, [selectedExam]);
 
-  const partData = useMemo(() => 
-    (!practiceType && currentExamData) ? (currentExamData.parts?.[selectedPart] || null) : null
+  const partData = useMemo(() =>
+    (!practiceType && currentExamData)
+      ? (currentExamData.parts?.[selectedPart] || null)
+      : null
   , [practiceType, currentExamData, selectedPart]);
 
   const score = useMemo(() => {
     if (!partData?.questions) return { correct: 0, total: 0, percentage: 0 };
-    const total = partData.questions.length;
-    const correct = partData.questions.filter(q => answers[q.id] === q.correct).length;
+    const total   = partData.questions.length;
+    const correct = partData.questions.filter((q) => answers[q.id] === q.correct).length;
     return { correct, total, percentage: total > 0 ? (correct / total) * 100 : 0 };
   }, [partData, answers]);
 
+  // ✅ Bake partData vào handleSubmit để useAppState tính điểm + saveProgress
+  const handleSubmitWithData = useMemo(
+    () => () => handleSubmit(partData),
+    [handleSubmit, partData]
+  );
+
   return (
     <>
-      <MainLayout 
+      <MainLayout
         testType={testType}
         onTestTypeChange={handleTestTypeChange}
         practiceType={practiceType}
@@ -192,37 +220,60 @@ const AppContent = memo(() => {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path={ROUTES.HOME} element={<HomePage />} />
+
+            {/* ✅ /test — chỉ làm bài, không có dashboard */}
             <Route path={ROUTES.TEST} element={
-              <PartTestContent 
-                isSignedIn={isSignedIn} selectedExam={selectedExam}
-                handleExamChange={handleExamChange} testType={testType}
-                handleTestTypeChange={handleTestTypeChange} selectedPart={selectedPart}
-                handlePartChange={handlePartChange} partData={partData}
-                currentQuestionIndex={currentQuestionIndex} setCurrentQuestionIndex={setCurrentQuestionIndex}
-                answers={answers} handleAnswerSelect={handleAnswerSelect}
-                showResults={showResults} handleSubmit={handleSubmit}
-                handleReset={handleReset} score={score}
+              <PartTestContent
+                isSignedIn={isSignedIn}
+                selectedExam={selectedExam}          handleExamChange={handleExamChange}
+                testType={testType}                  handleTestTypeChange={handleTestTypeChange}
+                selectedPart={selectedPart}          handlePartChange={handlePartChange}
+                partData={partData}
+                currentQuestionIndex={currentQuestionIndex}
+                setCurrentQuestionIndex={setCurrentQuestionIndex}
+                answers={answers}                    handleAnswerSelect={handleAnswerSelect}
+                showResults={showResults}
+                handleSubmit={handleSubmitWithData}
+                handleReset={handleReset}
+                score={score}
               />
             } />
-            <Route path={ROUTES.FULL_EXAM} element={<FullExamContainer onComplete={() => handleTestTypeChange('')} />} />
-            <Route path={ROUTES.GRAMMAR} element={<GrammarReview answers={answers} onAnswerSelect={handleAnswerSelect} onSubmit={handleSubmit} />} />
+
+            <Route path={ROUTES.FULL_EXAM} element={
+              <FullExamContainer onComplete={() => handleTestTypeChange('')} />
+            } />
+
+            <Route path={ROUTES.GRAMMAR} element={
+              <GrammarReview
+                answers={answers}
+                onAnswerSelect={handleAnswerSelect}
+                onSubmit={handleSubmitWithData}
+              />
+            } />
+
             <Route path={ROUTES.VOCABULARY} element={<VocabularyPractice />} />
-            <Route path={ROUTES.PROFILE} element={<UserProfile currentUser={user} />} />
+
+            {/* ✅ /profile — nơi duy nhất hiển thị UserProfile / Dashboard */}
+            <Route path={ROUTES.PROFILE} element={<UserProfile />} />
+
             <Route path={ROUTES.ANSWERS} element={<ExamAnswersPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="*"              element={<NotFoundPage />} />
           </Routes>
         </Suspense>
+
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       </MainLayout>
+
       <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
     </>
   );
 });
 
-// --- ROOT APP ---
+// ─────────────────────────────────────────────
+// ROOT
+// ─────────────────────────────────────────────
 export default function App() {
   const showSplash = useSplashScreen(2000);
-
   if (showSplash) return <LoadingSpinner message="Khởi động hệ thống..." />;
 
   return (
@@ -230,7 +281,7 @@ export default function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/admin/*" element={<AdminApp />} />
-          <Route path="/*" element={<AppContent />} />
+          <Route path="/*"       element={<AppContent />} />
         </Routes>
       </Suspense>
     </Router>

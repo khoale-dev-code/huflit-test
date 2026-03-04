@@ -1,198 +1,322 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Sparkles, ArrowRight, Info, ShieldCheck, Globe, Check } from 'lucide-react';
+import { X, Heart, Sparkles, ArrowRight, ShieldCheck, Globe, ChevronDown } from 'lucide-react';
 
-/**
- * GOOGLE MATERIAL 3 DESIGN CONSTANTS
- */
-const MODAL_VARIANTS = {
-  hidden: { opacity: 0, scale: 0.9, y: 20 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    y: 0,
-    transition: { type: 'spring', damping: 25, stiffness: 300, staggerChildren: 0.1 }
+// ─────────────────────────────────────────────
+// Pure CSS injected once — no Tailwind dependency
+// ─────────────────────────────────────────────
+const GLOBAL_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+  .wm-wrap * { font-family: 'Be Vietnam Pro', sans-serif; box-sizing: border-box; }
+
+  .wm-scroll::-webkit-scrollbar { width: 3px; }
+  .wm-scroll::-webkit-scrollbar-track { background: transparent; }
+  .wm-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+
+  .wm-grad-text {
+    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .wm-feature:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .wm-btn-on {
+    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.35);
+    color: #fff;
+    cursor: pointer;
+  }
+  .wm-btn-on:hover {
+    box-shadow: 0 6px 28px rgba(37,99,235,0.45);
+    transform: translateY(-1px);
+  }
+  .wm-btn-off {
+    background: #F1F5F9;
+    color: #94A3B8;
+    cursor: not-allowed;
+  }
+
+  @keyframes wmFloat {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .wm-float { animation: wmFloat 5s ease-in-out infinite; }
+
+  @keyframes wmBounce {
+    0%,100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(5px); opacity: 1; }
+  }
+  .wm-bounce { animation: wmBounce 1.4s ease-in-out infinite; }
+
+  .wm-blob1 {
+    position:absolute; width:200px; height:200px; border-radius:50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%);
+    top:-60px; right:-60px; pointer-events:none;
+  }
+  .wm-blob2 {
+    position:absolute; width:160px; height:160px; border-radius:50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%);
+    bottom:10px; left:-40px; pointer-events:none;
+  }
+`;
+
+// ─────────────────────────────────────────────
+// FEATURES
+// ─────────────────────────────────────────────
+const FEATURES = [
+  {
+    Icon: Globe,
+    title: 'Tài nguyên mở',
+    desc: 'Hàng ngàn đề thi cập nhật hàng ngày từ các nguồn uy tín.',
+    bg: 'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
+    iconColor: '#2563EB',
+    dot: '#93C5FD',
   },
-  exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } }
-};
+  {
+    Icon: ShieldCheck,
+    title: 'An toàn & Bảo mật',
+    desc: 'Dữ liệu mã hóa, quyền riêng tư được bảo vệ tuyệt đối.',
+    bg: 'linear-gradient(135deg,#ECFDF5,#D1FAE5)',
+    iconColor: '#059669',
+    dot: '#6EE7B7',
+  },
+  {
+    Icon: Heart,
+    title: 'Vì cộng đồng',
+    desc: 'Phi lợi nhuận, đồng hành cùng học sinh sinh viên Việt Nam.',
+    bg: 'linear-gradient(135deg,#FFF1F2,#FFE4E6)',
+    iconColor: '#E11D48',
+    dot: '#FCA5A5',
+  },
+];
 
-const ITEM_VARIANTS = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 }
-};
+// ─────────────────────────────────────────────
+// COMPONENT
+// ─────────────────────────────────────────────
+export default function WelcomeModal({ isOpen = false, onClose }) {
+  const [canClose, setCanClose] = useState(false);
+  const scrollRef = useRef(null);
 
-// --- Sub-components ---
+  // Lock body scroll
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
 
-const FeatureItem = ({ icon: Icon, title, description, bgColor, iconColor }) => (
-  <motion.div 
-    variants={ITEM_VARIANTS}
-    className="group flex gap-4 p-4 rounded-[28px] transition-all duration-300 hover:bg-slate-50 active:scale-[0.98]"
-  >
-    <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center flex-shrink-0 transition-transform group-hover:rotate-6 ${bgColor} ${iconColor}`}>
-      <Icon size={24} strokeWidth={2.5} />
-    </div>
-    <div className="flex flex-col justify-center">
-      <h3 className="text-[16px] font-semibold text-slate-900 leading-tight">{title}</h3>
-      <p className="text-[14px] text-slate-500 mt-1 leading-relaxed">{description}</p>
-    </div>
-  </motion.div>
-);
-
-const WelcomeModal = ({ isOpen = false, onClose }) => {
-  const [isScrolledToEnd, setIsScrolledToEnd] = useState(false);
+  // Reset on reopen
+  useEffect(() => {
+    if (isOpen) {
+      setCanClose(false);
+      setTimeout(() => scrollRef.current?.scrollTo({ top: 0 }), 50);
+    }
+  }, [isOpen]);
 
   const handleScroll = useCallback((e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    // Ngưỡng 20px để kích hoạt button
-    if (scrollHeight - scrollTop <= clientHeight + 20) {
-      setIsScrolledToEnd(true);
-    }
+    if (scrollHeight - scrollTop <= clientHeight + 32) setCanClose(true);
   }, []);
-
-  // Ngăn chặn scroll body khi modal mở
-  React.useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-6">
-          {/* Backdrop với độ mờ cao cấp */}
+        <div
+          className="wm-wrap"
+          style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+        >
+          {/* Inject CSS once */}
+          <style>{GLOBAL_CSS}</style>
+
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xl"
+            onClick={canClose ? onClose : undefined}
+            style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(10px)' }}
           />
 
-          {/* Modal Container */}
+          {/* Sheet */}
           <motion.div
-            variants={MODAL_VARIANTS}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="relative bg-white sm:rounded-[32px] rounded-t-[32px] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.18)] w-full max-w-[560px] max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden border border-white/20"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: 520,
+              maxHeight: '92dvh',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#fff',
+              borderRadius: '28px 28px 0 0',
+              boxShadow: '0 -12px 60px rgba(0,0,0,0.25)',
+              overflow: 'hidden',
+            }}
           >
-            {/* Header: Cố định để dễ dàng đóng */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">H</div>
-                <span className="font-medium text-slate-700">Hub Study</span>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-slate-100 active:bg-slate-200 rounded-full transition-colors text-slate-500"
-              >
-                <X size={20} />
-              </button>
+            {/* Pill */}
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
+              <div style={{ width: 36, height: 4, borderRadius: 99, background: '#E2E8F0' }} />
             </div>
 
-            {/* Scrollable Content */}
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px 12px', borderBottom: '1px solid #F1F5F9' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#2563EB,#7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#fff', fontWeight: 800, fontSize: 13 }}>H</span>
+                </div>
+                <span style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>Hub Study</span>
+              </div>
+
+              <AnimatePresence>
+                {canClose && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    onClick={onClose}
+                    style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <X size={16} color="#64748B" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Scrollable body */}
             <div
+              ref={scrollRef}
               onScroll={handleScroll}
-              className="overflow-y-auto flex-1 px-6 sm:px-10 py-8 scroll-smooth custom-scrollbar"
+              className="wm-scroll"
+              style={{ flex: 1, overflowY: 'auto' }}
             >
-              {/* Hero Section */}
-              <div className="text-center mb-10">
-                <motion.div 
-                   animate={{ scale: [1, 1.1, 1] }}
-                   transition={{ repeat: Infinity, duration: 4 }}
-                   className="inline-flex p-4 bg-blue-50 rounded-[24px] mb-6 text-blue-600"
-                >
-                  <Sparkles size={32} fill="currentColor" fillOpacity={0.2} />
-                </motion.div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight leading-tight">
-                  Nâng tầm tri thức <br/><span className="text-blue-600">cùng Hub Study</span>
+              {/* Hero */}
+              <div style={{ background: 'linear-gradient(160deg,#EFF6FF 0%,#F5F3FF 55%,#FDF2F8 100%)', padding: '32px 24px 28px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                <div className="wm-blob1" />
+                <div className="wm-blob2" />
+
+                <div className="wm-float" style={{ display: 'inline-flex', padding: 16, borderRadius: 24, background: 'rgba(255,255,255,0.85)', boxShadow: '0 4px 24px rgba(99,102,241,0.18)', marginBottom: 20 }}>
+                  <Sparkles size={30} color="#4F46E5" fill="#4F46E5" fillOpacity={0.2} />
+                </div>
+
+                <h2 style={{ fontSize: 'clamp(20px,5vw,26px)', fontWeight: 800, color: '#0F172A', lineHeight: 1.3, margin: '0 0 10px' }}>
+                  Nâng tầm tri thức<br />
+                  <span className="wm-grad-text">cùng Hub Study</span>
                 </h2>
-                <p className="mt-4 text-slate-500 text-[15px] leading-relaxed max-w-[320px] mx-auto">
-                  Khám phá kho tàng tài liệu học tập được cá nhân hóa hoàn toàn miễn phí.
+
+                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.7, margin: '0 auto', maxWidth: 300 }}>
+                  Khám phá kho tài liệu học tập được cá nhân hóa — hoàn toàn miễn phí.
                 </p>
+
+                {/* Stats */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+                  {[['1000+', 'Đề thi'], ['50K+', 'Học sinh'], ['100%', 'Miễn phí']].map(([val, label]) => (
+                    <div key={label} style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 12, padding: '8px 14px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: '#2563EB' }}>{val}</div>
+                      <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, marginTop: 1 }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Features - M3 Grid */}
-              <div className="space-y-2 mb-10">
-                <FeatureItem 
-                  icon={Globe}
-                  title="Tài nguyên mở"
-                  description="Hàng ngàn đề thi từ các nguồn uy tín được cập nhật mỗi ngày."
-                  bgColor="bg-blue-50"
-                  iconColor="text-blue-600"
-                />
-                <FeatureItem 
-                  icon={ShieldCheck}
-                  title="An toàn & Riêng tư"
-                  description="Dữ liệu học tập của bạn được mã hóa và bảo mật tuyệt đối."
-                  bgColor="bg-emerald-50"
-                  iconColor="text-emerald-600"
-                />
-                <FeatureItem 
-                  icon={Heart}
-                  title="Vì cộng đồng"
-                  description="Dự án phi lợi nhuận, đồng hành cùng học sinh sinh viên Việt Nam."
-                  bgColor="bg-rose-50"
-                  iconColor="text-rose-600"
-                />
+              {/* Features */}
+              <div style={{ padding: '20px 20px 8px' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12, marginTop: 0 }}>
+                  Tại sao chọn chúng tôi
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {FEATURES.map(({ Icon, title, desc, bg, iconColor, dot }, i) => (
+                    <motion.div
+                      key={i}
+                      className="wm-feature"
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.08 }}
+                      style={{ display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 18, background: bg, border: '1px solid rgba(255,255,255,0.9)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
+                    >
+                      <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                        <Icon size={20} color={iconColor} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                          <span style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{title}</span>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+                        </div>
+                        <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.55 }}>{desc}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
-              {/* QR Support Section - Glassmorphism style */}
-              <div className="bg-slate-50 rounded-[28px] p-6 border border-slate-100 flex flex-col items-center sm:flex-row gap-6">
-                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 group transition-transform hover:scale-105">
-                  <img 
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SupportHubStudy" 
-                    alt="Donate QR" 
-                    className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+              {/* Donate QR */}
+              <div style={{ margin: '16px 20px 28px', padding: '18px', borderRadius: 20, background: 'linear-gradient(135deg,#F8FAFF,#FDF4FF)', border: '1px solid #E0E7FF', display: 'flex', gap: 16, alignItems: 'center' }}>
+                <div style={{ background: '#fff', padding: 8, borderRadius: 14, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', flexShrink: 0 }}>
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SupportHubStudy"
+                    alt="Donate QR"
+                    style={{ width: 76, height: 76, display: 'block', borderRadius: 8 }}
                   />
                 </div>
-                <div className="text-center sm:text-left">
-                  <span className="inline-block px-3 py-1 bg-white rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200 mb-2">
-                    Donate
+                <div>
+                  <span style={{ display: 'inline-block', padding: '2px 8px', background: '#EDE9FE', color: '#7C3AED', fontSize: 10, fontWeight: 700, borderRadius: 99, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                    Ủng hộ dự án
                   </span>
-                  <p className="text-[14px] text-slate-600 leading-relaxed">
-                    Sự ủng hộ của bạn giúp duy trì máy chủ và đội ngũ phát triển nội dung.
+                  <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0 }}>
+                    Sự ủng hộ của bạn giúp duy trì máy chủ và phát triển thêm tính năng mới.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Footer Action */}
-            <div className="p-6 sm:p-8 bg-white border-t border-slate-50">
-              <motion.button
-                onClick={onClose}
-                disabled={!isScrolledToEnd}
-                whileHover={isScrolledToEnd ? { scale: 1.01, translateY: -2 } : {}}
-                whileTap={isScrolledToEnd ? { scale: 0.98 } : {}}
-                className={`w-full py-4 rounded-full font-semibold text-[15px] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg ${
-                  isScrolledToEnd
-                    ? 'bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
-                }`}
-              >
-                {isScrolledToEnd ? (
-                  <>Bắt đầu ngay <ArrowRight size={18} /></>
-                ) : (
-                  <>Cuộn để tiếp tục <Check size={18} className="opacity-50" /></>
-                )}
-              </motion.button>
-              
-              {!isScrolledToEnd && (
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center text-[12px] text-blue-500 mt-4 font-medium animate-pulse"
-                >
-                  Vui lòng đọc hết các điều khoản để tiếp tục
-                </motion.p>
+            {/* Footer */}
+            <div style={{ padding: '12px 20px 20px', background: '#fff', borderTop: '1px solid #F1F5F9' }}>
+              {!canClose && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 10 }}>
+                  <ChevronDown size={13} color="#94A3B8" className="wm-bounce" />
+                  <span style={{ fontSize: 12, color: '#94A3B8' }}>Cuộn xuống để tiếp tục</span>
+                  <ChevronDown size={13} color="#94A3B8" className="wm-bounce" />
+                </div>
               )}
+
+              <button
+                onClick={canClose ? onClose : undefined}
+                disabled={!canClose}
+                className={canClose ? 'wm-btn-on' : 'wm-btn-off'}
+                style={{
+                  width: '100%',
+                  padding: '15px',
+                  borderRadius: 99,
+                  border: 'none',
+                  fontFamily: 'Be Vietnam Pro, sans-serif',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                Bắt đầu học ngay
+                <ArrowRight size={17} />
+              </button>
+
+              <p style={{ textAlign: 'center', fontSize: 11, color: '#CBD5E1', marginTop: 10, marginBottom: 0 }}>
+                Bằng cách tiếp tục, bạn đồng ý với{' '}
+                <span style={{ color: '#94A3B8', textDecoration: 'underline', cursor: 'pointer' }}>điều khoản sử dụng</span>
+              </p>
             </div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   );
-};
-
-export default WelcomeModal;
+}
