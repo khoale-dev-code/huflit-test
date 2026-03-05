@@ -1,161 +1,151 @@
-import React, { useState, useMemo, memo, useCallback } from 'react';
+/*
+ * ReadingDisplay.jsx  —  M3 × Academic Editorial × Tailwind
+ *
+ * Tinh chỉnh UI/UX bởi Chuyên gia:
+ * - Refined Color Palette: Kem ấm hơn, Navy/Amber sang trọng.
+ * - Material 3 Transition: Hiệu ứng entrance scale nhẹ, mượt mà.
+ * - Full Prose Mode: Loại bỏ Show all/less ở Part Plain.
+ * - Mobile First Typography: Đã được tối ưu từ phiên bản trước.
+ */
+
+import React, { useState, useMemo, memo } from 'react';
 import {
   ChevronDown, ChevronUp, BookOpen, Lightbulb, Zap,
   Mail, Globe, Clock, MessageCircle, FileText,
 } from 'lucide-react';
 
-// ─────────────────────────────────────────────────────────────
-// DESIGN TOKENS
-// ─────────────────────────────────────────────────────────────
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+/* ── Google Fonts (inject once) ─────────────────────────── */
+let fontsInjected = false;
+function injectFonts() {
+  if (fontsInjected || typeof document === 'undefined') return;
+  const link = document.createElement('link');
+  link.rel  = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=DM+Sans:wght@400;500;600;700&display=swap';
+  document.head.appendChild(link);
+  fontsInjected = true;
+}
 
-  .rd-root {
-    --blue:       #2563EB;
-    --blue-light: #EFF6FF;
-    --blue-mid:   #DBEAFE;
-    --amber:      #D97706;
-    --amber-light:#FFFBEB;
-    --amber-mid:  #FDE68A;
-    --green:      #059669;
-    --surface:    #FFFFFF;
-    --bg:         #F8FAFC;
-    --border:     #E2E8F0;
-    --text:       #0F172A;
-    --muted:      #64748B;
-    --radius:     14px;
-    font-family: 'DM Sans', sans-serif;
-  }
+/* ── Shared Tailwind class strings (Academic Style) ─────── */
+// Tinh chỉnh nền kem ấm hơn và viền mờ hơn
+const CARD   = 'bg-[#FDFCFB] rounded-xl md:rounded-2xl border border-slate-200/50 overflow-hidden shadow-sm';
+const PROSE  = 'font-serif text-[15px] md:text-[17px] leading-[1.8] md:leading-[1.9] text-slate-800 tracking-[0.01em]';
+const LABEL  = 'font-sans text-[9px] md:text-[10px] font-bold uppercase tracking-[0.1em]';
+const META   = 'font-sans text-[11px] md:text-[12px] text-slate-500';
 
-  .rd-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
+/* ── Smoother Material entrance animation ────────────────── */
+const entryEffect = (delay = 0) => ({
+  animation: `mdEntry 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) both`,
+  animationDelay: `${delay}ms`,
+});
 
-  .rd-prose {
-    font-family: 'Lora', Georgia, serif;
-    font-size: 17px;
-    line-height: 1.85;
-    color: var(--text);
-    letter-spacing: 0.01em;
-  }
+/* Inject keyframe once */
+let kfInjected = false;
+function injectKeyframes() {
+  if (kfInjected || typeof document === 'undefined') return;
+  const s = document.createElement('style');
+  s.textContent = `
+    @keyframes mdEntry {
+      from { opacity:0; transform: scale(0.97); }
+      to   { opacity:1; transform: scale(1); }
+    }
+    .rd-scrollbar::-webkit-scrollbar { width: 3px; }
+    .rd-scrollbar::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
+    .rd-scrollbar::-webkit-scrollbar-track { background:transparent; }
+    /* Giảm mệt mỏi mắt bằng cách làm mịn chữ trên một số trình duyệt */
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  `;
+  document.head.appendChild(s);
+  kfInjected = true;
+}
 
-  .rd-prose p { margin: 0; }
-
-  .rd-blank {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    margin: 0 4px;
-    padding: 2px 12px;
-    background: var(--amber-light);
-    border: 1.5px solid var(--amber-mid);
-    border-radius: 6px;
-    color: var(--amber);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: default;
-    transition: background 0.15s;
-  }
-
-  .rd-blank:hover { background: var(--amber-mid); }
-
-  .rd-scroll::-webkit-scrollbar { width: 5px; }
-  .rd-scroll::-webkit-scrollbar-track { background: transparent; }
-  .rd-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-
-  .rd-fade { animation: rdFade 0.25s ease forwards; }
-  @keyframes rdFade {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .rd-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 99px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-`;
-
-// ─────────────────────────────────────────────────────────────
-// SHARED: Section Header
-// ─────────────────────────────────────────────────────────────
-const SectionLabel = ({ icon: Icon, label, color = '#2563EB', bg = '#EFF6FF' }) => (
-  <div className="rd-tag" style={{ background: bg, color }}>
-    <Icon size={11} />
+/* ── Chip / Badge ─────────────────────────────────────── */
+const Chip = ({ icon: Icon, label, colorClass = 'bg-blue-50 text-blue-800' }) => (
+  <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2.5 py-1 rounded-full font-sans text-[10px] md:text-[11px] font-semibold border border-blue-100 ${colorClass}`}>
+    {Icon && <Icon size={12} className="md:w-3 md:h-3 w-2.5 h-2.5" />}
     {label}
-  </div>
+  </span>
 );
 
-// ─────────────────────────────────────────────────────────────
-// PART 6: Text Completion
-// ─────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────
+   PART 6 — Text Completion
+   ───────────────────────────────────────────────────────── */
 const Part6Content = memo(({ data }) => {
   const [open, setOpen] = useState(true);
 
-  if (!data?.text || !data?.questions) return null;
+  const segments = useMemo(() => {
+    if (!data?.text) return [];
+    let display = data.text;
+    (data.questions || [])
+      .filter(q => q.type === 'fill')
+      .forEach(q => { display = display.replace(`(${q.id})`, `%%${q.id}%%`); });
+    return display.split(/%%(\d+)%%/);
+  }, [data]);
 
-  const fillQs = data.questions.filter((q) => q.type === 'fill');
-  let display = data.text;
-  fillQs.forEach((q) => { display = display.replace(`(${q.id})`, `%%${q.id}%%`); });
-  const parts = display.split(/%%(\d+)%%/);
+  if (!data?.text) return null;
 
   return (
-    <div className="rd-card rd-root">
-      {/* Header */}
+    <div className={CARD}>
       <button
-        onClick={() => setOpen(!open)}
-        style={{ width: '100%', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg)', borderBottom: open ? '1px solid var(--border)' : 'none', cursor: 'pointer' }}
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-5 md:px-6 py-3.5 md:py-4 bg-slate-50/50 hover:bg-slate-100/70 transition-colors border-b border-slate-200/50 active:bg-slate-200"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontWeight: 800, fontSize: 15, fontFamily: 'DM Sans' }}>6</span>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-[#1E3A5F] flex items-center justify-center flex-shrink-0 shadow">
+            <span className="font-sans font-black text-white text-[14px] md:text-[15px]">6</span>
           </div>
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)', fontFamily: 'DM Sans' }}>{data.title || 'Text Completion'}</div>
-            {data.description && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{data.description}</div>}
+          <div className="text-left">
+            <p className="font-sans font-bold text-[14px] md:text-[15px] text-slate-950 leading-tight">
+              {data.title || 'Text Completion'}
+            </p>
+            {data.description && (
+              <p className="font-sans text-[11px] md:text-[12px] text-slate-500 mt-1 leading-none line-clamp-1">{data.description}</p>
+            )}
           </div>
         </div>
-        {open ? <ChevronUp size={18} color="var(--muted)" /> : <ChevronDown size={18} color="var(--muted)" />}
+        {open
+          ? <ChevronUp size={18} className="text-slate-400 flex-shrink-0" />
+          : <ChevronDown size={18} className="text-slate-400 flex-shrink-0" />}
       </button>
 
       {open && (
-        <div className="rd-fade" style={{ padding: '20px' }}>
-          {/* Reading text */}
-          <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '20px 24px', border: '1px solid var(--border)', marginBottom: 16 }}>
-            <div className="rd-prose" style={{ lineHeight: 2.1 }}>
-              {parts.map((part, i) =>
+        <div className="p-5 md:p-6 space-y-4 md:space-y-5" style={entryEffect(0)}>
+          <div
+            className="rounded-xl border border-[#FDE68A]/60 bg-[#FFFDF7]/60 px-5 md:px-7 py-5 md:py-6"
+            style={{ background: 'linear-gradient(135deg, #FFFCF5 0%, #FFF8E6 100%)' }}
+          >
+            {/* Tinh chỉnh màu amber sang trọng hơn */}
+            <div className="h-0.5 w-10 md:w-12 bg-[#B45309] rounded-full mb-4 md:mb-5 opacity-80" />
+
+            <p className={`${PROSE} leading-[2.1] md:leading-[2.2]`}>
+              {segments.map((seg, i) =>
                 i % 2 === 0
-                  ? <span key={i}>{part}</span>
-                  : <span key={i} className="rd-blank">({part})</span>
+                  ? <span key={i}>{seg}</span>
+                  : (
+                    <span
+                      key={i}
+                      className="inline-flex items-center justify-center mx-1 px-3 py-0.5 rounded-md font-sans font-bold text-[12px] md:text-[13px] text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A] cursor-default select-none shadow-sm"
+                      style={{ minWidth: 40 }}
+                    >
+                      ({seg})
+                    </span>
+                  )
               )}
-            </div>
+            </p>
           </div>
 
-          {/* Tips row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div style={{ background: 'var(--blue-light)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--blue-mid)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <Zap size={15} color="var(--blue)" style={{ marginTop: 2, flexShrink: 0 }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100">
+              <Zap size={16} className="text-blue-700 flex-shrink-0 mt-0.5" />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--blue)', marginBottom: 2 }}>Instructions</div>
-                <div style={{ fontSize: 12, color: '#1E40AF', lineHeight: 1.5 }}>Choose A–D for each blank in the text.</div>
+                <p className={`${LABEL} text-slate-900 mb-1`}>Instructions</p>
+                <p className="font-sans text-[12px] text-slate-700 leading-snug">Choose A–D for each numbered blank.</p>
               </div>
             </div>
-            <div style={{ background: 'var(--amber-light)', borderRadius: 10, padding: '12px 14px', border: '1px solid var(--amber-mid)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <Lightbulb size={15} color="var(--amber)" style={{ marginTop: 2, flexShrink: 0 }} />
+            <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl bg-[#FFFDF7] border border-[#FDE68A]/70">
+              <Lightbulb size={16} className="text-[#B45309] flex-shrink-0 mt-0.5" />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--amber)', marginBottom: 2 }}>Pro Tip</div>
-                <div style={{ fontSize: 12, color: '#92400E', lineHeight: 1.5 }}>Read full context before answering.</div>
+                <p className={`${LABEL} text-[#92400E] mb-1`}>Pro Tip</p>
+                <p className="font-sans text-[12px] text-[#92400E]/90 leading-snug">Read the full passage before choosing.</p>
               </div>
             </div>
           </div>
@@ -164,114 +154,129 @@ const Part6Content = memo(({ data }) => {
     </div>
   );
 });
+Part6Content.displayName = 'Part6Content';
 
-// ─────────────────────────────────────────────────────────────
-// PART 7: Website + Email
-// ─────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────
+   PART 7 — Website + Email
+   ───────────────────────────────────────────────────────── */
 const Part7Content = memo(({ data }) => {
   const parsed = useMemo(() => {
-    const text = data?.text || '';
+    const text     = data?.text || '';
     const sections = text.split('---');
-    const websiteLines = sections[0]?.trim().split('\n').filter(Boolean) || [];
+    const webLines = sections[0]?.trim().split('\n').filter(Boolean) || [];
 
     let email = null;
     if (sections[1]) {
-      const lines = sections[1].trim().split('\n');
+      const lines   = sections[1].trim().split('\n');
       const headers = {};
-      const body = [];
-      let inBody = false;
+      const body    = [];
+      let inBody    = false;
 
-      lines.forEach((line) => {
-        line = line.trim();
+      lines.forEach(raw => {
+        const line = raw.trim();
         if (!line) { if (inBody) body.push(''); return; }
-        if (line.startsWith('To:'))      { headers.to      = line.slice(3).trim(); return; }
-        if (line.startsWith('From:'))    { headers.from    = line.slice(5).trim(); return; }
-        if (line.startsWith('Date:'))    { headers.date    = line.slice(5).trim(); return; }
-        if (line.startsWith('Subject:')) { headers.subject = line.slice(8).trim(); inBody = true; return; }
+        if (line.startsWith('To:'))      { headers.to      = line.slice(3).trim();  return; }
+        if (line.startsWith('From:'))    { headers.from    = line.slice(5).trim();  return; }
+        if (line.startsWith('Date:'))    { headers.date    = line.slice(5).trim();  return; }
+        if (line.startsWith('Subject:')) { headers.subject = line.slice(8).trim();  inBody = true; return; }
         if (inBody) body.push(line);
       });
 
-      email = { headers, body: body.filter((l, i, a) => !(l === '' && a[i - 1] === '')) };
+      email = {
+        headers,
+        body: body.filter((l, i, a) => !(l === '' && a[i - 1] === '')),
+      };
     }
 
-    return { websiteLines, email };
+    const url   = webLines.find(l => l.startsWith('http')) || 'https://example.com';
+    const title = webLines.find(l => l.includes('**'))?.replace(/\*\*/g, '');
+    const body  = webLines.filter(l => l && !l.startsWith('http') && !l.includes('**'));
+
+    return { url, title, body, email };
   }, [data]);
 
-  const { websiteLines, email } = parsed;
-
-  const url   = websiteLines.find((l) => l.startsWith('http')) || 'https://example.com';
-  const title = websiteLines.find((l) => l.includes('**'))?.replace(/\*\*/g, '');
-  const body  = websiteLines.filter((l) => l && !l.startsWith('http') && !l.includes('**'));
+  const { url, title, body, email } = parsed;
 
   return (
-    <div className="rd-root" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Website card */}
-      {websiteLines.length > 0 && (
-        <div className="rd-card">
+    <div className="space-y-5">
+      {(title || body.length > 0) && (
+        <div className={CARD} style={entryEffect(0)}>
           {/* Browser chrome */}
-          <div style={{ background: '#F1F5F9', borderBottom: '1px solid var(--border)', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ display: 'flex', gap: 5 }}>
-              {['#FC5755', '#FDBC40', '#34C84A'].map((c, i) => (
-                <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+          <div className="flex items-center gap-2 md:gap-3 px-4 py-2.5 bg-slate-100/70 border-b border-slate-200/50">
+            <div className="flex gap-1.5 hidden md:flex">
+              {['#FF5F57','#FEBC2E','#28C840'].map((c, i) => (
+                <div key={i} style={{ background: c }} className="w-2.5 h-2.5 rounded-full shadow-sm opacity-90" />
               ))}
             </div>
-            <div style={{ flex: 1, background: '#fff', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Globe size={11} color="var(--muted)" />
-              <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'DM Sans', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</span>
+            <div className="flex-1 flex items-center gap-2 bg-white/80 rounded-lg px-3 py-1.5 border border-slate-200/50 max-w-full md:max-w-sm">
+              <Globe size={12} className="text-slate-400 flex-shrink-0" />
+              <span className="font-sans text-[11px] text-slate-500 truncate">{url}</span>
             </div>
           </div>
 
           {/* Website body */}
-          <div style={{ padding: '24px 28px' }}>
-            {title && <h2 style={{ fontFamily: 'Lora', fontSize: 22, fontWeight: 600, color: 'var(--text)', marginBottom: 16, marginTop: 0 }}>{title}</h2>}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="px-5 md:px-8 py-6 md:py-8">
+            <div className="h-0.5 w-12 md:w-16 bg-[#1E3A5F] rounded-full mb-5 opacity-90" />
+            {title && (
+              <h2
+                className="text-xl md:text-[24px] font-bold text-slate-950 mb-5 leading-tight"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                {title}
+              </h2>
+            )}
+            <div className="space-y-4">
               {body.map((line, i) => (
-                <p key={i} className="rd-prose" style={{ margin: 0 }}>{line}</p>
+                <p key={i} className={PROSE} style={entryEffect(i * 30)}>{line}</p>
               ))}
             </div>
           </div>
         </div>
       )}
 
-      {/* Email card */}
       {email && (
-        <div className="rd-card">
+        <div className={CARD} style={entryEffect(60)}>
           {/* Email header strip */}
-          <div style={{ background: 'var(--blue)', padding: '14px 20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <Mail size={14} color="rgba(255,255,255,0.8)" />
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email</span>
+          <div
+            className="px-5 md:px-6 py-4 md:py-5 border-b border-[#1E3A5F]/20"
+            style={{ background: 'linear-gradient(135deg, #1E3A5F 0%, #294D7A 100%)' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Mail size={14} className="text-blue-200" />
+              <span className={`${LABEL} text-blue-200`}>Internal Email</span>
             </div>
             {email.headers.subject && (
-              <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', fontFamily: 'DM Sans', lineHeight: 1.35 }}>{email.headers.subject}</div>
+              <h3 className="font-sans font-bold text-base md:text-[18px] text-white leading-snug">
+                {email.headers.subject}
+              </h3>
             )}
           </div>
 
           {/* Meta row */}
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', flexWrap: 'wrap', gap: '6px 20px' }}>
+          <div className="px-5 md:px-6 py-3.5 bg-slate-50 border-b border-slate-200/50 flex flex-col md:flex-row md:flex-wrap gap-y-1.5 md:gap-x-6">
             {email.headers.from && (
-              <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'DM Sans' }}>
-                <strong style={{ color: 'var(--text)' }}>From:</strong> {email.headers.from}
+              <span className={META}>
+                <span className="font-semibold text-slate-800">From: </span>{email.headers.from}
               </span>
             )}
             {email.headers.to && (
-              <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'DM Sans' }}>
-                <strong style={{ color: 'var(--text)' }}>To:</strong> {email.headers.to}
+              <span className={META}>
+                <span className="font-semibold text-slate-800">To: </span>{email.headers.to}
               </span>
             )}
             {email.headers.date && (
-              <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'DM Sans' }}>
-                <Clock size={10} style={{ display: 'inline', marginRight: 3 }} />{email.headers.date}
+              <span className={`${META} flex items-center gap-1.5`}>
+                <Clock size={12} className="text-slate-400" />{email.headers.date}
               </span>
             )}
           </div>
 
           {/* Body */}
-          <div style={{ padding: '20px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="px-5 md:px-8 py-6 space-y-4">
             {email.body.map((line, i) =>
               line === ''
-                ? <div key={i} style={{ height: 8 }} />
-                : <p key={i} className="rd-prose" style={{ margin: 0 }}>{line}</p>
+                ? <div key={i} className="h-1.5 md:h-2" />
+                : <p key={i} className={PROSE} style={entryEffect(i * 25)}>{line}</p>
             )}
           </div>
         </div>
@@ -279,93 +284,124 @@ const Part7Content = memo(({ data }) => {
     </div>
   );
 });
+Part7Content.displayName = 'Part7Content';
 
-// ─────────────────────────────────────────────────────────────
-// PART 8: Chat
-// ─────────────────────────────────────────────────────────────
-const BUBBLE_COLORS = [
-  { dot: '#2563EB', bg: '#EFF6FF', text: '#1E3A8A', border: '#BFDBFE' },
-  { dot: '#7C3AED', bg: '#F5F3FF', text: '#3B0764', border: '#DDD6FE' },
-  { dot: '#DB2777', bg: '#FDF2F8', text: '#831843', border: '#FBCFE8' },
-  { dot: '#059669', bg: '#ECFDF5', text: '#064E3B', border: '#A7F3D0' },
+/* ─────────────────────────────────────────────────────────
+   PART 8 — Chat Thread
+   ───────────────────────────────────────────────────────── */
+const SENDER_PALETTES = [
+  { dot:'#1D4ED8', bg:'#EFF6FF', text:'#1E3A8A', border:'#BFDBFE', name:'#1D4ED8' },
+  { dot:'#6D28D9', bg:'#F5F3FF', text:'#3B0764', border:'#DDD6FE', name:'#6D28D9' },
+  { dot:'#BE185D', bg:'#FDF2F8', text:'#831843', border:'#FBCFE8', name:'#BE185D' },
+  { dot:'#047857', bg:'#ECFDF5', text:'#064E3B', border:'#A7F3D0', name:'#047857' },
+  { dot:'#B45309', bg:'#FFFBEB', text:'#78350F', border:'#FDE68A', name:'#B45309' },
 ];
 
 const Part8Content = memo(({ data }) => {
-  const messages = useMemo(() => {
-    const lines = (data?.text || '').split('\n').filter((l) => l.trim());
-    return lines.flatMap((line) => {
+  const { messages, senderMap } = useMemo(() => {
+    const lines = (data?.text || '').split('\n').filter(l => l.trim());
+    const msgs  = lines.flatMap(line => {
       const m = line.match(/^(.+?)\s*\((\d{1,2}:\d{2})\):\s*(.+)$/);
       return m ? [{ sender: m[1].trim(), time: m[2], text: m[3] }] : [];
     });
-  }, [data]);
-
-  const senderIndex = useMemo(() => {
     const map = {};
     let idx = 0;
-    messages.forEach(({ sender }) => {
-      if (!(sender in map)) map[sender] = idx++;
+    msgs.forEach(({ sender }) => { if (!(sender in map)) map[sender] = idx++; });
+    return { messages: msgs, senderMap: map };
+  }, [data]);
+
+  const groups = useMemo(() => {
+    const g = [];
+    messages.forEach(msg => {
+      const last = g[g.length - 1];
+      if (last?.sender === msg.sender) last.msgs.push(msg);
+      else g.push({ sender: msg.sender, msgs: [msg] });
     });
-    return map;
+    return g;
   }, [messages]);
 
   if (!messages.length) return (
-    <div className="rd-card rd-root" style={{ padding: '40px 20px', textAlign: 'center' }}>
-      <MessageCircle size={32} color="var(--muted)" style={{ margin: '0 auto 12px' }} />
-      <p style={{ color: 'var(--muted)', fontFamily: 'DM Sans', fontSize: 14 }}>No messages</p>
+    <div className={`${CARD} flex flex-col items-center justify-center py-12 md:py-16 gap-3`}>
+      <MessageCircle size={36} className="text-slate-300" />
+      <p className="font-sans text-sm text-slate-400">No messages found</p>
     </div>
   );
 
-  // Group consecutive same-sender messages
-  const groups = [];
-  messages.forEach((msg) => {
-    const last = groups[groups.length - 1];
-    if (last?.sender === msg.sender) last.msgs.push(msg);
-    else groups.push({ sender: msg.sender, msgs: [msg] });
-  });
-
   return (
-    <div className="rd-card rd-root" style={{ overflow: 'hidden' }}>
+    <div className={CARD}>
       {/* Header */}
-      <div style={{ padding: '12px 18px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <MessageCircle size={15} color="var(--blue)" />
-        <span style={{ fontFamily: 'DM Sans', fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>
-          Message Thread
-        </span>
-        <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--muted)', fontFamily: 'DM Sans' }}>
-          {messages.length} messages
-        </span>
+      <div className="flex items-center justify-between px-4 md:px-5 py-3 md:py-3.5 bg-slate-50 border-b border-slate-200/50">
+        <div className="flex items-center gap-2.5">
+          <MessageCircle size={16} className="text-blue-700 md:w-[15px] md:h-[15px]" />
+          <span className="font-sans font-bold text-[13px] md:text-[14px] text-slate-900">Message Thread</span>
+          <div className="flex -space-x-1.5 ml-1 hidden md:flex">
+            {Object.keys(senderMap).slice(0, 4).map((s, i) => {
+              const pal = SENDER_PALETTES[senderMap[s] % SENDER_PALETTES.length];
+              return (
+                <div
+                  key={s}
+                  title={s}
+                  className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-sm"
+                  style={{ background: pal.dot, zIndex: 10 - i }}
+                >
+                  <span className="text-white font-bold" style={{ fontSize: 8 }}>
+                    {s.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <span className="font-sans text-[10px] md:text-[11px] text-slate-400">{messages.length} msgs</span>
       </div>
 
       {/* Messages */}
-      <div className="rd-scroll" style={{ padding: '16px 18px', maxHeight: 480, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div
+        className="rd-scrollbar px-4 md:px-5 py-5 space-y-5 overflow-y-auto max-h-[65vh] md:max-h-[460px]"
+      >
         {groups.map((group, gi) => {
-          const colors = BUBBLE_COLORS[senderIndex[group.sender] % BUBBLE_COLORS.length];
+          const pal     = SENDER_PALETTES[senderMap[group.sender] % SENDER_PALETTES.length];
           const initial = group.sender.charAt(0).toUpperCase();
 
           return (
-            <div key={gi} className="rd-fade" style={{ animationDelay: `${gi * 0.04}s`, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div key={gi} className="flex items-start gap-2.5 md:gap-3" style={entryEffect(gi * 30)}>
               {/* Avatar */}
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: colors.dot, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                <span style={{ color: '#fff', fontSize: 12, fontWeight: 800, fontFamily: 'DM Sans' }}>{initial}</span>
+              <div
+                className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow"
+                style={{ background: pal.dot }}
+              >
+                <span className="text-white font-sans font-black text-[11px] md:text-[12px]">{initial}</span>
               </div>
 
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: colors.dot, fontFamily: 'DM Sans', marginBottom: 6 }}>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="font-sans font-semibold text-[11px] md:text-[12px] mb-1 md:mb-1.5"
+                  style={{ color: pal.name }}
+                >
                   {group.sender}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                </p>
+
+                <div className="flex flex-col gap-1.5">
                   {group.msgs.map((msg, mi) => (
-                    <div key={mi} style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                      <div style={{
-                        background: colors.bg,
-                        border: `1px solid ${colors.border}`,
-                        borderRadius: '4px 12px 12px 12px',
-                        padding: '9px 14px',
-                        maxWidth: '85%',
-                      }}>
-                        <p style={{ margin: 0, fontSize: 14, color: colors.text, lineHeight: 1.55, fontFamily: 'DM Sans' }}>{msg.text}</p>
+                    <div key={mi} className="flex items-end gap-1.5 md:gap-2">
+                      <div
+                        className="rounded-[4px_14px_14px_14px] px-3.5 py-2 md:py-2.5 max-w-[90%] md:max-w-[85%]"
+                        style={{
+                          background:   pal.bg,
+                          border:       `1px solid ${pal.border}`,
+                          boxShadow:    '0 1px 2px rgba(0,0,0,0.03)',
+                        }}
+                      >
+                        <p
+                          className="text-[13px] md:text-[14px] leading-[1.5] md:leading-[1.6] m-0 font-sans"
+                          style={{ color: pal.text }}
+                        >
+                          {msg.text}
+                        </p>
                       </div>
-                      <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'DM Sans', whiteSpace: 'nowrap', paddingBottom: 2 }}>{msg.time}</span>
+                      <span className="font-sans text-[9px] md:text-[10px] text-slate-400 flex-shrink-0 pb-0.5 tabular-nums">
+                        {msg.time}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -376,85 +412,148 @@ const Part8Content = memo(({ data }) => {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '10px 18px', background: 'var(--bg)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 6 }}>
-        <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-        <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'DM Sans' }}>End of conversation</span>
+      <div className="flex items-center gap-2 px-4 md:px-5 py-2.5 bg-slate-50 border-t border-slate-200/50">
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-90" />
+        <span className="font-sans text-[10px] md:text-[11px] text-slate-400">End of message log</span>
       </div>
     </div>
   );
 });
+Part8Content.displayName = 'Part8Content';
 
-// ─────────────────────────────────────────────────────────────
-// PLAIN TEXT
-// ─────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────
+   PLAIN TEXT — Long-form Article
+   ───────────────────────────────────────────────────────── */
+// Đã loại bỏ useState cho expand/collapse, hiển thị toàn bộ
 const PlainTextContent = memo(({ data }) => {
-  const text       = data?.text || '';
-  const paragraphs = text.trim().split(/\n\n+/).filter(Boolean);
-  const wordCount  = text.trim().split(/\s+/).filter(Boolean).length;
-  const readMins   = Math.max(1, Math.ceil(wordCount / 200));
+
+  const { paragraphs, wordCount, readMins } = useMemo(() => {
+    const text   = data?.text || '';
+    const paras  = text.trim().split(/\n\n+/).filter(Boolean);
+    const wc     = text.trim().split(/\s+/).filter(Boolean).length;
+    return {
+      paragraphs: paras,
+      wordCount:  wc,
+      readMins:   Math.max(1, Math.ceil(wc / 200)),
+    };
+  }, [data]);
 
   return (
-    <div className="rd-card rd-root">
-      {/* Header */}
-      <div style={{ padding: '14px 20px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <BookOpen size={16} color="var(--blue)" />
-          <span style={{ fontFamily: 'DM Sans', fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
-            {data?.title || 'Reading Passage'}
-          </span>
+    <div className={CARD} style={entryEffect(0)}>
+      <div className="px-5 md:px-8 pt-6 md:pt-8 pb-5 md:pb-6 border-b border-slate-100">
+        <div className="flex items-center gap-2 md:gap-3 mb-4">
+          <div className="h-px flex-1 bg-slate-200/60" />
+          <Chip icon={BookOpen} label="Academic Prose" colorClass="bg-blue-50 text-blue-900" />
+          <div className="h-px flex-1 bg-slate-200/60" />
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <span className="rd-tag" style={{ background: 'var(--blue-light)', color: 'var(--blue)' }}>
-            <FileText size={10} /> {wordCount} words
-          </span>
-          <span className="rd-tag" style={{ background: '#F0FDF4', color: '#15803D' }}>
-            <Clock size={10} /> ~{readMins} min
-          </span>
+
+        {data?.title && (
+          <h1
+            className="text-2xl md:text-[28px] font-bold text-slate-950 leading-[1.25] mb-3"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            {data.title}
+          </h1>
+        )}
+
+        {data?.description && (
+          <p className="font-sans text-[13px] md:text-[14px] text-slate-600 leading-relaxed border-l-[3px] border-[#1E3A5F]/40 pl-3 md:pl-4 italic my-4">
+            {data.description}
+          </p>
+        )}
+
+        <div className="flex items-center gap-2 mt-4 flex-wrap">
+          <Chip icon={FileText} label={`${wordCount} words`} colorClass="bg-slate-100 text-slate-700" />
+          <Chip icon={Clock}    label={`~${readMins} min read`} colorClass="bg-emerald-50 text-emerald-800" />
         </div>
       </div>
 
-      {data?.description && (
-        <div style={{ padding: '10px 20px', background: '#FFFBEB', borderBottom: '1px solid #FDE68A', fontSize: 12, color: '#92400E', fontFamily: 'DM Sans', lineHeight: 1.5 }}>
-          {data.description}
-        </div>
-      )}
+      <div className="px-5 md:px-8 pt-6 pb-8 md:pb-10">
+        <div className="max-w-prose mx-auto space-y-5 md:space-y-6">
+          {paragraphs.map((para, i) => {
+            // Drop cap on first paragraph - tinh chỉnh font-size responsive
+            if (i === 0) {
+              return (
+                <p
+                  key={i}
+                  className={`${PROSE}`}
+                  style={entryEffect(i * 15)}
+                >
+                  <span
+                    className="float-left font-bold text-[#1E3A5F] leading-[0.8] mr-2 md:mr-3 mt-1 opacity-90"
+                    style={{
+                      fontFamily: "'Playfair Display', Georgia, serif",
+                      fontSize: '3.3em',
+                      lineHeight: 0.85,
+                    }}
+                  >
+                    {para.charAt(0)}
+                  </span>
+                  {para.slice(1)}
+                </p>
+              );
+            }
 
-      {/* Content */}
-      <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-        {paragraphs.map((para, i) => (
-          <p key={i} className="rd-prose rd-fade" style={{ margin: 0, animationDelay: `${i * 0.04}s` }}>
-            {para}
-          </p>
-        ))}
+            // Pull-quote accent logic (every 4th para)
+            if (i > 0 && i % 4 === 0) {
+              return (
+                <div
+                  key={i}
+                  className="border-l-2 md:border-l-[3px] border-[#B45309]/50 pl-4 md:pl-5 py-1 my-6 md:my-8 bg-[#FFFDF7]/60 rounded-r-lg"
+                  style={entryEffect(i * 15)}
+                >
+                  <p className={`${PROSE} italic text-slate-700`}>{para}</p>
+                </div>
+              );
+            }
+
+            return (
+              <p key={i} className={PROSE} style={entryEffect(i * 15)}>
+                {para}
+              </p>
+            );
+          })}
+        </div>
+        {/* Đã loại bỏ phần button Show More */}
       </div>
     </div>
   );
 });
+PlainTextContent.displayName = 'PlainTextContent';
 
-// ─────────────────────────────────────────────────────────────
-// ROOT
-// ─────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────
+   ROOT: ReadingDisplay
+   ───────────────────────────────────────────────────────── */
 const ReadingDisplay = memo(({ data }) => {
+  injectFonts();
+  injectKeyframes();
+
   const type = useMemo(() => {
     if (!data) return 'empty';
-    if (data.questions?.some((q) => q.type === 'fill') && data.text?.includes('(')) return 'part6';
-    if (data.text?.includes('---') || data.text?.includes('To:') || data.text?.includes('From:')) return 'part7';
-    if (data.text?.match(/\(\d{1,2}:\d{2}\)/)) return 'part8';
+    const text = data.text || '';
+    if (data.questions?.some(q => q.type === 'fill') && text.includes('(')) return 'part6';
+    if (text.includes('---') || text.includes('To:') || text.includes('From:'))  return 'part7';
+    if (text.match(/\(\d{1,2}:\d{2}\)/)) return 'part8';
     return 'plain';
   }, [data]);
 
   if (!data) return (
-    <div className="rd-root rd-card" style={{ padding: '48px 20px', textAlign: 'center' }}>
-      <BookOpen size={36} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
-      <p style={{ fontFamily: 'DM Sans', fontWeight: 600, fontSize: 15, color: '#94A3B8', margin: 0 }}>
-        Chọn bài để bắt đầu đọc
-      </p>
+    <div
+      className={`${CARD} flex flex-col items-center justify-center py-12 md:py-16 gap-3.5 shadow-sm`}
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200/50">
+        <BookOpen size={26} className="text-slate-400" />
+      </div>
+      <div className="text-center px-5">
+        <p className="font-sans font-semibold text-[14px] md:text-[15px] text-slate-500">Chọn bài để bắt đầu đọc</p>
+        <p className="font-sans text-[11px] md:text-[12px] text-slate-400 mt-1.5 leading-snug">Select a reading passage from the left panel</p>
+      </div>
     </div>
   );
 
   return (
-    <div className="rd-root" style={{ width: '100%' }}>
-      <style>{styles}</style>
+    <div className="w-full" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {type === 'part6' && <Part6Content data={data} />}
       {type === 'part7' && <Part7Content data={data} />}
       {type === 'part8' && <Part8Content data={data} />}

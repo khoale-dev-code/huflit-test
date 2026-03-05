@@ -48,7 +48,7 @@ const MainLayout = ({
         - w-full để full width
         - flex flex-col để center children
       */}
-      <main className="flex-1 w-full flex flex-col">
+     <main className="flex-1 w-full flex flex-col pb-16 lg:pb-0">
         {/* 
           ✅ Content container
           - mx-auto: center horizontally
