@@ -523,8 +523,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         </div>
       </div>
 
-      {/* Bottom nav spacer */}
-      <div className="lg:hidden h-16 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
+       
 
       {/* ════════════════════════════════════════
           Full-screen "More" drawer
