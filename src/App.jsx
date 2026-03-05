@@ -32,6 +32,173 @@ const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'))
 const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
 
 // ─────────────────────────────────────────────
+// 🛡️ TRANSLATION PROTECTION HOOK
+// Chặn hoàn toàn Google Translate + mọi extension dịch tự động
+// ─────────────────────────────────────────────
+function useTranslationProtection() {
+  useEffect(() => {
+    // ── 1. Xóa cookies & storage ngay lập tức ──
+    const clearTranslateCookies = () => {
+      try {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
+        sessionStorage.removeItem('googtrans');
+        localStorage.removeItem('googtrans');
+      } catch { /* ignore */ }
+    };
+    clearTranslateCookies();
+
+    // ── 2. Gắn thuộc tính cứng lên <html> ──
+    // Google Translate xóa translate="no" → ta gắn lại liên tục
+    const lockHtmlAttrs = () => {
+      const html = document.documentElement;
+      html.setAttribute('translate', 'no');
+      html.setAttribute('class', 'notranslate');
+      // Xóa class translated-ltr / translated-rtl nếu GT đã thêm
+      if (html.className.includes('translated-')) {
+        html.className = html.className.replace(/\btranslated-\S+/g, '').trim();
+      }
+      // Xóa lang override (GT set lang="en" để kích hoạt dịch)
+      if (html.lang !== 'vi') html.setAttribute('lang', 'vi');
+    };
+    lockHtmlAttrs();
+
+    // ── 3. Kill Google Translate widget script nếu nó inject vào ──
+    const killGTScript = () => {
+      // GT inject một <script> với src chứa "translate.google"
+      document.querySelectorAll('script[src*="translate.google"]').forEach((s) => {
+        s.remove();
+      });
+      // GT cũng inject <style> với id="goog-gt-"
+      document.querySelectorAll('[id^="goog-gt-"]').forEach((el) => el.remove());
+      document.querySelectorAll('.goog-te-banner-frame').forEach((el) => el.remove());
+      document.querySelectorAll('.skiptranslate').forEach((el) => el.remove());
+      // DeepL inject iframe
+      document.querySelectorAll('iframe[id^="deepl"]').forEach((el) => el.remove());
+    };
+
+    // ── 4. Restore text nodes bị Google Translate wrap trong <font> ──
+    // GT thay: "Hello" → <font>Xin chào</font>
+    // Ta unwrap <font> lấy lại text gốc từ data-* attribute hoặc remove
+    const restoreFontNodes = (root = document.getElementById('root')) => {
+      if (!root) return;
+      root.querySelectorAll('font').forEach((font) => {
+        // GT đặt text gốc trong attribute không chuẩn — ta chỉ unwrap
+        const parent = font.parentNode;
+        if (!parent) return;
+        // Thay <font>...</font> bằng các child nodes của nó
+        while (font.firstChild) {
+          parent.insertBefore(font.firstChild, font);
+        }
+        font.remove();
+      });
+    };
+
+    // ── 5. MutationObserver — phản ứng real-time ──
+    let restoreTimer = null;
+
+    const observer = new MutationObserver((mutations) => {
+      let needsRestore = false;
+      let needsLock = false;
+
+      for (const mutation of mutations) {
+        // Phát hiện <font> node được thêm vào trong #root
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeName === 'FONT') {
+              needsRestore = true;
+            }
+            // Microsoft Translator dùng attribute _mstmutation
+            if (
+              node.nodeType === Node.ELEMENT_NODE &&
+              node.hasAttribute?.('_mstmutation')
+            ) {
+              node.remove();
+            }
+            // GT inject script/style tags
+            if (
+              node.nodeName === 'SCRIPT' &&
+              node.src?.includes('translate.google')
+            ) {
+              node.remove();
+            }
+          }
+        }
+
+        // Phát hiện attributes thay đổi trên <html>
+        if (
+          mutation.type === 'attributes' &&
+          mutation.target === document.documentElement
+        ) {
+          needsLock = true;
+        }
+      }
+
+      // Debounce để không chạy quá nhiều lần
+      if (needsRestore || needsLock) {
+        clearTimeout(restoreTimer);
+        restoreTimer = setTimeout(() => {
+          if (needsLock) lockHtmlAttrs();
+          if (needsRestore) restoreFontNodes();
+          killGTScript();
+          clearTranslateCookies();
+        }, 50);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'lang', 'translate'],
+    });
+
+    // ── 6. Chạy cleanup định kỳ phòng GT inject chậm ──
+    const interval = setInterval(() => {
+      killGTScript();
+      clearTranslateCookies();
+      lockHtmlAttrs();
+    }, 3000);
+
+    // ── 7. Cleanup khi visibility thay đổi (tab focus lại) ──
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        clearTranslateCookies();
+        lockHtmlAttrs();
+        killGTScript();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(interval);
+      clearTimeout(restoreTimer);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+}
+
+// ─────────────────────────────────────────────
+// 🛡️ TRANSLATE-SAFE TEXT WRAPPER
+// Bọc text trong <span translate="no"> để ngăn extension dịch node đó
+// Dùng cho các text quan trọng như câu hỏi, đáp án
+// ─────────────────────────────────────────────
+export const NoTranslate = memo(({ children, as: Tag = 'span', className = '', style }) => (
+  <Tag
+    translate="no"
+    className={`notranslate ${className}`}
+    style={style}
+    // data-nosnippet ngăn Google Search snippet cũng dịch
+    data-nosnippet
+  >
+    {children}
+  </Tag>
+));
+NoTranslate.displayName = 'NoTranslate';
+
+// ─────────────────────────────────────────────
 // InfoBadge
 // ─────────────────────────────────────────────
 const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
@@ -76,8 +243,7 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
 });
 
 // ─────────────────────────────────────────────
-// PartTestContent — chỉ chứa phần làm bài
-// ✅ UserProfile đã được xóa khỏi đây
+// PartTestContent
 // ─────────────────────────────────────────────
 const PartTestContent = memo(({
   isSignedIn,
@@ -96,8 +262,6 @@ const PartTestContent = memo(({
 
   return (
     <div className="w-full space-y-6">
-      {/* ✅ KHÔNG còn <UserProfile /> ở đây nữa */}
-
       <PartSelector
         selectedExam={selectedExam}
         onExamChange={handleExamChange}
@@ -169,6 +333,9 @@ const AppContent = memo(() => {
   const [currentExamData, setCurrentExamData] = useState(null);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
+  // 🛡️ Kích hoạt bảo vệ chống extension dịch
+  useTranslationProtection();
+
   const {
     selectedExam, testType, handleTestTypeChange,
     practiceType, handlePracticeTypeChange,
@@ -200,7 +367,6 @@ const AppContent = memo(() => {
     return { correct, total, percentage: total > 0 ? (correct / total) * 100 : 0 };
   }, [partData, answers]);
 
-  // ✅ Bake partData vào handleSubmit để useAppState tính điểm + saveProgress
   const handleSubmitWithData = useMemo(
     () => () => handleSubmit(partData),
     [handleSubmit, partData]
@@ -220,8 +386,6 @@ const AppContent = memo(() => {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path={ROUTES.HOME} element={<HomePage />} />
-
-            {/* ✅ /test — chỉ làm bài, không có dashboard */}
             <Route path={ROUTES.TEST} element={
               <PartTestContent
                 isSignedIn={isSignedIn}
@@ -238,11 +402,9 @@ const AppContent = memo(() => {
                 score={score}
               />
             } />
-
             <Route path={ROUTES.FULL_EXAM} element={
               <FullExamContainer onComplete={() => handleTestTypeChange('')} />
             } />
-
             <Route path={ROUTES.GRAMMAR} element={
               <GrammarReview
                 answers={answers}
@@ -250,14 +412,10 @@ const AppContent = memo(() => {
                 onSubmit={handleSubmitWithData}
               />
             } />
-
             <Route path={ROUTES.VOCABULARY} element={<VocabularyPractice />} />
-
-            {/* ✅ /profile — nơi duy nhất hiển thị UserProfile / Dashboard */}
-            <Route path={ROUTES.PROFILE} element={<UserProfile />} />
-
-            <Route path={ROUTES.ANSWERS} element={<ExamAnswersPage />} />
-            <Route path="*"              element={<NotFoundPage />} />
+            <Route path={ROUTES.PROFILE}    element={<UserProfile />} />
+            <Route path={ROUTES.ANSWERS}    element={<ExamAnswersPage />} />
+            <Route path="*"                 element={<NotFoundPage />} />
           </Routes>
         </Suspense>
 

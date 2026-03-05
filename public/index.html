@@ -1,50 +1,135 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" translate="no" class="notranslate">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    
-    <!-- Meta Description (quan trọng nhất) -->
-    <meta name="description" content="HUFLIT CDR online - Nền tảng luyện thi Tiếng Anh chuẩn đầu ra. Luyện TOEIC, từ vựng, ngữ pháp trực tuyến hiệu quả. Thi thử miễn phí, có đáp án chi tiết.">
-    
-    <!-- Keywords (optional nhưng tốt) -->
-    <meta name="keywords" content="HUFLIT CDR online, luyện thi tiếng Anh, TOEIC online, thi thử tiếng Anh, chuẩn đầu ra">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="%PUBLIC_URL%/favicon.png">
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png">
-    
-    <!-- Title (quan trọng) -->
-    <title>HUFLIT CDR online - Luyện thi Tiếng Anh Chuẩn Đầu Ra</title>
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="HUFLIT CDR online - Luyện thi Tiếng Anh Chuẩn Đầu Ra">
-    <meta property="og:description" content="HUFLIT CDR online - Nền tảng luyện thi Tiếng Anh chuẩn đầu ra. Luyện TOEIC, từ vựng, ngữ pháp trực tuyến hiệu quả.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="%PUBLIC_URL%/logo512.png">
-    <meta property="og:url" content="https://huflit.online">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="HUFLIT CDR online - Luyện thi Tiếng Anh">
-    <meta name="twitter:description" content="Nền tảng luyện thi Tiếng Anh chuẩn đầu ra HUFLIT CDR online">
-    <meta name="twitter:image" content="%PUBLIC_URL%/logo512.png">
-    
-    <!-- Canonical URL (để tránh duplicate content) -->
-    <link rel="canonical" href="https://huflit.online">
-    
-    <!-- Responsive Voice -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=arMTNtOF"></script>
+    <meta name="theme-color" content="#1e40af" />
 
-    <!-- Thêm vào index.html -->
-    <link rel="preconnect" href="https://huflit-test-4ce25.firebaseapp.com">
-    <link rel="preconnect" href="https://apis.google.com">
-    <link rel="preconnect" href="https://www.googleapis.com">
-    
+    <!-- =============================================
+         🛡️ CHẶN AUTO-TRANSLATE (Extension bảo vệ)
+         ============================================= -->
+    <meta name="google" content="notranslate" />
+    <meta http-equiv="Content-Language" content="vi" />
+
+    <!-- =============================================
+         🔍 SEO CORE
+         ============================================= -->
+    <title>HUFLIT CDR Online - Luyện Thi Tiếng Anh Chuẩn Đầu Ra</title>
+
+    <meta name="description" content="Nền tảng luyện thi Tiếng Anh chuẩn đầu ra HUFLIT CDR online. Thi thử TOEIC miễn phí, luyện từ vựng, ngữ pháp với đáp án chi tiết. Chuẩn bị tốt nhất cho kỳ thi đầu ra." />
+    <meta name="keywords" content="HUFLIT CDR online, luyện thi tiếng Anh, TOEIC online, thi thử tiếng Anh, chuẩn đầu ra HUFLIT, luyện nghe TOEIC, luyện đọc TOEIC" />
+    <meta name="author" content="HUFLIT CDR Online" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://huflit.online" />
+
+    <!-- =============================================
+         📱 OPEN GRAPH (Facebook / Zalo)
+         ============================================= -->
+    <meta property="og:site_name" content="HUFLIT CDR Online" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://huflit.online" />
+    <meta property="og:title" content="HUFLIT CDR Online - Luyện Thi Tiếng Anh Chuẩn Đầu Ra" />
+    <meta property="og:description" content="Nền tảng luyện thi Tiếng Anh chuẩn đầu ra HUFLIT CDR online. Thi thử TOEIC miễn phí, có đáp án chi tiết." />
+    <meta property="og:image" content="https://huflit.online/logo512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="vi_VN" />
+
+    <!-- =============================================
+         🐦 TWITTER CARD
+         ============================================= -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HUFLIT CDR Online - Luyện Thi Tiếng Anh" />
+    <meta name="twitter:description" content="Nền tảng luyện thi Tiếng Anh chuẩn đầu ra HUFLIT CDR online. Thi thử miễn phí." />
+    <meta name="twitter:image" content="https://huflit.online/logo512.png" />
+
+    <!-- =============================================
+         🎨 FAVICON
+         ============================================= -->
+    <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="%PUBLIC_URL%/logo512.png" />
+
+    <!-- =============================================
+         ⚡ PRECONNECT — Giảm latency kết nối bên ngoài
+         ============================================= -->
+    <!-- Firebase -->
+    <link rel="preconnect" href="https://huflit-test-4ce25.firebaseapp.com" />
+    <link rel="preconnect" href="https://firestore.googleapis.com" />
+    <!-- Google APIs -->
+    <link rel="preconnect" href="https://apis.google.com" />
+    <link rel="preconnect" href="https://www.googleapis.com" />
+    <!-- Google Fonts nếu dùng -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- ResponsiveVoice CDN -->
+    <link rel="preconnect" href="https://code.responsivevoice.org" />
+
+    <!-- =============================================
+         🔊 RESPONSIVE VOICE — defer để không block render
+         ============================================= -->
+    <script
+      src="https://code.responsivevoice.org/responsivevoice.js?key=arMTNtOF"
+      defer
+    ></script>
+
+    <!-- =============================================
+         🛡️ INLINE SCRIPT: Chặn translate NGAY KHI LOAD
+         Chạy trước React để không có khoảng trống bị dịch
+         ============================================= -->
+    <script>
+      (function () {
+        // Xóa cookie googtrans ngay khi trang load
+        document.cookie =
+          'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie =
+          'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' +
+          window.location.hostname;
+        try {
+          sessionStorage.removeItem('googtrans');
+          localStorage.removeItem('googtrans');
+        } catch (e) {}
+
+        // Gắn translate="no" vào <html> ngay lập tức
+        document.documentElement.setAttribute('translate', 'no');
+      })();
+    </script>
+
+    <!-- =============================================
+         📊 STRUCTURED DATA (JSON-LD) — Tăng SEO Google
+         ============================================= -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "HUFLIT CDR Online",
+        "url": "https://huflit.online",
+        "description": "Nền tảng luyện thi Tiếng Anh chuẩn đầu ra HUFLIT. Thi thử TOEIC miễn phí với đáp án chi tiết.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "vi",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "VND"
+        },
+        "provider": {
+          "@type": "Organization",
+          "name": "HUFLIT CDR Online",
+          "url": "https://huflit.online"
+        }
+      }
+    </script>
   </head>
+
   <body>
-    <noscript>Bạn cần bật JavaScript để chạy ứng dụng này.</noscript>
+    <noscript>
+      <div style="text-align:center;padding:40px;font-family:sans-serif;">
+        <h2>⚠️ JavaScript bị tắt</h2>
+        <p>Bạn cần bật JavaScript để sử dụng <strong>HUFLIT CDR Online</strong>.</p>
+      </div>
+    </noscript>
+
     <div id="root"></div>
   </body>
 </html>
