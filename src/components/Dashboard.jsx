@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ReferenceLine,
@@ -8,14 +8,12 @@ import {
 import {
   Trophy, Target, Activity, Flame, ChevronRight, Clock,
   AlertCircle, TrendingUp, TrendingDown, Minus,
-  BookOpen, Zap, BarChart2, Star,
+  BookOpen, Zap, BarChart2, Star, Lock, Unlock,
+  ArrowUp,
 } from 'lucide-react';
 import { useUserProgress } from '../hooks/useUserProgress.js';
 
 // ─── useContainerSize ─────────────────────────────────────────────────────────
-// Dùng ResizeObserver đo kích thước thực tế của wrapper.
-// Chỉ render chart khi width > 0 → triệt tiêu hoàn toàn lỗi Recharts -1×-1
-// dù component nằm trong bất kỳ bao nhiêu lớp wrapper (UserProfile → Dashboard…).
 function useContainerSize() {
   const ref = useRef(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -23,12 +21,9 @@ function useContainerSize() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
-    // Đọc ngay nếu đã có kích thước (HMR re-mount, lazy load, v.v.)
     if (el.offsetWidth > 0) {
       setSize({ width: el.offsetWidth, height: el.offsetHeight });
     }
-
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
       if (width > 0) setSize({ width, height });
@@ -38,6 +33,13 @@ function useContainerSize() {
   }, []);
 
   return [ref, size];
+}
+
+// ─── usePrevious ──────────────────────────────────────────────────────────────
+function usePrevious(value) {
+  const ref = useRef(undefined);
+  useEffect(() => { ref.current = value; });
+  return ref.current;
 }
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -55,6 +57,8 @@ const C = {
   yellowLight: '#FEF3C7',
   red:         '#EF4444',
   redLight:    '#FEE2E2',
+  purple:      '#8B5CF6',
+  purpleLight: '#EDE9FE',
 };
 
 // ─── Shared animation variants ────────────────────────────────────────────────
@@ -202,12 +206,185 @@ const Spinner = () => (
   </div>
 );
 
+// ─── LevelUpToast ─────────────────────────────────────────────────────────────
+const LevelUpToast = React.memo(({ level, onDone }) => {
+  useEffect(() => {
+    const t = setTimeout(onDone, 3200);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 60, scale: 0.85 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -40, scale: 0.9 }}
+      transition={{ type: 'spring', damping: 18, stiffness: 220 }}
+      className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border"
+      style={{
+        background: 'linear-gradient(135deg, #4361EE 0%, #7B3FF5 100%)',
+        borderColor: 'rgba(255,255,255,0.15)',
+      }}
+    >
+      <motion.div
+        animate={{ rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.3, 1.1, 1.2, 1] }}
+        transition={{ duration: 0.7 }}
+        className="text-2xl"
+      >
+        🎉
+      </motion.div>
+      <div>
+        <p className="font-black text-white text-sm leading-tight">Lên cấp!</p>
+        <p className="text-white/80 text-xs font-semibold">Bạn đã đạt Level {level}</p>
+      </div>
+      <div
+        className="flex items-center gap-1 font-black text-white text-sm px-2.5 py-1 rounded-xl"
+        style={{ background: 'rgba(255,255,255,0.18)' }}
+      >
+        <Star size={12} /> Lv.{level}
+      </div>
+    </motion.div>
+  );
+});
+LevelUpToast.displayName = 'LevelUpToast';
+
+// ─── LevelProgressBar ─────────────────────────────────────────────────────────
+const LevelProgressBar = React.memo(({
+  level, xpIntoLevel, xpRequiredForLevel, levelProgressPercent, nextUnlockLevel,
+}) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 0.1 }}
+    className="bg-white rounded-2xl p-5 border"
+    style={{ borderColor: C.border }}
+  >
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-sm font-black"
+          style={{ background: C.purpleLight, color: C.purple }}
+        >
+          <Star size={13} /> Lv.{level}
+        </div>
+        <span className="text-sm font-bold" style={{ color: C.text }}>Tiến độ cấp độ</span>
+      </div>
+      <span className="text-xs font-bold tabular-nums" style={{ color: C.muted }}>
+        {xpIntoLevel} / {xpRequiredForLevel} XP
+      </span>
+    </div>
+
+    <div className="h-3 rounded-full overflow-hidden relative" style={{ background: C.bg }}>
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${levelProgressPercent}%` }}
+        transition={{ duration: 0.9, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
+        className="h-full rounded-full"
+        style={{ background: `linear-gradient(90deg, ${C.purple}, #A78BFA)` }}
+      />
+      {levelProgressPercent > 10 && (
+        <motion.div
+          animate={{ x: ['0%', '200%'] }}
+          transition={{ repeat: Infinity, duration: 2, ease: 'linear', repeatDelay: 1 }}
+          className="absolute inset-y-0 left-0 rounded-full"
+          style={{
+            width: '20%',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
+          }}
+        />
+      )}
+    </div>
+
+    <div className="flex justify-between mt-1.5">
+      <p className="text-xs" style={{ color: C.muted }}>
+        {levelProgressPercent}% đến Level {level + 1}
+      </p>
+      {nextUnlockLevel && (
+        <p className="text-xs font-semibold flex items-center gap-1" style={{ color: C.accent }}>
+          <ArrowUp size={10} />
+          Lv.{nextUnlockLevel} mở thêm exam
+        </p>
+      )}
+    </div>
+  </motion.div>
+));
+LevelProgressBar.displayName = 'LevelProgressBar';
+
+// ─── ExamUnlockPanel ──────────────────────────────────────────────────────────
+const EXAM_TIERS = [
+  { exams: [1, 2], unlockLevel: 1,  label: 'Cơ bản' },
+  { exams: [3, 4], unlockLevel: 3,  label: 'Trung cấp' },
+  { exams: [5, 6], unlockLevel: 6,  label: 'Nâng cao' },
+  { exams: [7, 8], unlockLevel: 9,  label: 'Chuyên gia' },
+  { exams: [9, 10], unlockLevel: 12, label: 'Bậc thầy' },
+];
+
+const ExamUnlockPanel = React.memo(({ unlockedExams, level }) => (
+  <motion.section
+    {...fadeUp(0.5)}
+    className="bg-white rounded-2xl border p-5"
+    style={{ borderColor: C.border }}
+  >
+    <h3 className="font-black text-base mb-4 flex items-center gap-2" style={{ color: C.text }}>
+      <Unlock size={14} style={{ color: C.accent }} /> Kho đề thi
+    </h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5">
+      {EXAM_TIERS.map((tier) => {
+        const isUnlocked = unlockedExams === Infinity || tier.exams[0] <= unlockedExams;
+        const levelsNeeded = tier.unlockLevel - level;
+        return (
+          <div
+            key={tier.label}
+            className="rounded-xl p-3 border flex flex-col gap-2 transition-all"
+            style={{
+              borderColor: isUnlocked ? C.green : C.border,
+              background: isUnlocked ? C.greenLight : C.bg,
+              opacity: isUnlocked ? 1 : 0.7,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold" style={{ color: isUnlocked ? C.green : C.muted }}>
+                {tier.label}
+              </span>
+              {isUnlocked
+                ? <Unlock size={12} style={{ color: C.green }} />
+                : <Lock size={12} style={{ color: C.muted }} />}
+            </div>
+            <div className="flex gap-1.5 flex-wrap">
+              {tier.exams.map((e) => (
+                <span
+                  key={e}
+                  className="text-xs font-black px-2 py-0.5 rounded-lg"
+                  style={{
+                    background: isUnlocked ? C.green : C.border,
+                    color: isUnlocked ? '#fff' : C.muted,
+                  }}
+                >
+                  Exam {e}
+                </span>
+              ))}
+            </div>
+            {!isUnlocked && (
+              <p className="text-[10px] font-semibold flex items-center gap-1" style={{ color: C.muted }}>
+                <Star size={9} />
+                Cần Lv.{tier.unlockLevel}
+                {levelsNeeded > 0 && ` (+${levelsNeeded})`}
+              </p>
+            )}
+            {isUnlocked && (
+              <p className="text-[10px] font-semibold" style={{ color: C.green }}>
+                ✓ Đã mở khóa
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  </motion.section>
+));
+ExamUnlockPanel.displayName = 'ExamUnlockPanel';
+
 // ─── ScoreChart ───────────────────────────────────────────────────────────────
-// Dùng useContainerSize (ResizeObserver) để lấy kích thước thực tế của wrapper,
-// sau đó truyền width/height cụ thể vào AreaChart thay vì dùng ResponsiveContainer.
-// Cách này triệt tiêu hoàn toàn lỗi -1×-1 dù component được render bên trong
-// bao nhiêu lớp wrapper (UserProfile → DetailedDashboard → ScoreChart).
-const CHART_HEIGHT = 208; // = h-52 (13rem = 208px)
+const CHART_HEIGHT = 208;
 
 const ScoreChart = React.memo(({ chartData, averageScore, trend }) => {
   const [containerRef, { width }] = useContainerSize();
@@ -228,7 +405,6 @@ const ScoreChart = React.memo(({ chartData, averageScore, trend }) => {
         <TrendBadge value={trend} />
       </div>
 
-      {/* Wrapper luôn mount để ResizeObserver có thể đo, dù data rỗng */}
       <div ref={containerRef} className="w-full" style={{ height: CHART_HEIGHT, minWidth: 0 }}>
         {chartData.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center gap-2" style={{ color: C.muted }}>
@@ -237,14 +413,12 @@ const ScoreChart = React.memo(({ chartData, averageScore, trend }) => {
             <p className="text-xs">Hoàn thành vài bài để xem xu hướng</p>
           </div>
         ) : width > 0 ? (
-          /* Chỉ render chart khi đã có width thực — không bao giờ truyền -1 vào Recharts */
           <motion.div
             className="w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.35 }}
           >
-            {/* Truyền width/height cụ thể → Recharts không cần tự đo, không bao giờ nhận -1 */}
             <AreaChart
               width={width}
               height={CHART_HEIGHT}
@@ -433,6 +607,19 @@ WeaknessPanel.displayName = 'WeaknessPanel';
 export default function DetailedDashboard() {
   const navigate  = useNavigate();
   const { currentUser, progress, analytics, chartData, loading, isLoaded } = useUserProgress();
+  const [showLevelUp, setShowLevelUp] = useState(false);
+
+  const prevLevel = usePrevious(analytics.level);
+
+  // Fire toast when level increases
+  useEffect(() => {
+    if (
+      prevLevel !== undefined &&
+      analytics.level > prevLevel
+    ) {
+      setShowLevelUp(true);
+    }
+  }, [analytics.level, prevLevel]);
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -441,18 +628,23 @@ export default function DetailedDashboard() {
     return 'Chào buổi tối';
   }, []);
 
-  const xpPercent  = useMemo(
-    () => Math.min(100, Math.round((analytics.todayXP / analytics.dailyGoal) * 100)),
-    [analytics.todayXP, analytics.dailyGoal],
-  );
-  const goalReached = analytics.todayXP >= analytics.dailyGoal;
-
   const handleNavigate = useCallback((path) => navigate(path), [navigate]);
 
   if (!isLoaded || loading) return <Spinner />;
 
   return (
     <div className="min-h-screen pb-28" style={{ background: C.bg, color: C.text }}>
+
+      {/* ── Level-Up Toast ── */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <LevelUpToast
+            level={analytics.level}
+            onDone={() => setShowLevelUp(false)}
+          />
+        )}
+      </AnimatePresence>
+
       <main className="max-w-5xl mx-auto px-4 md:px-6 pt-8 space-y-5">
 
         {/* ── HERO ── */}
@@ -495,9 +687,9 @@ export default function DetailedDashboard() {
 
           <div className="flex items-center gap-2 flex-wrap">
             {[
-              { icon: Star,  val: `Lv.${analytics.level}`,              bg: C.accentLight,  color: C.accent  },
-              { icon: Flame, val: `${analytics.streak} ngày`,            bg: C.yellowLight, color: C.yellow  },
-              { icon: Zap,   val: `${analytics.xp.toLocaleString()} XP`, bg: C.greenLight,  color: C.green   },
+              { icon: Star,  val: `Lv.${analytics.level}`,              bg: C.purpleLight, color: C.purple  },
+              { icon: Flame, val: `${analytics.streak} ngày`,           bg: C.yellowLight, color: C.yellow  },
+              { icon: Zap,   val: `${analytics.xp.toLocaleString()} XP`, bg: C.greenLight, color: C.green   },
             ].map(({ icon: Icon, val, bg, color }) => (
               <div
                 key={val}
@@ -510,48 +702,14 @@ export default function DetailedDashboard() {
           </div>
         </motion.section>
 
-        {/* ── DAILY GOAL ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl p-5 border"
-          style={{ borderColor: C.border }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Target size={14} style={{ color: goalReached ? C.green : C.accent }} />
-              <span className="text-sm font-bold" style={{ color: C.text }}>Mục tiêu hôm nay</span>
-              {goalReached && (
-                <span
-                  className="text-xs font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: C.greenLight, color: C.green }}
-                >
-                  Hoàn thành 🎉
-                </span>
-              )}
-            </div>
-            <span
-              className="text-sm font-black tabular-nums"
-              style={{ color: goalReached ? C.green : C.accent }}
-            >
-              {analytics.todayXP}/{analytics.dailyGoal} XP
-            </span>
-          </div>
-          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: C.bg }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${xpPercent}%` }}
-              transition={{ duration: 0.8, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              className="h-full rounded-full"
-              style={{
-                background: goalReached
-                  ? C.green
-                  : `linear-gradient(90deg, ${C.accent}, #7B9FF9)`,
-              }}
-            />
-          </div>
-        </motion.div>
+        {/* ── LEVEL + DAILY GOAL ── */}
+        <LevelProgressBar
+          level={analytics.level}
+          xpIntoLevel={analytics.xpIntoLevel}
+          xpRequiredForLevel={analytics.xpRequiredForLevel}
+          levelProgressPercent={analytics.levelProgressPercent}
+          nextUnlockLevel={analytics.nextUnlockLevel}
+        />
 
         {/* ── STAT CARDS ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -573,7 +731,7 @@ export default function DetailedDashboard() {
           <StatCard
             icon={BookOpen}  label="Tổng bài làm"   value={analytics.totalAttempts}
             sub={<span className="text-xs" style={{ color: C.muted }}>bài tập</span>}
-            color="#8B5CF6"  bg="#EDE9FE"        delay={0.30}
+            color={C.purple} bg={C.purpleLight}  delay={0.30}
           />
         </div>
 
@@ -586,6 +744,12 @@ export default function DetailedDashboard() {
           />
           <HistoryPanel progress={progress} onNavigate={handleNavigate} />
         </div>
+
+        {/* ── EXAM UNLOCK PANEL ── */}
+        <ExamUnlockPanel
+          unlockedExams={analytics.unlockedExams}
+          level={analytics.level}
+        />
 
         {/* ── WEAKNESSES ── */}
         <WeaknessPanel weaknesses={analytics.weaknesses} />
