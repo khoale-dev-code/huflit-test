@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState, memo, useEffect, useRef } from 'react';
 import {
   ChevronDown, BookOpen, Headphones, Loader2,
-  CheckCircle2, ChevronRight, Info, Layers
+  CheckCircle2, ChevronRight, Info, Layers, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { loadExamData, getAllExamMetadata } from '../../data/examData';
@@ -9,10 +9,19 @@ import { loadExamData, getAllExamMetadata } from '../../data/examData';
 /* ─── Helpers ────────────────────────────────────────────── */
 const partLabel = (key) => key.replace(/part(\d+)/i, 'Part $1');
 
-/* ─── ExamPopover (Optimized) ────────────────────────────── */
-const ExamPopover = memo(({ isOpen, onClose, examList, selectedExam, onSelect, isLoading }) => {
+/* ─── ExamPopover ────────────────────────────────────────── */
+const ExamPopover = memo(({
+  isOpen, onClose, examList, selectedExam, onSelect, isLoading,
+  canAccessExam, getExamLockInfo,
+}) => {
   const [active, setActive] = useState(-1);
   const itemsRef = useRef([]);
+
+  // Chỉ cho phép navigate keyboard tới các exam không bị khóa
+  const accessibleIndexes = useMemo(
+    () => examList.map((e, i) => (!canAccessExam || canAccessExam(e.id)) ? i : -1).filter(i => i !== -1),
+    [examList, canAccessExam]
+  );
 
   useEffect(() => {
     if (isOpen) setActive(examList.findIndex(e => e.id === selectedExam));
@@ -25,22 +34,33 @@ const ExamPopover = memo(({ isOpen, onClose, examList, selectedExam, onSelect, i
   useEffect(() => {
     if (!isOpen) return;
     const kd = (e) => {
-      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(p => Math.min(p + 1, examList.length - 1)); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(p => Math.max(p - 1, 0)); }
-      else if (e.key === 'Enter' && active >= 0) { onSelect(examList[active].id); onClose(); }
-      else if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActive(p => {
+          const next = accessibleIndexes.find(i => i > p);
+          return next !== undefined ? next : p;
+        });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive(p => {
+          const prev = [...accessibleIndexes].reverse().find(i => i < p);
+          return prev !== undefined ? prev : p;
+        });
+      } else if (e.key === 'Enter' && active >= 0) {
+        if (canAccessExam && !canAccessExam(examList[active].id)) return;
+        onSelect(examList[active].id); onClose();
+      } else if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', kd);
     return () => window.removeEventListener('keydown', kd);
-  }, [isOpen, active, examList, onSelect, onClose]);
+  }, [isOpen, active, examList, onSelect, onClose, canAccessExam, accessibleIndexes]);
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Mobile Overlay */}
           <div className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px] md:hidden" onClick={onClose} />
-          
+
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -57,24 +77,56 @@ const ExamPopover = memo(({ isOpen, onClose, examList, selectedExam, onSelect, i
 
             <ul className="max-h-[320px] overflow-y-auto p-2 custom-scrollbar">
               {examList.map((exam, i) => {
-                const isSelected = exam.id === selectedExam;
+                const isSelected   = exam.id === selectedExam;
                 const isHighlighted = i === active;
+                const lockInfo     = getExamLockInfo ? getExamLockInfo(exam.id) : { locked: false };
+                const locked       = lockInfo.locked;
+
                 return (
                   <li key={exam.id} ref={el => itemsRef.current[i] = el}>
                     <button
-                      onClick={() => { onSelect(exam.id); onClose(); }}
+                      onClick={() => {
+                        if (locked) return;
+                        onSelect(exam.id);
+                        onClose();
+                      }}
+                      disabled={locked}
                       className={`
                         w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all
-                        ${isHighlighted ? 'bg-blue-50 ring-1 ring-inset ring-blue-100' : 'hover:bg-slate-50'}
+                        ${locked
+                          ? 'opacity-50 cursor-not-allowed bg-slate-50'
+                          : isHighlighted
+                            ? 'bg-blue-50 ring-1 ring-inset ring-blue-100'
+                            : 'hover:bg-slate-50'}
                       `}
                     >
-                      <div className="min-w-0 pr-4">
-                        <div className={`text-sm ${isSelected ? 'font-bold text-blue-600' : 'font-medium text-slate-700'}`}>
+                      <div className="min-w-0 pr-3 flex-1">
+                        <div className={`text-sm ${
+                          locked        ? 'text-slate-400 font-medium' :
+                          isSelected    ? 'font-bold text-blue-600'    :
+                                          'font-medium text-slate-700'
+                        }`}>
                           {exam.title}
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 uppercase tracking-tighter">ID: {exam.id}</div>
+                        {locked ? (
+                          <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                            <Lock className="w-2.5 h-2.5" />
+                            Cần Level {lockInfo.requiredLevel} để mở khóa
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-slate-400 mt-0.5 uppercase tracking-tighter">
+                            ID: {exam.id}
+                          </div>
+                        )}
                       </div>
-                      {isSelected && <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />}
+
+                      {/* Right icon */}
+                      {locked
+                        ? <Lock className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                        : isSelected
+                          ? <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
+                          : null
+                      }
                     </button>
                   </li>
                 );
@@ -86,8 +138,9 @@ const ExamPopover = memo(({ isOpen, onClose, examList, selectedExam, onSelect, i
     </AnimatePresence>
   );
 });
+ExamPopover.displayName = 'ExamPopover';
 
-/* ─── PartChips (Modern Scrollable) ───────────────────────── */
+/* ─── PartChips ───────────────────────────────────────────── */
 const PartChips = memo(({ parts, selected, onSelect, isLoading }) => {
   const scrollRef = useRef(null);
 
@@ -98,15 +151,16 @@ const PartChips = memo(({ parts, selected, onSelect, isLoading }) => {
 
   return (
     <div className="relative flex items-center group">
-      {/* Scroll Shadow Indicators */}
       <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-      
+
       <div
         ref={scrollRef}
         className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth w-full"
       >
         {isLoading ? (
-          [...Array(5)].map((_, i) => <div key={i} className="h-9 w-20 rounded-xl bg-slate-100 animate-pulse" />)
+          [...Array(5)].map((_, i) => (
+            <div key={i} className="h-9 w-20 rounded-xl bg-slate-100 animate-pulse" />
+          ))
         ) : (
           parts.map(({ key, count }) => {
             const isActive = selected === key;
@@ -117,8 +171,8 @@ const PartChips = memo(({ parts, selected, onSelect, isLoading }) => {
                 onClick={() => onSelect(key)}
                 className={`
                   relative shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all
-                  ${isActive 
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200 scale-105 z-10' 
+                  ${isActive
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200 scale-105 z-10'
                     : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}
                 `}
               >
@@ -137,6 +191,7 @@ const PartChips = memo(({ parts, selected, onSelect, isLoading }) => {
     </div>
   );
 });
+PartChips.displayName = 'PartChips';
 
 /* ─── Main Component ─────────────────────────────────────── */
 const PartSelector = memo(({
@@ -146,12 +201,15 @@ const PartSelector = memo(({
   onTestTypeChange = () => {},
   selectedPart = 'part1',
   onPartChange = () => {},
+  // 🔒 Exam access props (từ useExamAccess)
+  canAccessExam,
+  getExamLockInfo,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [examData, setExamData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [examData, setExamData]       = useState(null);
+  const [isLoading, setIsLoading]     = useState(false);
   const popoverRef = useRef(null);
-  const examList = useMemo(() => getAllExamMetadata(), []);
+  const examList   = useMemo(() => getAllExamMetadata(), []);
 
   useEffect(() => {
     if (!popoverOpen) return;
@@ -179,16 +237,25 @@ const PartSelector = memo(({
       .map(([key, d]) => ({ key, count: d.questions?.length || 0 }));
   }, [examData, testType]);
 
-  const currentExam = examList.find(e => e.id === selectedExam);
+  const currentExam     = examList.find(e => e.id === selectedExam);
   const currentPartData = examData?.parts?.[selectedPart];
+
+  // 🔒 Trạng thái khóa của exam đang được chọn trên trigger button
+  const selectedLockInfo = getExamLockInfo ? getExamLockInfo(selectedExam) : { locked: false };
+
+  // 🔒 Số exam đã được mở khóa (để hiện badge)
+  const unlockedCount = useMemo(() => {
+    if (!canAccessExam) return examList.length;
+    return examList.filter(e => canAccessExam(e.id)).length;
+  }, [examList, canAccessExam]);
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-4 px-2 sm:px-0">
       <div className="bg-white border border-slate-200 rounded-[24px] shadow-sm overflow-visible p-1.5">
-        
+
         {/* Row 1: Selectors */}
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
-          
+
           {/* Exam Dropdown */}
           <div className="relative flex-1" ref={popoverRef}>
             <button
@@ -196,11 +263,24 @@ const PartSelector = memo(({
               disabled={isLoading}
               className={`
                 w-full h-12 flex items-center gap-3 px-4 rounded-2xl border transition-all text-sm font-bold
-                ${popoverOpen ? 'bg-blue-50 border-blue-200 ring-4 ring-blue-50 text-blue-700' : 'bg-slate-50 border-transparent text-slate-700 hover:bg-white hover:border-slate-200'}
+                ${popoverOpen
+                  ? 'bg-blue-50 border-blue-200 ring-4 ring-blue-50 text-blue-700'
+                  : 'bg-slate-50 border-transparent text-slate-700 hover:bg-white hover:border-slate-200'}
               `}
             >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : <Layers className="w-4 h-4 text-slate-400" />}
+              {isLoading
+                ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                : <Layers className="w-4 h-4 text-slate-400" />
+              }
               <span className="flex-1 text-left truncate">{currentExam?.title || 'Chọn bộ đề'}</span>
+
+              {/* Badge: x/total đã mở */}
+              {canAccessExam && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-500">
+                  {unlockedCount}/{examList.length}
+                </span>
+              )}
+
               <ChevronDown size={16} className={`text-slate-400 transition-transform ${popoverOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -209,8 +289,14 @@ const PartSelector = memo(({
               onClose={() => setPopoverOpen(false)}
               examList={examList}
               selectedExam={selectedExam}
-              onSelect={(id) => onExamChange({ target: { value: id } })}
+              onSelect={(id) => {
+                // 🔒 Double-check trước khi gọi onExamChange
+                if (canAccessExam && !canAccessExam(id)) return;
+                onExamChange({ target: { value: id } });
+              }}
               isLoading={isLoading}
+              canAccessExam={canAccessExam}
+              getExamLockInfo={getExamLockInfo}
             />
           </div>
 
@@ -218,7 +304,7 @@ const PartSelector = memo(({
           <div className="bg-slate-100 p-1 rounded-2xl flex gap-1 h-12">
             {[
               { id: 'listening', icon: Headphones, label: 'Listening' },
-              { id: 'reading', icon: BookOpen, label: 'Reading' },
+              { id: 'reading',   icon: BookOpen,   label: 'Reading'   },
             ].map((type) => {
               const active = testType === type.id;
               return (
@@ -227,7 +313,9 @@ const PartSelector = memo(({
                   onClick={() => onTestTypeChange({ target: { value: type.id } })}
                   className={`
                     flex-1 md:flex-none flex items-center justify-center gap-2 px-5 rounded-[14px] text-xs font-bold transition-all
-                    ${active ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}
+                    ${active
+                      ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200'
+                      : 'text-slate-500 hover:text-slate-700'}
                   `}
                 >
                   <type.icon size={14} />
@@ -248,7 +336,7 @@ const PartSelector = memo(({
           />
         </div>
 
-        {/* Row 3: Detail Info (Redesigned) */}
+        {/* Row 3: Detail Info */}
         <AnimatePresence mode="wait">
           {currentPartData && (
             <motion.div
@@ -263,13 +351,15 @@ const PartSelector = memo(({
               </div>
               <div className="min-w-0">
                 <h4 className="text-sm font-bold text-slate-800 truncate">{currentPartData.title}</h4>
-                <p className="text-xs text-slate-500 truncate">{currentPartData.description || "Bắt đầu làm bài thi của bạn ngay bây giờ."}</p>
+                <p className="text-xs text-slate-500 truncate">
+                  {currentPartData.description || 'Bắt đầu làm bài thi của bạn ngay bây giờ.'}
+                </p>
               </div>
               <div className="ml-auto hidden sm:flex items-center gap-2">
-                 <span className="text-[11px] font-bold text-slate-400 uppercase">Ques:</span>
-                 <span className="px-2 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-lg leading-none">
+                <span className="text-[11px] font-bold text-slate-400 uppercase">Ques:</span>
+                <span className="px-2 py-1 bg-slate-900 text-white text-[10px] font-bold rounded-lg leading-none">
                   {currentPartData.questions?.length || 0}
-                 </span>
+                </span>
               </div>
             </motion.div>
           )}
@@ -285,5 +375,6 @@ const PartSelector = memo(({
     </div>
   );
 });
+PartSelector.displayName = 'PartSelector';
 
 export default PartSelector;

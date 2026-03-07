@@ -6,6 +6,7 @@ import { loadExamData, getAllExamMetadata } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
+import { useExamAccess } from './hooks/useExamAccess.js';
 
 // Components
 import MainLayout from './components/layout/MainLayout';
@@ -23,7 +24,7 @@ import HomePage from './pages/HomePage.jsx';
 import { ROUTES } from './config/routes';
 
 // Icons
-import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
+import { Trophy, FileText, Zap, BarChart3, Lock, Star } from 'lucide-react';
 
 // Lazy Loaded Components
 const AdminApp      = lazy(() => import('./admin/AdminApp'));
@@ -33,11 +34,9 @@ const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'
 
 // ─────────────────────────────────────────────
 // 🛡️ TRANSLATION PROTECTION HOOK
-// Chặn hoàn toàn Google Translate + mọi extension dịch tự động
 // ─────────────────────────────────────────────
 function useTranslationProtection() {
   useEffect(() => {
-    // ── 1. Xóa cookies & storage ngay lập tức ──
     const clearTranslateCookies = () => {
       try {
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -49,93 +48,50 @@ function useTranslationProtection() {
     };
     clearTranslateCookies();
 
-    // ── 2. Gắn thuộc tính cứng lên <html> ──
-    // Google Translate xóa translate="no" → ta gắn lại liên tục
     const lockHtmlAttrs = () => {
       const html = document.documentElement;
       html.setAttribute('translate', 'no');
       html.setAttribute('class', 'notranslate');
-      // Xóa class translated-ltr / translated-rtl nếu GT đã thêm
       if (html.className.includes('translated-')) {
         html.className = html.className.replace(/\btranslated-\S+/g, '').trim();
       }
-      // Xóa lang override (GT set lang="en" để kích hoạt dịch)
       if (html.lang !== 'vi') html.setAttribute('lang', 'vi');
     };
     lockHtmlAttrs();
 
-    // ── 3. Kill Google Translate widget script nếu nó inject vào ──
     const killGTScript = () => {
-      // GT inject một <script> với src chứa "translate.google"
-      document.querySelectorAll('script[src*="translate.google"]').forEach((s) => {
-        s.remove();
-      });
-      // GT cũng inject <style> với id="goog-gt-"
+      document.querySelectorAll('script[src*="translate.google"]').forEach((s) => s.remove());
       document.querySelectorAll('[id^="goog-gt-"]').forEach((el) => el.remove());
       document.querySelectorAll('.goog-te-banner-frame').forEach((el) => el.remove());
       document.querySelectorAll('.skiptranslate').forEach((el) => el.remove());
-      // DeepL inject iframe
       document.querySelectorAll('iframe[id^="deepl"]').forEach((el) => el.remove());
     };
 
-    // ── 4. Restore text nodes bị Google Translate wrap trong <font> ──
-    // GT thay: "Hello" → <font>Xin chào</font>
-    // Ta unwrap <font> lấy lại text gốc từ data-* attribute hoặc remove
     const restoreFontNodes = (root = document.getElementById('root')) => {
       if (!root) return;
       root.querySelectorAll('font').forEach((font) => {
-        // GT đặt text gốc trong attribute không chuẩn — ta chỉ unwrap
         const parent = font.parentNode;
         if (!parent) return;
-        // Thay <font>...</font> bằng các child nodes của nó
-        while (font.firstChild) {
-          parent.insertBefore(font.firstChild, font);
-        }
+        while (font.firstChild) parent.insertBefore(font.firstChild, font);
         font.remove();
       });
     };
 
-    // ── 5. MutationObserver — phản ứng real-time ──
     let restoreTimer = null;
 
     const observer = new MutationObserver((mutations) => {
       let needsRestore = false;
       let needsLock = false;
-
       for (const mutation of mutations) {
-        // Phát hiện <font> node được thêm vào trong #root
         if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
-            if (node.nodeName === 'FONT') {
-              needsRestore = true;
-            }
-            // Microsoft Translator dùng attribute _mstmutation
-            if (
-              node.nodeType === Node.ELEMENT_NODE &&
-              node.hasAttribute?.('_mstmutation')
-            ) {
-              node.remove();
-            }
-            // GT inject script/style tags
-            if (
-              node.nodeName === 'SCRIPT' &&
-              node.src?.includes('translate.google')
-            ) {
-              node.remove();
-            }
+            if (node.nodeName === 'FONT') needsRestore = true;
+            if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute?.('_mstmutation')) node.remove();
+            if (node.nodeName === 'SCRIPT' && node.src?.includes('translate.google')) node.remove();
           }
         }
-
-        // Phát hiện attributes thay đổi trên <html>
-        if (
-          mutation.type === 'attributes' &&
-          mutation.target === document.documentElement
-        ) {
-          needsLock = true;
-        }
+        if (mutation.type === 'attributes' && mutation.target === document.documentElement) needsLock = true;
       }
-
-      // Debounce để không chạy quá nhiều lần
       if (needsRestore || needsLock) {
         clearTimeout(restoreTimer);
         restoreTimer = setTimeout(() => {
@@ -148,20 +104,16 @@ function useTranslationProtection() {
     });
 
     observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
+      childList: true, subtree: true, attributes: true,
       attributeFilter: ['class', 'lang', 'translate'],
     });
 
-    // ── 6. Chạy cleanup định kỳ phòng GT inject chậm ──
     const interval = setInterval(() => {
       killGTScript();
       clearTranslateCookies();
       lockHtmlAttrs();
     }, 3000);
 
-    // ── 7. Cleanup khi visibility thay đổi (tab focus lại) ──
     const onVisibility = () => {
       if (document.visibilityState === 'visible') {
         clearTranslateCookies();
@@ -182,17 +134,9 @@ function useTranslationProtection() {
 
 // ─────────────────────────────────────────────
 // 🛡️ TRANSLATE-SAFE TEXT WRAPPER
-// Bọc text trong <span translate="no"> để ngăn extension dịch node đó
-// Dùng cho các text quan trọng như câu hỏi, đáp án
 // ─────────────────────────────────────────────
 export const NoTranslate = memo(({ children, as: Tag = 'span', className = '', style }) => (
-  <Tag
-    translate="no"
-    className={`notranslate ${className}`}
-    style={style}
-    // data-nosnippet ngăn Google Search snippet cũng dịch
-    data-nosnippet
-  >
+  <Tag translate="no" className={`notranslate ${className}`} style={style} data-nosnippet>
     {children}
   </Tag>
 ));
@@ -243,6 +187,37 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
 });
 
 // ─────────────────────────────────────────────
+// 🔒 ExamLockedBanner
+// Hiển thị khi người dùng cố truy cập exam bị khóa
+// ─────────────────────────────────────────────
+const ExamLockedBanner = memo(({ examId, requiredLevel, currentLevel, onGoBack }) => (
+  <div className="w-full flex flex-col items-center justify-center py-20 px-6 text-center">
+    <div className="w-20 h-20 rounded-2xl bg-slate-100 border-2 border-slate-200 flex items-center justify-center mb-6">
+      <Lock className="w-9 h-9 text-slate-400" strokeWidth={1.5} />
+    </div>
+    <h2 className="text-2xl font-black text-slate-900 mb-2">
+      {examId?.replace('exam', 'Đề thi ')} chưa mở khóa
+    </h2>
+    <p className="text-slate-500 text-sm max-w-sm mb-1">
+      Bạn cần đạt <strong className="text-indigo-600">Level {requiredLevel}</strong> để truy cập đề thi này.
+    </p>
+    <div className="flex items-center gap-2 mt-2 mb-8 px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-200">
+      <Star className="w-4 h-4 text-indigo-500" />
+      <span className="text-sm font-semibold text-indigo-700">
+        Level hiện tại: {currentLevel} · Cần thêm {requiredLevel - currentLevel} level
+      </span>
+    </div>
+    <button
+      onClick={onGoBack}
+      className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors"
+    >
+      ← Quay lại đề thi được mở
+    </button>
+  </div>
+));
+ExamLockedBanner.displayName = 'ExamLockedBanner';
+
+// ─────────────────────────────────────────────
 // PartTestContent
 // ─────────────────────────────────────────────
 const PartTestContent = memo(({
@@ -255,10 +230,25 @@ const PartTestContent = memo(({
   answers, handleAnswerSelect,
   showResults, handleSubmit, handleReset,
   score,
+  // exam access
+  canAccessExam, getExamLockInfo, level,
 }) => {
   useEffect(() => {
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [showResults]);
+
+  // 🔒 Chặn render nếu exam bị khóa
+  const lockInfo = getExamLockInfo(selectedExam);
+  if (lockInfo.locked) {
+    return (
+      <ExamLockedBanner
+        examId={selectedExam}
+        requiredLevel={lockInfo.requiredLevel}
+        currentLevel={level}
+        onGoBack={() => handleExamChange('exam1')}
+      />
+    );
+  }
 
   return (
     <div className="w-full space-y-6">
@@ -269,6 +259,9 @@ const PartTestContent = memo(({
         onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
         selectedPart={selectedPart}
         onPartChange={handlePartChange}
+        // Pass access info so PartSelector can show lock icons in dropdown
+        canAccessExam={canAccessExam}
+        getExamLockInfo={getExamLockInfo}
       />
 
       {showResults ? (
@@ -301,7 +294,7 @@ const PartTestContent = memo(({
 // ─────────────────────────────────────────────
 // FullExamContainer
 // ─────────────────────────────────────────────
-const FullExamContainer = memo(({ onComplete }) => {
+const FullExamContainer = memo(({ onComplete, canAccessExam, level }) => {
   const [examData, setExamData] = useState(null);
   const [loading, setLoading]   = useState(true);
 
@@ -309,18 +302,33 @@ const FullExamContainer = memo(({ onComplete }) => {
     const loadAll = async () => {
       try {
         const list   = getAllExamMetadata();
-        const loaded = await Promise.all(list.map((ex) => loadExamData(ex.id)));
+        // 🔒 Chỉ load exam mà user có quyền truy cập
+        const accessible = list.filter((ex) => canAccessExam(ex.id));
+        const loaded = await Promise.all(accessible.map((ex) => loadExamData(ex.id)));
         const dataMap = {};
-        list.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
+        accessible.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
         setExamData(dataMap);
       } finally {
         setLoading(false);
       }
     };
     loadAll();
-  }, []);
+  }, [canAccessExam]);
 
   if (loading) return <LoadingSpinner message="Đang tải dữ liệu toàn bộ đề thi..." />;
+
+  if (!examData || Object.keys(examData).length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+          <Lock className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
+        </div>
+        <h2 className="text-xl font-black text-slate-900 mb-2">Chưa có đề thi nào</h2>
+        <p className="text-slate-500 text-sm">Hoàn thành bài tập để tăng level và mở khóa đề thi.</p>
+      </div>
+    );
+  }
+
   return <FullExamMode examData={examData} onComplete={onComplete} />;
 });
 
@@ -333,8 +341,11 @@ const AppContent = memo(() => {
   const [currentExamData, setCurrentExamData] = useState(null);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
-  // 🛡️ Kích hoạt bảo vệ chống extension dịch
+  // 🛡️ Translation protection
   useTranslationProtection();
+
+  // 🔒 Exam access control
+  const { canAccessExam, getExamLockInfo, level } = useExamAccess();
 
   const {
     selectedExam, testType, handleTestTypeChange,
@@ -342,17 +353,31 @@ const AppContent = memo(() => {
     selectedPart, currentQuestionIndex, setCurrentQuestionIndex,
     answers, handleAnswerSelect,
     handleSubmit, showResults, handleReset,
-    handleExamChange, handlePartChange,
+    handleExamChange: _handleExamChange, handlePartChange,
     isSignedIn, user,
   } = useAppState();
 
+  // 🔒 Wrap handleExamChange — chặn nếu exam bị khóa
+  // Xử lý cả 2 dạng: string 'exam2' và event object { target: { value: 'exam2' } }
+  const handleExamChange = useMemo(() => (examIdOrEvent) => {
+    const examId = examIdOrEvent?.target?.value ?? examIdOrEvent;
+    if (!canAccessExam(examId)) {
+      console.warn(`[ExamAccess] Exam "${examId}" bị khóa ở level ${level}`);
+      return;
+    }
+    // Truyền nguyên dạng gốc để useAppState xử lý đúng
+    _handleExamChange(examIdOrEvent);
+  }, [canAccessExam, _handleExamChange, level]);
+
   useEffect(() => {
     if (selectedExam) {
+      // 🔒 Không load data nếu exam bị khóa
+      if (!canAccessExam(selectedExam)) return;
       loadExamData(selectedExam)
         .then(setCurrentExamData)
         .catch(() => setCurrentExamData(null));
     }
-  }, [selectedExam]);
+  }, [selectedExam, canAccessExam]);
 
   const partData = useMemo(() =>
     (!practiceType && currentExamData)
@@ -400,10 +425,17 @@ const AppContent = memo(() => {
                 handleSubmit={handleSubmitWithData}
                 handleReset={handleReset}
                 score={score}
+                canAccessExam={canAccessExam}
+                getExamLockInfo={getExamLockInfo}
+                level={level}
               />
             } />
             <Route path={ROUTES.FULL_EXAM} element={
-              <FullExamContainer onComplete={() => handleTestTypeChange('')} />
+              <FullExamContainer
+                onComplete={() => handleTestTypeChange('')}
+                canAccessExam={canAccessExam}
+                level={level}
+              />
             } />
             <Route path={ROUTES.GRAMMAR} element={
               <GrammarReview

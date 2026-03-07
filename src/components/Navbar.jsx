@@ -3,11 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Headphones, BookOpen, GraduationCap, Sparkles,
-  LogOut, User, X, Flame, Languages, Home, FileText,
+  LogOut, User, X, Languages, Home, FileText,
   ChevronRight, Star,
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
-import { useStreak } from './hooks/useStreak';
 import { ROUTES } from '../config/routes';
 
 /* ─────────────────────────────────────────────────────────────
@@ -27,9 +26,6 @@ const DESKTOP_MENU_ITEMS = ALL_MENU_ITEMS.slice(1);
 
 /* ─────────────────────────────────────────────────────────────
    Scroll to top helper
-   Dùng 'instant' thay vì 'smooth' để tránh conflict với
-   page-transition animation (nếu có). Đổi thành 'smooth'
-   nếu không dùng page transition.
    ───────────────────────────────────────────────────────────── */
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' });
 
@@ -108,7 +104,7 @@ const BottomTab = ({ item, isActive, onClick }) => {
    ───────────────────────────────────────────────────────────── */
 const MoreDrawer = ({
   open, onClose, allItems, isItemActive, onNav,
-  user, isSignedIn, streak,
+  user, isSignedIn,
   onProfile, onAnswers, onSignOut, onSignIn,
 }) => (
   <AnimatePresence>
@@ -163,12 +159,6 @@ const MoreDrawer = ({
                     <p className="text-sm font-bold text-slate-900 truncate">{user.displayName || 'Người dùng'}</p>
                     <p className="text-xs text-slate-500 truncate">{user.email}</p>
                   </div>
-                  {streak > 0 && (
-                    <div className="flex items-center gap-1 bg-orange-50 border border-orange-200 px-2 py-1 rounded-full flex-shrink-0">
-                      <Flame className="w-3 h-3 text-[#FF7D00]" />
-                      <span className="text-[#FF7D00] font-bold text-xs">{streak}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ) : (
@@ -287,7 +277,7 @@ const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick
         >
           {[
             { label: 'Trang cá nhân', icon: User,     fn: onProfileClick },
-            { label: 'Đáp án',        icon: FileText, fn: onAnswersClick  },
+            { label: 'Đáp án',         icon: FileText, fn: onAnswersClick  },
           ].map(({ label, icon: Icon, fn }) => (
             <button key={label} onClick={fn} role="menuitem"
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 transition-colors">
@@ -314,7 +304,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
   const navigate  = useNavigate();
   const location  = useLocation();
   const { user, isSignedIn, signInWithGoogle, signOut } = useFirebaseAuth();
-  const { streak } = useStreak();
 
   const [isScrolled,      setIsScrolled]      = useState(false);
   const [drawerOpen,      setDrawerOpen]      = useState(false);
@@ -350,11 +339,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     return pathMatch;
   }, [location.pathname, testType, practiceType]);
 
-  /* ── Navigate + scroll to top ──────────────────────────────────────────────
-     scrollToTop() được gọi SAU navigate() để React Router cập nhật DOM trước,
-     tránh trường hợp scroll bị reset bởi page render tiếp theo.
-     Dùng behavior: 'instant' để không tranh với page-transition animation.
-  ──────────────────────────────────────────────────────────────────────────── */
   const handleNav = useCallback((item) => {
     if (item.type === 'test')     onTestTypeChange?.(item.id);
     if (item.type === 'practice') onPracticeTypeChange?.(item.id);
@@ -362,7 +346,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
     scrollToTop();
   }, [navigate, onTestTypeChange, onPracticeTypeChange]);
 
-  // Profile / answers cũng scroll to top
   const handleProfile = useCallback(() => {
     navigate(ROUTES.PROFILE);
     scrollToTop();
@@ -398,7 +381,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
 
-            {/* Logo → home + scroll to top */}
+            {/* Logo */}
             <button
               onClick={() => { navigate(ROUTES.HOME); scrollToTop(); }}
               aria-label="HubStudy - Trang chủ"
@@ -424,16 +407,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
 
             {/* Right actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {isSignedIn && streak > 0 && (
-                <div className="flex items-center gap-1.5 bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
-                  <Flame className="w-4 h-4 text-[#FF9600] fill-current" />
-                  <span className="text-xs font-black text-orange-700 hidden sm:inline">
-                    {streak} Ngày liên tiếp
-                  </span>
-                  <span className="text-xs font-black text-orange-700 sm:hidden">{streak}</span>
-                </div>
-              )}
-
               {isSignedIn ? (
                 <div className="relative">
                   <button
@@ -523,8 +496,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         </div>
       </div>
 
-       
-
       {/* ════════════════════════════════════════
           Full-screen "More" drawer
           ════════════════════════════════════════ */}
@@ -536,7 +507,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         onNav={handleNav}
         user={user}
         isSignedIn={isSignedIn}
-        streak={streak}
         onProfile={handleProfile}
         onAnswers={handleAnswers}
         onSignOut={handleSignOut}
