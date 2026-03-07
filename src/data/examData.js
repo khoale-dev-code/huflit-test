@@ -9,7 +9,7 @@
 
   // Metadata cho tất cả các exams (lightweight)
   const EXAM_METADATA = {};
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     EXAM_METADATA[`exam${i}`] = {
       id: `exam${i}`,
       title: `Đề thi ${i}`,
