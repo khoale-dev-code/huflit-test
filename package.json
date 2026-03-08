@@ -26,6 +26,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.53.8",
     "@elevenlabs/elevenlabs-js": "^2.28.0",
+    "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
     "canvas-confetti": "^1.9.4",
     "dotenv": "^17.2.3",
@@ -33,6 +34,7 @@
     "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",
     "framer-motion": "^12.23.26",
+    "groq-sdk": "^0.37.0",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.563.0",
