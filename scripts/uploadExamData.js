@@ -32,7 +32,7 @@ const db = admin.firestore();
 // ============================================
 let EXAMS = {}; // { exam1: EXAM1_DATA, exam2: EXAM2_DATA, ... exam12: EXAM12_DATA }
 
-const examNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const examNumbers = [1, 2, 3, 4, 5, 6];
 
 try {
   for (const num of examNumbers) {
@@ -48,8 +48,8 @@ try {
   process.exit(1);
 }
 
-if (Object.keys(EXAMS).length < 12) {
-  console.error('Less than 12 exams loaded. Check files.');
+if (Object.keys(EXAMS).length < 6) {
+  console.error('Less than 6 exams loaded. Check files.');
   process.exit(1);
 }
 

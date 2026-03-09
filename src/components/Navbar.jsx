@@ -13,7 +13,7 @@ import { ROUTES } from '../config/routes';
    Route / menu config
    ───────────────────────────────────────────────────────────── */
 const ALL_MENU_ITEMS = [
-  { id: 'home',       label: 'Trang chủ', icon: Home,          path: ROUTES.HOME,   type: 'link'     },
+  { id: 'home',       label: 'Trang chủ', icon: Home,           path: ROUTES.HOME,   type: 'link'     },
   { id: 'listening',  label: 'Nghe',      icon: Headphones,    path: '/test',       type: 'test'     },
   { id: 'reading',    label: 'Đọc',       icon: BookOpen,      path: '/test',       type: 'test'     },
   { id: 'full',       label: 'Thi Thử',   icon: GraduationCap, path: '/full-exam',  type: 'exam'     },
@@ -76,7 +76,7 @@ const BottomTab = ({ item, isActive, onClick }) => {
       onClick={onClick}
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
-      className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 relative group"
+      className="flex flex-col items-center justify-center flex-1 gap-0.5 relative group pt-2"
     >
       <div className={`
         p-1.5 rounded-xl transition-all duration-200
@@ -164,7 +164,7 @@ const MoreDrawer = ({
             ) : (
               <div className="px-4 pt-4 pb-2">
                 <button
-                  onClick={() => { onSignIn(); onClose(); }}
+                  onClick={() => { onSignIn(); onClose(); }} // ✅ Logic redirect đã được truyền từ Navbar
                   className="w-full py-3 bg-[#00358E] text-white font-bold rounded-xl text-sm hover:bg-[#002763] transition-colors"
                 >
                   Đăng nhập để lưu tiến trình
@@ -237,6 +237,7 @@ const MoreDrawer = ({
                   >
                     <div className="p-1.5 rounded-lg bg-red-50"><LogOut className="w-4 h-4" /></div>
                     <span className="flex-1 text-left">Đăng xuất</span>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
                   </button>
                 </div>
               </div>
@@ -303,7 +304,7 @@ const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick
 const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange }) => {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const { user, isSignedIn, signInWithGoogle, signOut } = useFirebaseAuth();
+  const { user, isSignedIn, signOut } = useFirebaseAuth(); // Bỏ signInWithGoogle vì sẽ điều hướng về /login
 
   const [isScrolled,      setIsScrolled]      = useState(false);
   const [drawerOpen,      setDrawerOpen]      = useState(false);
@@ -433,7 +434,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
                 </div>
               ) : (
                 <button
-                  onClick={signInWithGoogle}
+                  onClick={() => navigate('/login')} // ✅ THAY ĐỔI TẠI ĐÂY: Dẫn về trang AuthPage
                   className="bg-[#00358E] text-white px-3 sm:px-5 py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-[#002763] active:bg-[#001d42] transition-colors"
                 >
                   <span className="hidden sm:inline">Đăng nhập</span>
@@ -451,10 +452,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
       {/* ════════════════════════════════════════
           MOBILE bottom nav
           ════════════════════════════════════════ */}
-      <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200">
         <div className="flex items-stretch h-16">
           {BOTTOM_NAV_ITEMS.map(item => (
             <BottomTab
@@ -465,13 +463,12 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             />
           ))}
 
-          {/* "Thêm" button */}
           <button
             onClick={() => setDrawerOpen(true)}
             aria-label="Xem thêm tùy chọn"
             aria-expanded={drawerOpen}
             aria-haspopup="dialog"
-            className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 group"
+            className="flex flex-col items-center justify-center flex-1 gap-0.5 group pt-2"
           >
             {isSignedIn && user?.photoURL ? (
               <img
@@ -494,7 +491,14 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             </span>
           </button>
         </div>
+
+        <div style={{ height: 'env(safe-area-inset-bottom)', backgroundColor: 'rgba(255,255,255,0.95)' }} />
       </div>
+
+      <div
+        className="lg:hidden pointer-events-none"
+        style={{ height: 'calc(64px + env(safe-area-inset-bottom))' }}
+      />
 
       {/* ════════════════════════════════════════
           Full-screen "More" drawer
@@ -510,7 +514,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         onProfile={handleProfile}
         onAnswers={handleAnswers}
         onSignOut={handleSignOut}
-        onSignIn={signInWithGoogle}
+        onSignIn={() => navigate('/login')} // ✅ THAY ĐỔI TẠI ĐÂY: Dẫn về trang AuthPage
       />
     </>
   );

@@ -1,26 +1,3 @@
-/* src/components/FullExam/FullExamMode.js
- *
- * FullExamMode – Component điều phối toàn bộ luồng thi Full Exam.
- *
- * LUỒNG CHÍNH:
- *   SETUP → EXAM (listening 30 phút) → EXAM (reading 60 phút) → RESULTS
- *
- * CÁC FIX SO VỚI BẢN CŨ:
- *   [FIX-1] Xóa useEffect reset timer theo section (gây double-set & race condition)
- *           → Thay bằng set thẳng trong từng handler
- *   [FIX-2] useExamTimer nhận ref-based callbacks → không stale closure
- *   [FIX-3] handleTimerComplete đúng: listening hết → set 3600s rồi chuyển reading
- *   [FIX-4] handleNextSection (user bấm "Tiếp theo") → set 3600s trước khi chuyển
- *   [FIX-5] handleStartExam → set 1800s ngay khi bắt đầu
- *
- * LUỒNG THỜI GIAN:
- *   Bắt đầu        → timeLeft = 1800 (30 phút, listening)
- *   Listening hết  → timeLeft = 3600 (60 phút, reading) [auto]
- *   User bấm Next  → timeLeft = 3600 (60 phút, reading) [manual]
- *   Reading hết    → mode = RESULTS
- *   Tổng: 30 + 60 = 90 phút ✅
- */
-
 import React, {
   useState, useEffect, useCallback, useMemo, useRef,
 } from 'react';
@@ -45,7 +22,9 @@ import { AutosaveIndicator } from './components/Header/AutosaveIndicator';
 import { TimeWarning }       from './components/Warnings/TimeWarning'; // đã redesign M3
 import { OfflineWarning }    from './components/Warnings/OfflineWarning';
 import { SubmitModal }       from './components/Modals/SubmitModal';
-import { getExamById }       from '../../data/examData';
+
+// ✅ ĐÃ SỬA: Đổi getExamById thành loadExamData cho đúng với file examData.js
+import { loadExamData }      from '../../data/examData';
 
 // ─── LocalStorage key cho draft ──────────────────────────────────────────────
 const EXAM_DRAFT_KEY = 'exam-progress-draft';
@@ -78,15 +57,12 @@ const FullExamMode = ({ onComplete }) => {
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [showWarning,     setShowWarning]     = useState(false);  // cảnh báo 5 phút
   const [showSubmitModal, setShowSubmitModal] = useState(false);  // modal nộp bài
-  const [isSaving,        setIsSaving]        = useState(false);  // autosave spinner
+  const [isSaving,         setIsSaving]        = useState(false);  // autosave spinner
   const [lastSaved,       setLastSaved]       = useState(null);   // timestamp lần save gần nhất
   const [saveError,       setSaveError]       = useState(null);   // lỗi khi save
   const [submitRetrying,  setSubmitRetrying]  = useState(false);  // đang nộp bài
 
   // ── Audio state ───────────────────────────────────────────────────────────────
-  // Dùng cả ref lẫn state:
-  //   - ref: để đọc trong callbacks không re-render (tránh stale closure)
-  //   - state: để trigger re-render khi cần cập nhật UI
   const isAudioPlayingRef = useRef(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
@@ -96,7 +72,6 @@ const FullExamMode = ({ onComplete }) => {
   }, []);
 
   // ── playedParts ref ───────────────────────────────────────────────────────────
-  // Đồng bộ từ state vào ref để dùng trong callbacks (tránh stale closure)
   const playedPartsRef = useRef(new Set());
   useEffect(() => {
     playedPartsRef.current = state.playedListeningParts || new Set();
@@ -115,7 +90,7 @@ const FullExamMode = ({ onComplete }) => {
     const handler = (e) => {
       if (state.mode === EXAM_MODES.EXAM && Object.keys(state.answers).length > 0) {
         e.preventDefault();
-        e.returnValue = ''; // Chrome yêu cầu gán returnValue
+        e.returnValue = ''; 
       }
     };
     window.addEventListener('beforeunload', handler);
@@ -123,7 +98,6 @@ const FullExamMode = ({ onComplete }) => {
   }, [state.mode, state.answers]);
 
   // ── [Effect 2] visibilitychange: lưu draft khi tab bị ẩn (mobile) ───────────
-  // Lý do: mobile browser có thể kill tab bất cứ lúc nào
   useEffect(() => {
     const save = () => {
       if (document.visibilityState === 'hidden' && state.examId) {
@@ -133,7 +107,7 @@ const FullExamMode = ({ onComplete }) => {
             answers:   state.answers,
             timestamp: Date.now(),
           }));
-        } catch (_) { /* localStorage đầy hoặc private mode → bỏ qua */ }
+        } catch (_) { }
       }
     };
     document.addEventListener('visibilitychange', save);
@@ -141,7 +115,6 @@ const FullExamMode = ({ onComplete }) => {
   }, [state.examId, state.answers]);
 
   // ── [Effect 3] Khôi phục draft khi examId thay đổi ──────────────────────────
-  // Chỉ khôi phục nếu draft thuộc cùng examId (tránh nhầm đề thi)
   useEffect(() => {
     if (!state.examId) return;
     try {
@@ -151,11 +124,10 @@ const FullExamMode = ({ onComplete }) => {
       if (draft.examId === state.examId && draft.answers) {
         setAnswers(draft.answers);
       }
-    } catch (_) { /* JSON parse lỗi → bỏ qua */ }
+    } catch (_) { }
   }, [state.examId, setAnswers]);
 
   // ── [Effect 4] Persist answers vào localStorage mỗi khi answers thay đổi ────
-  // Backup realtime, bổ sung cho autosave Firebase
   useEffect(() => {
     if (!state.examId) return;
     try {
@@ -171,7 +143,8 @@ const FullExamMode = ({ onComplete }) => {
   useEffect(() => {
     if (state.mode === EXAM_MODES.SETUP || !state.examId) return;
 
-    getExamById(state.examId)
+    // ✅ ĐÃ SỬA: Đổi getExamById thành loadExamData
+    loadExamData(state.examId)
       .then((data) => {
         if (!data?.parts) throw new Error('Invalid exam data: missing parts');
         setExamData(data);
@@ -183,16 +156,13 @@ const FullExamMode = ({ onComplete }) => {
   }, [state.examId, state.mode, setExamData]);
 
   // ── [Effect 6] Focus main content khi chuyển part ────────────────────────────
-  // preventScroll: true vì scroll được xử lý riêng ở Effect 7
   useEffect(() => {
     if (state.mode === EXAM_MODES.EXAM) {
       mainContentRef.current?.focus({ preventScroll: true });
     }
   }, [state.part, state.mode]);
 
-  // ── [Effect 7] Scroll to top sau khi React render xong khi đổi part/section ──
-  // setTimeout(0) đảm bảo DOM đã cập nhật trước khi scroll
-  // Không đặt scroll trong handler vì handler chạy trước render
+  // ── [Effect 7] Scroll to top ────────────────────────────────────────────────
   useEffect(() => {
     if (state.mode !== EXAM_MODES.EXAM) return;
     const id = setTimeout(() => {
@@ -202,7 +172,6 @@ const FullExamMode = ({ onComplete }) => {
   }, [state.part, state.section, state.mode]);
 
   // ── [Effect 8] Autosave lên Firebase mỗi 30 giây ─────────────────────────────
-  // Điều kiện: đang thi + đã đăng nhập + có kết nối + data đã load + không loading
   useEffect(() => {
     if (
       state.mode !== EXAM_MODES.EXAM ||
@@ -212,7 +181,7 @@ const FullExamMode = ({ onComplete }) => {
     ) return;
 
     const timer = setInterval(async () => {
-      if (!isOnline) return; // bỏ qua nếu offline
+      if (!isOnline) return; 
 
       try {
         setIsSaving(true);
@@ -234,7 +203,7 @@ const FullExamMode = ({ onComplete }) => {
       } finally {
         setIsSaving(false);
       }
-    }, EXAM_TIMINGS.AUTOSAVE); // mặc định 30000ms
+    }, EXAM_TIMINGS.AUTOSAVE);
 
     return () => clearInterval(timer);
   }, [
@@ -243,56 +212,34 @@ const FullExamMode = ({ onComplete }) => {
     currentUser, isOnline, progressLoading, saveProgress,
   ]);
 
-  // ── [KHÔNG CÒN] Effect reset timer theo section ──────────────────────────────
-  // [FIX-1] ĐÃ XÓA useEffect([state.section]) → setTimeLeft(...)
-  //
-  // Lý do xóa:
-  //   useEffect này chạy SAU render khi section thay đổi,
-  //   nhưng các handler (handleTimerComplete, handleNextSection)
-  //   cũng gọi setTimeLeft() → 2 lần set cùng lúc → race condition,
-  //   đôi khi timer bị set về giá trị sai.
-  //
-  // Giải pháp: setTimeLeft() được gọi DUY NHẤT tại nguồn:
-  //   - handleStartExam      → setTimeLeft(LISTENING)
-  //   - handleTimerComplete  → setTimeLeft(READING) khi listening hết
-  //   - handleNextSection    → setTimeLeft(READING) khi user bấm Next
-
 
   // ════════════════════════════════════════════════════════════════════════════
   // TIMER CALLBACKS
   // ════════════════════════════════════════════════════════════════════════════
 
-  // ── Ref để đọc section trong timer callback (tránh stale closure) ─────────
   const sectionRef = useRef(state.section);
   useEffect(() => { sectionRef.current = state.section; }, [state.section]);
 
-  // ── handleTimerComplete ──────────────────────────────────────────────────────
-  // setTimeLeft PHẢI gọi TRƯỚC setSection để useExamTimer([isActive, section])
-  // đọc được timeLeftRef = 3600 khi interval mới khởi tạo
   const handleTimerComplete = useCallback(() => {
     if (sectionRef.current === EXAM_SECTIONS.LISTENING) {
-      setTimeLeft(EXAM_TIMINGS.READING);   // ← trước
-      setSection(EXAM_SECTIONS.READING);   // ← sau → trigger interval restart
+      setTimeLeft(EXAM_TIMINGS.READING);   
+      setSection(EXAM_SECTIONS.READING);   
       setPart(5);
-      setShowWarning(false);               // reset warning cho Reading
+      setShowWarning(false);               
     } else {
-      setMode(EXAM_MODES.RESULTS);         // Reading hết → tự động nộp bài
+      setMode(EXAM_MODES.RESULTS);         
     }
   }, [setSection, setPart, setTimeLeft, setMode]);
 
-  // ── handleTimerWarning: được gọi khi còn 5 phút (300s) ──────────────────────
   const handleTimerWarning = useCallback(() => {
     setShowWarning(true);
   }, []);
 
-  // ── Kết nối timer hook ────────────────────────────────────────────────────────
-  // isActive: chỉ chạy khi đang thi + không pause + data đã load
-  // [FIX-2] useExamTimer dùng ref-based callbacks → không stale
   useExamTimer({
     isActive:   state.mode === EXAM_MODES.EXAM && !state.isPaused && !!state.examData,
     section:    state.section,
     timeLeft:   state.timeLeft,
-    onTick:     tickTimer,         // mỗi giây gọi tickTimer() → trừ 1 giây
+    onTick:     tickTimer,         
     onComplete: handleTimerComplete,
     onWarning:  handleTimerWarning,
   });
@@ -309,13 +256,11 @@ const FullExamMode = ({ onComplete }) => {
     onNavigatePrev: () => {
       const min = state.section === EXAM_SECTIONS.LISTENING ? 1 : 5;
       if (state.part > min) setPart(state.part - 1);
-      // scroll tự động qua Effect 7
     },
 
     onNavigateNext: () => {
       const max = state.section === EXAM_SECTIONS.LISTENING ? 4 : 8;
       if (state.part < max) setPart(state.part + 1);
-      // scroll tự động qua Effect 7
     },
 
     onTogglePause: () => {
@@ -332,7 +277,6 @@ const FullExamMode = ({ onComplete }) => {
     },
 
     onSubmit: () => {
-      // Chỉ cho submit khi đang ở part cuối của reading
       if (state.section === EXAM_SECTIONS.READING && state.part === 8) {
         setShowSubmitModal(true);
       }
@@ -351,17 +295,13 @@ const FullExamMode = ({ onComplete }) => {
   // HANDLERS
   // ════════════════════════════════════════════════════════════════════════════
 
-  // ── handleStartExam: người dùng chọn đề và bấm "Bắt đầu" ───────────────────
-  // [FIX-5] setTimeLeft(LISTENING) được gọi tại đây (không phải useEffect)
   const handleStartExam = useCallback((examId) => {
     setExamId(examId);
     setMode(EXAM_MODES.EXAM);
-    setTimeLeft(EXAM_TIMINGS.LISTENING);  // [FIX-5] 1800 giây = 30 phút
+    setTimeLeft(EXAM_TIMINGS.LISTENING);  
     setShowWarning(false);
-    // scroll to top tự động qua Effect 7 khi mode thay đổi
   }, [setExamId, setMode, setTimeLeft]);
 
-  // ── handleSelectAnswer: người dùng chọn đáp án ──────────────────────────────
   const handleSelectAnswer = useCallback((questionNum, optionIndex) => {
     const key = generateAnswerKey({
       section:  state.section,
@@ -371,9 +311,6 @@ const FullExamMode = ({ onComplete }) => {
     addAnswer(key, optionIndex);
   }, [state.section, state.part, addAnswer]);
 
-  // ── handleNavigatePart ───────────────────────────────────────────────────────
-  // Reading (part 5-8): tự do chuyển qua lại bất kỳ lúc nào
-  // Listening (part 1-4): không cho quay lại part đã phát xong audio
   const handleNavigatePart = useCallback((newPart) => {
     const isListening = sectionRef.current === EXAM_SECTIONS.LISTENING;
     if (
@@ -387,34 +324,30 @@ const FullExamMode = ({ onComplete }) => {
     setPart(newPart);
   }, [state.part, setPart]);
 
-  // ── handleNextSection: user bấm "Tiếp theo" sau listening part 4 ──────────
   const handleNextSection = useCallback(() => {
-    setTimeLeft(EXAM_TIMINGS.READING);    // ← TRƯỚC: sync timeLeftRef = 3600
-    setSection(EXAM_SECTIONS.READING);    // ← SAU: trigger interval restart
+    setTimeLeft(EXAM_TIMINGS.READING);    
+    setSection(EXAM_SECTIONS.READING);    
     setPart(5);
-    setShowWarning(false);                // reset warning
+    setShowWarning(false);                
   }, [setSection, setPart, setTimeLeft]);
 
-  // ── handleAudioEnd: audio của 1 listening part kết thúc ─────────────────────
   const handleAudioEnd = useCallback(() => {
     if (state.section !== EXAM_SECTIONS.LISTENING) return;
 
     const currentPart = state.part;
 
     setAudioPlaying(false);
-    markPartPlayed(currentPart); // đánh dấu không cho quay lại
+    markPartPlayed(currentPart); 
 
-    // setTimeout(0): đợi state update trước khi navigate
     setTimeout(() => {
       if (currentPart < 4) {
-        setPart(currentPart + 1); // chuyển sang listening part tiếp theo
+        setPart(currentPart + 1); 
       } else {
-        handleNextSection();      // part 4 xong → sang reading
+        handleNextSection();      
       }
     }, 0);
   }, [state.section, state.part, setAudioPlaying, markPartPlayed, setPart, handleNextSection]);
 
-  // ── handleFinalSubmit: người dùng xác nhận nộp bài ──────────────────────────
   const handleFinalSubmit = useCallback(async () => {
     setSubmitRetrying(true);
     setSaveError(null);
@@ -424,7 +357,6 @@ const FullExamMode = ({ onComplete }) => {
 
       const results = calculateFullResults(state.examData, state.answers);
 
-      // Chỉ lưu Firebase nếu đang online và đã đăng nhập
       if (isOnline && currentUser) {
         await saveProgress({
           exam:            state.examId,
@@ -436,7 +368,6 @@ const FullExamMode = ({ onComplete }) => {
           isDraft:         false,
           testType:        'full-exam',
 
-          // Tách riêng listening / reading answers để query dễ hơn
           listeningAnswers: Object.fromEntries(
             Object.entries(state.answers)
               .filter(([k]) => k.startsWith(EXAM_SECTIONS.LISTENING))
@@ -450,7 +381,6 @@ const FullExamMode = ({ onComplete }) => {
         });
       }
 
-      // Xóa draft sau khi nộp thành công
       localStorage.removeItem(EXAM_DRAFT_KEY);
 
       setMode(EXAM_MODES.RESULTS);
@@ -472,25 +402,21 @@ const FullExamMode = ({ onComplete }) => {
   // COMPUTED VALUES (useMemo)
   // ════════════════════════════════════════════════════════════════════════════
 
-  // Số câu chưa trả lời trong section hiện tại (hiển thị trên submit modal)
   const unansweredCount = useMemo(() => {
     if (!state.examData) return 0;
     return countUnansweredQuestions(state.examData, state.answers, state.section);
   }, [state.examData, state.answers, state.section]);
 
-  // Có phải part cuối của listening không? → hiển thị nút "Sang Reading"
   const isLastListeningPart = useMemo(
     () => state.section === EXAM_SECTIONS.LISTENING && state.part === 4,
     [state.section, state.part]
   );
 
-  // Có phải part cuối của reading không? → hiển thị nút "Nộp bài"
   const isLastReadingPart = useMemo(
     () => state.section === EXAM_SECTIONS.READING && state.part === 8,
     [state.section, state.part]
   );
 
-  // Context value cho AnswersContext (tránh tạo object mới mỗi render)
   const answersContextValue = useMemo(
     () => ({ answers: state.answers, addAnswer }),
     [state.answers, addAnswer]
@@ -501,12 +427,10 @@ const FullExamMode = ({ onComplete }) => {
   // RENDER
   // ════════════════════════════════════════════════════════════════════════════
 
-  // ── Màn hình chọn đề ────────────────────────────────────────────────────────
   if (state.mode === EXAM_MODES.SETUP) {
     return <ExamSetup onStartExam={handleStartExam} />;
   }
 
-  // ── Màn hình kết quả ────────────────────────────────────────────────────────
   if (state.mode === EXAM_MODES.RESULTS) {
     return (
       <ResultsScreen
@@ -525,15 +449,10 @@ const FullExamMode = ({ onComplete }) => {
     );
   }
 
-  // ── Màn hình thi chính ───────────────────────────────────────────────────────
   return (
     <AnswersContext.Provider value={answersContextValue}>
       <div className="min-h-screen bg-white">
 
-        {/* ════════════════════════════════════════
-            HEADER: Timer + Autosave indicator
-            sticky top-0 để luôn hiển thị khi scroll
-            ════════════════════════════════════════ */}
         <header
           className="sticky top-0 z-30 bg-white"
           style={{
@@ -551,7 +470,6 @@ const FullExamMode = ({ onComplete }) => {
             gap:             '12px',
             flexWrap:        'wrap',
           }}>
-            {/* Tiêu đề section + tên đề */}
             <div>
               <h2 style={{
                 fontSize:   'clamp(14px,2.5vw,17px)',
@@ -566,7 +484,6 @@ const FullExamMode = ({ onComplete }) => {
               </p>
             </div>
 
-            {/* Timer + Autosave */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px,3vw,32px)' }}>
               <Timer
                 timeLeft={state.timeLeft}
@@ -582,9 +499,6 @@ const FullExamMode = ({ onComplete }) => {
           </div>
         </header>
 
-        {/* ════════════════════════════════════════
-            STEP INDICATOR: Listening → Reading
-            ════════════════════════════════════════ */}
         <div
           className="bg-slate-50"
           style={{
@@ -600,11 +514,6 @@ const FullExamMode = ({ onComplete }) => {
           </div>
         </div>
 
-        {/* ════════════════════════════════════════
-            WARNINGS (fixed position, z-50)
-            ════════════════════════════════════════ */}
-
-        {/* Cảnh báo 5 phút – M3 design, auto-dismiss sau 8s */}
         <TimeWarning
           visible={showWarning}
           section={state.section}
@@ -612,14 +521,8 @@ const FullExamMode = ({ onComplete }) => {
           timeLeft={state.timeLeft}
         />
 
-        {/* Cảnh báo mất mạng */}
         <OfflineWarning isOnline={isOnline} />
 
-        {/* ════════════════════════════════════════
-            MAIN CONTENT
-            tabIndex={-1}: cho phép focus bằng code (Effect 6)
-            outline none: ẩn focus ring mặc định
-            ════════════════════════════════════════ */}
         <main
           id="main-content"
           ref={mainContentRef}
@@ -627,7 +530,6 @@ const FullExamMode = ({ onComplete }) => {
           aria-label={`${state.section} – Part ${state.part}`}
           style={{ outline: 'none' }}
         >
-          {/* Chỉ render ExamScreen khi examData đã load xong */}
           {state.examData && (
             <ExamScreen
               examData={state.examData}
@@ -648,9 +550,6 @@ const FullExamMode = ({ onComplete }) => {
           )}
         </main>
 
-        {/* ════════════════════════════════════════
-            SUBMIT MODAL
-            ════════════════════════════════════════ */}
         <SubmitModal
           visible={showSubmitModal}
           unansweredCount={unansweredCount}

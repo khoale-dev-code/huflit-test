@@ -1,43 +1,80 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  
+  // ─── Cấu hình Server (Development) ──────────────────────────────
   server: {
     port: 5173,
     open: true,
     cors: true,
+    // ✅ QUAN TRỌNG: Fix lỗi COOP (Cross-Origin-Opener-Policy) 
+    // Giúp Popup đăng nhập Google của Firebase hoạt động ổn định trên localhost
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      "Cross-Origin-Embedder-Policy": "unsafe-none"
+    },
   },
+
+  // ─── Cấu hình Resolve (Alias) ──────────────────────────────────
+  resolve: {
+    alias: {
+      // Giúp bạn import theo kiểu: import { ... } from '@/components/...'
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+
+  // ─── Cấu hình Build (Production) ───────────────────────────────
   build: {
     outDir: 'dist',
-    sourcemap: false,
-    // Sửa lỗi target: Dùng 'es2020' hoặc 'esnext' để an toàn cho cả JS và CSS
-    target: 'es2020', 
-    
-    // Nếu bạn chưa cài 'terser', hãy để mặc định (xóa dòng minify) để Vite dùng esbuild cực nhanh
-    // minify: 'terser', 
-    
-    chunkSizeWarningLimit: 1000,
+    target: 'esnext', // Sử dụng công nghệ JS mới nhất cho trình duyệt hiện đại
+    sourcemap: false, // Tắt sourcemap để bảo mật code và giảm dung lượng build
+    chunkSizeWarningLimit: 1500, // Tăng giới hạn cảnh báo dung lượng file
+
     rollupOptions: {
       output: {
-        // Tối ưu logic chia chunk để tránh "Circular dependency"
+        // ✅ TỐI ƯU CHUNKING: Chia nhỏ ứng dụng để tải nhanh hơn
         manualChunks(id) {
-          // Ưu tiên tách Firebase đầu tiên vì nó độc lập và rất nặng
+          // 1. Tách các thư viện Core (Firebase & Supabase)
           if (id.includes('node_modules/firebase')) {
-            return 'firebase-provider';
+            return 'firebase-bundle';
           }
-          
-          // Gom nhóm các thư viện đồ họa và UI nặng
-          if (id.includes('node_modules/recharts') || 
-              id.includes('node_modules/framer-motion') || 
-              id.includes('node_modules/lucide-react')) {
+          if (id.includes('node_modules/@supabase')) {
+            return 'supabase-bundle';
+          }
+
+          // 2. Tách UI & Icons (Nặng nhưng ít khi thay đổi)
+          if (
+            id.includes('node_modules/lucide-react') ||
+            id.includes('node_modules/framer-motion') ||
+            id.includes('node_modules/recharts')
+          ) {
             return 'ui-visuals';
           }
 
-          // Mọi thứ khác trong node_modules sẽ tự động vào vendor (mặc định của Vite)
-          // Chúng ta không cần return 'vendor' thủ công ở đây để tránh lỗi lặp vòng
-        }
-      }
-    }
+          // 3. Tách các tiện ích React Core
+          if (
+            id.includes('node_modules/react') ||
+            id.includes('node_modules/react-dom') ||
+            id.includes('node_modules/react-router-dom')
+          ) {
+            return 'react-vendor';
+          }
+        },
+        
+        // Cấu hình tên file để tránh cache cũ trên trình duyệt người dùng
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+      },
+    },
+  },
+  
+  // Tối ưu hóa việc nạp (pre-bundling) các thư viện nặng
+  optimizeDeps: {
+    include: ['firebase/app', 'firebase/auth', 'firebase/firestore', '@supabase/supabase-js'],
   }
-})
+});

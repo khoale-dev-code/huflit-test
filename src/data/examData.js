@@ -1,169 +1,63 @@
-  // src/data/examData.js
+import { supabase } from '../config/supabaseClient';
 
-  /**
-   * Lazy Loading Exam Data
-   * - Chỉ load exam khi người dùng chọn
-   * - Giảm bundle size ban đầu
-   * - Cache data sau lần load đầu tiên
-   */
+/**
+ * ─── DỮ LIỆU ĐỀ THI CHO HỌC VIÊN (USER FRONTEND) ─────────────────────
+ */
 
-  // Metadata cho tất cả các exams (lightweight)
-  const EXAM_METADATA = {};
-  for (let i = 1; i <= 6; i++) {
-    EXAM_METADATA[`exam${i}`] = {
-      id: `exam${i}`,
-      title: `Đề thi ${i}`,
-      loaded: false,
-      data: null,
-      loading: false,
-      loadPromise: null
-    };
+// 1. LẤY DANH SÁCH METADATA ĐỀ THI (Dùng cho giao diện chọn đề)
+export const getAllExamMetadataAsync = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('exams')
+      .select('id, title, description, duration, questions, metadata, is_public, showResults, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("❌ Lỗi truy vấn Supabase:", error.message);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("🚨 Lỗi tải danh sách đề thi (Học viên):", error.message);
+    return []; 
+  }
+};
+
+// 2. LẤY TOÀN BỘ CHI TIẾT 1 ĐỀ THI
+// Đã thêm lớp khiên bảo vệ (Validation) chặn lỗi UUID
+export const loadExamData = async (examId) => {
+  // A. BẢO VỆ: Nếu không có ID, trả về null luôn
+  if (!examId || typeof examId !== 'string') return null;
+
+  // B. BẢO VỆ: Kiểm tra xem examId có đúng chuẩn UUID không 
+  // (Chặn ngay lập tức các chữ linh tinh như "exam1", "exam2")
+  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
+  
+  if (!isValidUUID) {
+    console.warn(`⚠️ Bỏ qua tải đề thi: ID "${examId}" là dữ liệu cũ (không phải UUID).`);
+    return null; // Trả về null mà không gọi API để tránh làm sập Supabase
   }
 
-  // Cache để tránh load lại
-  const examCache = new Map();
+  // C. GỌI API CHÍNH THỨC
+  try {
+    const { data, error } = await supabase
+      .from('exams')
+      .select('*')
+      .eq('id', examId)
+      .single();
 
-  /**
-   * Load exam data dynamically
-   * @param {string} examId - ID của exam (exam1, exam2, ...)
-   * @returns {Promise<Object>} Exam data
-   */
-  export const loadExamData = async (examId) => {
-    // Kiểm tra cache trước
-    if (examCache.has(examId)) {
-      return examCache.get(examId);
+    if (error) {
+      console.error("❌ Lỗi truy vấn chi tiết đề thi:", error.message);
+      throw error;
     }
 
-    const metadata = EXAM_METADATA[examId];
-    if (!metadata) {
-      console.warn(`⚠️ Exam "${examId}" không tồn tại`);
-      return null;
-    }
+    return data;
+  } catch (error) {
+    console.error(`🚨 Lỗi tải dữ liệu đề thi ${examId}:`, error.message);
+    return null;
+  }
+};
 
-    // Nếu đang load, đợi promise hiện tại
-    if (metadata.loading && metadata.loadPromise) {
-      return metadata.loadPromise;
-    }
-
-    // Bắt đầu load
-    metadata.loading = true;
-    
-    const examNumber = examId.replace('exam', '');
-    
-    metadata.loadPromise = import(`./exams/exam${examNumber}.js`)
-      .then(module => {
-        const dataKey = `EXAM${examNumber}_DATA`;
-        const data = module[dataKey];
-        
-        if (!data) {
-          throw new Error(`❌ Không tìm thấy ${dataKey} trong module`);
-        }
-
-        // Lưu vào cache
-        examCache.set(examId, data);
-        metadata.data = data;
-        metadata.loaded = true;
-        metadata.loading = false;
-        
-        console.log(`✅ Đã load ${examId}`);
-        return data;
-      })
-      .catch(error => {
-        console.error(`❌ Lỗi khi load ${examId}:`, error);
-        metadata.loading = false;
-        metadata.loadPromise = null;
-        return null;
-      });
-
-    return metadata.loadPromise;
-  };
-
-  /**
-   * Preload exam để tăng tốc (optional)
-   * @param {string} examId 
-   */
-  export const preloadExamData = (examId) => {
-    if (!examCache.has(examId)) {
-      loadExamData(examId);
-    }
-  };
-
-  /**
-   * Get exam by ID (async)
-   * @param {string} examId 
-   * @returns {Promise<Object|null>}
-   */
-  export const getExamById = async (examId) => {
-    return await loadExamData(examId);
-  };
-
-  /**
-   * Get all exam metadata (synchronous - chỉ trả về thông tin cơ bản)
-   * @returns {Array<Object>}
-   */
-  export const getAllExamMetadata = () => {
-    return Object.values(EXAM_METADATA).map(({ id, title, loaded }) => ({
-      id,
-      title,
-      loaded
-    }));
-  };
-
-  /**
-   * Get all loaded exams (synchronous)
-   * @returns {Array<Object>}
-   */
-  export const getAllLoadedExams = () => {
-    return Array.from(examCache.values());
-  };
-
-  /**
-   * Get exam parts (async)
-   * @param {string} examId 
-   * @returns {Promise<Object>}
-   */
-  export const getExamParts = async (examId) => {
-    const exam = await loadExamData(examId);
-    return exam?.parts || {};
-  };
-
-  /**
-   * Get exam questions (async)
-   * @param {string} examId 
-   * @param {string} partId 
-   * @returns {Promise<Array>}
-   */
-  export const getExamQuestions = async (examId, partId) => {
-    const exam = await loadExamData(examId);
-    const part = exam?.parts?.[partId];
-    return part?.questions || [];
-  };
-
-  /**
-   * Clear cache (dùng khi cần reset)
-   */
-  export const clearExamCache = () => {
-    examCache.clear();
-    Object.values(EXAM_METADATA).forEach(meta => {
-      meta.loaded = false;
-      meta.data = null;
-      meta.loading = false;
-      meta.loadPromise = null;
-    });
-    console.log('🗑️ Đã xóa cache exams');
-  };
-
-  /**
-   * Get cache stats (debug)
-   */
-  export const getCacheStats = () => {
-    return {
-      totalExams: Object.keys(EXAM_METADATA).length,
-      loadedExams: examCache.size,
-      exams: Array.from(examCache.keys())
-    };
-  };
-
-  // Export metadata để dùng cho dropdown
-  export const EXAM_LIST = getAllExamMetadata();
-  
+// 3. Mock data (Để giữ tương thích với code cũ)
+export const examMetadata = [];
