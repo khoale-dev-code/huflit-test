@@ -1,4 +1,4 @@
-import React, { useMemo, useState, lazy, Suspense, memo, useEffect } from 'react';
+import React, { useMemo, useState, lazy, Suspense, memo, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
@@ -32,93 +32,163 @@ const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
 const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
 
-// ─────────────────────────────────────────────
-// 🛡️ TRANSLATION PROTECTION HOOK
-// ─────────────────────────────────────────────
+
+function patchNodePrototype() {
+  if (typeof window === 'undefined' || window.__translatePatchApplied) return;
+  window.__translatePatchApplied = true;
+
+  const origRemoveChild = Node.prototype.removeChild;
+  Node.prototype.removeChild = function (child) {
+    if (child.parentNode !== this) {
+      // Node was already moved by translator — silently ignore
+      return child;
+    }
+    return origRemoveChild.call(this, child);
+  };
+
+  const origInsertBefore = Node.prototype.insertBefore;
+  Node.prototype.insertBefore = function (newNode, refNode) {
+    if (refNode && refNode.parentNode !== this) {
+      // Reference node was moved — append instead to avoid crash
+      return this.appendChild(newNode);
+    }
+    return origInsertBefore.call(this, newNode, refNode);
+  };
+}
+
+// Patch immediately (before any render)
+patchNodePrototype();
+
+/**
+ * Hook — runs inside the React tree to watch for & undo translate mutations.
+ */
 function useTranslationProtection() {
   useEffect(() => {
+    // ── 1. Purge cookies & storage ────────────────────────────
     const clearTranslateCookies = () => {
       try {
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
+        ['', `; domain=${window.location.hostname}`, `; domain=.${window.location.hostname}`].forEach((suffix) => {
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${suffix}`;
+        });
         sessionStorage.removeItem('googtrans');
         localStorage.removeItem('googtrans');
       } catch { /* ignore */ }
     };
     clearTranslateCookies();
 
+    // ── 2. Lock <html> attributes ─────────────────────────────
     const lockHtmlAttrs = () => {
       const html = document.documentElement;
       html.setAttribute('translate', 'no');
-      html.setAttribute('class', 'notranslate');
-      if (html.className.includes('translated-')) {
-        html.className = html.className.replace(/\btranslated-\S+/g, '').trim();
-      }
+      if (!html.classList.contains('notranslate')) html.classList.add('notranslate');
+      // Remove any "translated-*" classes Google injects
+      [...html.classList].filter((c) => c.startsWith('translated-')).forEach((c) => html.classList.remove(c));
       if (html.lang !== 'vi') html.setAttribute('lang', 'vi');
     };
     lockHtmlAttrs();
 
-    const killGTScript = () => {
-      document.querySelectorAll('script[src*="translate.google"]').forEach((s) => s.remove());
-      document.querySelectorAll('[id^="goog-gt-"]').forEach((el) => el.remove());
-      document.querySelectorAll('.goog-te-banner-frame').forEach((el) => el.remove());
-      document.querySelectorAll('.skiptranslate').forEach((el) => el.remove());
-      document.querySelectorAll('iframe[id^="deepl"]').forEach((el) => el.remove());
+    // ── 3. Remove translator scripts & UI elements ────────────
+    const killGTElements = () => {
+      document.querySelectorAll([
+        'script[src*="translate.google"]',
+        'script[src*="translate.googleapis"]',
+        '[id^="goog-gt-"]',
+        '.goog-te-banner-frame',
+        '.skiptranslate',
+        'iframe[id^="deepl"]',
+        '#google_translate_element',
+        '.goog-te-gadget',
+      ].join(',')).forEach((el) => {
+        try { el.remove(); } catch { /* ignore */ }
+      });
     };
+    killGTElements();
 
-    const restoreFontNodes = (root = document.getElementById('root')) => {
+    // ── 4. Unwrap <font> nodes injected by Google Translate ───
+    // Google wraps every text node: "Hello" → <font>Hello</font>
+    // We reverse this by hoisting children back to the parent.
+    const unwrapFontNodes = (root = document.getElementById('root')) => {
       if (!root) return;
-      root.querySelectorAll('font').forEach((font) => {
+      // querySelectorAll is live-ish, iterate a static copy
+      [...root.querySelectorAll('font')].forEach((font) => {
         const parent = font.parentNode;
         if (!parent) return;
-        while (font.firstChild) parent.insertBefore(font.firstChild, font);
-        font.remove();
+        // Move all children out before removing the wrapper
+        while (font.firstChild) {
+          try { parent.insertBefore(font.firstChild, font); } catch { /* ignore */ }
+        }
+        try { parent.removeChild(font); } catch { /* ignore */ }
       });
     };
 
+    // Debounce the observer callback to batch rapid mutations
     let restoreTimer = null;
+    const scheduleRestore = (flags) => {
+      clearTimeout(restoreTimer);
+      restoreTimer = setTimeout(() => {
+        if (flags.lock)    lockHtmlAttrs();
+        if (flags.unwrap)  unwrapFontNodes();
+        if (flags.kill)    killGTElements();
+        clearTranslateCookies();
+      }, 50);
+    };
 
+    // ── 5. MutationObserver ───────────────────────────────────
     const observer = new MutationObserver((mutations) => {
-      let needsRestore = false;
-      let needsLock = false;
+      const flags = { lock: false, unwrap: false, kill: false };
+
       for (const mutation of mutations) {
+        // Attribute changes on <html> (class, lang, translate)
+        if (mutation.type === 'attributes' && mutation.target === document.documentElement) {
+          flags.lock = true;
+        }
+
         if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
-            if (node.nodeName === 'FONT') needsRestore = true;
-            if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute?.('_mstmutation')) node.remove();
-            if (node.nodeName === 'SCRIPT' && node.src?.includes('translate.google')) node.remove();
+            if (node.nodeName === 'FONT') {
+              flags.unwrap = true;
+            }
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              // Microsoft Translator attr
+              if (node.hasAttribute?.('_mstmutation')) {
+                try { node.remove(); } catch { /* ignore */ }
+              }
+              // GT script injection
+              if (node.nodeName === 'SCRIPT' &&
+                  (node.src?.includes('translate.google') || node.src?.includes('translate.googleapis'))) {
+                flags.kill = true;
+                try { node.remove(); } catch { /* ignore */ }
+              }
+            }
           }
         }
-        if (mutation.type === 'attributes' && mutation.target === document.documentElement) needsLock = true;
       }
-      if (needsRestore || needsLock) {
-        clearTimeout(restoreTimer);
-        restoreTimer = setTimeout(() => {
-          if (needsLock) lockHtmlAttrs();
-          if (needsRestore) restoreFontNodes();
-          killGTScript();
-          clearTranslateCookies();
-        }, 50);
+
+      if (flags.lock || flags.unwrap || flags.kill) {
+        scheduleRestore(flags);
       }
     });
 
     observer.observe(document.documentElement, {
-      childList: true, subtree: true, attributes: true,
+      childList:       true,
+      subtree:         true,
+      attributes:      true,
       attributeFilter: ['class', 'lang', 'translate'],
     });
 
+    // ── 6. Periodic sweep (fallback) ──────────────────────────
     const interval = setInterval(() => {
-      killGTScript();
+      killGTElements();
       clearTranslateCookies();
       lockHtmlAttrs();
     }, 3000);
 
+    // ── 7. Visibility change (tab re-focus) ───────────────────
     const onVisibility = () => {
       if (document.visibilityState === 'visible') {
         clearTranslateCookies();
         lockHtmlAttrs();
-        killGTScript();
+        killGTElements();
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
@@ -132,11 +202,17 @@ function useTranslationProtection() {
   }, []);
 }
 
-// ─────────────────────────────────────────────
-// 🛡️ TRANSLATE-SAFE TEXT WRAPPER
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// 🛡️ NoTranslate wrapper
+// Wraps any text that must NOT be translated (scores, code, names…)
+// ─────────────────────────────────────────────────────────────────
 export const NoTranslate = memo(({ children, as: Tag = 'span', className = '', style }) => (
-  <Tag translate="no" className={`notranslate ${className}`} style={style} data-nosnippet>
+  <Tag
+    translate="no"
+    className={`notranslate ${className}`.trim()}
+    style={style}
+    data-nosnippet
+  >
     {children}
   </Tag>
 ));
@@ -187,8 +263,7 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
 });
 
 // ─────────────────────────────────────────────
-// 🔒 ExamLockedBanner
-// Hiển thị khi người dùng cố truy cập exam bị khóa
+// ExamLockedBanner
 // ─────────────────────────────────────────────
 const ExamLockedBanner = memo(({ examId, requiredLevel, currentLevel, onGoBack }) => (
   <div className="w-full flex flex-col items-center justify-center py-20 px-6 text-center">
@@ -230,14 +305,12 @@ const PartTestContent = memo(({
   answers, handleAnswerSelect,
   showResults, handleSubmit, handleReset,
   score,
-  // exam access
   canAccessExam, getExamLockInfo, level,
 }) => {
   useEffect(() => {
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [showResults]);
 
-  // 🔒 Chặn render nếu exam bị khóa
   const lockInfo = getExamLockInfo(selectedExam);
   if (lockInfo.locked) {
     return (
@@ -259,7 +332,6 @@ const PartTestContent = memo(({
         onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
         selectedPart={selectedPart}
         onPartChange={handlePartChange}
-        // Pass access info so PartSelector can show lock icons in dropdown
         canAccessExam={canAccessExam}
         getExamLockInfo={getExamLockInfo}
       />
@@ -301,11 +373,10 @@ const FullExamContainer = memo(({ onComplete, canAccessExam, level }) => {
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const list   = getAllExamMetadata();
-        // 🔒 Chỉ load exam mà user có quyền truy cập
+        const list       = getAllExamMetadata();
         const accessible = list.filter((ex) => canAccessExam(ex.id));
-        const loaded = await Promise.all(accessible.map((ex) => loadExamData(ex.id)));
-        const dataMap = {};
+        const loaded     = await Promise.all(accessible.map((ex) => loadExamData(ex.id)));
+        const dataMap    = {};
         accessible.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
         setExamData(dataMap);
       } finally {
@@ -341,10 +412,9 @@ const AppContent = memo(() => {
   const [currentExamData, setCurrentExamData] = useState(null);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
-  // 🛡️ Translation protection
+  // 🛡️ Activate translation protection inside the React tree
   useTranslationProtection();
 
-  // 🔒 Exam access control
   const { canAccessExam, getExamLockInfo, level } = useExamAccess();
 
   const {
@@ -357,21 +427,17 @@ const AppContent = memo(() => {
     isSignedIn, user,
   } = useAppState();
 
-  // 🔒 Wrap handleExamChange — chặn nếu exam bị khóa
-  // Xử lý cả 2 dạng: string 'exam2' và event object { target: { value: 'exam2' } }
   const handleExamChange = useMemo(() => (examIdOrEvent) => {
     const examId = examIdOrEvent?.target?.value ?? examIdOrEvent;
     if (!canAccessExam(examId)) {
       console.warn(`[ExamAccess] Exam "${examId}" bị khóa ở level ${level}`);
       return;
     }
-    // Truyền nguyên dạng gốc để useAppState xử lý đúng
     _handleExamChange(examIdOrEvent);
   }, [canAccessExam, _handleExamChange, level]);
 
   useEffect(() => {
     if (selectedExam) {
-      // 🔒 Không load data nếu exam bị khóa
       if (!canAccessExam(selectedExam)) return;
       loadExamData(selectedExam)
         .then(setCurrentExamData)

@@ -16,6 +16,8 @@ const GlobalStyles = () => (
     :root {
       --font-sans: 'Google Sans Text', system-ui, sans-serif;
       --font-display: 'Google Sans Display', sans-serif;
+      /* Chiều cao tổng của bottom navbar (tabs + safe area) */
+      --bottom-nav-height: calc(64px + env(safe-area-inset-bottom));
     }
     
     .font-sans-m3 { font-family: var(--font-sans); }
@@ -133,19 +135,14 @@ const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId }
             ? `${theme.border} ${theme.bgSelected} ring-2 ring-offset-0 ${theme.ring}`
             : 'border-[#C4C6D0] bg-[#FAFAFA] hover:bg-gray-100/80 active:bg-gray-200/60'}`}
       >
-        {/* Label badge */}
         <div className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-colors duration-200 ${isSelected ? theme.base : 'bg-[#E1E2EC]'}`}>
           {isSelected
             ? <Check size={14} color="#fff" strokeWidth={2.5} />
             : <span className="text-sm font-medium text-[#44464F]">{label}</span>}
         </div>
-
-        {/* Text */}
         <span className={`text-[14.5px] flex-1 transition-colors duration-200 ${isSelected ? `${theme.textOn} font-medium` : 'text-[#1A1B1F] font-normal'}`}>
           {option}
         </span>
-
-        {/* Selection indicator */}
         {isSelected && (
           <div className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center animate-m3-fadein ${theme.base}`}>
             <Check size={11} color="#fff" strokeWidth={3} />
@@ -162,8 +159,6 @@ const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId }
 const QuestionCard = memo(({ question, options, selectedAnswer, onAnswerSelect }) => (
   <article className="q-card animate-m3-fadein bg-white border border-[#C4C6D0] rounded-[28px] p-4 mb-3 shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_12px_rgba(26,86,219,0.08)] transition-shadow duration-300">
     <ScriptDisplay script={question.script} />
-
-    {/* Question header */}
     <div className="flex items-start gap-3 mb-3.5">
       <div className="w-[30px] h-[30px] rounded-lg bg-[#2F3036] text-[#F2F0F4] flex items-center justify-center shrink-0 mt-[2px]">
         <span className="text-sm font-medium font-sans-m3">{question.id}</span>
@@ -172,8 +167,6 @@ const QuestionCard = memo(({ question, options, selectedAnswer, onAnswerSelect }
         {question.question}
       </h3>
     </div>
-
-    {/* Options */}
     <div className="flex flex-col gap-2">
       {options?.map((opt, i) => (
         <QuestionOption
@@ -299,7 +292,26 @@ const QuestionDisplay = memo(({
       </header>
 
       {/* ── Question List ── */}
-      <div className="px-4 py-4 md:px-5 md:py-5 pb-[148px] md:pb-5 max-w-3xl mx-auto">
+      <style>{`
+        .submit-bar-wrap {
+          position: fixed;
+          bottom: calc(64px + env(safe-area-inset-bottom));
+          left: 0; right: 0; z-index: 50;
+        }
+        .toast-wrap {
+          bottom: calc(72px + 64px + env(safe-area-inset-bottom) + 8px);
+        }
+        @media (min-width: 768px) {
+          .submit-bar-wrap { position: static; bottom: auto; }
+          .qd-pad { padding-bottom: 32px !important; }
+          .toast-wrap { bottom: 24px; left: auto; right: 20px; width: 340px; }
+        }
+      `}</style>
+
+      <div
+        className="px-4 py-4 md:px-5 md:py-5 max-w-3xl mx-auto qd-pad"
+        style={{ paddingBottom: 'calc(72px + 64px + env(safe-area-inset-bottom) + 8px)' }}
+      >
         {partData.questions.map((q) => (
           <QuestionCard
             key={q.id}
@@ -312,8 +324,15 @@ const QuestionDisplay = memo(({
         <TipsCard />
 
         {/* ── Submit Bar ── */}
-        <div className="fixed bottom-16 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#C4C6D0] shadow-[0_-2px_20px_rgba(26,86,219,0.08)] px-4 py-3 flex items-center justify-between gap-3 font-sans-m3
-                        md:static md:bottom-auto md:mt-2 md:mb-8 md:bg-[#FAFAFA] md:border md:rounded-[28px] md:px-5 md:py-4 md:shadow-[0_1px_6px_rgba(0,0,0,0.04),0_4px_16px_rgba(26,86,219,0.05)]">
+        <div
+          className="submit-bar-wrap
+                     bg-white/95 backdrop-blur-md border-t border-[#C4C6D0]
+                     shadow-[0_-2px_20px_rgba(26,86,219,0.08)]
+                     px-4 py-3 flex items-center justify-between gap-3 font-sans-m3
+                     md:mt-2 md:mb-8
+                     md:bg-[#FAFAFA] md:border md:border-[#C4C6D0] md:rounded-[28px] md:px-5 md:py-4
+                     md:shadow-[0_1px_6px_rgba(0,0,0,0.04),0_4px_16px_rgba(26,86,219,0.05)]"
+        >
           <div className="flex flex-col gap-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{answersCount}/{totalQuestions} câu</span>
@@ -348,10 +367,17 @@ const QuestionDisplay = memo(({
         onCancel={() => setConfirmOpen(false)}
       />
 
-      {/* ── M3 Toast ── */}
+      {/* ── M3 Toast ──
+          Mobile: hiện trên submit bar (submit bar ~72px + navbar 64px + safe-area)
+          Desktop: góc dưới phải
+      */}
       {status.show && (
-        <div className={`fixed z-[60] bottom-[90px] left-4 right-4 md:left-auto md:right-5 md:bottom-6 md:w-[340px] px-4 py-3.5 rounded-2xl flex items-center gap-3 shadow-[0_6px_24px_rgba(0,0,0,0.2)] animate-m3-slidein font-sans-m3
-          ${status.success ? 'bg-[#006C51] text-white' : 'bg-[#2F3036] text-[#F2F0F4]'}`}
+        <div
+          className={`fixed z-[60] left-4 right-4 toast-wrap
+            md:w-[340px]
+            px-4 py-3.5 rounded-2xl flex items-center gap-3
+            shadow-[0_6px_24px_rgba(0,0,0,0.2)] animate-m3-slidein font-sans-m3
+            ${status.success ? 'bg-[#006C51] text-white' : 'bg-[#2F3036] text-[#F2F0F4]'}`}
         >
           {status.success
             ? <CheckCircle size={18} className="shrink-0" />

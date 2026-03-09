@@ -76,7 +76,7 @@ const BottomTab = ({ item, isActive, onClick }) => {
       onClick={onClick}
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
-      className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 relative group"
+      className="flex flex-col items-center justify-center flex-1 gap-0.5 relative group pt-2"
     >
       <div className={`
         p-1.5 rounded-xl transition-all duration-200
@@ -451,10 +451,8 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
       {/* ════════════════════════════════════════
           MOBILE bottom nav
           ════════════════════════════════════════ */}
-      <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200">
+        {/* Tabs row — fixed 64px height */}
         <div className="flex items-stretch h-16">
           {BOTTOM_NAV_ITEMS.map(item => (
             <BottomTab
@@ -471,7 +469,7 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             aria-label="Xem thêm tùy chọn"
             aria-expanded={drawerOpen}
             aria-haspopup="dialog"
-            className="flex flex-col items-center justify-center flex-1 h-full gap-0.5 group"
+            className="flex flex-col items-center justify-center flex-1 gap-0.5 group pt-2"
           >
             {isSignedIn && user?.photoURL ? (
               <img
@@ -494,7 +492,16 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
             </span>
           </button>
         </div>
+
+        {/* ✅ Safe area filler — fills the gap on iPhone notch/home bar */}
+        <div style={{ height: 'env(safe-area-inset-bottom)', backgroundColor: 'rgba(255,255,255,0.95)' }} />
       </div>
+
+ 
+      <div
+        className="lg:hidden pointer-events-none"
+        style={{ height: 'calc(64px + env(safe-area-inset-bottom))' }}
+      />
 
       {/* ════════════════════════════════════════
           Full-screen "More" drawer
