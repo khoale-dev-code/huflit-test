@@ -8,7 +8,8 @@ import React, {
   useId,
 } from 'react';
 import StepIndicator from '../../StepIndicator';
-import { EXAM_LIST } from '../../../../data/examData';
+// Thay đổi import để dùng hàm async từ Firebase
+import { getAllExamMetadataAsync } from '../../../../data/examData';
 
 /* ─────────────────────────────────────────────────────────────
    Analytics (unchanged)
@@ -117,7 +118,6 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id }) => {
       className={[
         'relative flex items-start gap-3.5 cursor-pointer',
         'px-[clamp(14px,3vw,24px)] py-[clamp(12px,2vw,18px)]',
-        /* border-l-width stays constant — only color changes, no shorthand conflict */
         '[border-left-width:3px] [border-left-style:solid]',
         'transition-all duration-150 will-change-transform',
         'hover:translate-x-0.5',
@@ -271,18 +271,45 @@ ExamListBox.displayName = 'ExamListBox';
 export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
   const listboxId = useId();
 
-  const [selectedExam,       setSelectedExam]       = useState('exam1');
+  // THÊM: Quản lý danh sách đề thi từ Firebase
+  const [examList, setExamList] = useState([]);
+  const [isLoadingList, setIsLoadingList] = useState(true);
+
+  // Chọn mặc định đề thi đầu tiên nếu chưa có
+  const [selectedExam, setSelectedExam] = useState('');
+  
   const [isStarting,         setIsStarting]         = useState(false);
   const [searchQuery,        setSearchQuery]        = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [sortBy,             setSortBy]             = useState('newest');
 
-  const isLoading = !EXAM_LIST;
+  // Load danh sách đề thi khi render
+  useEffect(() => {
+    let mounted = true;
+    const fetchExams = async () => {
+      setIsLoadingList(true);
+      try {
+        const data = await getAllExamMetadataAsync(true);
+        if (mounted) {
+          setExamList(data);
+          if (data.length > 0) {
+            setSelectedExam(data[0].id); // Chọn tự động dòng đầu
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi tải đề thi:", error);
+      } finally {
+        if (mounted) setIsLoadingList(false);
+      }
+    };
+    fetchExams();
+    return () => { mounted = false; };
+  }, []);
 
   /* Filtered + sorted */
   const filteredExams = useMemo(() => {
-    if (!EXAM_LIST?.length) return [];
-    let r = EXAM_LIST;
+    if (!examList?.length) return [];
+    let r = examList;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       r = r.filter(e =>
@@ -297,9 +324,9 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
       if (sortBy === 'difficulty') return (a.difficultyScore || 0) - (b.difficultyScore || 0);
       return (b.createdAt || 0) - (a.createdAt || 0);
     });
-  }, [searchQuery, selectedDifficulty, sortBy]);
+  }, [examList, searchQuery, selectedDifficulty, sortBy]);
 
-  const total = EXAM_LIST?.length || 0;
+  const total = examList?.length || 0;
   const count = filteredExams.length;
 
   /* Handlers */
@@ -335,7 +362,7 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
     setSortBy('newest');
   }, []);
 
-  /* ── Select styling shared (no SVG arrow injection needed; use @tailwindcss/forms) ── */
+  /* ── Select styling shared ── */
   const selectClass = [
     'w-full px-3 py-2.5 rounded-lg',
     'border border-slate-200',
@@ -344,7 +371,6 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
     'cursor-pointer appearance-none',
     'transition-colors duration-150',
     'focus:border-blue-600 focus:ring-2 focus:ring-blue-100 focus:outline-none',
-    /* custom chevron via bg-image — kept as Tailwind arbitrary value */
     "bg-[url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")] bg-no-repeat bg-[right_10px_center] bg-[length:16px]",
     'pr-8',
   ].join(' ');
@@ -484,7 +510,7 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
           >
             {/* Search & filters */}
             <div className="flex flex-col gap-3 animate-[esFadeUp_.35s_.15s_cubic-bezier(.4,0,.2,1)_both]">
-              {/* Search input — no JS state for focus */}
+              {/* Search input */}
               <div>
                 <label
                   htmlFor="exam-search"
@@ -563,9 +589,9 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
                 <p className="text-xs text-slate-400 m-0">↑ ↓ để điều hướng</p>
               </div>
 
-              {/* Content — divide-y replaces old divideY style */}
+              {/* Content */}
               <div className="divide-y divide-slate-100">
-                {isLoading ? (
+                {isLoadingList ? (
                   <SkeletonList />
                 ) : filteredExams.length > 0 ? (
                   <ExamListBox

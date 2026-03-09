@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { useUserProgress } from '../hooks/useUserProgress.js';
 
+// Thêm Import hàm fetch exam từ data layer
+import { getAllExamMetadataAsync } from '../data/examData.js';
+
 // ─── useContainerSize ─────────────────────────────────────────────────────────
 function useContainerSize() {
   const ref = useRef(null);
@@ -131,7 +134,7 @@ const CustomTooltip = React.memo(({ active, payload, label }) => {
 CustomTooltip.displayName = 'CustomTooltip';
 
 // ─── HistoryItem ──────────────────────────────────────────────────────────────
-const HistoryItem = React.memo(({ item, index, onClick }) => {
+const HistoryItem = React.memo(({ item, index, onClick, examMap }) => {
   const { score } = item;
   const isGood     = score >= 80;
   const isMid      = score >= 50;
@@ -141,13 +144,26 @@ const HistoryItem = React.memo(({ item, index, onClick }) => {
   const handleClick = useCallback(() => onClick(item), [item, onClick]);
 
   const dateStr = useMemo(() => {
+    // Check Date object first
     if (item.completedAt instanceof Date && !isNaN(item.completedAt)) {
       return item.completedAt.toLocaleDateString('vi-VN', {
         day: '2-digit', month: '2-digit', year: '2-digit',
       });
     }
+    // Check timestamp number
+    if (item.timestamp) {
+      return new Date(item.timestamp).toLocaleDateString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: '2-digit',
+      });
+    }
     return 'N/A';
-  }, [item.completedAt]);
+  }, [item.completedAt, item.timestamp]);
+
+  // Lấy Tên Đề Thi từ examMap, nếu không có thì fallback dùng lại ID (item.exam)
+  const examTitle = examMap[item.exam] || item.exam;
+  
+  // Format phần thi cho đẹp
+  const partDisplay = item.part === 'full-exam' ? 'Full Test' : `Part ${item.part?.replace('part', '') || ''}`;
 
   return (
     <motion.div
@@ -164,9 +180,9 @@ const HistoryItem = React.memo(({ item, index, onClick }) => {
         >
           {score}
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 pr-2">
           <p className="font-bold text-sm truncate" style={{ color: C.text }}>
-            {item.exam} · Part {item.part}
+            {examTitle}
             {item.isPending && (
               <span
                 className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded"
@@ -180,7 +196,7 @@ const HistoryItem = React.memo(({ item, index, onClick }) => {
             <Clock size={10} />
             {dateStr}
             <span>·</span>
-            <span className="capitalize">{item.testType || 'Test'}</span>
+            <span className="capitalize">{partDisplay}</span>
           </div>
         </div>
       </div>
@@ -491,6 +507,7 @@ const ScoreChart = React.memo(({ chartData, averageScore, trend }) => {
 ScoreChart.displayName = 'ScoreChart';
 
 // ─── HistoryPanel ─────────────────────────────────────────────────────────────
+// THÊM LẠI MẢNG TABS BỊ THIẾU Ở ĐÂY
 const TABS = [
   { key: 'all',  label: 'Tất cả' },
   { key: 'good', label: '≥ 80'   },
@@ -499,6 +516,17 @@ const TABS = [
 
 const HistoryPanel = React.memo(({ progress, onNavigate }) => {
   const [historyFilter, setHistoryFilter] = useState('all');
+  const [examMap, setExamMap] = useState({});
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      const data = await getAllExamMetadataAsync();
+      const map = {};
+      data.forEach(ex => { map[ex.id] = ex.title; });
+      setExamMap(map);
+    };
+    fetchExams();
+  }, []);
 
   const filteredProgress = useMemo(() => {
     if (historyFilter === 'good') return progress.filter((p) => p.score >= 80);
@@ -506,7 +534,10 @@ const HistoryPanel = React.memo(({ progress, onNavigate }) => {
     return progress;
   }, [progress, historyFilter]);
 
-  const handleItemClick = useCallback((item) => onNavigate(`/review/${item.id}`), [onNavigate]);
+  // Chuyển hướng sang trang lịch sử bài làm chi tiết
+  const handleItemClick = useCallback((item) => {
+    onNavigate(`/history/${item.id}`, { state: { progressItem: item } });
+  }, [onNavigate]);
 
   return (
     <motion.section
@@ -549,6 +580,7 @@ const HistoryPanel = React.memo(({ progress, onNavigate }) => {
                 key={item.id}
                 item={item}
                 index={i}
+                examMap={examMap}
                 onClick={handleItemClick}
               />
             ))
@@ -628,7 +660,7 @@ export default function DetailedDashboard() {
     return 'Chào buổi tối';
   }, []);
 
-  const handleNavigate = useCallback((path) => navigate(path), [navigate]);
+  const handleNavigate = useCallback((path, state = {}) => navigate(path, state), [navigate]);
 
   if (!isLoaded || loading) return <Spinner />;
 

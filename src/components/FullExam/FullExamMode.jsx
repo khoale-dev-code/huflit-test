@@ -1,25 +1,3 @@
-/* src/components/FullExam/FullExamMode.js
- *
- * FullExamMode – Component điều phối toàn bộ luồng thi Full Exam.
- *
- * LUỒNG CHÍNH:
- *   SETUP → EXAM (listening 30 phút) → EXAM (reading 60 phút) → RESULTS
- *
- * CÁC FIX SO VỚI BẢN CŨ:
- *   [FIX-1] Xóa useEffect reset timer theo section (gây double-set & race condition)
- *           → Thay bằng set thẳng trong từng handler
- *   [FIX-2] useExamTimer nhận ref-based callbacks → không stale closure
- *   [FIX-3] handleTimerComplete đúng: listening hết → set 3600s rồi chuyển reading
- *   [FIX-4] handleNextSection (user bấm "Tiếp theo") → set 3600s trước khi chuyển
- *   [FIX-5] handleStartExam → set 1800s ngay khi bắt đầu
- *
- * LUỒNG THỜI GIAN:
- *   Bắt đầu        → timeLeft = 1800 (30 phút, listening)
- *   Listening hết  → timeLeft = 3600 (60 phút, reading) [auto]
- *   User bấm Next  → timeLeft = 3600 (60 phút, reading) [manual]
- *   Reading hết    → mode = RESULTS
- *   Tổng: 30 + 60 = 90 phút ✅
- */
 
 import React, {
   useState, useEffect, useCallback, useMemo, useRef,

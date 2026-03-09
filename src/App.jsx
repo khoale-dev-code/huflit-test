@@ -2,7 +2,7 @@ import React, { useMemo, useState, lazy, Suspense, memo, useEffect, useRef } fro
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
-import { loadExamData, getAllExamMetadata } from './data/examData';
+import { loadExamData, getAllExamMetadataAsync } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
@@ -21,18 +21,48 @@ import AuthModal from './components/Auth/AuthModal.jsx';
 import WelcomeModal from './components/modals/WelcomeModal.jsx';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import HomePage from './pages/HomePage.jsx';
+import AuthPage from './components/Auth/AuthPage.jsx'; // ✅ ĐÃ THÊM IMPORT AUTHPAGE Ở ĐÂY
 import { ROUTES } from './config/routes';
 
 // Icons
 import { Trophy, FileText, Zap, BarChart3, Lock, Star } from 'lucide-react';
+import ExamManagement from './admin/pages/Exams/ExamManagement.jsx';
+import CreateExam from './admin/pages/Exams/CreateExam.jsx';
+import DetailsExam from './admin/pages/Exams/DetailsExam.jsx';
+import EditExam from './admin/pages/Exams/EditExam.jsx';
+import ImportExamsPage from './admin/scripts/importExamsToFirebase.jsx';
+import MigrateData from './admin/scripts/MigrateFirestoreToSupabase.jsx';
+import UserManagement from './admin/pages/Users/UserManagement.jsx';
 
 // Lazy Loaded Components
+// AdminApp has its own auth guard (ProtectedRoute → useAdminAuth)
 const AdminApp      = lazy(() => import('./admin/AdminApp'));
 const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
 const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
+const HistoryTest = lazy(() => import('./components/HistoryTest.jsx'));
 
+// ─────────────────────────────────────────────────────────────────
+// 🛡️ TRANSLATION PROTECTION
+//
+// Google Translate wraps text nodes in <font> tags and mutates the
+// DOM directly, which causes React's reconciler to throw errors like:
+//   "NotFoundError: Failed to execute 'removeChild' on 'Node'"
+//
+// Strategy (layered):
+//   1. Prevent translate from starting (meta + html attrs)
+//   2. Remove Google Translate scripts & UI elements proactively
+//   3. Patch Node.prototype.removeChild & insertBefore to swallow
+//       errors when the node has already been moved by the translator
+//   4. MutationObserver to reverse any DOM mutations (<font> unwrap)
+//   5. Periodic cleanup sweep every 3s as last resort
+// ─────────────────────────────────────────────────────────────────
 
+/**
+ * Patches Node.prototype so React never crashes when Google Translate
+ * has moved a node that React still holds a reference to.
+ * Must be called ONCE before React mounts.
+ */
 function patchNodePrototype() {
   if (typeof window === 'undefined' || window.__translatePatchApplied) return;
   window.__translatePatchApplied = true;
@@ -373,7 +403,7 @@ const FullExamContainer = memo(({ onComplete, canAccessExam, level }) => {
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const list       = getAllExamMetadata();
+        const list       = await getAllExamMetadataAsync(); 
         const accessible = list.filter((ex) => canAccessExam(ex.id));
         const loaded     = await Promise.all(accessible.map((ex) => loadExamData(ex.id)));
         const dataMap    = {};
@@ -514,6 +544,7 @@ const AppContent = memo(() => {
             <Route path={ROUTES.PROFILE}    element={<UserProfile />} />
             <Route path={ROUTES.ANSWERS}    element={<ExamAnswersPage />} />
             <Route path="*"                 element={<NotFoundPage />} />
+            <Route path={ROUTES.HISTORY || "/history/:id"} element={<HistoryTest />} />
           </Routes>
         </Suspense>
 
@@ -525,9 +556,6 @@ const AppContent = memo(() => {
   );
 });
 
-// ─────────────────────────────────────────────
-// ROOT
-// ─────────────────────────────────────────────
 export default function App() {
   const showSplash = useSplashScreen(2000);
   if (showSplash) return <LoadingSpinner message="Khởi động hệ thống..." />;
@@ -536,8 +564,20 @@ export default function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
+          {/* ✅ THÊM ROUTE ĐĂNG NHẬP Ở ĐÂY ĐỂ NÓ ĐỘC LẬP VỚI MAIN LAYOUT */}
+          <Route path="/login" element={<AuthPage />} />
+
+          {/* Admin — isolated, no MainLayout, no user Navbar */}
           <Route path="/admin/*" element={<AdminApp />} />
-          <Route path="/*"       element={<AppContent />} />
+          <Route path="/admin/exams" element={<ExamManagement />} />
+          <Route path="/admin/exams/create" element={<CreateExam />} />
+          <Route path="/admin/exams/detail/:id" element={<DetailsExam />} />
+          <Route path="/admin/exams/edit/:id" element={<EditExam />} />
+          <Route path="/migrate-data" element={<MigrateData />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          
+          {/* Main app — all user-facing routes */}
+          <Route path="/*" element={<AppContent />} />
         </Routes>
       </Suspense>
     </Router>
