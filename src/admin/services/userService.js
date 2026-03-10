@@ -33,3 +33,18 @@ export const updateUserRole = async (userId, newRole) => {
     throw error;
   }
 };
+// 3. XÓA NGƯỜI DÙNG
+export const deleteUser = async (userId) => {
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error(`❌ Lỗi xóa User ${userId}:`, error.message);
+    throw error;
+  }
+};
