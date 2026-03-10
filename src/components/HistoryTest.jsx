@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, X, AlertCircle } from 'lucide-react';
-import { loadExamData } from '../data/examData';
+import { loadExamData } from '../data/examData'; // ✅ Sửa lại đường dẫn import nếu cần
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
 const HistoryTest = () => {
@@ -17,15 +17,23 @@ const HistoryTest = () => {
 
   useEffect(() => {
     if (!progressItem) {
-      setError("Không tìm thấy thông tin bài làm.");
+      setError("Không tìm thấy thông tin bài làm. Vui lòng quay lại danh sách.");
       setLoading(false);
       return;
     }
 
     const fetchExam = async () => {
       try {
-        const data = await loadExamData(progressItem.exam);
-        if (!data) throw new Error("Không thể tải dữ liệu đề thi.");
+        // ✅ CẬP NHẬT: Dùng exam_id (chuẩn Supabase) hoặc exam (chuẩn cũ)
+        const targetExamId = progressItem.exam_id || progressItem.exam; 
+
+        if (!targetExamId) {
+            throw new Error("Dữ liệu bài làm bị lỗi: Không tìm thấy ID Đề thi.");
+        }
+
+        const data = await loadExamData(targetExamId);
+        
+        if (!data) throw new Error("Không thể tải dữ liệu đề thi gốc từ hệ thống.");
         setExamData(data);
       } catch (err) {
         setError(err.message);
@@ -36,14 +44,14 @@ const HistoryTest = () => {
     fetchExam();
   }, [progressItem]);
 
-  if (loading) return <LoadingSpinner message="Đang tải dữ liệu bài làm..." />;
+  if (loading) return <LoadingSpinner message="Đang tải chi tiết bài làm..." />;
 
   if (error || !examData) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <h2 className="text-lg font-bold text-slate-800 mb-2">Đã có lỗi xảy ra</h2>
-        <p className="text-slate-500 mb-6">{error}</p>
+        <p className="text-slate-500 mb-6 text-center max-w-md">{error}</p>
         <button onClick={() => navigate(-1)} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
           Quay lại
         </button>
@@ -51,21 +59,27 @@ const HistoryTest = () => {
     );
   }
 
-  // Kết hợp data giữa "Bài thi gốc" và "Câu trả lời của User"
-  // Xác định xem user làm Full Test hay làm từng Part và SẮP XẾP LẠI theo Part 1 -> Part X
-  const partsToRender = progressItem.part === 'full-exam' 
+  // ✅ CẬP NHẬT: Xử lý linh hoạt cho cả Full Exam và Part
+  // Kiểm tra xem user làm toàn bộ đề hay chỉ 1 phần
+  // Giả định nếu không có progressItem.part, ngầm hiểu là full-exam
+  const isFullExam = !progressItem.part || progressItem.part === 'full-exam';
+
+  const partsToRender = isFullExam && examData.parts 
     ? Object.keys(examData.parts).sort((a, b) => {
-        // Tách số từ chữ "part1" -> 1, "part10" -> 10
         const numA = parseInt(a.replace(/\D/g, '')) || 0;
         const numB = parseInt(b.replace(/\D/g, '')) || 0;
         return numA - numB;
       })
-    : [progressItem.part];
+    : [progressItem.part].filter(Boolean); // Lọc bỏ giá trị undefined/null
 
-  const userAnswers = progressItem.answers || {};
+  // ✅ CẬP NHẬT: Map key answers từ Supabase (answers_detail) hoặc Firebase (answers)
+  const userAnswers = progressItem.answers_detail || progressItem.answers || {};
+  
+  // ✅ CẬP NHẬT: Map key thời gian
+  const examDate = progressItem.created_at || progressItem.timestamp;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-slate-50 pb-20 font-sans">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
@@ -74,18 +88,28 @@ const HistoryTest = () => {
           </button>
           <div>
             <h1 className="text-lg font-bold text-slate-900 leading-tight">Chi tiết bài làm</h1>
-            <p className="text-xs text-slate-500">{examData.title} · Score: <span className="font-bold text-blue-600">{progressItem.score}</span></p>
+            <p className="text-xs text-slate-500">
+              {examData.title} · Điểm: <span className="font-bold text-blue-600">{progressItem.score}</span>
+            </p>
           </div>
         </div>
-        <div className="text-xs font-semibold px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-200">
-          Ngày làm: {new Date(progressItem.timestamp).toLocaleString('vi-VN')}
-        </div>
+        {examDate && (
+          <div className="text-[10px] md:text-xs font-semibold px-2 md:px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-200 text-center">
+            {new Date(examDate).toLocaleString('vi-VN')}
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto mt-8 px-4">
+        {partsToRender.length === 0 && (
+            <div className="text-center py-10 text-slate-500">
+                Không tìm thấy phần thi nào phù hợp để hiển thị.
+            </div>
+        )}
+
         {partsToRender.map(partKey => {
-          const partData = examData.parts[partKey];
+          const partData = examData.parts?.[partKey];
           if (!partData || !partData.questions) return null;
 
           return (
@@ -94,11 +118,14 @@ const HistoryTest = () => {
                 <h2 className="text-lg font-bold text-slate-800 uppercase">
                   {partData.title || partKey}
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">{partData.description}</p>
+                {partData.description && (
+                  <p className="text-sm text-slate-500 mt-1">{partData.description}</p>
+                )}
               </div>
 
               <div className="space-y-8">
                 {partData.questions.map((q, idx) => {
+                  // userAnswers chứa dạng { "q_1": 0, "q_2": 2 }
                   const userAnswerIdx = userAnswers[q.id];
                   const isAnswered = userAnswerIdx !== undefined && userAnswerIdx !== null;
                   const isCorrect = isAnswered && userAnswerIdx === q.correct;

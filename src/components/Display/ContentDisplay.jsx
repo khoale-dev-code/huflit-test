@@ -1,8 +1,8 @@
 // ============================================================
-// ContentDisplay.jsx — Fixed z-index, padding, empty state CTA
+// ContentDisplay.jsx — Fix Bug Blank Screen & Chuẩn UI Google
 // ============================================================
 import React, { useMemo, memo } from 'react';
-import { AlertCircle, Headphones, FileText } from 'lucide-react';
+import { AlertCircle, Headphones, FileText, Loader2, ArrowRight } from 'lucide-react';
 import ReadingDisplay from './Readingdisplay';
 import ScriptDisplay from './ScriptDisplay';
 
@@ -12,21 +12,21 @@ const getAudioPath = (examId, partId) => {
 };
 
 // ── InfoCard ──
-const InfoCard = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
+const InfoCard = memo(({ icon: Icon, label, value, color = 'blue' }) => {
   const colorMap = {
-    indigo: 'text-indigo-600 bg-indigo-50',
-    purple: 'text-purple-600 bg-purple-50',
+    blue:    'text-blue-600 bg-blue-50',
+    purple:  'text-purple-600 bg-purple-50',
     emerald: 'text-emerald-600 bg-emerald-50',
-    amber: 'text-amber-600 bg-amber-50',
+    amber:   'text-amber-600 bg-amber-50',
   };
   return (
-    <div className="flex items-center gap-2 p-2 md:p-3 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-      <div className={`p-1.5 md:p-2 rounded-lg ${colorMap[color]}`}>
-        <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={2} />
+    <div className="flex items-center gap-3 p-3 md:p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-blue-200 hover:shadow-md transition-all duration-300">
+      <div className={`p-2.5 rounded-[14px] ${colorMap[color]}`}>
+        <Icon className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{label}</p>
-        <p className="text-xs md:text-sm font-bold text-slate-900 truncate">{value}</p>
+        <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
+        <p className="text-sm md:text-base font-black text-slate-800 truncate">{value}</p>
       </div>
     </div>
   );
@@ -60,21 +60,22 @@ const ListeningContent = memo(({
 
   if (!script) {
     return (
-      <div className="bg-slate-50 rounded-xl border border-slate-200 p-8 text-center">
-        {/* ✅ Fixed: smaller icon, standard padding */}
-        <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-4 shadow-sm">
-          <Headphones className="w-6 h-6 text-slate-400" strokeWidth={1.5} />
+      <div className="bg-white rounded-[24px] border border-slate-200/80 p-8 text-center shadow-sm animate-in fade-in duration-300">
+        <div className="w-14 h-14 rounded-[18px] bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-5 shadow-inner">
+          <Headphones className="w-7 h-7 text-slate-400" strokeWidth={2} />
         </div>
-        <p className="text-slate-900 font-bold text-base">Chưa có kịch bản</p>
-        <p className="text-slate-500 text-sm mt-1">Kịch bản cho phần này sẽ sớm có</p>
-        <p className="text-slate-400 text-xs mt-2">Part: {partNumber}</p>
+        <p className="text-slate-800 font-black text-lg">Chưa có kịch bản</p>
+        <p className="text-slate-500 text-sm mt-1 font-medium">Kịch bản cho phần này sẽ sớm được cập nhật.</p>
+        <div className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold">
+          <FileText className="w-3.5 h-3.5" />
+          Part {partNumber}
+        </div>
       </div>
     );
   }
 
   return (
-    // ✅ Fixed: removed z-20, it's unnecessary here
-    <div className="animate-in fade-in duration-300 w-full">
+    <div className="animate-in fade-in duration-500 w-full">
       <ScriptDisplay
         script={script}
         audioUrl={audioUrl}
@@ -88,25 +89,27 @@ const ListeningContent = memo(({
 });
 ListeningContent.displayName = 'ListeningContent';
 
-// ── EmptyState — now with CTA ──
+// ── EmptyState — with CTA ──
 const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
   const states = {
     'no-part': {
       icon: AlertCircle,
-      iconColor: 'text-slate-400',
-      bg: 'bg-slate-50',
-      border: 'border-slate-200',
-      title: 'Chọn Part để bắt đầu',
-      description: 'Vui lòng chọn một phần thi từ danh sách trên',
-      cta: 'Chọn Part',
+      iconColor: 'text-blue-500',
+      iconBg: 'bg-blue-50',
+      bg: 'bg-white',
+      border: 'border-slate-200/80',
+      title: 'Chưa chọn phần thi',
+      description: 'Vui lòng chọn một phần thi (Part) từ danh sách phía trên để bắt đầu.',
+      cta: 'Lên chọn Part ngay',
     },
     'no-content': {
       icon: FileText,
       iconColor: 'text-amber-500',
-      bg: 'bg-amber-50',
-      border: 'border-amber-200',
-      title: 'Không có nội dung',
-      description: 'Nội dung cho phần này chưa được tải hoặc cập nhật',
+      iconBg: 'bg-amber-50',
+      bg: 'bg-white',
+      border: 'border-slate-200/80',
+      title: 'Nội dung đang cập nhật',
+      description: 'Dữ liệu cho phần thi này chưa được tải lên hệ thống. Vui lòng thử phần khác.',
       cta: null,
     },
   };
@@ -115,21 +118,21 @@ const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
   const Icon = state.icon;
 
   return (
-    <div className={`${state.bg} rounded-xl border-2 ${state.border} p-8 animate-in fade-in duration-300 w-full`}>
-      <div className="text-center py-6">
-        {/* ✅ Fixed: w-12 h-12 instead of w-14/w-16 for mobile */}
-        <div className="w-12 h-12 rounded-xl bg-white border-2 border-slate-200 flex items-center justify-center mx-auto mb-4 shadow-sm">
-          <Icon className={`w-6 h-6 ${state.iconColor}`} strokeWidth={1.5} />
+    <div className={`${state.bg} rounded-[24px] border ${state.border} p-8 shadow-sm animate-in fade-in zoom-in-95 duration-300 w-full`}>
+      <div className="text-center py-6 flex flex-col items-center">
+        <div className={`w-16 h-16 rounded-[20px] ${state.iconBg} flex items-center justify-center mb-5 shadow-inner`}>
+          <Icon className={`w-8 h-8 ${state.iconColor}`} strokeWidth={2} />
         </div>
-        <p className="text-slate-900 font-bold text-lg mb-1">{state.title}</p>
-        <p className="text-slate-600 text-sm">{state.description}</p>
-        {/* ✅ Google UX: always provide a next action */}
+        <p className="text-slate-900 font-black text-xl mb-2">{state.title}</p>
+        <p className="text-slate-500 text-sm font-medium max-w-sm">{state.description}</p>
+        
         {state.cta && onSelectPart && (
           <button
             onClick={onSelectPart}
-            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+            className="mt-8 flex items-center gap-2 px-6 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-sm font-bold transition-all active:scale-[0.96] border border-blue-200/50"
           >
-            {state.cta} →
+            {state.cta}
+            <ArrowRight className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -138,11 +141,18 @@ const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
 });
 EmptyState.displayName = 'EmptyState';
 
-// ── ContentDisplay ──
+// ── ContentDisplay (MAIN COMPONENT) ──
 const ContentDisplay = memo(({
-  partData, selectedPart, currentQuestionIndex, testType, examId,
-  isPartPlayed, onAudioStart, onAudioEnd,
-  onSelectPart, // optional: scroll user up to part selector
+  partData,
+  selectedPart,
+  currentQuestionIndex,
+  testType,
+  examId,
+  isPartPlayed,
+  onAudioStart,
+  onAudioEnd,
+  onSelectPart,
+  isLoading = false,
 }) => {
   const content = useMemo(() => {
     if (!partData) return '';
@@ -157,29 +167,64 @@ const ContentDisplay = memo(({
     return partData.text || '';
   }, [partData, testType]);
 
-  if (testType === 'reading' && selectedPart === 'part5') return null;
-  if (!partData) return <EmptyState type="no-part" onSelectPart={onSelectPart} />;
-  if (!content.trim()) return <EmptyState type="no-content" />;
+  const contentKey = `${testType}-${selectedPart}`;
 
-  if (testType === 'reading') return <ReadingDisplay data={partData} />;
+  // 1. Trạng thái Đang tải (Spinner)
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-[24px] border border-slate-200/80 p-8 text-center shadow-sm animate-in fade-in duration-300">
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
+          <p className="text-slate-900 font-bold text-lg">Đang tải nội dung...</p>
+          {selectedPart && <p className="text-slate-500 text-sm mt-1 font-medium">Part {selectedPart.replace('part', '')}</p>}
+        </div>
+      </div>
+    );
+  }
 
+  // ✅ FIX BUG: 2. Kiểm tra nếu partData rỗng thì HIỆN EMPTY STATE TRƯỚC!
+  if (!partData) {
+    return <EmptyState type="no-part" onSelectPart={onSelectPart} />;
+  }
+
+  // 3. ĐẶC THÙ READING PART 5: Part 5 không có bài đọc chung -> Ẩn khung hiển thị (Return null ở đây mới đúng)
+  if (testType === 'reading' && selectedPart === 'part5') {
+    return null;
+  }
+
+  // 4. Nếu có dữ liệu nhưng nội dung text rỗng
+  if (!content.trim()) {
+    return <EmptyState type="no-content" />;
+  }
+
+  // 5. Render phần Đọc
+  if (testType === 'reading') {
+    return (
+      <div key={contentKey} className="animate-in fade-in duration-500">
+        <ReadingDisplay data={partData} />
+      </div>
+    );
+  }
+
+  // 6. Render phần Nghe
   if (testType === 'listening') {
     return (
-      <ListeningContent
-        partData={partData}
-        selectedPart={selectedPart}
-        testType={testType}
-        examId={examId}
-        isPartPlayed={isPartPlayed}
-        onAudioStart={onAudioStart}
-        onAudioEnd={onAudioEnd}
-      />
+      <div key={contentKey}>
+        <ListeningContent
+          partData={partData}
+          selectedPart={selectedPart}
+          testType={testType}
+          examId={examId}
+          isPartPlayed={isPartPlayed}
+          onAudioStart={onAudioStart}
+          onAudioEnd={onAudioEnd}
+        />
+      </div>
     );
   }
 
   return null;
 });
 ContentDisplay.displayName = 'ContentDisplay';
-export { ContentDisplay as default, EmptyState, ListeningContent };
 
- 
+export { ContentDisplay as default, EmptyState, ListeningContent };

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, lazy, Suspense, memo, useEffect, useRef } from 'react';
+import React, { useMemo, useState, lazy, Suspense, memo, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
@@ -6,7 +6,6 @@ import { loadExamData, getAllExamMetadataAsync } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
-import { useExamAccess } from './hooks/useExamAccess.js';
 
 // Components
 import MainLayout from './components/layout/MainLayout';
@@ -21,7 +20,7 @@ import AuthModal from './components/Auth/AuthModal.jsx';
 import WelcomeModal from './components/modals/WelcomeModal.jsx';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
 import HomePage from './pages/HomePage.jsx';
-import AuthPage from './components/Auth/AuthPage.jsx'; // ✅ ĐÃ THÊM IMPORT AUTHPAGE Ở ĐÂY
+import AuthPage from './components/Auth/AuthPage.jsx';
 import { ROUTES } from './config/routes';
 
 // Icons
@@ -35,66 +34,36 @@ import MigrateData from './admin/scripts/MigrateFirestoreToSupabase.jsx';
 import UserManagement from './admin/pages/Users/UserManagement.jsx';
 
 // Lazy Loaded Components
-// AdminApp has its own auth guard (ProtectedRoute → useAdminAuth)
 const AdminApp      = lazy(() => import('./admin/AdminApp'));
 const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
 const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
-const HistoryTest = lazy(() => import('./components/HistoryTest.jsx'));
+const HistoryTest   = lazy(() => import('./components/HistoryTest.jsx'));
 
 // ─────────────────────────────────────────────────────────────────
-// 🛡️ TRANSLATION PROTECTION
-//
-// Google Translate wraps text nodes in <font> tags and mutates the
-// DOM directly, which causes React's reconciler to throw errors like:
-//   "NotFoundError: Failed to execute 'removeChild' on 'Node'"
-//
-// Strategy (layered):
-//   1. Prevent translate from starting (meta + html attrs)
-//   2. Remove Google Translate scripts & UI elements proactively
-//   3. Patch Node.prototype.removeChild & insertBefore to swallow
-//       errors when the node has already been moved by the translator
-//   4. MutationObserver to reverse any DOM mutations (<font> unwrap)
-//   5. Periodic cleanup sweep every 3s as last resort
+// 🛡️ TRANSLATION PROTECTION (unchanged)
 // ─────────────────────────────────────────────────────────────────
-
-/**
- * Patches Node.prototype so React never crashes when Google Translate
- * has moved a node that React still holds a reference to.
- * Must be called ONCE before React mounts.
- */
 function patchNodePrototype() {
   if (typeof window === 'undefined' || window.__translatePatchApplied) return;
   window.__translatePatchApplied = true;
 
   const origRemoveChild = Node.prototype.removeChild;
   Node.prototype.removeChild = function (child) {
-    if (child.parentNode !== this) {
-      // Node was already moved by translator — silently ignore
-      return child;
-    }
+    if (child.parentNode !== this) return child;
     return origRemoveChild.call(this, child);
   };
 
   const origInsertBefore = Node.prototype.insertBefore;
   Node.prototype.insertBefore = function (newNode, refNode) {
-    if (refNode && refNode.parentNode !== this) {
-      // Reference node was moved — append instead to avoid crash
-      return this.appendChild(newNode);
-    }
+    if (refNode && refNode.parentNode !== this) return this.appendChild(newNode);
     return origInsertBefore.call(this, newNode, refNode);
   };
 }
 
-// Patch immediately (before any render)
 patchNodePrototype();
 
-/**
- * Hook — runs inside the React tree to watch for & undo translate mutations.
- */
 function useTranslationProtection() {
   useEffect(() => {
-    // ── 1. Purge cookies & storage ────────────────────────────
     const clearTranslateCookies = () => {
       try {
         ['', `; domain=${window.location.hostname}`, `; domain=.${window.location.hostname}`].forEach((suffix) => {
@@ -102,22 +71,19 @@ function useTranslationProtection() {
         });
         sessionStorage.removeItem('googtrans');
         localStorage.removeItem('googtrans');
-      } catch { /* ignore */ }
+      } catch { }
     };
     clearTranslateCookies();
 
-    // ── 2. Lock <html> attributes ─────────────────────────────
     const lockHtmlAttrs = () => {
       const html = document.documentElement;
       html.setAttribute('translate', 'no');
       if (!html.classList.contains('notranslate')) html.classList.add('notranslate');
-      // Remove any "translated-*" classes Google injects
       [...html.classList].filter((c) => c.startsWith('translated-')).forEach((c) => html.classList.remove(c));
       if (html.lang !== 'vi') html.setAttribute('lang', 'vi');
     };
     lockHtmlAttrs();
 
-    // ── 3. Remove translator scripts & UI elements ────────────
     const killGTElements = () => {
       document.querySelectorAll([
         'script[src*="translate.google"]',
@@ -129,29 +95,23 @@ function useTranslationProtection() {
         '#google_translate_element',
         '.goog-te-gadget',
       ].join(',')).forEach((el) => {
-        try { el.remove(); } catch { /* ignore */ }
+        try { el.remove(); } catch { }
       });
     };
     killGTElements();
 
-    // ── 4. Unwrap <font> nodes injected by Google Translate ───
-    // Google wraps every text node: "Hello" → <font>Hello</font>
-    // We reverse this by hoisting children back to the parent.
     const unwrapFontNodes = (root = document.getElementById('root')) => {
       if (!root) return;
-      // querySelectorAll is live-ish, iterate a static copy
       [...root.querySelectorAll('font')].forEach((font) => {
         const parent = font.parentNode;
         if (!parent) return;
-        // Move all children out before removing the wrapper
         while (font.firstChild) {
-          try { parent.insertBefore(font.firstChild, font); } catch { /* ignore */ }
+          try { parent.insertBefore(font.firstChild, font); } catch { }
         }
-        try { parent.removeChild(font); } catch { /* ignore */ }
+        try { parent.removeChild(font); } catch { }
       });
     };
 
-    // Debounce the observer callback to batch rapid mutations
     let restoreTimer = null;
     const scheduleRestore = (flags) => {
       clearTimeout(restoreTimer);
@@ -163,40 +123,32 @@ function useTranslationProtection() {
       }, 50);
     };
 
-    // ── 5. MutationObserver ───────────────────────────────────
     const observer = new MutationObserver((mutations) => {
       const flags = { lock: false, unwrap: false, kill: false };
 
       for (const mutation of mutations) {
-        // Attribute changes on <html> (class, lang, translate)
         if (mutation.type === 'attributes' && mutation.target === document.documentElement) {
           flags.lock = true;
         }
 
         if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
-            if (node.nodeName === 'FONT') {
-              flags.unwrap = true;
-            }
+            if (node.nodeName === 'FONT') flags.unwrap = true;
             if (node.nodeType === Node.ELEMENT_NODE) {
-              // Microsoft Translator attr
               if (node.hasAttribute?.('_mstmutation')) {
-                try { node.remove(); } catch { /* ignore */ }
+                try { node.remove(); } catch { }
               }
-              // GT script injection
               if (node.nodeName === 'SCRIPT' &&
                   (node.src?.includes('translate.google') || node.src?.includes('translate.googleapis'))) {
                 flags.kill = true;
-                try { node.remove(); } catch { /* ignore */ }
+                try { node.remove(); } catch { }
               }
             }
           }
         }
       }
 
-      if (flags.lock || flags.unwrap || flags.kill) {
-        scheduleRestore(flags);
-      }
+      if (flags.lock || flags.unwrap || flags.kill) scheduleRestore(flags);
     });
 
     observer.observe(document.documentElement, {
@@ -206,14 +158,12 @@ function useTranslationProtection() {
       attributeFilter: ['class', 'lang', 'translate'],
     });
 
-    // ── 6. Periodic sweep (fallback) ──────────────────────────
     const interval = setInterval(() => {
       killGTElements();
       clearTranslateCookies();
       lockHtmlAttrs();
     }, 3000);
 
-    // ── 7. Visibility change (tab re-focus) ───────────────────
     const onVisibility = () => {
       if (document.visibilityState === 'visible') {
         clearTranslateCookies();
@@ -232,17 +182,8 @@ function useTranslationProtection() {
   }, []);
 }
 
-// ─────────────────────────────────────────────────────────────────
-// 🛡️ NoTranslate wrapper
-// Wraps any text that must NOT be translated (scores, code, names…)
-// ─────────────────────────────────────────────────────────────────
 export const NoTranslate = memo(({ children, as: Tag = 'span', className = '', style }) => (
-  <Tag
-    translate="no"
-    className={`notranslate ${className}`.trim()}
-    style={style}
-    data-nosnippet
-  >
+  <Tag translate="no" className={`notranslate ${className}`.trim()} style={style} data-nosnippet>
     {children}
   </Tag>
 ));
@@ -268,6 +209,7 @@ const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
     </div>
   );
 });
+InfoBadge.displayName = 'InfoBadge';
 
 // ─────────────────────────────────────────────
 // StatsGrid
@@ -291,36 +233,7 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
     </div>
   );
 });
-
-// ─────────────────────────────────────────────
-// ExamLockedBanner
-// ─────────────────────────────────────────────
-const ExamLockedBanner = memo(({ examId, requiredLevel, currentLevel, onGoBack }) => (
-  <div className="w-full flex flex-col items-center justify-center py-20 px-6 text-center">
-    <div className="w-20 h-20 rounded-2xl bg-slate-100 border-2 border-slate-200 flex items-center justify-center mb-6">
-      <Lock className="w-9 h-9 text-slate-400" strokeWidth={1.5} />
-    </div>
-    <h2 className="text-2xl font-black text-slate-900 mb-2">
-      {examId?.replace('exam', 'Đề thi ')} chưa mở khóa
-    </h2>
-    <p className="text-slate-500 text-sm max-w-sm mb-1">
-      Bạn cần đạt <strong className="text-indigo-600">Level {requiredLevel}</strong> để truy cập đề thi này.
-    </p>
-    <div className="flex items-center gap-2 mt-2 mb-8 px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-200">
-      <Star className="w-4 h-4 text-indigo-500" />
-      <span className="text-sm font-semibold text-indigo-700">
-        Level hiện tại: {currentLevel} · Cần thêm {requiredLevel - currentLevel} level
-      </span>
-    </div>
-    <button
-      onClick={onGoBack}
-      className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors"
-    >
-      ← Quay lại đề thi được mở
-    </button>
-  </div>
-));
-ExamLockedBanner.displayName = 'ExamLockedBanner';
+StatsGrid.displayName = 'StatsGrid';
 
 // ─────────────────────────────────────────────
 // PartTestContent
@@ -331,27 +244,53 @@ const PartTestContent = memo(({
   testType, handleTestTypeChange,
   selectedPart, handlePartChange,
   partData,
+  currentExamData,  // ✅ ADDED: needed for testType sync
   currentQuestionIndex, setCurrentQuestionIndex,
   answers, handleAnswerSelect,
   showResults, handleSubmit, handleReset,
   score,
-  canAccessExam, getExamLockInfo, level,
+  isLoadingExam,  // ✅ ADDED: track loading state
 }) => {
+  // ✅ FIX #1: Auto-sync part when testType changes
+  useEffect(() => {
+    if (!currentExamData?.parts) return;
+
+    const availableParts = Object.entries(currentExamData.parts)
+      .filter(([, data]) => data.type === testType)
+      .map(([key]) => key);
+
+    if (availableParts.length === 0) {
+      console.warn(`No parts found for testType: ${testType}`);
+      return;
+    }
+
+    const isCurrentPartValid = availableParts.includes(selectedPart);
+    if (!isCurrentPartValid) {
+      console.log(`Switching ${selectedPart} → ${availableParts[0]} (for ${testType})`);
+      handlePartChange({ target: { value: availableParts[0] } });
+    }
+  }, [testType, currentExamData, selectedPart, handlePartChange]);
+
+  // ✅ Scroll to results when showing
   useEffect(() => {
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [showResults]);
 
-  const lockInfo = getExamLockInfo(selectedExam);
-  if (lockInfo.locked) {
-    return (
-      <ExamLockedBanner
-        examId={selectedExam}
-        requiredLevel={lockInfo.requiredLevel}
-        currentLevel={level}
-        onGoBack={() => handleExamChange('exam1')}
-      />
-    );
-  }
+  // ✅ Scroll to content when part/testType changes
+  useEffect(() => {
+    const contentDisplay = document.querySelector('[data-testid="content-display"]');
+    if (contentDisplay) {
+      contentDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedPart, testType]);
+
+  // ✅ FIX #2: Handle selection from empty state
+  const handleSelectPart = useCallback(() => {
+    const selector = document.querySelector('[role="listbox"]');
+    if (selector) {
+      selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
 
   return (
     <div className="w-full space-y-6">
@@ -362,8 +301,6 @@ const PartTestContent = memo(({
         onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
         selectedPart={selectedPart}
         onPartChange={handlePartChange}
-        canAccessExam={canAccessExam}
-        getExamLockInfo={getExamLockInfo}
       />
 
       {showResults ? (
@@ -374,15 +311,23 @@ const PartTestContent = memo(({
       ) : (
         <div className="w-full space-y-8">
           <ContentDisplay
-            partData={partData} selectedPart={selectedPart}
+            partData={partData}
+            selectedPart={selectedPart}
             currentQuestionIndex={currentQuestionIndex}
-            testType={testType} examId={selectedExam}
+            testType={testType}
+            examId={selectedExam}
+            isLoading={isLoadingExam}  // ✅ ADDED
+            onSelectPart={handleSelectPart}  // ✅ ADDED
+            data-testid="content-display"  // ✅ For scroll ref
           />
           <QuestionDisplay
-            selectedPart={selectedPart} selectedExam={selectedExam}
-            partData={partData} currentQuestionIndex={currentQuestionIndex}
+            selectedPart={selectedPart}
+            selectedExam={selectedExam}
+            partData={partData}
+            currentQuestionIndex={currentQuestionIndex}
             onQuestionChange={setCurrentQuestionIndex}
-            answers={answers} onAnswerSelect={handleAnswerSelect}
+            answers={answers}
+            onAnswerSelect={handleAnswerSelect}
             showResults={showResults}
             onSubmit={handleSubmit}
             testType={testType}
@@ -392,11 +337,12 @@ const PartTestContent = memo(({
     </div>
   );
 });
+PartTestContent.displayName = 'PartTestContent';
 
 // ─────────────────────────────────────────────
 // FullExamContainer
 // ─────────────────────────────────────────────
-const FullExamContainer = memo(({ onComplete, canAccessExam, level }) => {
+const FullExamContainer = memo(({ onComplete }) => {
   const [examData, setExamData] = useState(null);
   const [loading, setLoading]   = useState(true);
 
@@ -404,17 +350,16 @@ const FullExamContainer = memo(({ onComplete, canAccessExam, level }) => {
     const loadAll = async () => {
       try {
         const list       = await getAllExamMetadataAsync(); 
-        const accessible = list.filter((ex) => canAccessExam(ex.id));
-        const loaded     = await Promise.all(accessible.map((ex) => loadExamData(ex.id)));
+        const loaded     = await Promise.all(list.map((ex) => loadExamData(ex.id)));
         const dataMap    = {};
-        accessible.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
+        list.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
         setExamData(dataMap);
       } finally {
         setLoading(false);
       }
     };
     loadAll();
-  }, [canAccessExam]);
+  }, []);
 
   if (loading) return <LoadingSpinner message="Đang tải dữ liệu toàn bộ đề thi..." />;
 
@@ -425,13 +370,14 @@ const FullExamContainer = memo(({ onComplete, canAccessExam, level }) => {
           <Lock className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
         </div>
         <h2 className="text-xl font-black text-slate-900 mb-2">Chưa có đề thi nào</h2>
-        <p className="text-slate-500 text-sm">Hoàn thành bài tập để tăng level và mở khóa đề thi.</p>
+        <p className="text-slate-500 text-sm">Hệ thống đang cập nhật đề thi mới, vui lòng quay lại sau.</p>
       </div>
     );
   }
 
   return <FullExamMode examData={examData} onComplete={onComplete} />;
 });
+FullExamContainer.displayName = 'FullExamContainer';
 
 // ─────────────────────────────────────────────
 // AppContent
@@ -440,12 +386,10 @@ const AppContent = memo(() => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal]     = useState(false);
   const [currentExamData, setCurrentExamData] = useState(null);
+  const [isLoadingExam, setIsLoadingExam]     = useState(false);  // ✅ ADDED
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
-  // 🛡️ Activate translation protection inside the React tree
   useTranslationProtection();
-
-  const { canAccessExam, getExamLockInfo, level } = useExamAccess();
 
   const {
     selectedExam, testType, handleTestTypeChange,
@@ -453,27 +397,20 @@ const AppContent = memo(() => {
     selectedPart, currentQuestionIndex, setCurrentQuestionIndex,
     answers, handleAnswerSelect,
     handleSubmit, showResults, handleReset,
-    handleExamChange: _handleExamChange, handlePartChange,
+    handleExamChange, handlePartChange,
     isSignedIn, user,
   } = useAppState();
 
-  const handleExamChange = useMemo(() => (examIdOrEvent) => {
-    const examId = examIdOrEvent?.target?.value ?? examIdOrEvent;
-    if (!canAccessExam(examId)) {
-      console.warn(`[ExamAccess] Exam "${examId}" bị khóa ở level ${level}`);
-      return;
-    }
-    _handleExamChange(examIdOrEvent);
-  }, [canAccessExam, _handleExamChange, level]);
-
+  // ✅ FIX: Track loading state when exam data loads
   useEffect(() => {
     if (selectedExam) {
-      if (!canAccessExam(selectedExam)) return;
+      setIsLoadingExam(true);
       loadExamData(selectedExam)
         .then(setCurrentExamData)
-        .catch(() => setCurrentExamData(null));
+        .catch(() => setCurrentExamData(null))
+        .finally(() => setIsLoadingExam(false));
     }
-  }, [selectedExam, canAccessExam]);
+  }, [selectedExam]);
 
   const partData = useMemo(() =>
     (!practiceType && currentExamData)
@@ -514,6 +451,7 @@ const AppContent = memo(() => {
                 testType={testType}                  handleTestTypeChange={handleTestTypeChange}
                 selectedPart={selectedPart}          handlePartChange={handlePartChange}
                 partData={partData}
+                currentExamData={currentExamData}  // ✅ ADDED
                 currentQuestionIndex={currentQuestionIndex}
                 setCurrentQuestionIndex={setCurrentQuestionIndex}
                 answers={answers}                    handleAnswerSelect={handleAnswerSelect}
@@ -521,16 +459,12 @@ const AppContent = memo(() => {
                 handleSubmit={handleSubmitWithData}
                 handleReset={handleReset}
                 score={score}
-                canAccessExam={canAccessExam}
-                getExamLockInfo={getExamLockInfo}
-                level={level}
+                isLoadingExam={isLoadingExam}  // ✅ ADDED
               />
             } />
             <Route path={ROUTES.FULL_EXAM} element={
               <FullExamContainer
                 onComplete={() => handleTestTypeChange('')}
-                canAccessExam={canAccessExam}
-                level={level}
               />
             } />
             <Route path={ROUTES.GRAMMAR} element={
@@ -543,8 +477,8 @@ const AppContent = memo(() => {
             <Route path={ROUTES.VOCABULARY} element={<VocabularyPractice />} />
             <Route path={ROUTES.PROFILE}    element={<UserProfile />} />
             <Route path={ROUTES.ANSWERS}    element={<ExamAnswersPage />} />
+            <Route path="/history/:id"      element={<HistoryTest />} />
             <Route path="*"                 element={<NotFoundPage />} />
-            <Route path={ROUTES.HISTORY || "/history/:id"} element={<HistoryTest />} />
           </Routes>
         </Suspense>
 
@@ -555,7 +489,11 @@ const AppContent = memo(() => {
     </>
   );
 });
+AppContent.displayName = 'AppContent';
 
+// ─────────────────────────────────────────────
+// Main App
+// ─────────────────────────────────────────────
 export default function App() {
   const showSplash = useSplashScreen(2000);
   if (showSplash) return <LoadingSpinner message="Khởi động hệ thống..." />;
@@ -564,10 +502,8 @@ export default function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          {/* ✅ THÊM ROUTE ĐĂNG NHẬP Ở ĐÂY ĐỂ NÓ ĐỘC LẬP VỚI MAIN LAYOUT */}
           <Route path="/login" element={<AuthPage />} />
 
-          {/* Admin — isolated, no MainLayout, no user Navbar */}
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/admin/exams" element={<ExamManagement />} />
           <Route path="/admin/exams/create" element={<CreateExam />} />
@@ -576,7 +512,6 @@ export default function App() {
           <Route path="/migrate-data" element={<MigrateData />} />
           <Route path="/admin/users" element={<UserManagement />} />
           
-          {/* Main app — all user-facing routes */}
           <Route path="/*" element={<AppContent />} />
         </Routes>
       </Suspense>
