@@ -1,14 +1,17 @@
 // ============================================================
-// ContentDisplay.jsx — Fix Bug Blank Screen & Chuẩn UI Google
+// ContentDisplay.jsx — Hỗ trợ Dynamic Array (Mảng Part Động)
 // ============================================================
 import React, { useMemo, memo } from 'react';
-import { AlertCircle, Headphones, FileText, Loader2, ArrowRight } from 'lucide-react';
+import { AlertCircle, Headphones, BookOpen, FileText, Loader2, ArrowRight, PenTool, Mic } from 'lucide-react';
 import ReadingDisplay from './Readingdisplay';
 import ScriptDisplay from './ScriptDisplay';
 
-const getAudioPath = (examId, partId) => {
-  if (!examId || !partId) return null;
-  return `/public/data/audio/${examId}/listening/${partId}.mp3`;
+// Cấu hình UI cho từng loại kỹ năng
+const TYPE_UI = {
+  listening: { icon: Headphones, color: 'text-blue-500',   bg: 'bg-blue-50',   title: 'Phần Nghe' },
+  reading:   { icon: BookOpen,   color: 'text-amber-500',  bg: 'bg-amber-50',  title: 'Phần Đọc' },
+  writing:   { icon: PenTool,    color: 'text-emerald-500',bg: 'bg-emerald-50',title: 'Phần Viết' },
+  speaking:  { icon: Mic,        color: 'text-purple-500', bg: 'bg-purple-50', title: 'Phần Nói' }
 };
 
 // ── InfoCard ──
@@ -33,12 +36,10 @@ const InfoCard = memo(({ icon: Icon, label, value, color = 'blue' }) => {
 });
 InfoCard.displayName = 'InfoCard';
 
-// ── ListeningContent ──
-const ListeningContent = memo(({
-  partData, selectedPart, testType, examId, isPartPlayed, onAudioStart, onAudioEnd
+// ── MediaContent (Xử lý Audio/Script cho Listening & Speaking) ──
+const MediaContent = memo(({
+  partData, isPartPlayed, onAudioStart, onAudioEnd
 }) => {
-  const partNumber = selectedPart.replace('part', '');
-
   const script = useMemo(() => {
     if (!partData) return '';
     if (partData.script) return partData.script;
@@ -51,24 +52,23 @@ const ListeningContent = memo(({
     return '';
   }, [partData]);
 
-  const audioUrl = useMemo(() => {
-    if (!examId) return null;
-    return partData?.audioUrl || getAudioPath(examId, selectedPart);
-  }, [examId, selectedPart, partData]);
+  const audioUrl = partData?.audioUrl || null;
+  const partTitle = partData?.title || `Phần Thi`;
 
-  const partTitle = useMemo(() => partData?.title || `Part ${partNumber} - Phần Nghe`, [partData, partNumber]);
-
-  if (!script) {
+  // Nếu không có Audio VÀ không có Script thì hiện Empty
+  if (!script && !audioUrl) {
+    const ui = TYPE_UI[partData?.type] || TYPE_UI.listening;
+    const Icon = ui.icon;
     return (
       <div className="bg-white rounded-[24px] border border-slate-200/80 p-8 text-center shadow-sm animate-in fade-in duration-300">
-        <div className="w-14 h-14 rounded-[18px] bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-5 shadow-inner">
-          <Headphones className="w-7 h-7 text-slate-400" strokeWidth={2} />
+        <div className={`w-14 h-14 rounded-[18px] ${ui.bg} border border-slate-100 flex items-center justify-center mx-auto mb-5 shadow-inner`}>
+          <Icon className={`w-7 h-7 ${ui.color}`} strokeWidth={2} />
         </div>
-        <p className="text-slate-800 font-black text-lg">Chưa có kịch bản</p>
-        <p className="text-slate-500 text-sm mt-1 font-medium">Kịch bản cho phần này sẽ sớm được cập nhật.</p>
+        <p className="text-slate-800 font-black text-lg">Chưa có dữ liệu Media</p>
+        <p className="text-slate-500 text-sm mt-1 font-medium">Nội dung (Audio/Script) cho phần này sẽ sớm được cập nhật.</p>
         <div className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold">
           <FileText className="w-3.5 h-3.5" />
-          Part {partNumber}
+          {partTitle}
         </div>
       </div>
     );
@@ -87,27 +87,40 @@ const ListeningContent = memo(({
     </div>
   );
 });
-ListeningContent.displayName = 'ListeningContent';
+MediaContent.displayName = 'MediaContent';
+
+// ── TextContent (Cho Writing / Reading / Speaking Prompt) ──
+const TextContent = memo(({ partData }) => {
+  const content = partData?.text || partData?.description || partData?.instruction || '';
+  if (!content.trim()) return null;
+
+  return (
+    <div className="bg-white rounded-[24px] border border-slate-200/80 p-6 md:p-8 shadow-sm animate-in fade-in duration-500 w-full">
+      {partData?.title && (
+        <h3 className="text-lg font-black text-slate-800 mb-4 pb-4 border-b border-slate-100">
+          {partData.title}
+        </h3>
+      )}
+      <div className="prose prose-slate max-w-none text-[15px] leading-relaxed font-medium text-slate-700 whitespace-pre-wrap">
+        {content}
+      </div>
+    </div>
+  );
+});
+TextContent.displayName = 'TextContent';
+
 
 // ── EmptyState — with CTA ──
 const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
   const states = {
     'no-part': {
-      icon: AlertCircle,
-      iconColor: 'text-blue-500',
-      iconBg: 'bg-blue-50',
-      bg: 'bg-white',
-      border: 'border-slate-200/80',
+      icon: AlertCircle, iconColor: 'text-blue-500', iconBg: 'bg-blue-50', bg: 'bg-white',
       title: 'Chưa chọn phần thi',
       description: 'Vui lòng chọn một phần thi (Part) từ danh sách phía trên để bắt đầu.',
       cta: 'Lên chọn Part ngay',
     },
     'no-content': {
-      icon: FileText,
-      iconColor: 'text-amber-500',
-      iconBg: 'bg-amber-50',
-      bg: 'bg-white',
-      border: 'border-slate-200/80',
+      icon: FileText, iconColor: 'text-amber-500', iconBg: 'bg-amber-50', bg: 'bg-white',
       title: 'Nội dung đang cập nhật',
       description: 'Dữ liệu cho phần thi này chưa được tải lên hệ thống. Vui lòng thử phần khác.',
       cta: null,
@@ -118,7 +131,7 @@ const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
   const Icon = state.icon;
 
   return (
-    <div className={`${state.bg} rounded-[24px] border ${state.border} p-8 shadow-sm animate-in fade-in zoom-in-95 duration-300 w-full`}>
+    <div className={`${state.bg} rounded-[24px] border border-slate-200/80 p-8 shadow-sm animate-in fade-in zoom-in-95 duration-300 w-full`}>
       <div className="text-center py-6 flex flex-col items-center">
         <div className={`w-16 h-16 rounded-[20px] ${state.iconBg} flex items-center justify-center mb-5 shadow-inner`}>
           <Icon className={`w-8 h-8 ${state.iconColor}`} strokeWidth={2} />
@@ -144,7 +157,7 @@ EmptyState.displayName = 'EmptyState';
 // ── ContentDisplay (MAIN COMPONENT) ──
 const ContentDisplay = memo(({
   partData,
-  selectedPart,
+  selectedPart, // Ở dạng mảng, selectedPart có thể là part.id (VD: "part_173...")
   currentQuestionIndex,
   testType,
   examId,
@@ -154,20 +167,6 @@ const ContentDisplay = memo(({
   onSelectPart,
   isLoading = false,
 }) => {
-  const content = useMemo(() => {
-    if (!partData) return '';
-    if (testType === 'listening') {
-      if (partData.script) return partData.script;
-      if (partData.text) return partData.text;
-      if (partData.questions && Array.isArray(partData.questions)) {
-        return partData.questions.filter(q => q.script).map(q => q.script).join('\n\n');
-      }
-      return '';
-    }
-    return partData.text || '';
-  }, [partData, testType]);
-
-  const contentKey = `${testType}-${selectedPart}`;
 
   // 1. Trạng thái Đang tải (Spinner)
   if (isLoading) {
@@ -176,55 +175,65 @@ const ContentDisplay = memo(({
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
           <p className="text-slate-900 font-bold text-lg">Đang tải nội dung...</p>
-          {selectedPart && <p className="text-slate-500 text-sm mt-1 font-medium">Part {selectedPart.replace('part', '')}</p>}
         </div>
       </div>
     );
   }
 
-  // ✅ FIX BUG: 2. Kiểm tra nếu partData rỗng thì HIỆN EMPTY STATE TRƯỚC!
+  // 2. Không có dữ liệu part
   if (!partData) {
     return <EmptyState type="no-part" onSelectPart={onSelectPart} />;
   }
 
-  // 3. ĐẶC THÙ READING PART 5: Part 5 không có bài đọc chung -> Ẩn khung hiển thị (Return null ở đây mới đúng)
-  if (testType === 'reading' && selectedPart === 'part5') {
-    return null;
-  }
+  const contentKey = `${partData.id || selectedPart}`;
+  const pType = partData.type || testType; // Tự động nhận diện loại part
 
-  // 4. Nếu có dữ liệu nhưng nội dung text rỗng
-  if (!content.trim()) {
-    return <EmptyState type="no-content" />;
-  }
+  // 3. Xử lý hiển thị dựa trên Loại Part (part.type)
+  switch (pType) {
+    case 'listening':
+      return (
+        <div key={contentKey}>
+          <MediaContent
+            partData={partData}
+            isPartPlayed={isPartPlayed}
+            onAudioStart={onAudioStart}
+            onAudioEnd={onAudioEnd}
+          />
+        </div>
+      );
 
-  // 5. Render phần Đọc
-  if (testType === 'reading') {
-    return (
-      <div key={contentKey} className="animate-in fade-in duration-500">
-        <ReadingDisplay data={partData} />
-      </div>
-    );
-  }
+    case 'reading':
+      // Nếu có component ReadingDisplay riêng thì dùng, không thì dùng TextContent chung
+      if (partData.text) {
+         return (
+          <div key={contentKey} className="animate-in fade-in duration-500">
+            {ReadingDisplay ? <ReadingDisplay data={partData} /> : <TextContent partData={partData} />}
+          </div>
+        );
+      }
+      // Nếu Reading Part không có đoạn văn (VD: part 5 grammar) thì không cần hiện content block.
+      return null; 
 
-  // 6. Render phần Nghe
-  if (testType === 'listening') {
-    return (
-      <div key={contentKey}>
-        <ListeningContent
-          partData={partData}
-          selectedPart={selectedPart}
-          testType={testType}
-          examId={examId}
-          isPartPlayed={isPartPlayed}
-          onAudioStart={onAudioStart}
-          onAudioEnd={onAudioEnd}
-        />
-      </div>
-    );
-  }
+    case 'writing':
+    case 'speaking':
+      // Writing và Speaking hiển thị đề bài/prompt
+      return (
+        <div key={contentKey}>
+          <TextContent partData={partData} />
+          {/* Nếu có Audio đi kèm (như Speaking) */}
+          {partData.audioUrl && (
+             <div className="mt-4">
+                <MediaContent partData={partData} />
+             </div>
+          )}
+        </div>
+      );
 
-  return null;
+    default:
+      // Trường hợp không có content nào
+      return <EmptyState type="no-content" />;
+  }
 });
 ContentDisplay.displayName = 'ContentDisplay';
 
-export { ContentDisplay as default, EmptyState, ListeningContent };
+export { ContentDisplay as default, EmptyState, MediaContent as ListeningContent };

@@ -1,13 +1,11 @@
 // src/admin/pages/Exams/components/QuestionItem.jsx
 import React, { useState } from 'react';
-import { X, Plus, Check, Edit2, ChevronUp } from 'lucide-react';
+import { X, Plus, Check, Edit2, ChevronUp, GripVertical, CheckCircle2 } from 'lucide-react';
 
 // ─── QuestionItem (Hiển thị & Chỉnh sửa real-time) ──────────────────────────
 export const QuestionItem = ({ question, index, onRemove, onUpdate }) => {
-  // State quản lý chế độ: đang xem hay đang sửa
   const [isEditing, setIsEditing] = useState(false);
 
-  // Hàm cập nhật mảng options
   const handleUpdateOption = (oi, val) => {
     const newOptions = [...(question.options || ['', '', '', ''])];
     newOptions[oi] = val;
@@ -17,63 +15,79 @@ export const QuestionItem = ({ question, index, onRemove, onUpdate }) => {
   // NẾU ĐANG Ở CHẾ ĐỘ CHỈNH SỬA
   if (isEditing) {
     return (
-      <div className="border-2 border-blue-300 bg-blue-50/20 rounded-xl p-5 space-y-4 shadow-sm transition-all">
-        <div className="flex justify-between items-center border-b border-blue-100 pb-3 mb-2">
-          <span className="text-sm font-bold text-blue-800">Đang sửa câu hỏi {index + 1}</span>
+      <div className="bg-blue-50/50 border border-blue-200 rounded-2xl p-5 sm:p-6 shadow-sm transition-all animate-in fade-in duration-200">
+        <div className="flex justify-between items-center mb-5">
+          <div className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-black flex-shrink-0">
+              {index + 1}
+            </span>
+            <span className="text-sm font-bold text-slate-800">Chỉnh sửa câu hỏi</span>
+          </div>
           <button
             onClick={() => setIsEditing(false)}
-            className="px-3 py-1.5 bg-white border border-blue-200 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-50 flex items-center gap-1 transition-colors"
+            className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 hover:text-slate-900 flex items-center gap-1.5 transition-colors shadow-sm"
           >
-            <ChevronUp className="w-3.5 h-3.5" /> Thu gọn
+            <ChevronUp className="w-4 h-4" /> Đóng
           </button>
         </div>
         
-        {/* Sửa câu hỏi - Cập nhật trực tiếp lên prop question */}
-        <div>
-          <label className="text-xs font-bold text-gray-700 block mb-1.5">Nội dung câu hỏi</label>
-          <textarea
-            value={question.question || ''}
-            onChange={(e) => onUpdate && onUpdate({ question: e.target.value })}
-            rows={2}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none bg-white shadow-sm"
-          />
-        </div>
-
-        {/* Sửa đáp án */}
-        <div>
-          <label className="text-xs font-bold text-gray-700 block mb-2">
-            Đáp án <span className="text-gray-400 font-normal">(click chữ cái để đổi đáp án đúng)</span>
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            {(question.options || ['', '', '', '']).map((opt, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <button
-                  onClick={() => onUpdate && onUpdate({ correct: i })}
-                  className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold border-2 transition-colors
-                    ${question.correct === i
-                      ? 'bg-green-500 border-green-500 text-white shadow-md'
-                      : 'border-gray-300 text-gray-400 hover:border-green-400 bg-white'}`}
-                >
-                  {String.fromCharCode(65 + i)}
-                </button>
-                <input
-                  value={opt}
-                  onChange={(e) => handleUpdateOption(i, e.target.value)}
-                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white shadow-sm"
-                />
-              </div>
-            ))}
+        <div className="space-y-6">
+          {/* Question Input */}
+          <div>
+            <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-2">Nội dung câu hỏi</label>
+            <textarea
+              value={question.question || ''}
+              onChange={(e) => onUpdate && onUpdate({ question: e.target.value })}
+              rows={2}
+              placeholder="Nhập nội dung câu hỏi..."
+              className="w-full border-0 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:ring-4 focus:ring-blue-500/20 bg-white shadow-sm resize-y transition-all"
+            />
           </div>
-        </div>
 
-        {/* Sửa giải thích */}
-        <div>
-          <label className="text-xs font-bold text-gray-700 block mb-1.5">Giải thích (tuỳ chọn)</label>
-          <input
-            value={question.explanation || ''}
-            onChange={(e) => onUpdate && onUpdate({ explanation: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white shadow-sm"
-          />
+          {/* Options */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block">Đáp án</label>
+              <span className="text-xs text-slate-400 font-medium">Click vào chữ cái để đặt làm đáp án đúng</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {(question.options || ['', '', '', '']).map((opt, i) => {
+                const isCorrect = question.correct === i;
+                return (
+                  <div key={i} className={`flex items-center gap-3 p-1.5 rounded-2xl border transition-all ${isCorrect ? 'bg-emerald-50 border-emerald-200 shadow-sm' : 'bg-white border-transparent shadow-sm'}`}>
+                    <button
+                      onClick={() => onUpdate && onUpdate({ correct: i })}
+                      className={`w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center text-sm font-black transition-all
+                        ${isCorrect 
+                          ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200 scale-105' 
+                          : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                    >
+                      {String.fromCharCode(65 + i)}
+                    </button>
+                    <input
+                      value={opt}
+                      onChange={(e) => handleUpdateOption(i, e.target.value)}
+                      placeholder={`Lựa chọn ${String.fromCharCode(65 + i)}`}
+                      className={`flex-1 min-w-0 border-0 px-2 py-2 text-sm font-medium focus:ring-0 bg-transparent outline-none
+                        ${isCorrect ? 'text-emerald-900 placeholder:text-emerald-300' : 'text-slate-700 placeholder:text-slate-300'}`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Explanation */}
+          <div>
+            <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-2">Giải thích <span className="text-slate-400 font-medium normal-case tracking-normal">(Tuỳ chọn)</span></label>
+            <textarea
+              value={question.explanation || ''}
+              onChange={(e) => onUpdate && onUpdate({ explanation: e.target.value })}
+              rows={2}
+              placeholder="Giải thích vì sao đáp án này đúng..."
+              className="w-full border-0 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-600 focus:ring-4 focus:ring-blue-500/20 bg-white shadow-sm resize-y transition-all placeholder:italic"
+            />
+          </div>
         </div>
       </div>
     );
@@ -81,61 +95,70 @@ export const QuestionItem = ({ question, index, onRemove, onUpdate }) => {
 
   // NẾU Ở CHẾ ĐỘ XEM (Mặc định)
   return (
-    <div className="border border-gray-100 rounded-xl p-4 hover:border-gray-200 hover:shadow-sm transition-all group bg-white">
-      <div className="flex items-start gap-3 mb-3">
-        <span className="w-7 h-7 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 flex-shrink-0 mt-0.5">
-          {String(index + 1).padStart(2, '0')}
+    <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-100 hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/5 transition-all group relative">
+      
+      {/* Action Buttons - Hiện khi Hover */}
+      <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-slate-100 z-10">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+          title="Chỉnh sửa câu hỏi"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onRemove(question.id)}
+          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+          title="Xóa câu hỏi này"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="flex items-start gap-3 sm:gap-4 mb-4 pr-20">
+        <span className="w-8 h-8 bg-white border border-slate-200 shadow-sm rounded-xl flex items-center justify-center text-xs font-black text-slate-600 flex-shrink-0 mt-0.5">
+          {index + 1}
         </span>
-        <p className="text-sm text-gray-900 flex-1 leading-relaxed">
-          {question.question || '(Chưa có nội dung câu hỏi)'}
+        <p className="text-sm font-bold text-slate-800 leading-relaxed pt-1 whitespace-pre-wrap">
+          {question.question || <span className="text-slate-400 italic">(Chưa có nội dung câu hỏi)</span>}
         </p>
-        
-        {/* Nút hành động hiện khi hover */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
-            title="Sửa câu hỏi"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onRemove(question.id)}
-            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-            title="Xóa câu hỏi"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
       </div>
 
       {question.options?.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 pl-10">
-          {question.options.map((opt, oi) => (
-            <div
-              key={oi}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium
-                ${oi === question.correct
-                  ? 'border-green-200 bg-green-50 text-green-800'
-                  : 'border-gray-100 text-gray-600'}`}
-            >
-              <span
-                className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0
-                  ${oi === question.correct ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pl-11 sm:pl-12">
+          {question.options.map((opt, oi) => {
+            const isCorrect = oi === question.correct;
+            return (
+              <div
+                key={oi}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all
+                  ${isCorrect
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800 shadow-sm'
+                    : 'border-slate-200 bg-white text-slate-600'}`}
               >
-                {String.fromCharCode(65 + oi)}
-              </span>
-              <span className="truncate">{opt}</span>
-              {oi === question.correct && <Check className="w-3 h-3 text-green-600 ml-auto flex-shrink-0" />}
-            </div>
-          ))}
+                <span
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black flex-shrink-0
+                    ${isCorrect ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200' : 'bg-slate-100 text-slate-500'}`}
+                >
+                  {String.fromCharCode(65 + oi)}
+                </span>
+                <span className="flex-1 break-words leading-snug">{opt || <span className="text-slate-300 italic">Trống</span>}</span>
+                {isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {question.explanation && (
-        <p className="mt-3 ml-10 text-xs text-gray-500 italic border-l-2 border-gray-200 pl-3">
-          💡 {question.explanation}
-        </p>
+        <div className="mt-4 pl-11 sm:pl-12">
+          <div className="bg-amber-50/50 border border-amber-100 rounded-xl px-4 py-3">
+            <p className="text-xs text-amber-800/80 font-medium leading-relaxed italic">
+              <span className="font-bold not-italic text-amber-600 mr-2">💡 Giải thích:</span>
+              {question.explanation}
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -159,75 +182,92 @@ export const AddQuestionForm = ({ onAdd, onCancel }) => {
   };
 
   return (
-    <div className="border-2 border-blue-200 bg-blue-50/20 rounded-xl p-5 space-y-4 shadow-sm">
-      {/* Question text */}
-      <div>
-        <label className="text-xs font-bold text-gray-700 block mb-1.5">
-          Nội dung câu hỏi mới <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          placeholder="Nhập câu hỏi..."
-          value={q.question}
-          onChange={e => setQ(p => ({ ...p, question: e.target.value }))}
-          rows={2}
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none bg-white shadow-sm"
-        />
-      </div>
-
-      {/* Options */}
-      <div>
-        <label className="text-xs font-bold text-gray-700 block mb-2">
-          Đáp án <span className="text-gray-400 font-normal">(click chữ cái để chọn đáp án đúng)</span>
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          {q.options.map((opt, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <button
-                onClick={() => setQ(p => ({ ...p, correct: i }))}
-                className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold border-2 transition-colors
-                  ${q.correct === i
-                    ? 'bg-green-500 border-green-500 text-white shadow-md'
-                    : 'border-gray-300 text-gray-400 hover:border-green-400 bg-white'}`}
-              >
-                {String.fromCharCode(65 + i)}
-              </button>
-              <input
-                placeholder={`Đáp án ${String.fromCharCode(65 + i)}`}
-                value={opt}
-                onChange={e => updateOption(i, e.target.value)}
-                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white shadow-sm"
-              />
-            </div>
-          ))}
+    <div className="bg-white border-2 border-blue-500 rounded-2xl p-5 sm:p-6 shadow-lg shadow-blue-500/10 animate-in slide-in-from-top-2 duration-300">
+      <div className="flex items-center gap-2 mb-6">
+        <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200">
+          <Plus className="w-5 h-5" />
         </div>
+        <h4 className="text-base font-black text-slate-800">Thêm câu hỏi mới</h4>
       </div>
 
-      {/* Explanation */}
-      <div>
-        <label className="text-xs font-bold text-gray-700 block mb-1.5">
-          Giải thích <span className="text-gray-400 font-normal">(tuỳ chọn)</span>
-        </label>
-        <input
-          placeholder="VD: Michael nói 'the prices were way too high' → ..."
-          value={q.explanation}
-          onChange={e => setQ(p => ({ ...p, explanation: e.target.value }))}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white shadow-sm"
-        />
-      </div>
+      <div className="space-y-6">
+        {/* Question text */}
+        <div>
+          <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-2">
+            Nội dung câu hỏi <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            placeholder="Ví dụ: Đâu là thủ đô của Việt Nam?"
+            value={q.question}
+            onChange={e => setQ(p => ({ ...p, question: e.target.value }))}
+            rows={2}
+            className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-blue-50/20 resize-y transition-all placeholder:text-slate-300"
+          />
+        </div>
 
-      <div className="flex gap-2 pt-2">
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 flex items-center gap-1.5 shadow-sm"
-        >
-          <Plus className="w-3.5 h-3.5" /> Thêm câu hỏi
-        </button>
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-50 bg-white shadow-sm"
-        >
-          Hủy
-        </button>
+        {/* Options */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block">Đáp án</label>
+            <span className="text-xs text-slate-400 font-medium">Click vào chữ cái để chọn đáp án đúng</span>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            {q.options.map((opt, i) => {
+              const isCorrect = q.correct === i;
+              return (
+                <div key={i} className={`flex items-center gap-3 p-1.5 rounded-2xl border-2 transition-all ${isCorrect ? 'bg-emerald-50 border-emerald-500 shadow-md shadow-emerald-100' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
+                  <button
+                    onClick={() => setQ(p => ({ ...p, correct: i }))}
+                    className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-sm font-black transition-all
+                      ${isCorrect 
+                        ? 'bg-emerald-500 text-white scale-105' 
+                        : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                  >
+                    {String.fromCharCode(65 + i)}
+                  </button>
+                  <input
+                    placeholder={`Nhập lựa chọn ${String.fromCharCode(65 + i)}...`}
+                    value={opt}
+                    onChange={e => updateOption(i, e.target.value)}
+                    className={`flex-1 min-w-0 border-0 px-2 py-2 text-sm font-medium focus:ring-0 bg-transparent outline-none
+                      ${isCorrect ? 'text-emerald-900 placeholder:text-emerald-300' : 'text-slate-700 placeholder:text-slate-300'}`}
+                  />
+                  {isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0" />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Explanation */}
+        <div>
+          <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-2">
+            Giải thích <span className="text-slate-400 font-medium normal-case tracking-normal">(tuỳ chọn)</span>
+          </label>
+          <textarea
+            placeholder="Cung cấp lời giải thích cho học sinh sau khi họ làm xong..."
+            value={q.explanation}
+            onChange={e => setQ(p => ({ ...p, explanation: e.target.value }))}
+            rows={2}
+            className="w-full border-2 border-slate-100 rounded-xl px-5 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-blue-50/20 resize-y transition-all placeholder:text-slate-300"
+          />
+        </div>
+
+        <div className="flex gap-3 pt-4 border-t border-slate-100">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3.5 border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all"
+          >
+            Hủy bỏ
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+          >
+            <Check className="w-5 h-5" /> Thêm câu hỏi
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -2,9 +2,29 @@
 import React, { useState, useRef } from 'react';
 import {
   ChevronDown, ChevronRight, Headphones, BookOpen,
-  Music, Upload, Trash2, Plus,
+  Music, Upload, Trash2, Plus, PenTool, Mic
 } from 'lucide-react';
 import { QuestionItem, AddQuestionForm } from './QuestionItem';
+
+// ─── Cấu hình linh hoạt cho từng loại Part ─────────────────────────
+const TYPE_CONFIG = {
+  listening: { 
+    icon: Headphones, color: 'text-blue-600', bg: 'bg-blue-100', badge: 'bg-blue-100 text-blue-700', 
+    label: 'LISTENING', textLabel: 'Script / Transcript', hasAudio: true, hasText: true 
+  },
+  reading: { 
+    icon: BookOpen, color: 'text-amber-600', bg: 'bg-amber-100', badge: 'bg-amber-100 text-amber-700', 
+    label: 'READING', textLabel: 'Nội dung đoạn văn / Email / Bài đọc', hasAudio: false, hasText: true 
+  },
+  writing: { 
+    icon: PenTool, color: 'text-emerald-600', bg: 'bg-emerald-100', badge: 'bg-emerald-100 text-emerald-700', 
+    label: 'WRITING', textLabel: 'Đề bài (Writing Prompt)', hasAudio: false, hasText: true 
+  },
+  speaking: { 
+    icon: Mic, color: 'text-purple-600', bg: 'bg-purple-100', badge: 'bg-purple-100 text-purple-700', 
+    label: 'SPEAKING', textLabel: 'Đề bài / Script (Speaking Prompt)', hasAudio: true, hasText: true 
+  },
+};
 
 // ─── AudioUploader ─────────────────────────────────────────────────
 const AudioUploader = ({ part, partId, onUpload, onDelete, progress }) => {
@@ -87,36 +107,37 @@ const PartPanel = ({
   partId, part,
   isExpanded, onToggle,
   onUpdatePart, onAddQuestion, onRemoveQuestion,
-  onUpdateQuestion, // <--- THÊM PROP NÀY ĐỂ NHẬN HÀM TỪ EditExam
+  onUpdateQuestion,
   onAudioUpload, onAudioDelete,
   uploadProgress,
 }) => {
   const [showAddQ, setShowAddQ] = useState(false);
-  const isListening = part.type === 'listening';
-  const qCount      = part.questions?.length ?? 0;
+  
+  // Lấy cấu hình dựa trên part.type, mặc định fallback về reading nếu không tìm thấy
+  const config = TYPE_CONFIG[part.type] || TYPE_CONFIG.reading;
+  const Icon = config.icon;
+  const qCount = part.questions?.length ?? 0;
 
   return (
     <div className={`border rounded-2xl overflow-hidden transition-all ${isExpanded ? 'border-blue-200 shadow-sm' : 'border-gray-100'}`}>
       {/* Header */}
       <button
         onClick={onToggle}
-        className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${isExpanded ? 'bg-blue-50/40' : 'bg-white hover:bg-gray-50'}`}
+        className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${isExpanded ? 'bg-slate-50' : 'bg-white hover:bg-gray-50'}`}
       >
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isListening ? 'bg-blue-100' : 'bg-amber-100'}`}>
-          {isListening
-            ? <Headphones className="w-4 h-4 text-blue-600" />
-            : <BookOpen   className="w-4 h-4 text-amber-600" />}
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${config.bg}`}>
+          <Icon className={`w-4 h-4 ${config.color}`} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-gray-900 truncate">{part.title}</p>
           <p className="text-xs text-gray-500 mt-0.5">
             {qCount} câu hỏi
-            {isListening && part.audioName && ` · 🎧 ${part.audioName}`}
-            {!isListening && part.text && ` · 📄 ${part.text.length} ký tự`}
+            {config.hasAudio && part.audioName && ` · 🎧 ${part.audioName}`}
+            {config.hasText && part.text && ` · 📄 ${part.text.length} ký tự`}
           </p>
         </div>
-        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${isListening ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-          {isListening ? 'LISTENING' : 'READING'}
+        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${config.badge}`}>
+          {config.label}
         </span>
         {isExpanded
           ? <ChevronDown  className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -138,61 +159,49 @@ const PartPanel = ({
             />
           </div>
 
-          {/* Description */}
+          {/* Instruction */}
           <div>
-            <label className="text-xs font-bold text-gray-700 block mb-1.5">Hướng dẫn</label>
+            <label className="text-xs font-bold text-gray-700 block mb-1.5">Hướng dẫn / Yêu cầu</label>
             <input
-              value={part.description ?? ''}
+              value={part.description ?? part.instruction ?? ''}
               onChange={e => onUpdatePart(partId, { description: e.target.value })}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-              placeholder="Mô tả ngắn..."
+              placeholder="Mô tả ngắn hoặc yêu cầu bài làm..."
             />
           </div>
 
-          {/* Listening: audio + script */}
-          {isListening && (
-            <>
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Music className="w-4 h-4 text-blue-600" />
-                  <label className="text-xs font-bold text-gray-700">File âm thanh</label>
-                </div>
-                <AudioUploader
-                  part={part} partId={partId}
-                  onUpload={onAudioUpload} onDelete={onAudioDelete}
-                  progress={uploadProgress[partId]}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1.5">Script / Transcript</label>
-                <textarea
-                  value={part.script ?? ''}
-                  onChange={e => onUpdatePart(partId, { script: e.target.value })}
-                  rows={6}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-y font-mono"
-                  placeholder="Dán transcript bài nghe vào đây..."
-                />
-              </div>
-            </>
-          )}
-
-          {/* Reading: passage */}
-          {!isListening && (
+          {/* Audio Section (Hiển thị nếu loại part có audio) */}
+          {config.hasAudio && (
             <div>
-              <label className="text-xs font-bold text-gray-700 block mb-1.5">
-                Nội dung đoạn văn / Email / Quảng cáo
-              </label>
-              <textarea
-                value={part.text ?? ''}
-                onChange={e => onUpdatePart(partId, { text: e.target.value })}
-                rows={8}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-y"
-                placeholder="Dán nội dung bài đọc vào đây..."
+              <div className="flex items-center gap-2 mb-3">
+                <Music className="w-4 h-4 text-blue-600" />
+                <label className="text-xs font-bold text-gray-700">File âm thanh</label>
+              </div>
+              <AudioUploader
+                part={part} partId={partId}
+                onUpload={onAudioUpload} onDelete={onAudioDelete}
+                progress={uploadProgress[partId]}
               />
             </div>
           )}
 
-          {/* Questions */}
+          {/* Text Section (Hiển thị nếu loại part có text) */}
+          {config.hasText && (
+            <div>
+              <label className="text-xs font-bold text-gray-700 block mb-1.5">
+                {config.textLabel}
+              </label>
+              <textarea
+                value={part.text ?? part.script ?? ''}
+                onChange={e => onUpdatePart(partId, { text: e.target.value, script: e.target.value })}
+                rows={6}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-y"
+                placeholder="Nhập nội dung vào đây..."
+              />
+            </div>
+          )}
+
+          {/* Questions Section */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs font-bold text-gray-700">Câu hỏi ({qCount})</label>
@@ -210,7 +219,6 @@ const PartPanel = ({
                 <QuestionItem
                   key={q.id} question={q} index={i}
                   onRemove={qid => onRemoveQuestion(partId, qid)}
-                  // Truyền hàm update xuống QuestionItem
                   onUpdate={updates => onUpdateQuestion && onUpdateQuestion(partId, q.id, updates)} 
                 />
               ))}
@@ -232,6 +240,7 @@ const PartPanel = ({
               )}
             </div>
           </div>
+
         </div>
       )}
     </div>

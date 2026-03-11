@@ -3,67 +3,72 @@ import { useNavigate } from 'react-router-dom'
 import {
   ArrowRight, Zap, TrendingUp,
   Headphones, FileText, Brain, Database, Rocket, Star,
-  Users,
+  Users, Sparkles
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { ROUTES } from '../config/routes'
 import { useAppState } from '../hooks/useAppState'
 import MemoizedHeaderSection from '../components/sections/HeaderSection'
 
-// ─── Static data ───────────────────────────────────────────────────────────────
+// ─── Gamified Theme Data ───────────────────────────────────────────────────────
 const STATS = [
-  { Icon: Users,      value: '5K+', label: 'Học viên' },
-  { Icon: Zap,        value: '320', label: 'Online'   },
-  { Icon: Star,       value: '4.9', label: 'Rating'   },
-  { Icon: TrendingUp, value: '95%', label: 'Pass'     },
+  { Icon: Users,      value: '5K+', label: 'Học viên', theme: { bg: 'bg-[#EAF6FE]', text: 'text-[#1CB0F6]', border: 'border-[#BAE3FB]' } },
+  { Icon: Zap,        value: '320', label: 'Online',   theme: { bg: 'bg-[#fff4e5]', text: 'text-[#FF9600]', border: 'border-[#ffdfb2]' } },
+  { Icon: Star,       value: '4.9', label: 'Rating',   theme: { bg: 'bg-[#FFC800]/10', text: 'text-[#FFC800]', border: 'border-[#FFC800]/30' } },
+  { Icon: TrendingUp, value: '95%', label: 'Pass',     theme: { bg: 'bg-[#f1faeb]', text: 'text-[#58CC02]', border: 'border-[#bcf096]' } },
 ]
 
 const FEATURES = [
-  { id: 'listening',  Icon: Headphones, title: 'Listening', desc: 'Bài nghe mô phỏng thực tế',  gradient: 'from-blue-600 to-blue-500'     },
-  { id: 'reading',    Icon: FileText,   title: 'Reading',   desc: 'Kho bài đọc phong phú',       gradient: 'from-cyan-500 to-teal-500'     },
-  { id: 'grammar',    Icon: Brain,      title: 'Grammar',   desc: 'Ngữ pháp qua thực hành',      gradient: 'from-indigo-600 to-blue-600'   },
-  { id: 'vocabulary', Icon: Database,   title: 'Vocab',     desc: 'Ghi nhớ từ vựng thông minh',  gradient: 'from-violet-600 to-purple-600' },
+  { 
+    id: 'listening',  Icon: Headphones, title: 'Listening', desc: 'Bài nghe mô phỏng thực tế',  
+    theme: { bg: 'bg-[#1CB0F6]', iconBg: 'bg-[#1899D6]', hoverBorder: 'hover:border-[#1CB0F6]' } 
+  },
+  { 
+    id: 'reading',    Icon: FileText,   title: 'Reading',   desc: 'Kho bài đọc phong phú',       
+    theme: { bg: 'bg-[#58CC02]', iconBg: 'bg-[#46A302]', hoverBorder: 'hover:border-[#58CC02]' } 
+  },
+  { 
+    id: 'grammar',    Icon: Brain,      title: 'Grammar',   desc: 'Ngữ pháp qua thực hành',      
+    theme: { bg: 'bg-[#CE82FF]', iconBg: 'bg-[#B975E5]', hoverBorder: 'hover:border-[#CE82FF]' } 
+  },
+  { 
+    id: 'vocabulary', Icon: Database,   title: 'Vocab',     desc: 'Ghi nhớ từ vựng thông minh',  
+    theme: { bg: 'bg-[#FF9600]', iconBg: 'bg-[#E58700]', hoverBorder: 'hover:border-[#FF9600]' } 
+  },
 ]
 
-// ─── FeatureCard ───────────────────────────────────────────────────────────────
-const FeatureCard = memo(({ Icon, title, desc, gradient, onClick }) => (
+// ─── Gamified FeatureCard ──────────────────────────────────────────────────────
+const FeatureCard = memo(({ Icon, title, desc, theme, onClick }) => (
   <motion.button
     onClick={onClick}
-    whileHover={{ y: -2 }}
-    whileTap={{ scale: 0.98 }}
-    className="w-full text-left bg-white border border-slate-200 p-3 xs:p-3.5 sm:p-4 rounded-xl hover:shadow-md transition-all duration-200"
+    whileHover={{ y: -4 }}
+    className={`w-full text-left bg-white border-2 border-slate-200 border-b-[6px] p-5 sm:p-6 rounded-[28px] transition-colors duration-200 active:border-b-2 active:translate-y-[4px] outline-none ${theme.hoverBorder} group`}
   >
-    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-3`}>
-      <Icon className="w-4 h-4 text-white" aria-hidden="true" />
+    <div className={`w-14 h-14 rounded-[18px] ${theme.bg} flex items-center justify-center mb-5 shadow-sm border-b-[4px] ${theme.iconBg} transition-transform group-hover:scale-110`}>
+      <Icon className="w-7 h-7 text-white" strokeWidth={2.5} aria-hidden="true" />
     </div>
-    <h3 className="text-sm xs:text-base font-bold text-slate-900 mb-0.5">{title}</h3>
-    <p className="text-xs text-slate-500 leading-tight mb-3">{desc}</p>
-    <div className="flex items-center gap-1 text-blue-600 font-semibold text-xs">
-      Khám phá <ArrowRight className="w-3 h-3" aria-hidden="true" />
+    <h3 className="text-[18px] sm:text-[20px] font-quick font-black text-slate-800 mb-1.5">{title}</h3>
+    <p className="text-[14px] font-nunito font-bold text-slate-500 leading-snug mb-5">{desc}</p>
+    <div className="flex items-center gap-1.5 text-slate-400 font-extrabold text-[13px] uppercase tracking-wider group-hover:text-slate-600 transition-colors">
+      Khám phá <ArrowRight className="w-4 h-4" strokeWidth={3} aria-hidden="true" />
     </div>
   </motion.button>
 ))
 FeatureCard.displayName = 'FeatureCard'
 
-// ─── StatCard ──────────────────────────────────────────────────────────────────
-const StatCard = memo(({ Icon, value, label }) => (
-  <div className="bg-white rounded-xl border border-slate-200 p-3 xs:p-4 text-center">
-    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mx-auto mb-2">
-      <Icon className="w-4 h-4 text-blue-600" aria-hidden="true" />
+// ─── Gamified StatCard ─────────────────────────────────────────────────────────
+const StatCard = memo(({ Icon, value, label, theme }) => (
+  <div className={`bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-4 sm:p-5 flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-transform`}>
+    <div className={`w-12 h-12 rounded-[16px] ${theme.bg} ${theme.border} border-2 flex items-center justify-center mb-3`}>
+      <Icon className={`w-6 h-6 ${theme.text}`} strokeWidth={2.5} aria-hidden="true" />
     </div>
-    <p className="text-xl xs:text-2xl font-black text-slate-900">{value}</p>
-    <p className="text-[9px] xs:text-[10px] font-bold text-slate-500 uppercase tracking-wide mt-0.5">{label}</p>
+    <p className="text-[24px] sm:text-[28px] font-black text-slate-800 font-quick leading-none mb-1">{value}</p>
+    <p className="text-[11px] sm:text-[12px] font-extrabold text-slate-400 uppercase tracking-widest">{label}</p>
   </div>
 ))
 StatCard.displayName = 'StatCard'
 
 // ─── HomePage ──────────────────────────────────────────────────────────────────
-// Phân chia trách nhiệm rõ ràng:
-//   HeaderSection  → Hero: headline + CTA button + stats strip (500+/24/7/Top1)
-//   HomePage body  → Features cards + Stats cards + CTA banner
-//
-// Trước đây HomePage tự render lại toàn bộ hero (headline, CTA, stats) bên trong
-// <main> → gây duplicate với HeaderSection đứng ngay phía trên.
 const HomePage = memo(() => {
   const navigate = useNavigate()
   const { isSignedIn, user, handleTestTypeChange } = useAppState()
@@ -81,47 +86,47 @@ const HomePage = memo(() => {
   }, [navigate, handleTestTypeChange])
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-[#F4F7FA] min-h-screen font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
 
-      {/* ── Hero ──────────────────────────────────────────────────────────────
-          HeaderSection chứa: headline, description, CTA button, stats strip.
-          HomePage KHÔNG lặp lại các nội dung này bên dưới.
-      ────────────────────────────────────────────────────────────────────── */}
+      {/* Hero Section (Vẫn giữ nguyên component của bạn) */}
       <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
 
-      <main className="w-full">
+      <main className="w-full pb-20">
 
         {/* ═══ FEATURES ══════════════════════════════════════════════════════ */}
-        <section className="px-4 sm:px-6 py-10 sm:py-14">
+        <section className="px-4 sm:px-6 py-12 sm:py-16">
           <div className="max-w-5xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-6 sm:mb-8"
+              className="text-center mb-8 sm:mb-12"
             >
-              <h2 className="text-xl xs:text-2xl sm:text-3xl font-black text-slate-900 mb-2">
-                Luyện tập <span className="text-blue-600">4 kỹ năng</span>
+              <h2 className="text-[26px] sm:text-[36px] font-black text-slate-800 mb-3 font-quick">
+                Mở khóa <span className="text-[#1CB0F6] inline-block relative">
+                  4 Kỹ năng
+                  <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#FFC800] opacity-80" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="4" fill="transparent"/></svg>
+                </span>
               </h2>
-              <p className="text-xs xs:text-sm text-slate-500">
-                Toàn diện từ Listening, Reading, Grammar đến Vocabulary
+              <p className="text-[15px] sm:text-[17px] font-bold text-slate-500">
+                Chinh phục bài thi tiếng Anh một cách dễ dàng và thú vị nhất!
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
               {FEATURES.map((f, i) => (
                 <motion.div
                   key={f.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
+                  transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
                 >
                   <FeatureCard
                     Icon={f.Icon}
                     title={f.title}
                     desc={f.desc}
-                    gradient={f.gradient}
+                    theme={f.theme}
                     onClick={() => handleFeatureClick(f.id)}
                   />
                 </motion.div>
@@ -131,27 +136,31 @@ const HomePage = memo(() => {
         </section>
 
         {/* ═══ STATS ═════════════════════════════════════════════════════════ */}
-        <section className="px-4 sm:px-6 py-10 sm:py-14 bg-slate-50">
+        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y-2 border-slate-200">
           <div className="max-w-5xl mx-auto">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="text-center text-lg xs:text-xl sm:text-2xl font-black text-slate-900 mb-6 sm:mb-8"
+              className="flex items-center justify-center gap-3 mb-8 sm:mb-12"
             >
-              Được tin tưởng bởi hàng ngàn học viên
-            </motion.h2>
+              <Sparkles className="text-[#FFC800]" size={28} strokeWidth={2.5} />
+              <h2 className="text-center text-[22px] sm:text-[30px] font-black text-slate-800 font-quick">
+                Cộng đồng học tập sôi nổi
+              </h2>
+              <Sparkles className="text-[#FFC800]" size={28} strokeWidth={2.5} />
+            </motion.div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {STATS.map((s, i) => (
                 <motion.div
                   key={s.label}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 }}
+                  transition={{ delay: i * 0.1 }}
                 >
-                  <StatCard Icon={s.Icon} value={s.value} label={s.label} />
+                  <StatCard Icon={s.Icon} value={s.value} label={s.label} theme={s.theme} />
                 </motion.div>
               ))}
             </div>
@@ -159,30 +168,41 @@ const HomePage = memo(() => {
         </section>
 
         {/* ═══ CTA BANNER ════════════════════════════════════════════════════ */}
-        <section className="px-4 sm:px-6 py-10 sm:py-14">
-          <div className="max-w-5xl mx-auto">
+        <section className="px-4 sm:px-6 py-12 sm:py-20">
+          <div className="max-w-4xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl px-6 sm:px-10 py-10 sm:py-14 text-center"
+              className="relative bg-[#1CB0F6] border-b-[8px] border-[#1899D6] rounded-[36px] px-6 sm:px-12 py-12 sm:py-16 text-center overflow-hidden shadow-xl"
             >
-              <h2 className="text-xl xs:text-2xl sm:text-3xl font-black text-white mb-3">
-                Sẵn sàng bắt đầu?
-              </h2>
-              <p className="text-blue-100 text-xs xs:text-sm mb-6 font-medium max-w-xl mx-auto leading-relaxed">
-                Luyện tập thông minh, đạt kết quả nhanh chóng. Bắt đầu hành trình chinh phục HUFLIT ngay hôm nay.
-              </p>
-              <motion.button
-                onClick={handleFullTest}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                className="inline-flex items-center gap-2 bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <Rocket className="w-4 h-4" aria-hidden="true" />
-                VÀO THI NGAY
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </motion.button>
+              {/* Trang trí nền mờ */}
+              <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white opacity-10 rounded-full blur-[40px]" />
+              <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-white opacity-10 rounded-full blur-[30px]" />
+
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
+                  <Rocket className="w-10 h-10 text-[#FF9600]" strokeWidth={2.5} />
+                </div>
+                
+                <h2 className="text-[28px] sm:text-[40px] font-black text-white mb-4 font-quick leading-tight" style={{ textShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                  Sẵn sàng cất cánh?
+                </h2>
+                
+                <p className="text-white/90 text-[15px] sm:text-[18px] font-bold mb-8 max-w-xl mx-auto leading-relaxed">
+                  Đừng chỉ học, hãy chơi với ngôn ngữ! Bắt đầu hành trình chinh phục điểm cao cùng HubStudy ngay bây giờ.
+                </p>
+                
+                <motion.button
+                  onClick={handleFullTest}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center gap-3 bg-[#58CC02] text-white px-8 sm:px-10 py-4 sm:py-5 rounded-[24px] font-quick font-black text-[18px] sm:text-[20px] uppercase tracking-wider shadow-[0_8px_0_#46A302] hover:bg-[#46A302] hover:shadow-[0_4px_0_#46A302] hover:translate-y-[4px] active:shadow-none active:translate-y-[8px] transition-all outline-none border-2 border-[#46A302]"
+                >
+                  VÀO THI NGAY
+                  <ArrowRight className="w-6 h-6" strokeWidth={3} aria-hidden="true" />
+                </motion.button>
+              </div>
             </motion.div>
           </div>
         </section>

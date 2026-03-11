@@ -1,55 +1,48 @@
-import React, {
-  useState,
-  memo,
-  useMemo,
-  useCallback,
-  useRef,
-  useEffect,
-  useId,
-} from 'react';
+import React, { useState, memo, useMemo, useCallback, useRef, useEffect, useId } from 'react';
 import StepIndicator from '../../StepIndicator';
 import { getAllExamMetadataAsync } from '../../../../data/examData';
+import { Search, ChevronRight, Check, FileText, Clock, LayoutGrid } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-/* ─────────────────────────────────────────────────────────────
-   Analytics
-   ───────────────────────────────────────────────────────────── */
+/* ─── Analytics ──────────────────────────────────────────── */
 const analytics = {
   track: (event, props) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[analytics]', event, props);
-    }
+    if (process.env.NODE_ENV === 'development') console.debug('[analytics]', event, props);
   },
 };
 
-/* ─────────────────────────────────────────────────────────────
-   Class maps
-   ───────────────────────────────────────────────────────────── */
-const DIFFICULTY_CLASSES = {
-  beginner:     'text-teal-700 bg-teal-50',
-  intermediate: 'text-amber-700 bg-amber-50',
-  advanced:     'text-rose-700 bg-rose-50',
-};
-const DIFFICULTY_LABELS = {
-  beginner:     'Cơ bản',
-  intermediate: 'Trung cấp',
-  advanced:     'Nâng cao',
+/* ─── Difficulty config ──────────────────────────────────── */
+const DIFFICULTY_CONFIG = {
+  beginner:     { label: 'Cơ bản',    bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
+  intermediate: { label: 'Trung cấp', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  advanced:     { label: 'Nâng cao',  bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
 };
 
-/* ─────────────────────────────────────────────────────────────
-   SkeletonList
-   ───────────────────────────────────────────────────────────── */
+/* ─── Global Styles & Fonts ──────────────────────────────── */
+const GlobalStyles = memo(() => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700&family=Quicksand:wght@600;700&display=swap');
+    
+    .font-quick { font-family: 'Quicksand', sans-serif; }
+    .font-nunito { font-family: 'Nunito', sans-serif; }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  `}</style>
+));
+GlobalStyles.displayName = 'GlobalStyles';
+
+/* ─── Skeleton ───────────────────────────────────────────── */
 const SkeletonList = memo(() => (
-  <div role="status" aria-label="Loading exams..." aria-busy="true" className="py-2">
+  <div role="status" aria-busy="true" className="divide-y divide-gray-100">
     {[1, 2, 3, 4].map(i => (
-      <div key={i} className="flex gap-4 items-center px-5 h-[112px] border-b border-slate-100 last:border-none">
-        <div className="animate-pulse bg-slate-200 rounded-full w-5 h-5 shrink-0" />
-        <div className="flex-1 flex flex-col gap-2.5">
-          <div className="animate-pulse bg-slate-200 rounded-md h-4 w-[60%]" />
-          <div className="animate-pulse bg-slate-100 rounded-md h-3 w-[85%]" />
-          <div className="flex gap-2">
-            <div className="animate-pulse bg-slate-100 rounded-md h-6 w-16" />
-            <div className="animate-pulse bg-slate-100 rounded-md h-6 w-16" />
-          </div>
+      <div key={i} className="flex items-center gap-3 px-4 py-3 h-20 bg-white">
+        <div className="w-5 h-5 rounded-full bg-gray-200 shrink-0 animate-pulse" />
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="h-3.5 w-2/3 bg-gray-200 rounded animate-pulse" />
+          <div className="h-3 w-4/5 bg-gray-100 rounded animate-pulse" />
         </div>
       </div>
     ))}
@@ -57,33 +50,20 @@ const SkeletonList = memo(() => (
 ));
 SkeletonList.displayName = 'SkeletonList';
 
-/* ─────────────────────────────────────────────────────────────
-   EmptyState
-   ───────────────────────────────────────────────────────────── */
-const EmptyState = memo(({ searchQuery, onClearFilters }) => (
-  <div role="status" className="py-16 px-6 text-center flex flex-col items-center gap-4">
-    <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-2">
-      <svg width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <circle cx="18" cy="18" r="11" stroke="#94A3B8" strokeWidth="2" />
-        <path d="M27 27l7 7" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
-      </svg>
+/* ─── Empty State ────────────────────────────────────────── */
+const EmptyState = memo(({ searchQuery, onClear }) => (
+  <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-white">
+    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
+      <Search className="w-6 h-6 text-gray-300" strokeWidth={2} />
     </div>
-    <div className="space-y-1">
-      <p className="text-base font-semibold text-slate-900 m-0">
-        Không tìm thấy đề thi
-      </p>
-      <p className="text-sm text-slate-500 m-0 max-w-sm">
-        {searchQuery ? (
-          <>Không có kết quả cho "<strong>{searchQuery}</strong>". Thử từ khóa khác.</>
-        ) : (
-          'Hiện chưa có đề thi nào trong hệ thống.'
-        )}
-      </p>
-    </div>
+    <p className="text-base font-semibold text-gray-800 mb-1">Không tìm thấy đề thi</p>
+    <p className="text-sm font-medium text-gray-500 mb-4 max-w-xs">
+      {searchQuery ? <>Không có kết quả cho "<strong>{searchQuery}</strong>"</> : 'Chưa có đề thi nào.'}
+    </p>
     {searchQuery && (
-      <button
-        onClick={onClearFilters}
-        className="mt-4 px-5 py-2.5 rounded-xl border border-blue-600 bg-blue-50 text-blue-700 font-medium text-sm transition-colors hover:bg-blue-100 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 outline-none"
+      <button 
+        onClick={onClear} 
+        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors"
       >
         Xóa tìm kiếm
       </button>
@@ -92,82 +72,62 @@ const EmptyState = memo(({ searchQuery, onClearFilters }) => (
 ));
 EmptyState.displayName = 'EmptyState';
 
-/* ─────────────────────────────────────────────────────────────
-   ExamListItem
-   ───────────────────────────────────────────────────────────── */
+/* ─── Exam List Item ─────────────────────────────────────── */
 const ExamListItem = memo(({ exam, isSelected, onSelect, id }) => {
   const itemRef = useRef(null);
+  useEffect(() => { if (isSelected) itemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, [isSelected]);
 
-  useEffect(() => {
-    if (isSelected) itemRef.current?.focus();
-  }, [isSelected]);
+  const diff = DIFFICULTY_CONFIG[exam.difficulty];
 
   return (
     <div
-      id={id}
-      ref={itemRef}
-      role="option"
-      aria-selected={isSelected}
-      tabIndex={isSelected ? 0 : -1}
+      id={id} ref={itemRef}
+      role="option" aria-selected={isSelected} tabIndex={isSelected ? 0 : -1}
       onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelect();
-        }
-      }}
-      className={[
-        'group relative flex items-center gap-4 cursor-pointer outline-none box-border',
-        'h-[112px] px-5 border-b border-slate-100 last:border-none',
-        'transition-colors duration-200',
-        'focus-visible:bg-blue-50/50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-600',
-        isSelected ? 'bg-blue-50/40' : 'bg-white hover:bg-slate-50',
-      ].join(' ')}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
+      className={`
+        relative flex items-center gap-3 px-4 py-3 min-h-20 cursor-pointer outline-none transition-colors border-b border-gray-100 last:border-b-0
+        ${isSelected ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}
+      `}
     >
-      {/* Indicator Line */}
-      {isSelected && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-md" />
-      )}
+      {/* Selected Indicator */}
+      {isSelected && <div className="absolute left-0 top-2 bottom-2 w-1 bg-blue-500 rounded-r" />}
 
-      {/* Radio indicator */}
-      <div
-        aria-hidden="true"
-        className={[
-          'shrink-0 w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-colors',
-          isSelected ? 'border-blue-600 bg-blue-600' : 'border-slate-300 bg-white group-hover:border-slate-400',
-        ].join(' ')}
-      >
-        {isSelected && <span className="w-2 h-2 rounded-full bg-white" />}
+      {/* Radio Checkbox */}
+      <div className={`
+        w-5 h-5 rounded-md shrink-0 flex items-center justify-center border-2 transition-all
+        ${isSelected ? 'bg-blue-500 border-blue-600' : 'bg-white border-gray-300'}
+      `}>
+        {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
       </div>
 
-      <div className="flex-1 min-w-0 py-2">
-        <div className="flex justify-between items-center gap-3 mb-1.5">
-          <h3 className="text-[15px] font-semibold text-slate-900 m-0 truncate group-hover:text-blue-700 transition-colors">
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <h3 className={`text-sm font-semibold truncate ${isSelected ? 'text-blue-700' : 'text-gray-800'}`}>
             {exam.title || `Exam ${exam.id}`}
           </h3>
           {exam.isNew && (
-            <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded shrink-0">
-              NEW
+            <span className="px-2 py-0.5 bg-rose-100 text-rose-600 rounded-md text-xs font-bold uppercase shrink-0">
+              Mới
             </span>
           )}
         </div>
 
-        <p className="text-sm text-slate-500 mb-3 m-0 truncate">
-          {exam.description || 'Bài kiểm tra năng lực tiếng Anh toàn diện'}
+        <p className="text-xs font-medium text-gray-500 truncate mb-2">
+          {exam.description || 'Bài kiểm tra năng lực tiếng Anh'}
         </p>
 
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 font-medium flex items-center gap-1">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            {exam.questions || 60} câu
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium">
+            <FileText size={12} /> {exam.questions || 60} câu
           </span>
-          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 font-medium flex items-center gap-1">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            {exam.duration || 90} phút
+          <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium">
+            <Clock size={12} /> {exam.duration || 90} phút
           </span>
-          {exam.difficulty && (
-            <span className={`text-xs px-2.5 py-1 rounded-md font-medium ${DIFFICULTY_CLASSES[exam.difficulty] || 'bg-slate-100 text-slate-600'}`}>
-              {DIFFICULTY_LABELS[exam.difficulty] || exam.difficulty}
+          {diff && (
+            <span className={`px-2 py-1 rounded-lg text-xs font-medium border ${diff.bg} ${diff.text} ${diff.border}`}>
+              {diff.label}
             </span>
           )}
         </div>
@@ -177,25 +137,20 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id }) => {
 });
 ExamListItem.displayName = 'ExamListItem';
 
-/* ─────────────────────────────────────────────────────────────
-   ExamListBox
-   ───────────────────────────────────────────────────────────── */
-const ITEM_H  = 112; 
-const VISIBLE = 4;
+/* ─── Virtual List Box ───────────────────────────────────── */
+const ITEM_H  = 88;
+const VISIBLE = 5;
 const BUFFER  = 2;
 
 const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef(null);
 
-  const activeIdx = useMemo(
-    () => exams.findIndex(e => e.id === selectedExam),
-    [exams, selectedExam],
-  );
+  const activeIdx = useMemo(() => exams.findIndex(e => e.id === selectedExam), [exams, selectedExam]);
 
   const handleKeyDown = useCallback((e) => {
     const len = exams.length;
-    if (len === 0) return;
+    if (!len) return;
     let next = activeIdx;
     if      (e.key === 'ArrowDown') { e.preventDefault(); next = Math.min(activeIdx + 1, len - 1); }
     else if (e.key === 'ArrowUp')   { e.preventDefault(); next = Math.max(activeIdx - 1, 0); }
@@ -204,40 +159,32 @@ const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
     else return;
 
     onSelectExam(exams[next].id);
-    const itemTop = next * ITEM_H;
-    const container = containerRef.current;
-    if (!container) return;
-    if (itemTop < container.scrollTop)
-      container.scrollTop = itemTop;
-    else if (itemTop + ITEM_H > container.scrollTop + container.clientHeight)
-      container.scrollTop = itemTop + ITEM_H - container.clientHeight;
+    const top = next * ITEM_H;
+    const el  = containerRef.current;
+    if (!el) return;
+    if (top < el.scrollTop) el.scrollTop = top;
+    else if (top + ITEM_H > el.scrollTop + el.clientHeight) el.scrollTop = top + ITEM_H - el.clientHeight;
   }, [exams, activeIdx, onSelectExam]);
-
-  const handleScroll = useCallback((e) => setScrollTop(e.currentTarget.scrollTop), []);
 
   const startIdx = Math.max(0, Math.floor(scrollTop / ITEM_H) - BUFFER);
   const endIdx   = Math.min(exams.length, Math.ceil((scrollTop + VISIBLE * ITEM_H) / ITEM_H) + BUFFER);
 
   return (
     <div
-      id={listboxId}
-      ref={containerRef}
-      role="listbox"
-      aria-label="Danh sách đề thi"
+      id={listboxId} ref={containerRef}
+      role="listbox" aria-label="Danh sách đề thi"
       aria-activedescendant={selectedExam ? `exam-opt-${selectedExam}` : undefined}
       tabIndex={0}
-      onScroll={handleScroll}
+      onScroll={e => setScrollTop(e.currentTarget.scrollTop)}
       onKeyDown={handleKeyDown}
-      className="outline-none overflow-y-auto w-full
-                 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 hover:scrollbar-thumb-slate-300"
-      style={{ maxHeight: VISIBLE * ITEM_H }}
+      className="outline-none custom-scrollbar bg-white"
+      style={{ maxHeight: VISIBLE * ITEM_H, overflowY: 'auto' }}
     >
       <div style={{ height: exams.length * ITEM_H, position: 'relative' }}>
-        <div style={{ transform: `translateY(${startIdx * ITEM_H}px)`, position: 'absolute', top: 0, left: 0, right: 0 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, transform: `translateY(${startIdx * ITEM_H}px)` }}>
           {exams.slice(startIdx, endIdx).map(exam => (
             <ExamListItem
-              key={exam.id}
-              id={`exam-opt-${exam.id}`}
+              key={exam.id} id={`exam-opt-${exam.id}`}
               exam={exam}
               isSelected={selectedExam === exam.id}
               onSelect={() => onSelectExam(exam.id)}
@@ -250,204 +197,242 @@ const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
 });
 ExamListBox.displayName = 'ExamListBox';
 
-/* ─────────────────────────────────────────────────────────────
-   MAIN COMPONENT
-   ───────────────────────────────────────────────────────────── */
-export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
+/* ─── Category Tab Bar ───────────────────────────────────── */
+const CategoryTabs = memo(({ categories, activeCategory, onChange }) => (
+  <div className="flex gap-2 overflow-x-auto pb-2 pt-0 custom-scrollbar snap-x">
+    {categories.map(cat => {
+      const active = activeCategory === cat.id;
+      return (
+        <button 
+          key={cat.id} 
+          onClick={() => onChange(cat.id)}
+          className={`
+            snap-start shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all outline-none
+            ${active 
+              ? 'bg-blue-500 text-white' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+          `}
+        >
+          {cat.label} {cat.count > 0 && <span className={`ml-1 text-xs font-bold`}>{cat.count}</span>}
+        </button>
+      );
+    })}
+  </div>
+));
+CategoryTabs.displayName = 'CategoryTabs';
+
+/* ══════════════════════════════════════════════════════
+   MAIN — ExamSetup
+══════════════════════════════════════════════════════ */
+export const ExamSetup = memo(({ onStartExam }) => {
   const listboxId = useId();
 
-  const [examList, setExamList] = useState([]);
-  const [isLoadingList, setIsLoadingList] = useState(true);
-  const [selectedExam, setSelectedExam] = useState('');
-  
-  const [isStarting,  setIsStarting]  = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [examList,        setExamList]        = useState([]);
+  const [isLoading,       setIsLoading]       = useState(true);
+  const [selectedExam,    setSelectedExam]    = useState('');
+  const [isStarting,      setIsStarting]      = useState(false);
+  const [searchQuery,     setSearchQuery]     = useState('');
+  const [activeCategory,  setActiveCategory]  = useState('all');
 
   useEffect(() => {
     let mounted = true;
-    const fetchExams = async () => {
-      setIsLoadingList(true);
-      try {
-        const data = await getAllExamMetadataAsync(true);
-        if (mounted) {
-          setExamList(data);
-          if (data.length > 0) {
-            setSelectedExam(data[0].id);
-          }
-        }
-      } catch (error) {
-        console.error("Lỗi tải đề thi:", error);
-      } finally {
-        if (mounted) setIsLoadingList(false);
-      }
-    };
-    fetchExams();
+    setIsLoading(true);
+    getAllExamMetadataAsync()
+      .then(data => {
+        if (!mounted) return;
+        setExamList(data || []);
+        if (data?.length > 0) setSelectedExam(data[0].id);
+      })
+      .catch(err => console.error('[ExamSetup] load failed:', err))
+      .finally(() => { if (mounted) setIsLoading(false); });
     return () => { mounted = false; };
   }, []);
 
+  const categories = useMemo(() => {
+    const countMap = {};
+    examList.forEach(e => {
+      const cat = (e.category || 'other').toLowerCase();
+      countMap[cat] = (countMap[cat] || 0) + 1;
+    });
+
+    const dynamic = Object.entries(countMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, count]) => ({
+        id,
+        label: id.toUpperCase(),
+        count,
+      }));
+
+    return [{ id: 'all', label: 'TẤT CẢ', count: examList.length }, ...dynamic];
+  }, [examList]);
+
   const filteredExams = useMemo(() => {
-    if (!examList?.length) return [];
     let r = examList;
+    if (activeCategory !== 'all') {
+      r = r.filter(e => (e.category || 'other').toLowerCase() === activeCategory);
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       r = r.filter(e =>
         e.title?.toLowerCase().includes(q) ||
         e.description?.toLowerCase().includes(q) ||
-        e.id?.toLowerCase().includes(q),
+        e.id?.toLowerCase().includes(q)
       );
     }
-    // Mặc định sắp xếp bài mới nhất lên trên
-    return [...r].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }, [examList, searchQuery]);
+    return [...r].sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+  }, [examList, activeCategory, searchQuery]);
 
-  const count = filteredExams.length;
+  useEffect(() => {
+    if (filteredExams.length > 0 && !filteredExams.find(e => e.id === selectedExam)) {
+      setSelectedExam(filteredExams[0].id);
+    }
+  }, [filteredExams, selectedExam]);
+
+  const selectedExamData = useMemo(() => examList.find(e => e.id === selectedExam), [examList, selectedExam]);
 
   const handleStart = useCallback(async () => {
+    if (!selectedExam) return;
     setIsStarting(true);
     analytics.track('exam_started', { examId: selectedExam });
-    try { onStartExam?.(selectedExam); } finally { setIsStarting(false); }
+    try { await onStartExam?.(selectedExam); } finally { setIsStarting(false); }
   }, [selectedExam, onStartExam]);
 
-  const handleSearch = useCallback((e) => {
-    setSearchQuery(e.target.value);
-    analytics.track('search_used', { query: e.target.value });
-  }, []);
-
-  const handleSelectExam = useCallback((id) => {
-    setSelectedExam(id);
-    onExamHover?.(id);
-  }, [onExamHover]);
-
-  const clearFilters = useCallback(() => {
-    setSearchQuery('');
-  }, []);
-
-  /* Style chuẩn Material Design cho Input */
-  const inputClass = "w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm transition-all duration-200 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 outline-none placeholder:text-slate-400";
+  const handleSearch = useCallback(e => setSearchQuery(e.target.value), []);
+  const handleSelectExam = useCallback(id => setSelectedExam(id), []);
+  const clearSearch = useCallback(() => setSearchQuery(''), []);
 
   const TEST_SECTIONS = [
-    { label: 'Listening', desc: '20 câu · 4 phần', time: '30 phút' },
-    { label: 'Reading',   desc: '40 câu · 4 phần', time: '60 phút' },
+    { label: 'Listening', desc: 'Nghe hiểu tình huống', time: '30 phút', icon: '🎧', bg: 'bg-blue-50', border: 'border-blue-200' },
+    { label: 'Reading',   desc: 'Đọc hiểu văn bản', time: '60 phút', icon: '📖', bg: 'bg-emerald-50', border: 'border-emerald-200' },
   ];
 
   const REQUIREMENTS = [
     'Môi trường yên tĩnh, tập trung',
-    'Kết nối internet ổn định',
-    'Tiến độ lưu tự động liên tục',
-    'Không thể quay lại phần nghe đã làm',
+    'Kết nối mạng ổn định',
+    'Tiến độ được lưu tự động',
   ];
 
   return (
-    <div className="examsetup-root min-h-screen bg-slate-50 font-[family-name:var(--font-dm-sans,'DM_Sans',system-ui,sans-serif)] pb-20">
-
+    <div className="min-h-screen bg-gray-50 pb-24 lg:pb-12 selection:bg-blue-200">
+      <GlobalStyles />
+      
       {/* ── Header ── */}
-      <header
-        role="banner"
-        className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm pt-[max(12px,env(safe-area-inset-top))]"
-      >
-        <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-4">
-          <div className="flex items-start gap-4 flex-wrap">
-            <div className="flex-1 min-w-0">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md mb-3">
-                <svg width="12" height="12" viewBox="0 0 10 12" fill="none" aria-hidden="true">
-                  <path d="M5 0L10 2v5c0 2.5-2 4-5 5C2 11 0 9.5 0 7V2L5 0z" fill="currentColor" />
-                </svg>
-                Official Assessment
-              </span>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-tight m-0">
-                HUFLIT English Placement Test
+      {/* ── Header ── */}
+      <header className="bg-white border-b border-slate-200 py-5 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          
+          {/* ── Page Header ── */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight italic leading-tight">
+                HubStudy <span className="text-blue-600">Placement Test</span>
               </h1>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-                Đánh giá năng lực ngoại ngữ theo chuẩn khung tham chiếu
+              <p className="text-slate-500 text-sm mt-1 font-medium">
+                Đánh giá năng lực ngoại ngữ chuẩn đầu ra.
               </p>
             </div>
-          </div>
 
+            <div className="inline-flex items-center gap-2 w-fit px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-xl text-xs font-bold uppercase tracking-widest shrink-0">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              Official Assessment
+            </div>
+          </div>
+          
           <div className="mt-5 pt-4 border-t border-slate-100">
-            <nav aria-label="Exam steps">
-              <StepIndicator currentMode="setup" />
-            </nav>
+            <StepIndicator currentMode="setup" />
           </div>
         </div>
       </header>
 
-      {/* ── Main Layout ── */}
-      <main role="main" className="max-w-[1200px] mx-auto px-4 md:px-8 py-8">
-        <div className="flex flex-col-reverse lg:grid lg:grid-cols-[1fr_340px] gap-8 items-start">
-          
-          {/* ── Exam selection (Cột trái/Trên mobile) ── */}
-          <section aria-label="Chọn đề thi" className="flex flex-col gap-6 w-full animate-[esFadeUp_.35s_.10s_cubic-bezier(.4,0,.2,1)_both]">
-            
-            {/* Box Tìm Kiếm */}
-            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-              <label htmlFor="exam-search" className="block text-sm font-semibold text-slate-800 mb-3">
-                Tìm kiếm bài thi
+      {/* ── Main Content ── */}
+      <main className="max-w-6xl mx-auto px-4 md:px-6 pt-4 md:pt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+
+          {/* ── Left: Exam Selection ── */}
+          <div className="lg:col-span-7 flex flex-col gap-4">
+
+            {/* Search & Categories Box */}
+            <div className="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-xs">
+              <label htmlFor="exam-search" className="block text-xs font-semibold text-gray-800 uppercase tracking-wider mb-3">
+                Chọn đề thi
               </label>
-              <div className="relative">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              
+              <div className="relative mb-4">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <Search size={18} strokeWidth={2} />
+                </div>
                 <input
-                  id="exam-search"
-                  type="search"
-                  autoComplete="off"
-                  placeholder="Nhập tên bài kiểm tra, mã đề hoặc mô tả..."
-                  value={searchQuery}
-                  onChange={handleSearch}
+                  id="exam-search" type="search" autoComplete="off"
+                  placeholder="Nhập mã đề, tên..."
+                  value={searchQuery} onChange={handleSearch}
                   aria-controls={listboxId}
-                  className={`${inputClass} pl-12`}
+                  className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition-all placeholder:text-gray-400"
                 />
               </div>
+
+              <CategoryTabs categories={categories} activeCategory={activeCategory} onChange={cat => { setActiveCategory(cat); setSearchQuery(''); }} />
             </div>
 
-            {/* Danh sách đề thi */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                <p className="text-sm font-semibold text-slate-900 m-0">
-                  Kết quả: <span className="text-blue-600">{count}</span> đề thi
+            {/* Exam List Box */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100 shrink-0">
+                <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <span className="text-blue-600 font-bold">{filteredExams.length}</span> đề thi
                 </p>
-                <p className="text-xs font-medium text-slate-500 m-0 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm hidden sm:block">
-                  Sử dụng phím ↑ ↓ để chọn
-                </p>
+                <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                  <LayoutGrid size={14} /> Phím mũi tên
+                </div>
               </div>
 
-              <div className="divide-y divide-slate-100 flex-1">
-                {isLoadingList ? (
+              <div className="flex-1 min-h-80">
+                {isLoading ? (
                   <SkeletonList />
                 ) : filteredExams.length > 0 ? (
-                  <ExamListBox
-                    exams={filteredExams}
-                    selectedExam={selectedExam}
-                    onSelectExam={handleSelectExam}
-                    listboxId={listboxId}
-                  />
+                  <ExamListBox exams={filteredExams} selectedExam={selectedExam} onSelectExam={handleSelectExam} listboxId={listboxId} />
                 ) : (
-                  <EmptyState searchQuery={searchQuery} onClearFilters={clearFilters} />
+                  <EmptyState searchQuery={searchQuery} onClear={clearSearch} />
                 )}
               </div>
             </div>
-          </section>
+          </div>
 
-          {/* ── Aside: Chi tiết / Xác nhận (Cột phải/Dưới mobile) ── */}
-          <aside
-            role="complementary"
-            aria-label="Thông tin bài kiểm tra"
-            className="w-full lg:sticky lg:top-32 animate-[esFadeUp_.35s_.05s_cubic-bezier(.4,0,.2,1)_both]"
-          >
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-6">
-              
-              {/* Cấu trúc bài thi */}
+          {/* ── Right: Info & CTA ── */}
+          <aside className="lg:col-span-5 lg:sticky lg:top-20">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 md:p-6 shadow-xs flex flex-col gap-4">
+
+              {/* Selected Preview */}
+              <AnimatePresence mode="wait">
+                {selectedExamData && (
+                  <motion.div 
+                    key={selectedExamData.id}
+                    initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                    className="p-4 md:p-5 bg-blue-50 border border-blue-200 rounded-xl"
+                  >
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Mục tiêu hiện tại</p>
+                    <p className="text-lg font-semibold text-blue-900 leading-snug mb-2">{selectedExamData.title}</p>
+                    {selectedExamData.category && (
+                      <span className="inline-block px-2.5 py-1 bg-white text-blue-600 rounded-lg text-xs font-semibold uppercase border border-blue-100">
+                        {selectedExamData.category}
+                      </span>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Test Structure */}
               <div>
-                <h2 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                  Cấu trúc dự kiến
-                </h2>
-                <div className="space-y-4">
-                  {TEST_SECTIONS.map((s, i) => (
-                    <div key={s.label} className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800 m-0">{s.label}</p>
-                        <p className="text-xs text-slate-500 mt-1">{s.desc}</p>
+                <h2 className="text-xs font-semibold text-gray-800 uppercase tracking-wider mb-3">Cấu trúc bài thi</h2>
+                <div className="flex flex-col gap-2">
+                  {TEST_SECTIONS.map(s => (
+                    <div key={s.label} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg border ${s.bg} ${s.border}`}>{s.icon}</div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800 m-0 leading-none">{s.label}</p>
+                          <p className="text-xs font-medium text-gray-600 mt-1">{s.desc}</p>
+                        </div>
                       </div>
-                      <span className="text-xs font-bold text-slate-700 bg-white px-2 py-1 rounded shadow-sm border border-slate-200">
+                      <span className="px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
                         {s.time}
                       </span>
                     </div>
@@ -455,54 +440,67 @@ export const ExamSetup = memo(({ onStartExam, onExamHover }) => {
                 </div>
               </div>
 
-              {/* Lưu ý */}
-              <div className="pt-6 border-t border-slate-100">
-                <h2 className="text-sm font-bold text-slate-900 mb-3">Lưu ý quan trọng</h2>
-                <ul className="m-0 p-0 list-none space-y-3">
+              {/* Requirements */}
+              <div className="pt-4 border-t border-gray-100">
+                <h2 className="text-xs font-semibold text-gray-800 uppercase tracking-wider mb-3">Lưu ý trước khi thi</h2>
+                <ul className="flex flex-col gap-2.5">
                   {REQUIREMENTS.map(item => (
-                    <li key={item} className="flex gap-3 items-start">
-                      <svg className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                      <span className="text-sm text-slate-600 leading-relaxed">{item}</span>
+                    <li key={item} className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-green-50 border border-green-200 flex items-center justify-center shrink-0 flex-none mt-0.5">
+                        <Check size={12} className="text-green-600" strokeWidth={4} />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700 leading-snug">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Action */}
-              <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
+              {/* CTA Button (Desktop) */}
+              <div className="hidden lg:block pt-2">
                 <button
                   onClick={handleStart}
-                  disabled={isStarting || !selectedExam}
-                  aria-busy={isStarting}
+                  disabled={isStarting || !selectedExam || isLoading}
                   className={`
-                    w-full py-3.5 px-6 rounded-xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all duration-200
-                    focus:outline-none focus:ring-4 focus:ring-blue-600/30
-                    ${isStarting || !selectedExam 
-                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                      : 'bg-blue-600 text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30 active:translate-y-0'}
+                    w-full py-3 rounded-lg font-semibold text-base uppercase tracking-wide flex items-center justify-center gap-2 transition-all outline-none
+                    ${(isStarting || !selectedExam || isLoading)
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-500 text-white hover:bg-green-600 active:scale-95'}
                   `}
                 >
                   {isStarting ? (
-                    <>
-                      <span className="animate-spin w-5 h-5 border-2 border-white/40 border-t-white rounded-full" />
-                      Đang xử lý...
-                    </>
+                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Chuẩn bị...</>
                   ) : (
-                    <>
-                      Bắt đầu làm bài
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </>
+                    <>Bắt đầu thi <ChevronRight size={18} strokeWidth={2} /></>
                   )}
                 </button>
-                <p className="text-xs font-medium text-slate-400 text-center m-0">
-                  Hệ thống tự động lưu trữ tiến độ
-                </p>
               </div>
+
             </div>
           </aside>
-          
+
         </div>
       </main>
+
+      {/* ── CTA Button (Mobile) ── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+        <button
+          onClick={handleStart}
+          disabled={isStarting || !selectedExam || isLoading}
+          className={`
+            w-full py-3 rounded-lg font-semibold text-base uppercase tracking-wide flex items-center justify-center gap-2 transition-all outline-none
+            ${(isStarting || !selectedExam || isLoading)
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-green-500 text-white active:scale-95'}
+          `}
+        >
+          {isStarting ? (
+            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Chuẩn bị...</>
+          ) : (
+            <>Bắt đầu thi ngay <ChevronRight size={18} strokeWidth={2} /></>
+          )}
+        </button>
+      </div>
+
     </div>
   );
 });

@@ -9,7 +9,8 @@ export const getAllExamMetadataAsync = async () => {
   try {
     const { data, error } = await supabase
       .from('exams')
-      .select('id, title, description, duration, questions, metadata, is_public, showResults, created_at')
+      // ✅ ĐÃ BỔ SUNG 'category' VÀO ĐÂY ĐỂ ĐỒNG BỘ VỚI UI MỚI
+      .select('id, title, description, category, duration, questions, metadata, is_public, showResults, created_at')
       .order('created_at', { ascending: false });
 
     if (error) {

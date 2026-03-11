@@ -1,11 +1,5 @@
 /*
- * ReadingDisplay.jsx  —  M3 × Academic Editorial × Tailwind
- *
- * Tinh chỉnh UI/UX bởi Chuyên gia:
- * - Refined Color Palette: Kem ấm hơn, Navy/Amber sang trọng.
- * - Material 3 Transition: Hiệu ứng entrance scale nhẹ, mượt mà.
- * - Full Prose Mode: Loại bỏ Show all/less ở Part Plain.
- * - Mobile First Typography: Đã được tối ưu từ phiên bản trước.
+ * ReadingDisplay.jsx — Gamified UI · Tailwind CSS · Framer Motion
  */
 
 import React, { useState, useMemo, memo } from 'react';
@@ -13,61 +7,23 @@ import {
   ChevronDown, ChevronUp, BookOpen, Lightbulb, Zap,
   Mail, Globe, Clock, MessageCircle, FileText,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-/* ── Google Fonts (inject once) ─────────────────────────── */
-let fontsInjected = false;
-function injectFonts() {
-  if (fontsInjected || typeof document === 'undefined') return;
-  const link = document.createElement('link');
-  link.rel  = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=DM+Sans:wght@400;500;600;700&display=swap';
-  document.head.appendChild(link);
-  fontsInjected = true;
-}
-
-/* ── Shared Tailwind class strings (Academic Style) ─────── */
-// Tinh chỉnh nền kem ấm hơn và viền mờ hơn
-const CARD   = 'bg-[#FDFCFB] rounded-xl md:rounded-2xl border border-slate-200/50 overflow-hidden shadow-sm';
-const PROSE  = 'font-serif text-[15px] md:text-[17px] leading-[1.8] md:leading-[1.9] text-slate-800 tracking-[0.01em]';
-const LABEL  = 'font-sans text-[9px] md:text-[10px] font-bold uppercase tracking-[0.1em]';
-const META   = 'font-sans text-[11px] md:text-[12px] text-slate-500';
-
-/* ── Smoother Material entrance animation ────────────────── */
-const entryEffect = (delay = 0) => ({
-  animation: `mdEntry 0.4s cubic-bezier(0.05, 0.7, 0.1, 1.0) both`,
-  animationDelay: `${delay}ms`,
-});
-
-/* Inject keyframe once */
-let kfInjected = false;
-function injectKeyframes() {
-  if (kfInjected || typeof document === 'undefined') return;
-  const s = document.createElement('style');
-  s.textContent = `
-    @keyframes mdEntry {
-      from { opacity:0; transform: scale(0.97); }
-      to   { opacity:1; transform: scale(1); }
-    }
-    .rd-scrollbar::-webkit-scrollbar { width: 3px; }
-    .rd-scrollbar::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
-    .rd-scrollbar::-webkit-scrollbar-track { background:transparent; }
-    /* Giảm mệt mỏi mắt bằng cách làm mịn chữ trên một số trình duyệt */
-    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  `;
-  document.head.appendChild(s);
-  kfInjected = true;
-}
+/* ── Gamified Tokens ─────────────────────────── */
+const CARD = 'bg-white rounded-xl md:rounded-2xl border border-gray-200 shadow-xs overflow-hidden flex flex-col';
+const PROSE = 'font-sans text-sm md:text-base leading-relaxed md:leading-snug text-gray-700 font-medium';
+const LABEL = 'font-sans text-xs font-bold uppercase tracking-widest';
 
 /* ── Chip / Badge ─────────────────────────────────────── */
-const Chip = ({ icon: Icon, label, colorClass = 'bg-blue-50 text-blue-800' }) => (
-  <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2.5 py-1 rounded-full font-sans text-[10px] md:text-[11px] font-semibold border border-blue-100 ${colorClass}`}>
-    {Icon && <Icon size={12} className="md:w-3 md:h-3 w-2.5 h-2.5" />}
+const Chip = ({ icon: Icon, label, colorClass = 'bg-blue-50 text-blue-600 border-blue-200' }) => (
+  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-sans text-xs font-bold border ${colorClass}`}>
+    {Icon && <Icon size={14} strokeWidth={2} />}
     {label}
   </span>
 );
 
 /* ─────────────────────────────────────────────────────────
-   PART 6 — Text Completion
+   PART 6 — Text Completion (Điền vào chỗ trống)
    ───────────────────────────────────────────────────────── */
 const Part6Content = memo(({ data }) => {
   const [open, setOpen] = useState(true);
@@ -84,74 +40,73 @@ const Part6Content = memo(({ data }) => {
   if (!data?.text) return null;
 
   return (
-    <div className={CARD}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={CARD}>
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-5 md:px-6 py-3.5 md:py-4 bg-slate-50/50 hover:bg-slate-100/70 transition-colors border-b border-slate-200/50 active:bg-slate-200"
+        className="w-full flex items-center justify-between px-4 md:px-5 py-3 md:py-4 bg-gray-50 hover:bg-gray-100 transition-colors border-b border-gray-200 active:bg-gray-200 outline-none"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-[#1E3A5F] flex items-center justify-center flex-shrink-0 shadow">
-            <span className="font-sans font-black text-white text-[14px] md:text-[15px]">6</span>
+          <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <FileText size={18} className="text-white" strokeWidth={2} />
           </div>
           <div className="text-left">
-            <p className="font-sans font-bold text-[14px] md:text-[15px] text-slate-950 leading-tight">
-              {data.title || 'Text Completion'}
+            <p className="font-sans font-semibold text-sm md:text-base text-gray-900 leading-tight">
+              {data.title || 'Điền từ vào chỗ trống'}
             </p>
             {data.description && (
-              <p className="font-sans text-[11px] md:text-[12px] text-slate-500 mt-1 leading-none line-clamp-1">{data.description}</p>
+              <p className="font-sans font-medium text-xs md:text-sm text-gray-500 mt-0.5 line-clamp-1">{data.description}</p>
             )}
           </div>
         </div>
-        {open
-          ? <ChevronUp size={18} className="text-slate-400 flex-shrink-0" />
-          : <ChevronDown size={18} className="text-slate-400 flex-shrink-0" />}
+        <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
+          {open ? <ChevronUp size={18} strokeWidth={2.5} /> : <ChevronDown size={18} strokeWidth={2.5} />}
+        </div>
       </button>
 
-      {open && (
-        <div className="p-5 md:p-6 space-y-4 md:space-y-5" style={entryEffect(0)}>
-          <div
-            className="rounded-xl border border-[#FDE68A]/60 bg-[#FFFDF7]/60 px-5 md:px-7 py-5 md:py-6"
-            style={{ background: 'linear-gradient(135deg, #FFFCF5 0%, #FFF8E6 100%)' }}
+      <AnimatePresence>
+        {open && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="p-4 md:p-6 space-y-5"
           >
-            {/* Tinh chỉnh màu amber sang trọng hơn */}
-            <div className="h-0.5 w-10 md:w-12 bg-[#B45309] rounded-full mb-4 md:mb-5 opacity-80" />
+            <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6 shadow-xs">
+              <p className={PROSE}>
+                {segments.map((seg, i) =>
+                  i % 2 === 0
+                    ? <span key={i}>{seg}</span>
+                    : (
+                      <span
+                        key={i}
+                        className="inline-flex items-center justify-center mx-1 px-2.5 py-0.5 rounded-lg font-sans font-semibold text-xs md:text-sm text-blue-600 bg-blue-50 border border-blue-200 cursor-default select-none align-middle"
+                        style={{ minWidth: 40 }}
+                      >
+                        {seg}
+                      </span>
+                    )
+                )}
+              </p>
+            </div>
 
-            <p className={`${PROSE} leading-[2.1] md:leading-[2.2]`}>
-              {segments.map((seg, i) =>
-                i % 2 === 0
-                  ? <span key={i}>{seg}</span>
-                  : (
-                    <span
-                      key={i}
-                      className="inline-flex items-center justify-center mx-1 px-3 py-0.5 rounded-md font-sans font-bold text-[12px] md:text-[13px] text-[#92400E] bg-[#FEF3C7] border border-[#FDE68A] cursor-default select-none shadow-sm"
-                      style={{ minWidth: 40 }}
-                    >
-                      ({seg})
-                    </span>
-                  )
-              )}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100">
-              <Zap size={16} className="text-blue-700 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className={`${LABEL} text-slate-900 mb-1`}>Instructions</p>
-                <p className="font-sans text-[12px] text-slate-700 leading-snug">Choose A–D for each numbered blank.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                <Zap size={18} className="text-indigo-500 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                <div>
+                  <p className={`${LABEL} text-indigo-700 mb-0.5`}>Hướng dẫn</p>
+                  <p className="font-sans font-medium text-xs md:text-sm text-indigo-900/80 leading-snug">Đọc kỹ ngữ cảnh xung quanh mỗi ô trống để chọn từ vựng/ngữ pháp phù hợp nhất.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
+                <Lightbulb size={18} className="text-amber-500 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                <div>
+                  <p className={`${LABEL} text-amber-700 mb-0.5`}>Mẹo nhỏ</p>
+                  <p className="font-sans font-medium text-xs md:text-sm text-amber-900/80 leading-snug">Hãy đọc lướt toàn bộ đoạn văn một lần trước khi bắt đầu điền từ.</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl bg-[#FFFDF7] border border-[#FDE68A]/70">
-              <Lightbulb size={16} className="text-[#B45309] flex-shrink-0 mt-0.5" />
-              <div>
-                <p className={`${LABEL} text-[#92400E] mb-1`}>Pro Tip</p>
-                <p className="font-sans text-[12px] text-[#92400E]/90 leading-snug">Read the full passage before choosing.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 });
 Part6Content.displayName = 'Part6Content';
@@ -182,13 +137,10 @@ const Part7Content = memo(({ data }) => {
         if (inBody) body.push(line);
       });
 
-      email = {
-        headers,
-        body: body.filter((l, i, a) => !(l === '' && a[i - 1] === '')),
-      };
+      email = { headers, body: body.filter((l, i, a) => !(l === '' && a[i - 1] === '')) };
     }
 
-    const url   = webLines.find(l => l.startsWith('http')) || 'https://example.com';
+    const url   = webLines.find(l => l.startsWith('http')) || 'https://www.reading-test.com';
     const title = webLines.find(l => l.includes('**'))?.replace(/\*\*/g, '');
     const body  = webLines.filter(l => l && !l.startsWith('http') && !l.includes('**'));
 
@@ -198,88 +150,81 @@ const Part7Content = memo(({ data }) => {
   const { url, title, body, email } = parsed;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 md:space-y-6">
       {(title || body.length > 0) && (
-        <div className={CARD} style={entryEffect(0)}>
-          {/* Browser chrome */}
-          <div className="flex items-center gap-2 md:gap-3 px-4 py-2.5 bg-slate-100/70 border-b border-slate-200/50">
-            <div className="flex gap-1.5 hidden md:flex">
-              {['#FF5F57','#FEBC2E','#28C840'].map((c, i) => (
-                <div key={i} style={{ background: c }} className="w-2.5 h-2.5 rounded-full shadow-sm opacity-90" />
-              ))}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={CARD}>
+          {/* Browser Chrome */}
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-gray-100 border-b border-gray-200">
+            <div className="hidden md:flex gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
             </div>
-            <div className="flex-1 flex items-center gap-2 bg-white/80 rounded-lg px-3 py-1.5 border border-slate-200/50 max-w-full md:max-w-sm">
-              <Globe size={12} className="text-slate-400 flex-shrink-0" />
-              <span className="font-sans text-[11px] text-slate-500 truncate">{url}</span>
+            <div className="flex-1 flex items-center gap-2 bg-white rounded-lg px-3 py-1.5 border border-gray-200 max-w-full md:max-w-xs">
+              <Globe size={12} className="text-gray-400 shrink-0" strokeWidth={2} />
+              <span className="font-sans font-medium text-xs text-gray-500 truncate">{url}</span>
             </div>
           </div>
 
-          {/* Website body */}
-          <div className="px-5 md:px-8 py-6 md:py-8">
-            <div className="h-0.5 w-12 md:w-16 bg-[#1E3A5F] rounded-full mb-5 opacity-90" />
+          {/* Website Body */}
+          <div className="px-4 md:px-6 py-5 md:py-8 bg-white">
             {title && (
-              <h2
-                className="text-xl md:text-[24px] font-bold text-slate-950 mb-5 leading-tight"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-              >
+              <h2 className="text-lg md:text-2xl font-semibold text-gray-900 mb-4 md:mb-5 leading-tight">
                 {title}
               </h2>
             )}
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {body.map((line, i) => (
-                <p key={i} className={PROSE} style={entryEffect(i * 30)}>{line}</p>
+                <p key={i} className={PROSE}>{line}</p>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {email && (
-        <div className={CARD} style={entryEffect(60)}>
-          {/* Email header strip */}
-          <div
-            className="px-5 md:px-6 py-4 md:py-5 border-b border-[#1E3A5F]/20"
-            style={{ background: 'linear-gradient(135deg, #1E3A5F 0%, #294D7A 100%)' }}
-          >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={CARD}>
+          {/* Email Header */}
+          <div className="px-4 md:px-6 py-4 md:py-5 bg-blue-500">
             <div className="flex items-center gap-2 mb-2">
-              <Mail size={14} className="text-blue-200" />
-              <span className={`${LABEL} text-blue-200`}>Internal Email</span>
+              <Mail size={16} className="text-white" strokeWidth={2} />
+              <span className={`${LABEL} text-white`}>Email</span>
             </div>
             {email.headers.subject && (
-              <h3 className="font-sans font-bold text-base md:text-[18px] text-white leading-snug">
+              <h3 className="font-sans font-semibold text-base md:text-lg text-white leading-snug">
                 {email.headers.subject}
               </h3>
             )}
           </div>
 
-          {/* Meta row */}
-          <div className="px-5 md:px-6 py-3.5 bg-slate-50 border-b border-slate-200/50 flex flex-col md:flex-row md:flex-wrap gap-y-1.5 md:gap-x-6">
-            {email.headers.from && (
-              <span className={META}>
-                <span className="font-semibold text-slate-800">From: </span>{email.headers.from}
-              </span>
-            )}
-            {email.headers.to && (
-              <span className={META}>
-                <span className="font-semibold text-slate-800">To: </span>{email.headers.to}
-              </span>
-            )}
+          {/* Meta Row */}
+          <div className="px-4 md:px-6 py-3 md:py-4 bg-blue-50 border-b border-blue-100 flex flex-col md:flex-row gap-2 md:gap-6 text-xs md:text-sm">
+            <div className="flex flex-col gap-1">
+              {email.headers.from && (
+                <span className="font-sans text-gray-600">
+                  <strong className="text-blue-900">Từ:</strong> {email.headers.from}
+                </span>
+              )}
+              {email.headers.to && (
+                <span className="font-sans text-gray-600">
+                  <strong className="text-blue-900">Tới:</strong> {email.headers.to}
+                </span>
+              )}
+            </div>
             {email.headers.date && (
-              <span className={`${META} flex items-center gap-1.5`}>
-                <Clock size={12} className="text-slate-400" />{email.headers.date}
+              <span className="font-sans text-gray-500 font-medium flex items-center gap-1 md:ml-auto">
+                <Clock size={12} strokeWidth={2} /> {email.headers.date}
               </span>
             )}
           </div>
 
           {/* Body */}
-          <div className="px-5 md:px-8 py-6 space-y-4">
+          <div className="px-4 md:px-6 py-5 md:py-6 space-y-3 bg-white">
             {email.body.map((line, i) =>
-              line === ''
-                ? <div key={i} className="h-1.5 md:h-2" />
-                : <p key={i} className={PROSE} style={entryEffect(i * 25)}>{line}</p>
+              line === '' ? <div key={i} className="h-1" /> : <p key={i} className={PROSE}>{line}</p>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -287,14 +232,14 @@ const Part7Content = memo(({ data }) => {
 Part7Content.displayName = 'Part7Content';
 
 /* ─────────────────────────────────────────────────────────
-   PART 8 — Chat Thread
+   PART 8 — Chat Thread (Tin nhắn)
    ───────────────────────────────────────────────────────── */
 const SENDER_PALETTES = [
-  { dot:'#1D4ED8', bg:'#EFF6FF', text:'#1E3A8A', border:'#BFDBFE', name:'#1D4ED8' },
-  { dot:'#6D28D9', bg:'#F5F3FF', text:'#3B0764', border:'#DDD6FE', name:'#6D28D9' },
-  { dot:'#BE185D', bg:'#FDF2F8', text:'#831843', border:'#FBCFE8', name:'#BE185D' },
-  { dot:'#047857', bg:'#ECFDF5', text:'#064E3B', border:'#A7F3D0', name:'#047857' },
-  { dot:'#B45309', bg:'#FFFBEB', text:'#78350F', border:'#FDE68A', name:'#B45309' },
+  { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', initial: 'bg-blue-500' },
+  { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', initial: 'bg-green-500' },
+  { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', initial: 'bg-amber-500' },
+  { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200', initial: 'bg-purple-500' },
+  { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', initial: 'bg-red-500' },
 ];
 
 const Part8Content = memo(({ data }) => {
@@ -321,85 +266,54 @@ const Part8Content = memo(({ data }) => {
   }, [messages]);
 
   if (!messages.length) return (
-    <div className={`${CARD} flex flex-col items-center justify-center py-12 md:py-16 gap-3`}>
-      <MessageCircle size={36} className="text-slate-300" />
-      <p className="font-sans text-sm text-slate-400">No messages found</p>
+    <div className={`${CARD} flex flex-col items-center justify-center py-12 gap-3`}>
+      <MessageCircle size={36} className="text-gray-300" strokeWidth={1.5} />
+      <p className="font-sans font-semibold text-sm text-gray-400">Không có dữ liệu tin nhắn</p>
     </div>
   );
 
   return (
-    <div className={CARD}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={CARD}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 md:px-5 py-3 md:py-3.5 bg-slate-50 border-b border-slate-200/50">
+      <div className="flex items-center justify-between px-4 md:px-5 py-3 md:py-4 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2.5">
-          <MessageCircle size={16} className="text-blue-700 md:w-[15px] md:h-[15px]" />
-          <span className="font-sans font-bold text-[13px] md:text-[14px] text-slate-900">Message Thread</span>
-          <div className="flex -space-x-1.5 ml-1 hidden md:flex">
-            {Object.keys(senderMap).slice(0, 4).map((s, i) => {
-              const pal = SENDER_PALETTES[senderMap[s] % SENDER_PALETTES.length];
-              return (
-                <div
-                  key={s}
-                  title={s}
-                  className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-sm"
-                  style={{ background: pal.dot, zIndex: 10 - i }}
-                >
-                  <span className="text-white font-bold" style={{ fontSize: 8 }}>
-                    {s.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500">
+            <MessageCircle size={16} strokeWidth={2} />
           </div>
+          <span className="font-sans font-semibold text-sm text-gray-800">Đoạn Chat</span>
         </div>
-        <span className="font-sans text-[10px] md:text-[11px] text-slate-400">{messages.length} msgs</span>
+        <span className="px-2.5 py-1 bg-gray-200 rounded-md font-sans font-medium text-xs text-gray-600">
+          {messages.length} tin
+        </span>
       </div>
 
       {/* Messages */}
-      <div
-        className="rd-scrollbar px-4 md:px-5 py-5 space-y-5 overflow-y-auto max-h-[65vh] md:max-h-[460px]"
-      >
+      <div className="px-3 md:px-5 py-5 space-y-5 overflow-y-auto max-h-96 md:max-h-[500px] custom-scrollbar bg-white">
         {groups.map((group, gi) => {
-          const pal     = SENDER_PALETTES[senderMap[group.sender] % SENDER_PALETTES.length];
+          const pal = SENDER_PALETTES[senderMap[group.sender] % SENDER_PALETTES.length];
           const initial = group.sender.charAt(0).toUpperCase();
 
           return (
-            <div key={gi} className="flex items-start gap-2.5 md:gap-3" style={entryEffect(gi * 30)}>
+            <div key={gi} className="flex items-end gap-2.5">
               {/* Avatar */}
-              <div
-                className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow"
-                style={{ background: pal.dot }}
-              >
-                <span className="text-white font-sans font-black text-[11px] md:text-[12px]">{initial}</span>
+              <div className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center shrink-0 ${pal.initial}`}>
+                <span className="text-white font-sans font-bold text-xs">{initial}</span>
               </div>
 
               <div className="flex-1 min-w-0">
-                <p
-                  className="font-sans font-semibold text-[11px] md:text-[12px] mb-1 md:mb-1.5"
-                  style={{ color: pal.name }}
-                >
+                <p className={`font-sans font-semibold text-xs mb-1.5 ml-0.5 ${pal.text}`}>
                   {group.sender}
                 </p>
 
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 items-start">
                   {group.msgs.map((msg, mi) => (
-                    <div key={mi} className="flex items-end gap-1.5 md:gap-2">
-                      <div
-                        className="rounded-[4px_14px_14px_14px] px-3.5 py-2 md:py-2.5 max-w-[90%] md:max-w-[85%]"
-                        style={{
-                          background:   pal.bg,
-                          border:       `1px solid ${pal.border}`,
-                          boxShadow:    '0 1px 2px rgba(0,0,0,0.03)',
-                        }}
-                      >
-                        <p
-                          className="text-[13px] md:text-[14px] leading-[1.5] md:leading-[1.6] m-0 font-sans"
-                          style={{ color: pal.text }}
-                        >
+                    <div key={mi} className="flex items-end gap-1.5 max-w-xs md:max-w-md">
+                      <div className={`px-3 py-2 rounded-lg rounded-bl-none border ${pal.bg} ${pal.border}`}>
+                        <p className="text-xs md:text-sm font-sans font-medium text-gray-800 leading-snug m-0">
                           {msg.text}
                         </p>
                       </div>
-                      <span className="font-sans text-[9px] md:text-[10px] text-slate-400 flex-shrink-0 pb-0.5 tabular-nums">
+                      <span className="font-sans font-medium text-xs text-gray-400 shrink-0 pb-0.5">
                         {msg.time}
                       </span>
                     </div>
@@ -410,13 +324,7 @@ const Part8Content = memo(({ data }) => {
           );
         })}
       </div>
-
-      {/* Footer */}
-      <div className="flex items-center gap-2 px-4 md:px-5 py-2.5 bg-slate-50 border-t border-slate-200/50">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-90" />
-        <span className="font-sans text-[10px] md:text-[11px] text-slate-400">End of message log</span>
-      </div>
-    </div>
+    </motion.div>
   );
 });
 Part8Content.displayName = 'Part8Content';
@@ -424,69 +332,44 @@ Part8Content.displayName = 'Part8Content';
 /* ─────────────────────────────────────────────────────────
    PLAIN TEXT — Long-form Article
    ───────────────────────────────────────────────────────── */
-// Đã loại bỏ useState cho expand/collapse, hiển thị toàn bộ
 const PlainTextContent = memo(({ data }) => {
-
   const { paragraphs, wordCount, readMins } = useMemo(() => {
-    const text   = data?.text || '';
-    const paras  = text.trim().split(/\n\n+/).filter(Boolean);
-    const wc     = text.trim().split(/\s+/).filter(Boolean).length;
-    return {
-      paragraphs: paras,
-      wordCount:  wc,
-      readMins:   Math.max(1, Math.ceil(wc / 200)),
-    };
+    const text  = data?.text || '';
+    const paras = text.trim().split(/\n\n+/).filter(Boolean);
+    const wc    = text.trim().split(/\s+/).filter(Boolean).length;
+    return { paragraphs: paras, wordCount: wc, readMins: Math.max(1, Math.ceil(wc / 200)) };
   }, [data]);
 
   return (
-    <div className={CARD} style={entryEffect(0)}>
-      <div className="px-5 md:px-8 pt-6 md:pt-8 pb-5 md:pb-6 border-b border-slate-100">
-        <div className="flex items-center gap-2 md:gap-3 mb-4">
-          <div className="h-px flex-1 bg-slate-200/60" />
-          <Chip icon={BookOpen} label="Academic Prose" colorClass="bg-blue-50 text-blue-900" />
-          <div className="h-px flex-1 bg-slate-200/60" />
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={CARD}>
+      <div className="px-4 md:px-6 py-5 md:py-7 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <Chip icon={BookOpen} label="Bài đọc" colorClass="bg-blue-100 text-blue-700 border-blue-200" />
+          <Chip icon={FileText} label={`${wordCount} từ`} colorClass="bg-gray-100 text-gray-700 border-gray-300" />
+          <Chip icon={Clock}    label={`~${readMins} phút`} colorClass="bg-amber-100 text-amber-700 border-amber-200" />
         </div>
 
         {data?.title && (
-          <h1
-            className="text-2xl md:text-[28px] font-bold text-slate-950 leading-[1.25] mb-3"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
+          <h1 className="text-lg md:text-xl font-semibold text-gray-900 leading-tight mb-1.5">
             {data.title}
           </h1>
         )}
 
         {data?.description && (
-          <p className="font-sans text-[13px] md:text-[14px] text-slate-600 leading-relaxed border-l-[3px] border-[#1E3A5F]/40 pl-3 md:pl-4 italic my-4">
+          <p className="font-sans font-medium text-xs md:text-sm text-gray-500 mt-2">
             {data.description}
           </p>
         )}
-
-        <div className="flex items-center gap-2 mt-4 flex-wrap">
-          <Chip icon={FileText} label={`${wordCount} words`} colorClass="bg-slate-100 text-slate-700" />
-          <Chip icon={Clock}    label={`~${readMins} min read`} colorClass="bg-emerald-50 text-emerald-800" />
-        </div>
       </div>
 
-      <div className="px-5 md:px-8 pt-6 pb-8 md:pb-10">
-        <div className="max-w-prose mx-auto space-y-5 md:space-y-6">
+      <div className="px-4 md:px-6 py-5 md:py-7 bg-white">
+        <div className="space-y-4 md:space-y-5">
           {paragraphs.map((para, i) => {
-            // Drop cap on first paragraph - tinh chỉnh font-size responsive
+            // Drop cap ở đoạn đầu tiên
             if (i === 0) {
               return (
-                <p
-                  key={i}
-                  className={`${PROSE}`}
-                  style={entryEffect(i * 15)}
-                >
-                  <span
-                    className="float-left font-bold text-[#1E3A5F] leading-[0.8] mr-2 md:mr-3 mt-1 opacity-90"
-                    style={{
-                      fontFamily: "'Playfair Display', Georgia, serif",
-                      fontSize: '3.3em',
-                      lineHeight: 0.85,
-                    }}
-                  >
+                <p key={i} className={PROSE}>
+                  <span className="float-left font-sans font-bold text-3xl md:text-4xl leading-none text-blue-500 mr-1.5 mt-0.5">
                     {para.charAt(0)}
                   </span>
                   {para.slice(1)}
@@ -494,29 +377,20 @@ const PlainTextContent = memo(({ data }) => {
               );
             }
 
-            // Pull-quote accent logic (every 4th para)
+            // Accent block xen kẽ
             if (i > 0 && i % 4 === 0) {
               return (
-                <div
-                  key={i}
-                  className="border-l-2 md:border-l-[3px] border-[#B45309]/50 pl-4 md:pl-5 py-1 my-6 md:my-8 bg-[#FFFDF7]/60 rounded-r-lg"
-                  style={entryEffect(i * 15)}
-                >
-                  <p className={`${PROSE} italic text-slate-700`}>{para}</p>
+                <div key={i} className="border-l-4 border-amber-400 pl-3 md:pl-4 py-2 my-4 md:my-5 bg-amber-50 rounded-r-lg">
+                  <p className={`${PROSE} text-amber-900/80`}>{para}</p>
                 </div>
               );
             }
 
-            return (
-              <p key={i} className={PROSE} style={entryEffect(i * 15)}>
-                {para}
-              </p>
-            );
+            return <p key={i} className={PROSE}>{para}</p>;
           })}
         </div>
-        {/* Đã loại bỏ phần button Show More */}
       </div>
-    </div>
+    </motion.div>
   );
 });
 PlainTextContent.displayName = 'PlainTextContent';
@@ -525,8 +399,6 @@ PlainTextContent.displayName = 'PlainTextContent';
    ROOT: ReadingDisplay
    ───────────────────────────────────────────────────────── */
 const ReadingDisplay = memo(({ data }) => {
-  injectFonts();
-  injectKeyframes();
 
   const type = useMemo(() => {
     if (!data) return 'empty';
@@ -538,26 +410,31 @@ const ReadingDisplay = memo(({ data }) => {
   }, [data]);
 
   if (!data) return (
-    <div
-      className={`${CARD} flex flex-col items-center justify-center py-12 md:py-16 gap-3.5 shadow-sm`}
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
-    >
-      <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-100 flex items-center justify-center shadow-inner border border-slate-200/50">
-        <BookOpen size={26} className="text-slate-400" />
+    <div className={`${CARD} flex flex-col items-center justify-center py-12 gap-3 bg-gray-50`}>
+      <div className="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center">
+        <BookOpen size={28} className="text-gray-400" strokeWidth={1.5} />
       </div>
-      <div className="text-center px-5">
-        <p className="font-sans font-semibold text-[14px] md:text-[15px] text-slate-500">Chọn bài để bắt đầu đọc</p>
-        <p className="font-sans text-[11px] md:text-[12px] text-slate-400 mt-1.5 leading-snug">Select a reading passage from the left panel</p>
+      <div className="text-center px-4">
+        <p className="font-sans font-semibold text-sm text-gray-600">Chọn bài để bắt đầu đọc</p>
+        <p className="font-sans font-medium text-xs text-gray-400 mt-0.5">Nội dung sẽ hiển thị tại đây</p>
       </div>
     </div>
   );
 
   return (
-    <div className="w-full" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="w-full font-sans selection:bg-blue-200" style={{ fontFamily: '-apple-system, "Segoe UI", "Roboto", sans-serif' }}>
       {type === 'part6' && <Part6Content data={data} />}
       {type === 'part7' && <Part7Content data={data} />}
       {type === 'part8' && <Part8Content data={data} />}
       {type === 'plain' && <PlainTextContent data={data} />}
+
+      {/* Global Scrollbar Style */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+      `}</style>
     </div>
   );
 });

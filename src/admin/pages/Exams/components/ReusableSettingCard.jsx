@@ -2,19 +2,6 @@
 import React from 'react';
 import { Check, X } from 'lucide-react';
 
-/**
- * Reusable Setting Card Component
- * Dùng cho các tùy chọn cấu hình với toggle switch và mô tả
- * 
- * Props:
- * - title: Tiêu đề chính
- * - description: Mô tả nhỏ bên dưới
- * - icon: Icon component từ lucide-react (optional)
- * - value: Trạng thái hiện tại (boolean)
- * - onChange: Callback khi toggle
- * - variant: 'primary' | 'accent' | 'success' (style mặc định: primary)
- * - badge: Badge text (optional)
- */
 const ReusableSettingCard = ({
   title,
   description,
