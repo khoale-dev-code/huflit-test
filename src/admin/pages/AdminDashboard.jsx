@@ -1,10 +1,11 @@
 // src/admin/pages/AdminDashboard.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, BookOpen, CheckCircle2, Loader2,
   ArrowUpRight, ArrowDownRight,
-  Calendar, Zap, Bell, ChevronRight
+  Calendar, Zap, Bell, ChevronRight,
+  Activity, PlusCircle, Trash2, Edit3, ShieldAlert
 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { supabase } from '../../config/supabaseClient';
@@ -73,7 +74,7 @@ const WeeklyBarChart = ({ data }) => {
   );
 };
 
-// ─── DonutChart — SVG thuần, không cần thư viện ──────────────────
+// ─── DonutChart ───────────────────────────────────────────────────
 const DonutChart = ({ segments, size = 164, thickness = 28 }) => {
   const [hovered,  setHovered]  = useState(null);
   const [animated, setAnimated] = useState(false);
@@ -83,14 +84,13 @@ const DonutChart = ({ segments, size = 164, thickness = 28 }) => {
     return () => clearTimeout(t);
   }, []);
 
-  const total        = segments.reduce((s, d) => s + d.value, 0);
+  const total = segments.reduce((s, d) => s + d.value, 0);
   if (total === 0) return null;
 
-  const cx           = size / 2;
-  const cy           = size / 2;
-  const r            = (size - thickness) / 2;
+  const cx = size / 2, cy = size / 2;
+  const r = (size - thickness) / 2;
   const circumference = 2 * Math.PI * r;
-  const GAP           = 3; // px gap giữa các segment
+  const GAP = 3;
 
   let cumulative = 0;
   const arcs = segments.map((seg) => {
@@ -104,60 +104,33 @@ const DonutChart = ({ segments, size = 164, thickness = 28 }) => {
   const hoveredSeg = hovered !== null ? arcs[hovered] : null;
 
   return (
-    <div className="relative flex items-center justify-center flex-shrink-0"
-         style={{ width: size, height: size }}>
-      <svg
-        width={size} height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        className="-rotate-90"
-        style={{ overflow: 'visible' }}
-      >
-        {/* Track ring */}
+    <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" style={{ overflow: 'visible' }}>
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f1f5f9" strokeWidth={thickness} />
-
-        {/* Colored segments */}
         {arcs.map((arc, i) => (
-          <circle
-            key={i}
-            cx={cx} cy={cy} r={r}
-            fill="none"
-            stroke={arc.color}
+          <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={arc.color}
             strokeWidth={hovered === i ? thickness + 5 : thickness}
             strokeDasharray={`${animated ? arc.dash : 0} ${circumference}`}
-            strokeDashoffset={arc.offset}
-            strokeLinecap="butt"
+            strokeDashoffset={arc.offset} strokeLinecap="butt"
             style={{
-              transition: animated
-                ? `stroke-dasharray 0.7s cubic-bezier(0.4,0,0.2,1) ${i * 0.12}s, stroke-width 0.2s ease`
-                : 'none',
+              transition: animated ? `stroke-dasharray 0.7s cubic-bezier(0.4,0,0.2,1) ${i * 0.12}s, stroke-width 0.2s ease` : 'none',
               cursor: 'pointer',
               filter: hovered === i ? `drop-shadow(0 0 8px ${arc.color}55)` : 'none',
             }}
-            onMouseEnter={() => setHovered(i)}
-            onMouseLeave={() => setHovered(null)}
+            onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
           />
         ))}
       </svg>
-
-      {/* Center text — rotated back to normal */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
         {hoveredSeg ? (
           <>
-            <span className="text-xl font-black text-slate-900 tabular-nums leading-none">
-              {hoveredSeg.value.toLocaleString()}
-            </span>
-            <span className="text-[10px] font-bold mt-1 uppercase tracking-wide" style={{ color: hoveredSeg.color }}>
-              {hoveredSeg.label}
-            </span>
+            <span className="text-xl font-black text-slate-900 tabular-nums leading-none">{hoveredSeg.value.toLocaleString()}</span>
+            <span className="text-[10px] font-bold mt-1 uppercase tracking-wide" style={{ color: hoveredSeg.color }}>{hoveredSeg.label}</span>
           </>
         ) : (
           <>
-            <span className="text-xl font-black text-slate-900 tabular-nums leading-none">
-              {total.toLocaleString()}
-            </span>
-            <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wide">
-              Tổng
-            </span>
+            <span className="text-xl font-black text-slate-900 tabular-nums leading-none">{total.toLocaleString()}</span>
+            <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wide">Tổng</span>
           </>
         )}
       </div>
@@ -167,11 +140,10 @@ const DonutChart = ({ segments, size = 164, thickness = 28 }) => {
 
 // ─── RoleDistributionCard ─────────────────────────────────────────
 const RoleDistributionCard = ({ recentUsers, totalUsers }) => {
-  // Ước tính phân bổ từ sample
-  const adminInSample   = recentUsers.filter(u => u.role === 'admin').length;
-  const sampleSize      = Math.max(recentUsers.length, 1);
-  const estAdmin        = Math.round((adminInSample / sampleSize) * totalUsers);
-  const estStudent      = Math.max(totalUsers - estAdmin, 0);
+  const adminInSample = recentUsers.filter(u => u.role === 'admin').length;
+  const sampleSize    = Math.max(recentUsers.length, 1);
+  const estAdmin      = Math.round((adminInSample / sampleSize) * totalUsers);
+  const estStudent    = Math.max(totalUsers - estAdmin, 0);
 
   const segments = [
     { label: 'Học sinh', value: estStudent, color: '#3b82f6', dotClass: 'bg-blue-500'   },
@@ -185,11 +157,8 @@ const RoleDistributionCard = ({ recentUsers, totalUsers }) => {
         <h2 className="text-base font-black text-slate-900">Phân bổ người dùng</h2>
         <p className="text-xs text-slate-400 font-medium mt-0.5">Tỷ lệ vai trò trong hệ thống</p>
       </div>
-
       <div className="flex items-center gap-6 flex-1">
         <DonutChart segments={segments} size={164} thickness={28} />
-
-        {/* Legend */}
         <div className="flex flex-col gap-3 flex-1 min-w-0">
           {segments.map((seg, i) => (
             <div key={i} className="flex items-center justify-between gap-2">
@@ -198,39 +167,25 @@ const RoleDistributionCard = ({ recentUsers, totalUsers }) => {
                 <span className="text-xs font-semibold text-slate-600 truncate">{seg.label}</span>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-xs font-black text-slate-800 tabular-nums">
-                  {seg.value.toLocaleString()}
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 tabular-nums w-8 text-right">
-                  {total > 0 ? ((seg.value / total) * 100).toFixed(0) : 0}%
-                </span>
+                <span className="text-xs font-black text-slate-800 tabular-nums">{seg.value.toLocaleString()}</span>
               </div>
             </div>
           ))}
-
-          <div className="border-t border-slate-100 pt-3 mt-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Tổng cộng</span>
-              <span className="text-sm font-black text-slate-900 tabular-nums">
-                {total.toLocaleString()}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// ─── QuickInfoCard ────────────────────────────────────────────────
-const QuickInfoCard = ({ weeklyData, navigate }) => {
+// ─── QuickInfoCard (Đã cập nhật Active Rate) ──────────────────────
+const QuickInfoCard = ({ weeklyData, activeRate, navigate }) => {
   const sorted    = [...weeklyData].sort((a, b) => b.count - a.count);
   const bestDay   = sorted[0]?.label ?? '—';
   const total     = weeklyData.reduce((a, b) => a + b.count, 0);
   const avgPerDay = total ? (total / 7).toFixed(1) : '0';
 
   return (
-    <div className="bg-blue-600 rounded-2xl p-6 text-white flex flex-col gap-5 relative overflow-hidden h-full">
+    <div className="bg-blue-600 rounded-2xl p-6 text-white flex flex-col gap-5 relative overflow-hidden h-full shadow-sm">
       <Zap className="absolute -right-6 -bottom-6 w-40 h-40 text-white/10 rotate-12 pointer-events-none select-none" />
       <div className="relative z-10">
         <p className="text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-1.5">Thông tin nhanh</p>
@@ -240,13 +195,12 @@ const QuickInfoCard = ({ weeklyData, navigate }) => {
         </h3>
         <p className="text-blue-200 text-sm mt-2 leading-relaxed">
           Tổng <strong className="text-white">{total}</strong> lượt thi tuần này.
-          Đăng bài mới vào ngày cao điểm để tăng tương tác.
         </p>
       </div>
       <div className="relative z-10 grid grid-cols-2 gap-3">
         <div className="bg-white/15 backdrop-blur-sm rounded-xl p-3.5">
           <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wide mb-1">Active Rate</p>
-          <p className="text-xl font-black tabular-nums">84.2%</p>
+          <p className="text-xl font-black tabular-nums">{activeRate}%</p>
         </div>
         <div className="bg-white/15 backdrop-blur-sm rounded-xl p-3.5">
           <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wide mb-1">TB / ngày</p>
@@ -265,6 +219,84 @@ const QuickInfoCard = ({ weeklyData, navigate }) => {
   );
 };
 
+// ─── AdminActivityLog (Bảng mới) ─────────────────────────────────
+const AdminActivityLog = ({ logs }) => {
+  // Hàm map icon và màu sắc theo loại hành động
+  const getActionConfig = (action) => {
+    switch (action) {
+      case 'CREATE_EXAM': return { icon: PlusCircle, color: 'text-emerald-600', bg: 'bg-emerald-100', label: 'Tạo đề thi' };
+      case 'UPDATE_EXAM': return { icon: Edit3, color: 'text-blue-600', bg: 'bg-blue-100', label: 'Sửa đề thi' };
+      case 'DELETE_EXAM': return { icon: Trash2, color: 'text-red-600', bg: 'bg-red-100', label: 'Xóa đề thi' };
+      case 'DELETE_USER': return { icon: ShieldAlert, color: 'text-amber-600', bg: 'bg-amber-100', label: 'Xóa user' };
+      default:            return { icon: Activity, color: 'text-slate-600', bg: 'bg-slate-100', label: 'Cập nhật' };
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+          <Activity className="w-4 h-4 text-slate-600" />
+        </div>
+        <div>
+          <h2 className="text-base font-black text-slate-900">Nhật ký hoạt động</h2>
+          <p className="text-xs text-slate-400 font-medium mt-0.5">Các thao tác quản trị gần đây</p>
+        </div>
+      </div>
+      <div className="overflow-x-auto flex-1">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-100">
+              <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hành động</th>
+              <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Đối tượng</th>
+              <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Thời gian</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {logs.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-6 py-10 text-center text-sm text-slate-400 font-medium">
+                  Chưa có hoạt động nào gần đây.
+                </td>
+              </tr>
+            ) : (
+              logs.map((log) => {
+                const config = getActionConfig(log.action_type);
+                const Icon = config.icon;
+                return (
+                  <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${config.bg} ${config.color}`}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">{config.label}</p>
+                          <p className="text-[11px] font-medium text-slate-400">{log.admin_name || 'Admin'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <span className="text-sm font-medium text-slate-600">{log.target_name || '—'}</span>
+                    </td>
+                    <td className="px-6 py-3.5 text-right">
+                      <span className="text-xs font-semibold text-slate-500 tabular-nums">
+                        {new Date(log.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
+                        <span className="text-slate-300 mx-1">|</span>
+                        {new Date(log.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 // ─── MAIN DASHBOARD ──────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -277,6 +309,8 @@ const AdminDashboard = () => {
     totalExams:  0,
     recentUsers: [],
     weeklyData:  [],
+    activeRate:  0,
+    adminLogs:   [],
   });
 
   useEffect(() => {
@@ -284,41 +318,60 @@ const AdminDashboard = () => {
       if (!admin) return;
       setDataLoading(true);
       try {
-        const { data: users } = await supabase
-          .from('profiles')
-          .select('id, created_at, full_name, email, role');
-        const { count: exams } = await supabase
-          .from('exams')
-          .select('*', { count: 'exact', head: true });
+        // 1. Users & Exams
+        const { data: users } = await supabase.from('profiles').select('id, created_at, full_name, email, role');
+        const { count: exams } = await supabase.from('exams').select('*', { count: 'exact', head: true });
 
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        // 2. Exam Results (7 days) - Lấy thêm user_id để tính Active Rate
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 6);
+        startDate.setHours(0, 0, 0, 0);
+
         const { data: results } = await supabase
           .from('exam_results')
-          .select('created_at')
-          .gte('created_at', sevenDaysAgo.toISOString());
+          .select('created_at, user_id')
+          .gte('created_at', startDate.toISOString());
 
+        // Process Weekly Data
         const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
         const last7Days = [];
         for (let i = 6; i >= 0; i--) {
           const d = new Date();
           d.setDate(d.getDate() - i);
-          const count = results?.filter(
-            r => new Date(r.created_at).toDateString() === d.toDateString()
+          const targetDateStr = d.toLocaleDateString('en-CA');
+          
+          const count = results?.filter(r => 
+            new Date(r.created_at).toLocaleDateString('en-CA') === targetDateStr
           ).length || 0;
+          
           last7Days.push({ label: days[d.getDay()], count });
         }
+
+        // 3. Tính Active Rate = (Số user duy nhất thi trong 7 ngày / Tổng user) * 100
+        let activeRateVal = 0;
+        if (users && users.length > 0 && results) {
+          const uniqueActiveUsers = new Set(results.filter(r => r.user_id).map(r => r.user_id)).size;
+          activeRateVal = ((uniqueActiveUsers / users.length) * 100).toFixed(1);
+        }
+
+        // 4. Lấy dữ liệu Admin Logs
+        const { data: adminLogsData } = await supabase
+          .from('admin_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
 
         setStats({
           totalUsers:  users?.length || 0,
           totalExams:  exams || 0,
-          recentUsers: users
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 5) || [],
-          weeklyData: last7Days,
+          recentUsers: users?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5) || [],
+          weeklyData:  last7Days,
+          activeRate:  activeRateVal,
+          adminLogs:   adminLogsData || [],
         });
+
       } catch (err) {
-        console.error('Lỗi:', err.message);
+        console.error('Lỗi tải Dashboard:', err.message);
       } finally {
         setDataLoading(false);
       }
@@ -337,18 +390,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden font-sans">
-      <AdminSidebar
-        isOpen={sidebarOpen}
-        setIsOpen={setSidebarOpen}
-        admin={admin}
-        onSignOut={signOut}
-      />
-
+      <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} admin={admin} onSignOut={signOut} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <AdminNavbar
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          onQuickAction={() => navigate('/admin/exams/create')}
-        />
+        <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => navigate('/admin/exams/create')} />
 
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -359,15 +403,7 @@ const AdminDashboard = () => {
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight italic leading-tight">
                   HubStudy <span className="text-blue-600">Pulse</span>
                 </h1>
-                <p className="text-slate-500 text-sm mt-0.5 font-medium">
-                  Theo dõi nhịp độ học tập thời gian thực.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 self-start sm:self-auto shadow-sm flex-shrink-0">
-                <Calendar className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-bold text-slate-600 uppercase tracking-wide whitespace-nowrap">
-                  7 ngày qua
-                </span>
+                <p className="text-slate-500 text-sm mt-0.5 font-medium">Theo dõi nhịp độ hệ thống thời gian thực.</p>
               </div>
             </div>
 
@@ -386,52 +422,28 @@ const AdminDashboard = () => {
                     <h2 className="text-base font-black text-slate-900">Lượt thi theo ngày</h2>
                     <p className="text-xs text-slate-400 font-medium mt-0.5">Số bài nộp 7 ngày gần nhất</p>
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block flex-shrink-0" />Hôm nay
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-slate-200 inline-block flex-shrink-0" />Khác
-                    </span>
-                  </div>
                 </div>
                 <WeeklyBarChart data={stats.weeklyData} />
               </div>
-
               <div className="lg:col-span-5">
-                <QuickInfoCard weeklyData={stats.weeklyData} navigate={navigate} />
+                <QuickInfoCard weeklyData={stats.weeklyData} activeRate={stats.activeRate} navigate={navigate} />
               </div>
             </div>
 
-            {/* ── Donut Chart + Recent Users Table ── */}
+            {/* ── Donut Chart + Recent Users ── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-
-              {/* Donut */}
               <div className="lg:col-span-4">
-                <RoleDistributionCard
-                  recentUsers={stats.recentUsers}
-                  totalUsers={stats.totalUsers}
-                />
+                <RoleDistributionCard recentUsers={stats.recentUsers} totalUsers={stats.totalUsers} />
               </div>
-
-              {/* Recent Users */}
               <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <h2 className="text-base font-black text-slate-900">Thành viên mới nhất</h2>
                     <p className="text-xs text-slate-400 font-medium mt-0.5">5 người dùng đăng ký gần đây</p>
                   </div>
-                  <button
-                    onClick={() => navigate('/admin/users')}
-                    className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors group flex-shrink-0"
-                  >
-                    Xem tất cả
-                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
                 </div>
-
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left" style={{ minWidth: '480px' }}>
+                  <table className="w-full text-left">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-100">
                         <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Thành viên</th>
@@ -440,56 +452,43 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                      {stats.recentUsers.length === 0 ? (
-                        <tr>
-                          <td colSpan={3} className="px-6 py-10 text-center text-sm text-slate-400 font-medium">
-                            Chưa có thành viên nào.
+                      {stats.recentUsers.map(user => (
+                        <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center font-black text-blue-600 text-sm flex-shrink-0 uppercase">
+                                {user.full_name?.charAt(0) || '?'}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-slate-800 truncate">{user.full_name || 'Chưa đặt tên'}</p>
+                                <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide
+                              ${user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-600'}`}>
+                              {user.role || 'user'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="text-xs font-semibold text-slate-500 tabular-nums">
+                              {new Date(user.created_at).toLocaleDateString('vi-VN')}
+                            </span>
                           </td>
                         </tr>
-                      ) : (
-                        stats.recentUsers.map(user => (
-                          <tr
-                            key={user.id}
-                            className="hover:bg-slate-50 transition-colors cursor-pointer"
-                            onClick={() => navigate(`/admin/users/${user.id}`)}
-                          >
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center font-black text-blue-600 text-sm flex-shrink-0 uppercase">
-                                  {user.full_name?.charAt(0) || '?'}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-sm font-bold text-slate-800 truncate" style={{ maxWidth: '160px' }}>
-                                    {user.full_name || 'Chưa đặt tên'}
-                                  </p>
-                                  <p className="text-xs text-slate-400 truncate" style={{ maxWidth: '160px' }}>
-                                    {user.email}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide
-                                ${user.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-600'}`}>
-                                {user.role || 'user'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <span className="text-xs font-semibold text-slate-500 tabular-nums">
-                                {new Date(user.created_at).toLocaleDateString('vi-VN', {
-                                  day: '2-digit', month: '2-digit', year: 'numeric',
-                                })}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
+                      ))}
                     </tbody>
                   </table>
                 </div>
               </div>
-
             </div>
+
+            {/* ── BẢNG NHẬT KÝ ADMIN (MỚI THÊM) ── */}
+            <div className="grid grid-cols-1">
+              <AdminActivityLog logs={stats.adminLogs} />
+            </div>
+
           </div>
         </main>
       </div>
