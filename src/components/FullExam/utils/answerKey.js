@@ -1,37 +1,37 @@
 // ============================================================
 // src/components/FullExam/utils/answerKey.js
 //
-// FIX: Chuẩn hóa key format một chỗ duy nhất.
-// Format: "listening-p1-q1" / "reading-p5-q1"
-//
-// LƯU Ý QUAN TRỌNG cho reading:
-// - part truyền vào là ABSOLUTE part number (5,6,7,8)
-// - KHÔNG phải relative index (1,2,3,4)
+// FIX TỐI THƯỢNG: Hỗ trợ ID động (UUID/String) của Supabase
+// Format chuẩn mới: "listening-part_123abc-q1" 
 // ============================================================
 
 /**
- * Tạo answer key chuẩn hóa.
+ * Tạo answer key chuẩn hóa hỗ trợ ID chuỗi.
  * @param {object} params
  * @param {string} params.section  - 'listening' | 'reading'
- * @param {number} params.part     - absolute part number (1-4 for listening, 5-8 for reading)
- * @param {number} params.question - question number within part (1-based)
- * @returns {string} e.g. "listening-p1-q1", "reading-p5-q3"
+ * @param {string|number} params.part - ID của part (từ Supabase) hoặc số
+ * @param {number} params.question - question number
+ * @returns {string} e.g. "listening-part_1739...-q1"
  */
 export const generateAnswerKey = ({ section, part, question }) => {
-  return `${section}-p${part}-q${question}`;
+  // Đã bỏ chữ "p" cứng, dùng thẳng part ID
+  return `${section}-${part}-q${question}`;
 };
 
 /**
  * Parse an answer key back to its components.
  * @param {string} key
- * @returns {{ section: string, part: number, question: number } | null}
+ * @returns {{ section: string, part: string, question: number } | null}
  */
 export const parseAnswerKey = (key) => {
-  const match = key?.match(/^(listening|reading)-p(\d+)-q(\d+)$/);
+  // Đã thay (\d+) thành (.+) để có thể đọc được chuỗi UUID/chữ cái
+  const match = key?.match(/^(listening|reading)-(.+)-q(\d+)$/);
+  
   if (!match) return null;
+  
   return {
     section:  match[1],
-    part:     parseInt(match[2], 10),
+    part:     match[2], // Không dùng parseInt nữa vì đây là chuỗi ID
     question: parseInt(match[3], 10),
   };
 };
@@ -43,6 +43,7 @@ export const parseAnswerKey = (key) => {
  * @returns {object} filtered answers
  */
 export const getAnswersBySection = (answers, section) => {
+  if (!answers) return {};
   return Object.fromEntries(
     Object.entries(answers).filter(([key]) => key.startsWith(`${section}-`))
   );

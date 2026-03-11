@@ -7,125 +7,155 @@ import {
 } from 'recharts';
 import {
   Trophy, Activity, Flame, ChevronRight, Clock,
-  TrendingUp, TrendingDown, BookOpen, Zap, BarChart2, Star, User
+  TrendingUp, TrendingDown, BookOpen, Zap, BarChart2, Star, User, Target, FileText
 } from 'lucide-react';
 import { useUserProgress } from '../hooks/useUserProgress.js';
 import { getAllExamMetadataAsync } from '../data/examData.js';
 
-// --- 1. Custom Hooks ---
+/* ── Google Fonts: add to index.html ──
+   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+── */
+
 function usePrevious(value) {
   const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
+  useEffect(() => { ref.current = value; });
   return ref.current;
 }
 
-// --- 2. Design System Tokens ---
-const C = {
-  bg: '#F8FAFC',
-  surface: '#FFFFFF',
-  border: '#E2E8F0',
-  text: '#0F172A',
-  muted: '#64748B',
-  accent: '#2563EB', // ✅ Đổi màu chủ đạo sang Xanh dương (Blue)
-  green: '#10B981',
-  yellow: '#F59E0B',
-  red: '#EF4444',
-  blue: '#3B82F6',
+/* ── Design tokens — compact & refined ── */
+const G = {
+  bg: '#F5F7FA',
+  blue: '#1CB0F6', blueDark: '#18A0E0', blueBg: '#EAF6FE',
+  green: '#58CC02', greenDark: '#46A302', greenBg: '#F0FAE8',
+  yellow: '#FFC200', yellowDark: '#D9A600', yellowBg: '#FFFBEA',
+  purple: '#CE82FF', purpleBg: '#F8EEFF',
+  red: '#FF4B4B', orange: '#FF9600',
+  n50: '#F8FAFC', n100: '#F1F5F9', n200: '#E2E8F0',
+  n400: '#94A3B8', n500: '#64748B', n600: '#475569', n800: '#1E293B',
 };
+const F = { display: '"Baloo 2", "Nunito", sans-serif', body: '"Nunito", "Baloo 2", sans-serif' };
 
-// --- 3. Sub-Components ---
+/* ── Custom chart tooltip ── */
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-xl border border-slate-100 ring-1 ring-black/5">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">{label}</p>
-      <p className="text-lg font-black text-blue-600">{payload[0].value} <span className="text-xs text-slate-400 font-normal">điểm</span></p>
+    <div style={{
+      fontFamily: F.body, background: '#fff', padding: '8px 12px',
+      borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
+      border: `1px solid ${G.n200}`,
+    }}>
+      <p style={{ fontSize: 10, fontWeight: 800, color: G.n400, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>{label}</p>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+        <span style={{ fontFamily: F.display, fontSize: 17, fontWeight: 900, color: G.blue }}>{payload[0].value}</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: G.n500 }}>điểm</span>
+      </div>
     </div>
   );
 };
 
-const StatCard = ({ icon: Icon, label, value, sub, color, bg }) => (
-  <motion.div 
-    whileHover={{ y: -4 }}
-    className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all group"
-  >
-    <div className="flex justify-between items-start mb-4">
-      <div className="p-3 rounded-2xl transition-colors" style={{ backgroundColor: bg }}>
-        <Icon size={20} style={{ color }} />
-      </div>
-      {sub}
+/* ── Stat Card — compact 2-col layout ── */
+const StatCard = ({ icon: Icon, label, value, sub, mainColor, bgLight }) => (
+  <div style={{
+    background: '#fff', borderRadius: 16, padding: '12px 14px',
+    border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+    display: 'flex', alignItems: 'center', gap: 12,
+  }}>
+    <div style={{
+      width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+      backgroundColor: bgLight, color: mainColor,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <Icon size={16} strokeWidth={2.5} />
     </div>
-    <div>
-      <p className="text-sm font-medium text-slate-500 mb-1">{label}</p>
-      <h4 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h4>
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <p style={{ fontFamily: F.display, fontSize: 18, fontWeight: 900, color: G.n800, margin: 0, lineHeight: 1 }}>{value}</p>
+      <p style={{ fontFamily: F.body, fontSize: 10, fontWeight: 800, color: G.n400, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '3px 0 0' }}>{label}</p>
     </div>
-  </motion.div>
+    <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{sub}</div>
+  </div>
 );
 
-const HistoryItem = ({ item, index, onClick, examMap }) => {
-  const scoreColor = item.score >= 80 ? C.green : item.score >= 50 ? C.yellow : C.red;
-  
-  // Hỗ trợ cả Supabase (mới) và Firebase (cũ)
-  const targetExamId = item.exam_id || item.exam;
-  const examTitle = examMap[targetExamId] || targetExamId || 'Bài thi';
+/* ── History row ── */
+const HistoryItem = ({ item, onClick, examMap }) => {
+  const score = item.score;
+  const isGood = score >= 80, isMid = score >= 50;
+  const color  = isGood ? G.green  : isMid ? G.yellow  : G.red;
+  const bgCol  = isGood ? G.greenBg : isMid ? G.yellowBg : '#FFF0F0';
+
+  const examTitle = examMap[item.exam_id || item.exam] || 'Bài tập rèn luyện';
   const targetDate = item.created_at || item.completedAt || item.timestamp;
-  const targetPart = item.part || 'full-exam';
+  const partLabel = (!item.part || item.part === 'full-exam') ? 'Full' : `P${String(item.part).replace('part', '')}`;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
+    <button
       onClick={() => onClick(item)}
-      className="group flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl cursor-pointer transition-all border border-transparent hover:border-slate-100"
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+        padding: '8px 10px', marginBottom: 4,
+        background: '#fff', border: `1.5px solid ${G.n200}`,
+        borderRadius: 12, cursor: 'pointer', textAlign: 'left',
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+        fontFamily: F.body, outline: 'none',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = G.blue; e.currentTarget.style.boxShadow = `0 2px 10px rgba(28,176,246,0.1)`; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = G.n200; e.currentTarget.style.boxShadow = 'none'; }}
     >
-      <div className="flex items-center gap-4 min-w-0"> {/* Thêm min-w-0 để chống tràn ngang */}
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0" 
-              style={{ backgroundColor: `${scoreColor}15`, color: scoreColor }}>
-          {item.score}
-        </div>
-        <div className="min-w-0 flex-1 pr-2">
-          <h5 className="font-bold text-slate-800 truncate text-sm">
-            {examTitle}
-          </h5>
-          <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1 truncate">
-            <Clock size={10} className="flex-shrink-0" /> 
-            {targetDate ? new Date(targetDate).toLocaleDateString('vi-VN') : 'Gần đây'} 
-            <span className="mx-1 text-slate-300">•</span>
-            {targetPart === 'full-exam' ? 'Full Test' : `Part ${targetPart.replace('part', '')}`}
-          </p>
+      {/* Score badge */}
+      <div style={{
+        width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: F.display, fontWeight: 900, fontSize: 13, color,
+        background: bgCol,
+      }}>
+        {score}
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{
+          fontFamily: F.body, fontSize: 12, fontWeight: 800, color: G.n800,
+          margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3,
+        }}>
+          {examTitle}
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, fontWeight: 700, color: G.n400 }}>
+            <Clock size={10} strokeWidth={2.5} />
+            {targetDate ? new Date(targetDate).toLocaleDateString('vi-VN') : 'Gần đây'}
+          </span>
+          <span style={{ width: 2, height: 2, borderRadius: '50%', background: G.n300, flexShrink: 0 }} />
+          <span style={{ fontSize: 10, fontWeight: 800, color: G.n500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{partLabel}</span>
         </div>
       </div>
-      <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1 flex-shrink-0" />
-    </motion.div>
+
+      {/* Arrow */}
+      <div style={{ width: 22, height: 22, borderRadius: '50%', background: G.n100, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: G.n400 }}>
+        <ChevronRight size={12} strokeWidth={2.5} />
+      </div>
+    </button>
   );
 };
 
-// --- 4. Main Component ---
+/* ══════════════════════════════════════
+   MAIN
+══════════════════════════════════════ */
 export default function DetailedDashboard() {
   const navigate = useNavigate();
   const { currentUser, progress, analytics, chartData, loading, isLoaded } = useUserProgress();
-  
+
   const [examMap, setExamMap] = useState({});
   const [activeTab, setActiveTab] = useState('all');
   const [showLevelUp, setShowLevelUp] = useState(false);
-  
   const prevLevel = usePrevious(analytics.level);
 
-  // Mở Toast Level Up
   useEffect(() => {
-    if (prevLevel !== undefined && analytics.level > prevLevel) {
-      setShowLevelUp(true);
-    }
+    if (prevLevel !== undefined && analytics.level > prevLevel) setShowLevelUp(true);
   }, [analytics.level, prevLevel]);
 
-  // ✅ Auto-hide Toast Level Up sau 3 giây
   useEffect(() => {
     if (showLevelUp) {
-      const timer = setTimeout(() => setShowLevelUp(false), 3000);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setShowLevelUp(false), 4000);
+      return () => clearTimeout(t);
     }
   }, [showLevelUp]);
 
@@ -139,172 +169,261 @@ export default function DetailedDashboard() {
 
   const filteredHistory = useMemo(() => {
     if (activeTab === 'good') return progress.filter(p => p.score >= 80);
-    if (activeTab === 'bad') return progress.filter(p => p.score < 50);
+    if (activeTab === 'bad')  return progress.filter(p => p.score < 50);
     return progress;
   }, [progress, activeTab]);
 
   const handleHistoryClick = useCallback((item) => {
-    navigate(`/history/${item.id}`, { 
-        state: { progressItem: item },
-        replace: false 
-    });
+    navigate(`/history/${item.id}`, { state: { progressItem: item }, replace: false });
   }, [navigate]);
 
+  /* ── Loading ── */
   if (!isLoaded || loading) return (
-    <div className="h-screen w-full flex items-center justify-center bg-white">
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} 
-                  className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full" />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: G.bg }}>
+      <div style={{ width: 32, height: 32, border: `4px solid ${G.n200}`, borderTop: `4px solid ${G.blue}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 
   return (
-    <div className="min-h-screen pb-12 font-sans selection:bg-blue-100" style={{ backgroundColor: C.bg }}>
-      
-      {/* LEVEL UP TOAST (Đã đổi màu xanh & Tự ẩn) */}
+    <div style={{ minHeight: '100vh', background: G.bg, fontFamily: F.body, paddingBottom: 64 }}>
+
+      {/* ── LEVEL UP TOAST ── */}
       <AnimatePresence>
         {showLevelUp && (
           <motion.div
-            initial={{ opacity: 0, y: 50, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, scale: 0.5, x: '-50%' }}
-            className="fixed bottom-10 left-1/2 z-[100] flex items-center gap-4 px-6 py-4 rounded-[2rem] shadow-2xl border border-white/20 backdrop-blur-xl"
+            initial={{ opacity: 0, y: -32, scale: 0.92, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.92, y: -20, x: '-50%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
             style={{
-              background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)', // Gradient Xanh dương -> Cyan
-              boxShadow: '0 20px 40px -10px rgba(37, 99, 235, 0.4)'
+              position: 'fixed', top: 72, left: '50%', zIndex: 100,
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '12px 18px', borderRadius: 16,
+              background: '#fff', border: `1.5px solid #FDE68A`,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+              maxWidth: '88vw',
             }}
           >
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl">🎉</div>
+            <div style={{ width: 40, height: 40, background: G.yellowBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🎉</div>
             <div>
-              <h4 className="text-white font-black text-lg leading-none">Cấp độ mới!</h4>
-              <p className="text-white/90 text-xs font-bold mt-1">Bạn đã đạt Level {analytics.level}</p>
+              <p style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: G.n800, margin: 0 }}>Tuyệt vời! Thăng Cấp!</p>
+              <p style={{ fontFamily: F.body, fontSize: 12, fontWeight: 700, color: G.n500, margin: '1px 0 0' }}>
+                Bạn vừa đạt <strong style={{ color: G.yellow }}>Level {analytics.level}</strong>
+              </p>
             </div>
-            <button onClick={() => setShowLevelUp(false)} className="ml-2 bg-white text-blue-600 px-4 py-2 rounded-xl text-xs font-black">TUYỆT VỜI</button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="bg-white border-b border-slate-200 pt-8 pb-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="flex items-center gap-5">
-              {/* ✅ Avatar trong suốt và viền mềm mại */}
-              <div className="w-20 h-20 rounded-full border-2 border-slate-100 bg-slate-50/50 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {currentUser?.photoURL 
-                  ? <img src={currentUser.photoURL} alt="Avatar" className="w-full h-full object-cover bg-transparent" /> 
-                  : <User className="text-slate-400" size={32} />
-                }
-              </div>
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Chào {currentUser?.name?.split(' ').pop() || 'Khoa'}! 👋</h1>
-                <p className="text-slate-500 font-medium text-sm mt-1">Cùng xem lại hành trình học tập của bạn.</p>
-              </div>
+      {/* ── HEADER ── */}
+      <div style={{ background: '#fff', borderBottom: `1.5px solid ${G.n200}`, padding: '14px 0' }}>
+        <div style={{
+          maxWidth: 960, margin: '0 auto', padding: '0 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 10,
+        }}>
+          {/* User */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: '50%',
+              background: G.n100, border: `1.5px solid ${G.n200}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              overflow: 'hidden', flexShrink: 0,
+            }}>
+              {currentUser?.photoURL
+                ? <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <User size={18} strokeWidth={2} color={G.n400} />}
             </div>
-            <div className="flex gap-3">
-              <div className="bg-orange-50 px-4 py-2 rounded-2xl border border-orange-100 flex items-center gap-2">
-                <Flame size={18} className="text-orange-500" />
-                <span className="font-bold text-orange-700">{analytics.streak} ngày</span>
-              </div>
-              <div className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 flex items-center gap-2">
-                <Zap size={18} className="text-blue-600" />
-                <span className="font-bold text-blue-700">{analytics.xp.toLocaleString()} XP</span>
-              </div>
+            <div>
+              <h1 style={{ fontFamily: F.display, fontSize: 16, fontWeight: 900, color: G.n800, margin: 0, lineHeight: 1.2 }}>
+                Chào {currentUser?.name?.split(' ').pop() || 'bạn'}! 👋
+              </h1>
+              <p style={{ fontFamily: F.body, fontSize: 11, fontWeight: 700, color: G.n500, margin: '2px 0 0' }}>Sẵn sàng phá kỷ lục hôm nay chưa?</p>
             </div>
+          </div>
+
+          {/* Streak + XP pills */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[
+              { icon: <Flame size={14} color={G.orange} strokeWidth={2} />, label: `${analytics.streak} chuỗi`, bg: '#FFF4E6', border: '#FEDDAD', color: G.orange },
+              { icon: <Zap  size={14} color={G.blue}   strokeWidth={2} />, label: `${analytics.xp.toLocaleString()} XP`, bg: G.blueBg, border: '#BAE3FB', color: G.blue },
+            ].map((p, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px', borderRadius: 10,
+                background: p.bg, border: `1.5px solid ${p.border}`,
+              }}>
+                {p.icon}
+                <span style={{ fontFamily: F.display, fontSize: 12, fontWeight: 800, color: p.color }}>{p.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 -mt-8">
-        <div className="space-y-6">
-          
-          {/* LEVEL PROGRESS (Đổi sang tông Xanh dương) */}
-          <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg"><Star size={20} fill="currentColor" /></div>
-                <div><span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cấp độ</span><h3 className="text-lg font-black text-slate-800 leading-none">Level {analytics.level}</h3></div>
+      {/* ── MAIN ── */}
+      <main style={{ maxWidth: 960, margin: '0 auto', padding: '16px 16px 0' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+          {/* LEVEL BAR */}
+          <div style={{
+            background: '#fff', borderRadius: 16, padding: '12px 16px',
+            border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: G.yellowBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Star size={18} color={G.yellow} fill={G.yellow} strokeWidth={1.5} />
               </div>
-              <div className="text-right">
-                <span className="text-xs font-bold text-slate-400">Lv.{analytics.level + 1}</span>
-                <p className="text-sm font-black text-blue-600">{analytics.xpIntoLevel}/{analytics.xpRequiredForLevel} XP</p>
+              <div>
+                <p style={{ fontFamily: F.body, fontSize: 10, fontWeight: 800, color: G.n400, textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>Level</p>
+                <p style={{ fontFamily: F.display, fontSize: 20, fontWeight: 900, color: G.n800, margin: 0, lineHeight: 1 }}>{analytics.level}</p>
               </div>
             </div>
-            <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${analytics.levelProgressPercent}%` }} className="h-full bg-gradient-to-r from-blue-600 to-cyan-400" />
+            <div style={{ flex: 1, minWidth: 140 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontFamily: F.body, fontSize: 11, fontWeight: 700, color: G.n500 }}>Tới Level {analytics.level + 1}</span>
+                <span style={{ fontFamily: F.display, fontSize: 12, fontWeight: 900, color: G.yellow }}>
+                  {analytics.xpIntoLevel} <span style={{ color: G.n400, fontWeight: 700 }}>/ {analytics.xpRequiredForLevel} XP</span>
+                </span>
+              </div>
+              <div style={{ height: 8, background: G.n100, borderRadius: 99, overflow: 'hidden' }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${analytics.levelProgressPercent}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  style={{ height: '100%', background: `linear-gradient(90deg, ${G.yellow}, ${G.orange})`, borderRadius: 99 }}
+                />
+              </div>
             </div>
           </div>
 
-          {/* STATS */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={Activity} label="Độ chính xác" value={`${analytics.accuracy}%`} sub={analytics.trend > 0 ? <TrendingUp size={16} className="text-emerald-500" /> : <TrendingDown size={16} className="text-rose-500" />} color={C.green} bg="#ECFDF5" />
-            <StatCard icon={Trophy} label="Best Score" value={analytics.bestScore} color={C.yellow} bg="#FFFBEB" />
-            <StatCard icon={BarChart2} label="Trung bình" value={analytics.averageScore} color={C.accent} bg="#EFF6FF" />
-            <StatCard icon={BookOpen} label="Bài đã làm" value={analytics.totalAttempts} color={C.blue} bg="#EFF6FF" />
+          {/* STATS GRID — 2 rows × 2 cols on mobile, 4 cols on wide */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+            <StatCard icon={Target}    label="Chính xác"  value={`${analytics.accuracy}%`}   mainColor={G.green}  bgLight={G.greenBg}
+              sub={analytics.trend > 0 ? <TrendingUp size={13} strokeWidth={2.5} color={G.green} /> : <TrendingDown size={13} strokeWidth={2.5} color={G.red} />} />
+            <StatCard icon={Trophy}    label="Cao nhất"   value={analytics.bestScore}         mainColor={G.yellow} bgLight={G.yellowBg}
+              sub={<Star size={13} color={G.yellow} fill={G.yellow} />} />
+            <StatCard icon={BarChart2} label="Trung bình" value={analytics.averageScore}      mainColor={G.blue}   bgLight={G.blueBg}
+              sub={<Activity size={13} strokeWidth={2.5} color={G.blue} />} />
+            <StatCard icon={BookOpen}  label="Hoàn thành" value={analytics.totalAttempts}     mainColor={G.purple} bgLight={G.purpleBg}
+              sub={<FileText size={13} strokeWidth={2.5} color={G.purple} />} />
           </div>
 
-          {/* ✅ Tỷ lệ chia Lưới mới (7:5) giúp cột Lịch sử rộng rãi hơn */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* CHART */}
-            <div className="lg:col-span-7 bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 overflow-hidden">
-              <div className="flex justify-between items-center mb-8">
-                <div><h3 className="text-xl font-black text-slate-900">Tiến độ</h3><p className="text-sm text-slate-500 font-medium">Xu hướng điểm số</p></div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-500 border border-slate-100"><div className="w-2 h-2 rounded-full bg-blue-600" />Điểm TB ngày</div>
+          {/* CHART + HISTORY */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12, alignItems: 'start' }}>
+
+            {/* Chart */}
+            <div style={{
+              background: '#fff', borderRadius: 16, padding: '14px 14px',
+              border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+            }}>
+              <div style={{ marginBottom: 12 }}>
+                <h3 style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: G.n800, margin: 0 }}>Biểu đồ học tập</h3>
+                <p style={{ fontFamily: F.body, fontSize: 11, fontWeight: 700, color: G.n400, margin: '3px 0 0' }}>Xu hướng điểm số qua các bài test</p>
               </div>
-              <div className="h-[300px] w-full -ml-4">
+              <div style={{ height: 220 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
+                  <AreaChart data={chartData} margin={{ top: 6, right: 6, left: -28, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={C.accent} stopOpacity={0.2} />
-                        <stop offset="95%" stopColor={C.accent} stopOpacity={0} />
+                        <stop offset="5%"  stopColor={G.blue} stopOpacity={0.22} />
+                        <stop offset="95%" stopColor={G.blue} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }} dy={10} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 11 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="avg" stroke={C.accent} strokeWidth={4} fillOpacity={1} fill="url(#colorScore)" dot={{ r: 4, fill: '#FFF', stroke: C.accent, strokeWidth: 2 }} activeDot={{ r: 7, fill: C.accent, stroke: '#FFF', strokeWidth: 3 }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={G.n100} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false}
+                      tick={{ fill: G.n400, fontSize: 10, fontWeight: 700, fontFamily: F.body }} dy={6} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false}
+                      tick={{ fill: G.n400, fontSize: 10, fontWeight: 700, fontFamily: F.body }} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: G.n200, strokeWidth: 1, strokeDasharray: '4 4' }} />
+                    <Area type="monotone" dataKey="avg" stroke={G.blue} strokeWidth={2.5}
+                      fillOpacity={1} fill="url(#colorScore)"
+                      dot={{ r: 3.5, fill: '#fff', stroke: G.blue, strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: G.blue, stroke: '#fff', strokeWidth: 2 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* HISTORY */}
-            <div className="lg:col-span-5 bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-black text-slate-800">Lịch sử</h3>
-                <span className="text-[10px] font-black px-2 py-1 bg-blue-50 text-blue-600 rounded-lg">{progress.length}</span>
+            {/* History */}
+            <div style={{
+              background: '#fff', borderRadius: 16, padding: '14px 14px',
+              border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', height: 360,
+            }}>
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <h3 style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: G.n800, margin: 0 }}>Lịch sử bài làm</h3>
+                <span style={{
+                  fontFamily: F.body, fontSize: 10, fontWeight: 800, color: G.n500,
+                  background: G.n100, border: `1px solid ${G.n200}`,
+                  padding: '2px 7px', borderRadius: 7,
+                }}>
+                  {progress.length} BÀI
+                </span>
               </div>
-              
-              {/* TABS Đã đổi màu xanh */}
-              <div className="flex gap-2 mb-4 bg-slate-50 p-1 rounded-2xl">
-                {['all', 'good', 'bad'].map((tab) => (
-                  <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 py-2 text-[11px] font-bold rounded-xl transition-all ${activeTab === tab ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}>
-                    {tab === 'all' ? 'Tất cả' : tab === 'good' ? '≥ 80' : '< 50'}
+
+              {/* Tabs */}
+              <div style={{ display: 'flex', gap: 3, padding: 3, background: G.n100, borderRadius: 11, marginBottom: 10 }}>
+                {[
+                  { id: 'all',  label: 'Tất cả' },
+                  { id: 'good', label: 'Tốt ≥80' },
+                  { id: 'bad',  label: 'Cần cố' },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      flex: 1, padding: '6px 4px', border: 'none', borderRadius: 8, cursor: 'pointer',
+                      fontFamily: F.body, fontSize: 11, fontWeight: 800,
+                      background: activeTab === tab.id ? '#fff' : 'transparent',
+                      color: activeTab === tab.id ? G.blue : G.n500,
+                      boxShadow: activeTab === tab.id ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {tab.label}
                   </button>
                 ))}
               </div>
 
-              <div className="flex-1 overflow-y-auto max-h-[360px] pr-2 space-y-1 custom-scrollbar">
-                {filteredHistory.length > 0 ? filteredHistory.map((item, i) => (
-                  <HistoryItem 
-                    key={item.id} 
-                    item={item} 
-                    index={i} 
-                    examMap={examMap} 
-                    onClick={handleHistoryClick} 
-                  />
-                )) : <div className="text-center py-12 text-slate-400 text-sm">Chưa có bài làm</div>}
+              {/* List */}
+              <div style={{ flex: 1, overflowY: 'auto', paddingRight: 2 }}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {filteredHistory.length > 0
+                      ? filteredHistory.map(item => (
+                        <HistoryItem key={item.id} item={item} examMap={examMap} onClick={handleHistoryClick} />
+                      ))
+                      : (
+                        <div style={{ paddingTop: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                          <div style={{ width: 40, height: 40, background: G.n50, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <BookOpen size={20} strokeWidth={2} color={G.n200} />
+                          </div>
+                          <p style={{ fontFamily: F.body, fontSize: 12, fontWeight: 700, color: G.n400, margin: 0 }}>Chưa có bài tập nào</p>
+                        </div>
+                      )}
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </div>
         </div>
       </main>
-      
-      {/* Scrollbar Style cho mượt */}
+
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: ${G.n200}; border-radius: 8px; }
+        @media (min-width: 640px) {
+          .stats-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        }
       `}</style>
     </div>
   );

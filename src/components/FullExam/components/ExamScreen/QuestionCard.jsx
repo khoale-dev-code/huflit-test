@@ -1,208 +1,11 @@
 /* src/components/FullExam/components/ExamScreen/QuestionCard.jsx */
-/* Material Design 3 · WCAG 2.1 AA · Mobile-first · Core Web Vitals optimised */
+/* Google & Duolingo UI · WCAG 2.1 AA · Mobile-first · Tailwind CSS */
 
 import React, { memo, useCallback, useId } from 'react';
+import { Check, Lightbulb } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────
-   Design tokens (MD3-aligned)
-   ───────────────────────────────────────────────────────────── */
-const tokens = {
-  primary:       '#1565C0',
-  primaryLight:  '#E3F2FD',
-  primaryDark:   '#0D47A1',
-  surface:       '#FFFFFF',
-  surfaceVar:    '#F5F7FA',
-  outline:       '#C9D3DF',
-  outlineHover:  '#90A4AE',
-  onSurface:     '#1A2330',
-  onSurfaceMed:  '#4A5568',
-  onSurfaceLow:  '#718096',
-  success:       '#2E7D32',
-  successLight:  '#E8F5E9',
-  radius:        '12px',
-  radiusSm:      '8px',
-  elevation1:    '0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06)',
-  elevation2:    '0 3px 8px rgba(0,0,0,.10), 0 1px 3px rgba(0,0,0,.06)',
-  transition:    'all .18s cubic-bezier(.4,0,.2,1)',
-};
-
-/* ─────────────────────────────────────────────────────────────
-   Global styles injected once
-   ───────────────────────────────────────────────────────────── */
-const STYLE_ID = '__qcard_styles__';
-if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
-  style.textContent = `
-    @media (prefers-reduced-motion: reduce) {
-      .qcard-opt { transition: none !important; }
-      .qcard-opt:focus-visible { transition: none !important; }
-    }
-    .qcard-opt:focus-visible {
-      outline: 3px solid ${tokens.primary};
-      outline-offset: 2px;
-    }
-    .qcard-opt:focus:not(:focus-visible) { outline: none; }
-    .qcard-opt {
-      position: relative;
-      overflow: hidden;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .qcard-opt::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: ${tokens.primary};
-      opacity: 0;
-      transition: opacity .2s;
-    }
-    .qcard-opt:active::after { opacity: .08; }
-    .qcard-opt[aria-pressed="true"]::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: ${tokens.primary};
-      opacity: .05;
-      pointer-events: none;
-    }
-    .qcard-opt { min-height: 56px; }
-    @media (min-width: 640px) {
-      .qcard-opt { min-height: 52px; }
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Inline-style helpers
-   ───────────────────────────────────────────────────────────── */
-const s = {
-  /* FIX: replace border shorthand with 3 separate properties so
-     React never sees shorthand + borderColor on the same element */
-  card: {
-    background:    tokens.surface,
-    borderWidth:   '1px',
-    borderStyle:   'solid',
-    borderColor:   tokens.outline,       // ← non-shorthand only
-    borderRadius:  tokens.radius,
-    padding:       '24px 20px',
-    boxShadow:     tokens.elevation1,
-    transition:    tokens.transition,
-    contain:       'content',
-  },
-  /* FIX: cardHover now only overrides the two properties that actually
-     change — no shorthand, no conflict */
-  cardHover: {
-    boxShadow:   tokens.elevation2,
-    borderColor: tokens.outlineHover,   // ← same non-shorthand key, safe
-  },
-  badge: {
-    display:        'inline-flex',
-    alignItems:     'center',
-    gap:            '6px',
-    fontSize:       '11px',
-    fontWeight:     700,
-    letterSpacing:  '.08em',
-    textTransform:  'uppercase',
-    color:          tokens.primary,
-    background:     tokens.primaryLight,
-    padding:        '3px 10px',
-    borderRadius:   '100px',
-    marginBottom:   '12px',
-    userSelect:     'none',
-  },
-  questionText: {
-    fontSize:   'clamp(15px, 2.5vw, 17px)',
-    fontWeight: 600,
-    lineHeight: 1.55,
-    color:      tokens.onSurface,
-    margin:     '0 0 6px',
-  },
-  hint: {
-    display:      'flex',
-    alignItems:   'flex-start',
-    gap:          '6px',
-    fontSize:     '13px',
-    color:        tokens.onSurfaceLow,
-    fontStyle:    'italic',
-    marginTop:    '10px',
-    padding:      '8px 12px',
-    background:   tokens.surfaceVar,
-    borderRadius: tokens.radiusSm,
-    /* FIX: borderLeft shorthand → 3 separate props */
-    borderLeftWidth: '3px',
-    borderLeftStyle: 'solid',
-    borderLeftColor: tokens.outline,
-    lineHeight:   1.5,
-  },
-  divider: {
-    border:     'none',
-    /* FIX: borderTop shorthand → separate props */
-    borderTopWidth: '1px',
-    borderTopStyle: 'solid',
-    borderTopColor: tokens.outline,
-    margin:     '20px 0 16px',
-  },
-  optList: {
-    listStyle:      'none',
-    margin:         0,
-    padding:        0,
-    display:        'flex',
-    flexDirection:  'column',
-    gap:            '10px',
-  },
-  selectedTag: {
-    display:      'flex',
-    alignItems:   'center',
-    gap:          '6px',
-    fontSize:     '12px',
-    fontWeight:   700,
-    color:        tokens.success,
-    padding:      '8px 14px',
-    background:   tokens.successLight,
-    borderRadius: tokens.radiusSm,
-    marginTop:    '18px',
-  },
-};
-
-/* ─────────────────────────────────────────────────────────────
-   SVG icons
-   ───────────────────────────────────────────────────────────── */
-const IconCircle = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-    aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="10" stroke="#90A4AE" strokeWidth="2"/>
-  </svg>
-);
-
-const IconChecked = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-    aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="10" fill={tokens.primary}/>
-    <path d="M7.5 12.5l3 3 6-6" stroke="#fff" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const IconHint = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-    aria-hidden="true" focusable="false" style={{ flexShrink: 0, marginTop: '2px' }}>
-    <circle cx="12" cy="12" r="10" stroke={tokens.onSurfaceLow} strokeWidth="2"/>
-    <path d="M12 8v4m0 4h.01" stroke={tokens.onSurfaceLow} strokeWidth="2"
-      strokeLinecap="round"/>
-  </svg>
-);
-
-const IconCheck = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-    aria-hidden="true" focusable="false">
-    <path d="M5 13l4 4L19 7" stroke={tokens.success} strokeWidth="2.5"
-      strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-/* ─────────────────────────────────────────────────────────────
-   OptionButton
+   Option Button (Clean & Modern)
    ───────────────────────────────────────────────────────────── */
 const OptionButton = memo(({
   option,
@@ -212,73 +15,43 @@ const OptionButton = memo(({
   groupId,
   optionId,
 }) => {
-  /* FIX: no border shorthand — use borderWidth + borderStyle + borderColor */
-  const optStyle = {
-    width:        '100%',
-    padding:      '14px 16px',
-    borderRadius: tokens.radiusSm,
-    borderWidth:  '2px',
-    borderStyle:  'solid',
-    borderColor:  isSelected ? tokens.primary : tokens.outline,  // ← only this changes
-    background:   isSelected ? tokens.primaryLight : tokens.surface,
-    cursor:       'pointer',
-    display:      'flex',
-    alignItems:   'center',
-    gap:          '14px',
-    textAlign:    'left',
-    transition:   tokens.transition,
-    color:        tokens.onSurface,
-    fontFamily:   'inherit',
-  };
-
   return (
-    <li role="none">
+    <li role="none" className="w-full">
       <button
         type="button"
         role="radio"
         aria-checked={isSelected}
         aria-describedby={`${groupId}-label`}
         id={optionId}
-        className="qcard-opt"
         onClick={onSelect}
-        style={optStyle}
+        className={`
+          w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl border transition-all duration-150 text-left outline-none
+          ${isSelected
+            ? 'bg-blue-50 border-blue-400 shadow-sm'
+            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'}
+        `}
       >
-        <span style={{ flexShrink: 0, lineHeight: 0 }} aria-hidden="true">
-          {isSelected ? <IconChecked /> : <IconCircle />}
-        </span>
+        {/* Label Badge (A, B, C, D) */}
+        <div className={`
+          w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs sm:text-sm font-bold shrink-0 transition-colors
+          ${isSelected 
+            ? 'bg-blue-500 text-white' 
+            : 'bg-gray-100 text-gray-600'}
+        `}>
+          {optionLabel}
+        </div>
 
-        <span style={{
-          flex:       1,
-          fontSize:   'clamp(13px, 2vw, 15px)',
-          fontWeight: isSelected ? 600 : 400,
-          lineHeight: 1.5,
-          color:      isSelected ? tokens.primary : tokens.onSurface,
-        }}>
-          <span style={{
-            fontWeight:  700,
-            marginRight: '6px',
-            color:       isSelected ? tokens.primary : tokens.onSurfaceMed,
-          }}>{optionLabel}.</span>
+        {/* Option Text */}
+        <span className={`
+          flex-1 text-sm sm:text-base leading-normal
+          ${isSelected ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'}
+        `}>
           {option}
         </span>
 
+        {/* Selected Checkmark */}
         {isSelected && (
-          <span style={{
-            flexShrink:    0,
-            fontSize:      '11px',
-            fontWeight:    700,
-            color:         tokens.primary,
-            background:    tokens.surface,
-            /* FIX: border shorthand → separate props */
-            borderWidth:   '1px',
-            borderStyle:   'solid',
-            borderColor:   tokens.primary,
-            borderRadius:  '100px',
-            padding:       '2px 10px',
-            letterSpacing: '.04em',
-          }} aria-hidden="true">
-            Selected
-          </span>
+          <Check className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={3} />
         )}
       </button>
     </li>
@@ -287,7 +60,7 @@ const OptionButton = memo(({
 OptionButton.displayName = 'OptionButton';
 
 /* ─────────────────────────────────────────────────────────────
-   QuestionCard
+   QuestionCard (Main Container)
    ───────────────────────────────────────────────────────────── */
 export const QuestionCard = memo(({
   question,
@@ -297,7 +70,6 @@ export const QuestionCard = memo(({
   questionKey,
 }) => {
   const groupId = useId();
-  const [hovered, setHovered] = React.useState(false);
 
   const handleSelect = useCallback(
     (idx) => onAnswerSelect(idx),
@@ -305,61 +77,55 @@ export const QuestionCard = memo(({
   );
 
   if (!question) return null;
-
   const options = question.options || [];
 
   return (
     <article
       aria-labelledby={`${groupId}-heading`}
-      style={{ ...s.card, ...(hovered ? s.cardHover : {}) }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className="bg-white rounded-2xl p-4 sm:p-6 mb-5 border border-gray-200 shadow-xs font-sans"
+      style={{ fontFamily: '-apple-system, "Segoe UI", "Roboto", sans-serif' }}
     >
-      <header>
-        <div style={s.badge} aria-label={`Question ${questionNum}`}>
-          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-            <circle cx="5" cy="5" r="5" fill={tokens.primary}/>
-          </svg>
-          Question {questionNum}
+      <header className="flex gap-3 sm:gap-4 mb-4 sm:mb-5">
+        {/* Question Number Badge */}
+        <div 
+          aria-label={`Question ${questionNum}`}
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-base sm:text-lg shrink-0 shadow-xs"
+        >
+          {questionNum}
         </div>
 
-        <p id={`${groupId}-heading`} style={s.questionText}>
-          {question.question || 'No question text'}
-        </p>
-
-        {question.hint && (
-          <p style={s.hint} role="note" aria-label="Hint">
-            <IconHint />
-            <span><strong>Hint:</strong> {question.hint}</span>
+        {/* Question Content */}
+        <div className="flex-1">
+          <p id={`${groupId}-heading`} className="text-base sm:text-lg font-semibold text-gray-900 leading-snug m-0">
+            {question.question || 'Nội dung câu hỏi bị trống.'}
           </p>
-        )}
+
+          {/* Hint Box */}
+          {question.hint && (
+            <div role="note" aria-label="Hint" className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex gap-2.5 items-start">
+              <div className="w-6 h-6 rounded-md bg-amber-400 text-white flex items-center justify-center shrink-0 flex-none">
+                <Lightbulb className="w-4 h-4" strokeWidth={2.5} />
+              </div>
+              <p className="text-xs sm:text-sm font-medium text-amber-900 leading-normal mt-0.5">
+                {question.hint}
+              </p>
+            </div>
+          )}
+        </div>
       </header>
 
-      <hr style={s.divider} aria-hidden="true" />
-
-      <fieldset
-        style={{ border: 'none', margin: 0, padding: 0 }}
-        aria-labelledby={`${groupId}-heading`}
-      >
-        <legend style={{
-          position:  'absolute',
-          width:     '1px',
-          height:    '1px',
-          overflow:  'hidden',
-          clip:      'rect(0 0 0 0)',
-          whiteSpace:'nowrap',
-        }}>
-          Choose one answer for question {questionNum}
+      {/* Accessible Fieldset for Options */}
+      <fieldset aria-labelledby={`${groupId}-heading`} className="border-none m-0 p-0">
+        <legend className="sr-only">
+          Chọn một đáp án cho câu hỏi {questionNum}
         </legend>
 
         {options.length > 0 ? (
-          <ul style={s.optList} role="radiogroup"
-            aria-label={`Answer options for question ${questionNum}`}>
+          <ul role="radiogroup" aria-label={`Answer options for question ${questionNum}`} className="flex flex-col gap-2 m-0 p-0 list-none">
             {options.map((option, idx) => (
               <OptionButton
                 key={`${questionKey}-option-${idx}`}
                 option={option}
-                optionIndex={idx}
                 isSelected={selectedAnswer === idx}
                 onSelect={() => handleSelect(idx)}
                 optionLabel={String.fromCharCode(65 + idx)}
@@ -369,19 +135,12 @@ export const QuestionCard = memo(({
             ))}
           </ul>
         ) : (
-          <p style={{ color: tokens.onSurfaceLow, fontSize: '14px' }} role="status">
-            No options available for this question.
-          </p>
+          <div role="status" className="py-4 px-3 bg-gray-50 border border-gray-200 rounded-lg text-center">
+            <p className="text-gray-400 font-medium text-sm">Không có dữ liệu đáp án cho câu hỏi này.</p>
+          </div>
         )}
       </fieldset>
 
-      {selectedAnswer !== undefined && (
-        <div style={s.selectedTag} role="status"
-          aria-live="polite" aria-atomic="true">
-          <IconCheck />
-          Answer {String.fromCharCode(65 + selectedAnswer)} selected
-        </div>
-      )}
     </article>
   );
 });

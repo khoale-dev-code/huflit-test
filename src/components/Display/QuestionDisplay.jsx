@@ -1,178 +1,134 @@
 import React, { useMemo, useCallback, useState, memo } from 'react';
 import {
   CheckCircle, AlertCircle, Volume2, Check,
-  Sparkles, ChevronDown, ChevronUp, Lightbulb, Send,
+  Sparkles, ChevronDown, Lightbulb, Send,
 } from 'lucide-react';
 import { useUnifiedAuth } from '../../hooks/useUnifiedAuth';
 import ConfirmModal from './ConfirmModal';
 
-/* ══════════════════════════════════════════════════════
-   GLOBAL STYLES & ANIMATIONS
-══════════════════════════════════════════════════════ */
-const GlobalStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;600&family=Google+Sans+Text:wght@400;500&display=swap');
-    
-    :root {
-      --font-sans: 'Google Sans Text', system-ui, sans-serif;
-      --font-display: 'Google Sans Display', sans-serif;
-      /* Chiều cao tổng của bottom navbar (tabs + safe area) */
-      --bottom-nav-height: calc(64px + env(safe-area-inset-bottom));
-    }
-    
-    .font-sans-m3 { font-family: var(--font-sans); }
-    .font-display-m3 { font-family: var(--font-display); }
+/* ─── Design tokens ──────────────────────────────────────── */
+const C = {
+  blue: '#1CB0F6', blueDark: '#1899D6', blueBg: '#EAF6FE', blueBorder: '#BAE3FB',
+  green: '#58CC02', greenDark: '#46A302', greenBg: '#F0FAE8',
+  yellow: '#FFC200', yellowDark: '#D9A600', yellowBg: '#FFFBEA',
+  n50: '#F8FAFC', n100: '#F1F5F9', n200: '#E2E8F0',
+  n400: '#94A3B8', n500: '#64748B', n600: '#475569', n800: '#1E293B',
+  white: '#FFFFFF', red: '#FF4B4B',
+};
+const F = { body: '"Nunito", "Baloo 2", sans-serif', display: '"Baloo 2", "Nunito", sans-serif' };
 
-    @keyframes m3-fadein {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes m3-slidein {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
+const anim = `
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800;900&family=Nunito:wght@600;700;800;900&display=swap');
+  @keyframes bounceIn {
+    0%   { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+  .bounce-in { animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+`;
 
-    .animate-m3-fadein { animation: m3-fadein 0.24s ease both; }
-    .animate-m3-slidein { animation: m3-slidein 0.22s ease both; }
-    .animate-shimmer {
-      background: linear-gradient(90deg, transparent 40%, rgba(255,255,255,0.35) 60%, transparent 80%);
-      background-size: 200% 100%;
-      animation: shimmer 1.8s linear infinite;
-    }
-
-    .q-card:nth-child(1) { animation-delay: 0.03s; }
-    .q-card:nth-child(2) { animation-delay: 0.06s; }
-    .q-card:nth-child(3) { animation-delay: 0.09s; }
-    .q-card:nth-child(4) { animation-delay: 0.12s; }
-    .q-card:nth-child(5) { animation-delay: 0.15s; }
-  `}</style>
-);
-
-/* ══════════════════════════════════════════════════════
-   PROGRESS BAR — M3 Linear Indicator
-══════════════════════════════════════════════════════ */
-const ProgressBar = memo(({ percentage }) => {
-  const done = percentage === 100;
-  return (
-    <div className="h-1 w-full bg-[#E1E2EC] rounded-full overflow-hidden relative">
-      <div
-        className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out ${
-          done ? 'bg-gradient-to-r from-[#006C51] to-[#00A878]' : 'bg-gradient-to-r from-[#1A56DB] to-[#4D8FFF]'
-        }`}
-        style={{ width: `${percentage}%` }}
-      />
-      {!done && percentage > 0 && (
-        <div
-          className="absolute top-0 left-0 h-full w-full animate-shimmer rounded-full"
-          style={{ width: `${percentage}%` }}
-        />
-      )}
+/* ─── Progress Bar ───────────────────────────────────────── */
+const ProgressBar = memo(({ percentage }) => (
+  <div style={{ height: 10, width: '100%', background: C.n200, borderRadius: 99, overflow: 'hidden', border: `1.5px solid ${C.n200}` }}>
+    <div style={{
+      height: '100%', width: `${percentage}%`,
+      background: percentage === 100 ? C.green : C.blue,
+      borderRadius: 99, transition: 'width 0.4s ease',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      <div style={{ position: 'absolute', top: 2, left: 4, right: 4, height: 3, background: 'rgba(255,255,255,0.35)', borderRadius: 99 }} />
     </div>
-  );
-});
+  </div>
+));
 
-/* ══════════════════════════════════════════════════════
-   SCRIPT DISPLAY — M3 Outlined Card Expandable
-══════════════════════════════════════════════════════ */
+/* ─── Script (Audio) Display ─────────────────────────────── */
 const ScriptDisplay = memo(({ script }) => {
   const [open, setOpen] = useState(false);
   if (!script) return null;
   return (
-    <div className="mb-3.5 border border-[#D8E2FF] rounded-2xl overflow-hidden bg-[#D8E2FF]/30 font-sans-m3">
+    <div style={{ marginBottom: 16, background: C.blueBg, border: `2px solid ${C.blueBorder}`, borderRadius: 18, overflow: 'hidden' }}>
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between p-2.5 px-3.5 bg-transparent border-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A56DB]"
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', outline: 'none', fontFamily: F.body }}
       >
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#1A56DB] flex items-center justify-center shrink-0">
-            <Volume2 size={14} color="#fff" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 11, background: '#DAEEFB', border: `2px solid ${C.blueBorder}`, boxShadow: `0 3px 0 ${C.blueBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Volume2 size={17} color={C.blue} strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-medium text-[#001257] uppercase tracking-wider">Audio Script</span>
+          <span style={{ fontFamily: F.display, fontSize: 11, fontWeight: 900, color: C.blue, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Nội dung âm thanh</span>
         </div>
-        <div className="w-6 h-6 rounded-full bg-[#1A56DB]/10 flex items-center justify-center transition-transform duration-200">
-          {open ? <ChevronUp size={14} className="text-[#1A56DB]" /> : <ChevronDown size={14} className="text-[#1A56DB]" />}
+        <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#DAEEFB', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+          <ChevronDown size={16} color={C.blue} strokeWidth={3} />
         </div>
       </button>
       {open && (
-        <div className="px-3.5 pb-3.5 pt-1 border-t border-[#D8E2FF] animate-m3-fadein">
-          <p className="text-sm text-[#001257] italic m-0 mt-2 font-sans-m3 leading-relaxed">"{script}"</p>
+        <div className="bounce-in" style={{ padding: '10px 16px 14px', borderTop: `2px solid ${C.blueBorder}` }}>
+          <p style={{ fontFamily: F.body, fontSize: 14, fontWeight: 700, color: C.n600, fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>"{script}"</p>
         </div>
       )}
     </div>
   );
 });
 
-/* ══════════════════════════════════════════════════════
-   QUESTION OPTION — M3 Selection Control Card
-══════════════════════════════════════════════════════ */
-const OPT_CLASSES = [
-  { base: 'bg-[#1A56DB]', border: 'border-[#1A56DB]', bgSelected: 'bg-[#D8E2FF]', textOn: 'text-[#001257]', ring: 'ring-[#1A56DB]/30' },
-  { base: 'bg-[#5F35C4]', border: 'border-[#5F35C4]', bgSelected: 'bg-[#EADDFF]', textOn: 'text-[#21005D]', ring: 'ring-[#5F35C4]/30' },
-  { base: 'bg-[#006C51]', border: 'border-[#006C51]', bgSelected: 'bg-[#89F8D2]', textOn: 'text-[#002116]', ring: 'ring-[#006C51]/30' },
-  { base: 'bg-[#7E4E00]', border: 'border-[#7E4E00]', bgSelected: 'bg-[#FFDDB0]', textOn: 'text-[#281900]', ring: 'ring-[#7E4E00]/30' },
-];
-
+/* ─── Question Option ────────────────────────────────────── */
 const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId }) => {
   const label = String.fromCharCode(65 + index);
-  const theme = OPT_CLASSES[index % OPT_CLASSES.length];
-
   return (
-    <label className="block cursor-pointer group">
-      <input
-        type="radio"
-        className="absolute w-0 h-0 opacity-0"
-        name={`q-${questionId}`}
-        checked={isSelected}
-        onChange={onSelect}
-      />
-      <div
-        className={`relative overflow-hidden flex items-center gap-3 py-2.5 px-3.5 rounded-2xl border-[1.5px] transition-all duration-200 font-sans-m3
-          ${isSelected
-            ? `${theme.border} ${theme.bgSelected} ring-2 ring-offset-0 ${theme.ring}`
-            : 'border-[#C4C6D0] bg-[#FAFAFA] hover:bg-gray-100/80 active:bg-gray-200/60'}`}
-      >
-        <div className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center transition-colors duration-200 ${isSelected ? theme.base : 'bg-[#E1E2EC]'}`}>
-          {isSelected
-            ? <Check size={14} color="#fff" strokeWidth={2.5} />
-            : <span className="text-sm font-medium text-[#44464F]">{label}</span>}
+    <label style={{ display: 'block', cursor: 'pointer' }}>
+      <input type="radio" style={{ display: 'none' }} name={`q-${questionId}`} checked={isSelected} onChange={onSelect} />
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '10px 14px', borderRadius: 16,
+        border: `2px solid ${isSelected ? C.blue : C.n200}`,
+        boxShadow: `0 ${isSelected ? 2 : 3}px 0 ${isSelected ? C.blueDark + '60' : C.n200}`,
+        background: isSelected ? C.blueBg : C.white,
+        transform: isSelected ? 'translateY(-1px)' : 'none',
+        transition: 'all 0.12s ease',
+      }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: F.display, fontSize: 13, fontWeight: 900,
+          background: isSelected ? C.blue : C.n100,
+          color: isSelected ? C.white : C.n400,
+          border: `2px solid ${isSelected ? C.blueDark : C.n200}`,
+          transition: 'all 0.12s',
+        }}>
+          {isSelected ? <Check size={14} strokeWidth={4} /> : label}
         </div>
-        <span className={`text-[14.5px] flex-1 transition-colors duration-200 ${isSelected ? `${theme.textOn} font-medium` : 'text-[#1A1B1F] font-normal'}`}>
+        <span style={{ fontFamily: F.body, fontSize: 14, fontWeight: isSelected ? 800 : 700, color: isSelected ? C.blue : C.n600, flex: 1, lineHeight: 1.45 }}>
           {option}
         </span>
-        {isSelected && (
-          <div className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center animate-m3-fadein ${theme.base}`}>
-            <Check size={11} color="#fff" strokeWidth={3} />
-          </div>
-        )}
       </div>
     </label>
   );
 });
 
-/* ══════════════════════════════════════════════════════
-   QUESTION CARD — M3 Elevated Card
-══════════════════════════════════════════════════════ */
+/* ─── Question Card ──────────────────────────────────────── */
 const QuestionCard = memo(({ question, options, selectedAnswer, onAnswerSelect }) => (
-  <article className="q-card animate-m3-fadein bg-white border border-[#C4C6D0] rounded-[28px] p-4 mb-3 shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_12px_rgba(26,86,219,0.08)] transition-shadow duration-300">
+  <article className="bounce-in" style={{
+    background: C.white, border: `2px solid ${C.n200}`, borderBottom: `4px solid ${C.n200}`,
+    borderRadius: 24, padding: '16px', marginBottom: 16,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+  }}>
     <ScriptDisplay script={question.script} />
-    <div className="flex items-start gap-3 mb-3.5">
-      <div className="w-[30px] h-[30px] rounded-lg bg-[#2F3036] text-[#F2F0F4] flex items-center justify-center shrink-0 mt-[2px]">
-        <span className="text-sm font-medium font-sans-m3">{question.id}</span>
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+      <div style={{
+        width: 34, height: 34, borderRadius: 11, flexShrink: 0,
+        background: C.blue, border: `2px solid ${C.blueDark}`,
+        boxShadow: `0 3px 0 ${C.blueDark}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{ fontFamily: F.display, fontSize: 13, fontWeight: 900, color: C.white }}>{question.id}</span>
       </div>
-      <h3 className="text-base text-[#1A1B1F] m-0 leading-snug font-display-m3 font-medium">
+      <h3 style={{ fontFamily: F.display, fontSize: 15, fontWeight: 800, color: C.n800, margin: 0, lineHeight: 1.5, paddingTop: 4 }}>
         {question.question}
       </h3>
     </div>
-    <div className="flex flex-col gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {options?.map((opt, i) => (
         <QuestionOption
           key={`${question.id}-${i}`}
-          index={i}
-          option={opt}
+          index={i} option={opt}
           isSelected={selectedAnswer === i}
           onSelect={() => onAnswerSelect(question.id, i)}
           questionId={question.id}
@@ -182,38 +138,34 @@ const QuestionCard = memo(({ question, options, selectedAnswer, onAnswerSelect }
   </article>
 ));
 
-/* ══════════════════════════════════════════════════════
-   TIPS CARD — M3 Tonal Card
-══════════════════════════════════════════════════════ */
+/* ─── Tips Card ──────────────────────────────────────────── */
 const TipsCard = () => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-[#FFFBF0] border border-[#F0E0A0] rounded-[28px] overflow-hidden mb-3">
+    <div style={{ background: C.yellowBg, border: `2px solid ${C.yellow}40`, borderRadius: 20, overflow: 'hidden', marginBottom: 16 }}>
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-2.5 p-3.5 bg-transparent border-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB300] font-sans-m3"
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', outline: 'none', fontFamily: F.body }}
       >
-        <div className="w-8 h-8 rounded-lg bg-[#FFB300] flex items-center justify-center shrink-0">
-          <Lightbulb size={16} color="#fff" />
+        <div style={{ width: 34, height: 34, borderRadius: 11, background: C.yellow, border: `2px solid ${C.yellowDark}`, boxShadow: `0 3px 0 ${C.yellowDark}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Lightbulb size={17} color="#fff" strokeWidth={2.5} />
         </div>
-        <span className="text-sm font-medium text-[#5D4E00] flex-1 text-left">Mẹo làm bài</span>
-        <ChevronDown
-          size={18}
-          className="text-[#A08000] transition-transform duration-200"
-          style={{ transform: open ? 'rotate(180deg)' : 'none' }}
-        />
+        <span style={{ fontFamily: F.display, fontSize: 11, fontWeight: 900, color: '#92710A', textTransform: 'uppercase', letterSpacing: '0.08em', flex: 1, textAlign: 'left' }}>Mẹo đạt điểm cao</span>
+        <div style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s', display: 'flex', color: C.yellow }}>
+          <ChevronDown size={18} strokeWidth={3} />
+        </div>
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-[#F0E0A0] animate-m3-fadein font-sans-m3">
+        <div className="bounce-in" style={{ padding: '10px 16px 14px', borderTop: `2px solid ${C.yellow}30` }}>
           {[
-            { label: 'Scanning',    tip: 'Đọc câu hỏi trước khi nghe/đọc đoạn văn.' },
-            { label: 'Elimination', tip: 'Loại bỏ đáp án có từ vựng tiêu cực hoặc gây nhiễu.' },
+            { label: 'Scanning', tip: 'Đọc lướt câu hỏi trước khi nghe/đọc.' },
+            { label: 'Loại trừ', tip: 'Gạch ngay đáp án có từ khóa trái ngược.' },
           ].map(({ label, tip }) => (
-            <div key={label} className="flex gap-2.5 mt-3">
-              <span className="text-xs font-medium text-[#7E5700] bg-[#FFE082] px-2 py-0.5 rounded-full shrink-0 h-fit">
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+              <span style={{ fontFamily: F.display, fontSize: 11, fontWeight: 900, color: '#7A5C00', background: C.yellow, padding: '3px 10px', borderRadius: 8, flexShrink: 0, textTransform: 'uppercase', border: `1.5px solid ${C.yellowDark}` }}>
                 {label}
               </span>
-              <span className="text-sm text-[#5D4E00] leading-tight">{tip}</span>
+              <span style={{ fontFamily: F.body, fontSize: 13, fontWeight: 700, color: '#6B5200', lineHeight: 1.5 }}>{tip}</span>
             </div>
           ))}
         </div>
@@ -222,167 +174,160 @@ const TipsCard = () => {
   );
 };
 
+/* ─── Submit Card ────────────────────────────────────────── */
+const SubmitCard = ({ isAllAnswered, answersCount, totalQuestions, isSignedIn, onSubmit }) => (
+  <div style={{
+    marginTop: 8, padding: '18px 18px',
+    borderRadius: 24,
+    border: `2px solid ${isAllAnswered ? C.green : C.n200}`,
+    borderBottom: `4px solid ${isAllAnswered ? C.greenDark : C.n200}`,
+    background: isAllAnswered ? C.greenBg : C.white,
+    display: 'flex', flexDirection: 'column', gap: 14,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+    transition: 'all 0.25s',
+  }}>
+    {/* Status row */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{
+        width: 40, height: 40, borderRadius: 13, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: isAllAnswered ? C.green : C.n100,
+        border: `2px solid ${isAllAnswered ? C.greenDark : C.n200}`,
+        boxShadow: `0 3px 0 ${isAllAnswered ? C.greenDark : C.n200}`,
+      }}>
+        {isAllAnswered
+          ? <CheckCircle size={20} color="#fff" strokeWidth={2.5} />
+          : <AlertCircle size={20} color={C.n400} strokeWidth={2.5} />}
+      </div>
+      <div>
+        <p style={{ fontFamily: F.display, fontSize: 15, fontWeight: 900, color: isAllAnswered ? C.greenDark : C.n800, margin: 0 }}>
+          {isAllAnswered ? 'Mọi thứ đã sẵn sàng!' : 'Chưa hoàn thành!'}
+        </p>
+        <p style={{ fontFamily: F.body, fontSize: 12, fontWeight: 700, color: C.n500, margin: '2px 0 0' }}>
+          {isAllAnswered ? 'Bấm nộp bài ngay thôi!' : `Còn ${totalQuestions - answersCount} câu chưa chọn đáp án.`}
+        </p>
+      </div>
+    </div>
+
+    {/* Submit button */}
+    <button
+      onClick={onSubmit}
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        padding: '13px 0', borderRadius: 16,
+        fontFamily: F.display, fontSize: 15, fontWeight: 900,
+        textTransform: 'uppercase', letterSpacing: '0.05em',
+        color: C.white, cursor: 'pointer', outline: 'none', border: 'none',
+        background: isAllAnswered ? C.green : C.blue,
+        boxShadow: `0 4px 0 ${isAllAnswered ? C.greenDark : C.blueDark}`,
+        transition: 'all 0.12s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.06)'; }}
+      onMouseLeave={e => { e.currentTarget.style.filter = 'none'; }}
+      onMouseDown={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(4px)'; }}
+      onMouseUp={e => { e.currentTarget.style.boxShadow = `0 4px 0 ${isAllAnswered ? C.greenDark : C.blueDark}`; e.currentTarget.style.transform = 'none'; }}
+    >
+      <Send size={16} strokeWidth={3} />
+      {isSignedIn ? 'Nộp & Lưu' : 'Nộp bài'}
+    </button>
+  </div>
+);
+
 /* ══════════════════════════════════════════════════════
    MAIN — QuestionDisplay
 ══════════════════════════════════════════════════════ */
-const QuestionDisplay = memo(({
-  selectedPart, selectedExam, partData, answers,
-  onAnswerSelect, showResults, onSubmit, testType,
-}) => {
+const QuestionDisplay = memo(({ selectedPart, selectedExam, partData, answers, onAnswerSelect, showResults, onSubmit, testType }) => {
   const { user: firebaseUser, isSignedIn } = useUnifiedAuth();
-
-  const [status,      setStatus]      = useState({ show: false, message: '', success: false });
+  const [status, setStatus]       = useState({ show: false, message: '', success: false });
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const answersCount    = useMemo(() => Object.keys(answers).length, [answers]);
-  const totalQuestions  = useMemo(() => partData?.questions?.length || 0, [partData]);
-  const percentage      = useMemo(() => (totalQuestions > 0 ? Math.round((answersCount / totalQuestions) * 100) : 0), [answersCount, totalQuestions]);
-  const isAllAnswered   = answersCount === totalQuestions && totalQuestions > 0;
+  const answersCount   = useMemo(() => Object.keys(answers).length, [answers]);
+  const totalQuestions = useMemo(() => partData?.questions?.length || 0, [partData]);
+  const percentage     = useMemo(() => totalQuestions > 0 ? Math.round((answersCount / totalQuestions) * 100) : 0, [answersCount, totalQuestions]);
+  const isAllAnswered  = answersCount === totalQuestions && totalQuestions > 0;
 
   const triggerStatus = useCallback(() => {
-    setStatus({
-      show: true,
-      message: !isSignedIn ? 'Đăng nhập để lưu kết quả' : '✓ Kết quả đã được lưu!',
-      success: !!isSignedIn,
-    });
+    setStatus({ show: true, message: !isSignedIn ? 'Đăng nhập để lưu kết quả nhé!' : 'Tuyệt vời! Kết quả đã được lưu.', success: !!isSignedIn });
     setTimeout(() => setStatus({ show: false, message: '', success: false }), 3000);
   }, [isSignedIn]);
 
   const handleSubmit = useCallback(() => {
-    if (!isAllAnswered) {
-      setConfirmOpen(true);
-      return;
-    }
-    onSubmit();
-    triggerStatus();
+    if (!isAllAnswered) { setConfirmOpen(true); return; }
+    onSubmit(); triggerStatus();
   }, [isAllAnswered, onSubmit, triggerStatus]);
 
   const handleConfirm = useCallback(() => {
-    setConfirmOpen(false);
-    onSubmit();
-    triggerStatus();
+    setConfirmOpen(false); onSubmit(); triggerStatus();
   }, [onSubmit, triggerStatus]);
 
   if (!partData?.questions || showResults) return null;
 
   return (
-    <div className="min-h-screen bg-[#F7F8FF] text-[#1A1B1F] antialiased selection:bg-[#1A56DB]/20">
-      <GlobalStyles />
+    <div style={{ minHeight: '100vh', background: C.n50, fontFamily: F.body, WebkitFontSmoothing: 'antialiased' }}>
+      <style>{anim}</style>
 
-      {/* ── Sticky Header ── */}
-      <header className="sticky top-0 z-30 bg-[#F7F8FF]/95 backdrop-blur-md border-b border-[#C4C6D0] px-4 pt-3 pb-2.5 font-sans-m3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#D8E2FF] flex items-center justify-center">
-              <Sparkles size={16} className="text-[#1A56DB]" />
+      {/* ── Header ── */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 30,
+        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)',
+        borderBottom: `2px solid ${C.n200}`,
+        padding: '10px 16px 12px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+      }}>
+        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            {/* Label */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 11, background: C.blueBg, border: `2px solid ${C.blueBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Sparkles size={16} color={C.blue} strokeWidth={2.5} />
+              </div>
+              <span style={{ fontFamily: F.display, fontSize: 13, fontWeight: 900, color: C.n600, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Luyện tập</span>
             </div>
-            <span className="text-sm font-semibold font-display-m3">Practice</span>
-          </div>
 
-          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors duration-300
-            ${isAllAnswered
-              ? 'bg-[#89F8D2] border-[#006C51]/40 text-[#002116]'
-              : 'bg-[#D8E2FF] border-[#1A56DB]/30 text-[#001257]'}`}
-          >
-            {isAllAnswered && <Check size={12} className="text-[#006C51]" strokeWidth={2.5} />}
-            <span className="text-sm font-medium">{answersCount}/{totalQuestions}</span>
-          </div>
-        </div>
-        <ProgressBar percentage={percentage} />
-      </header>
-
-      {/* ── Question List ── */}
-      <style>{`
-        .submit-bar-wrap {
-          position: fixed;
-          bottom: calc(64px + env(safe-area-inset-bottom));
-          left: 0; right: 0; z-index: 50;
-        }
-        .toast-wrap {
-          bottom: calc(72px + 64px + env(safe-area-inset-bottom) + 8px);
-        }
-        @media (min-width: 768px) {
-          .submit-bar-wrap { position: static; bottom: auto; }
-          .qd-pad { padding-bottom: 32px !important; }
-          .toast-wrap { bottom: 24px; left: auto; right: 20px; width: 340px; }
-        }
-      `}</style>
-
-      <div
-        className="px-4 py-4 md:px-5 md:py-5 max-w-3xl mx-auto qd-pad"
-        style={{ paddingBottom: 'calc(72px + 64px + env(safe-area-inset-bottom) + 8px)' }}
-      >
-        {partData.questions.map((q) => (
-          <QuestionCard
-            key={q.id}
-            question={q}
-            options={q.options}
-            selectedAnswer={answers[q.id]}
-            onAnswerSelect={onAnswerSelect}
-          />
-        ))}
-        <TipsCard />
-
-        {/* ── Submit Bar ── */}
-        <div
-          className="submit-bar-wrap
-                     bg-white/95 backdrop-blur-md border-t border-[#C4C6D0]
-                     shadow-[0_-2px_20px_rgba(26,86,219,0.08)]
-                     px-4 py-3 flex items-center justify-between gap-3 font-sans-m3
-                     md:mt-2 md:mb-8
-                     md:bg-[#FAFAFA] md:border md:border-[#C4C6D0] md:rounded-[28px] md:px-5 md:py-4
-                     md:shadow-[0_1px_6px_rgba(0,0,0,0.04),0_4px_16px_rgba(26,86,219,0.05)]"
-        >
-          <div className="flex flex-col gap-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">{answersCount}/{totalQuestions} câu</span>
-              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${isAllAnswered ? 'bg-[#89F8D2] text-[#002116]' : 'bg-[#D8E2FF] text-[#001257]'}`}>
-                {percentage}%
+            {/* Counter pill */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '5px 12px', borderRadius: 12,
+              border: `2px solid ${isAllAnswered ? C.green : C.n200}`,
+              background: isAllAnswered ? C.greenBg : C.white,
+              transition: 'all 0.25s',
+            }}>
+              {isAllAnswered && <Check size={13} color={C.green} strokeWidth={4} />}
+              <span style={{ fontFamily: F.display, fontSize: 13, fontWeight: 900, color: isAllAnswered ? C.green : C.n500 }}>
+                {answersCount} / {totalQuestions}
               </span>
             </div>
-            <span className={`text-xs font-medium ${isAllAnswered ? 'text-[#006C51]' : 'text-[#44464F]'}`}>
-              {isAllAnswered ? '✓ Sẵn sàng nộp bài' : `Còn ${totalQuestions - answersCount} câu chưa trả lời`}
-            </span>
           </div>
-
-          <button
-            onClick={handleSubmit}
-            className={`flex items-center gap-2 px-5 py-2.5 md:px-6 md:py-3 rounded-[28px] text-[13px] md:text-sm font-semibold tracking-wide shrink-0 transition-all duration-200 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A56DB] text-white
-              ${isAllAnswered
-                ? 'bg-[#00358E] hover:bg-[#002763] shadow-[0_2px_12px_rgba(0,53,142,0.35)] hover:shadow-[0_4px_18px_rgba(0,53,142,0.45)]'
-                : 'bg-[#1A56DB] hover:bg-[#00358E] shadow-[0_1px_4px_rgba(26,86,219,0.2)] hover:shadow-[0_2px_8px_rgba(26,86,219,0.3)]'}`}
-          >
-            <Send size={15} />
-            {isSignedIn ? 'Nộp & Lưu' : 'Nộp bài'}
-          </button>
+          <ProgressBar percentage={percentage} />
         </div>
+      </header>
+
+      {/* ── Content ── */}
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '16px 14px 48px' }}>
+        {partData.questions.map(q => (
+          <QuestionCard key={q.id} question={q} options={q.options} selectedAnswer={answers[q.id]} onAnswerSelect={onAnswerSelect} />
+        ))}
+        <TipsCard />
+        <SubmitCard isAllAnswered={isAllAnswered} answersCount={answersCount} totalQuestions={totalQuestions} isSignedIn={isSignedIn} onSubmit={handleSubmit} />
       </div>
 
       {/* ── Confirm Modal ── */}
-      <ConfirmModal
-        open={confirmOpen}
-        answersCount={answersCount}
-        totalQuestions={totalQuestions}
-        onConfirm={handleConfirm}
-        onCancel={() => setConfirmOpen(false)}
-      />
+      <ConfirmModal open={confirmOpen} answersCount={answersCount} totalQuestions={totalQuestions} onConfirm={handleConfirm} onCancel={() => setConfirmOpen(false)} />
 
-      {/* ── M3 Toast ──
-          Mobile: hiện trên submit bar (submit bar ~72px + navbar 64px + safe-area)
-          Desktop: góc dưới phải
-      */}
+      {/* ── Toast ── */}
       {status.show && (
-        <div
-          className={`fixed z-[60] left-4 right-4 toast-wrap
-            md:w-[340px]
-            px-4 py-3.5 rounded-2xl flex items-center gap-3
-            shadow-[0_6px_24px_rgba(0,0,0,0.2)] animate-m3-slidein font-sans-m3
-            ${status.success ? 'bg-[#006C51] text-white' : 'bg-[#2F3036] text-[#F2F0F4]'}`}
-        >
-          {status.success
-            ? <CheckCircle size={18} className="shrink-0" />
-            : <AlertCircle size={18} color="#FFCC02" className="shrink-0" />}
-          <span className="text-sm font-medium">{status.message}</span>
+        <div className="bounce-in" style={{
+          position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 100, display: 'flex', alignItems: 'center', gap: 10,
+          padding: '10px 16px', borderRadius: 18,
+          background: C.white, border: `2px solid ${status.success ? C.green : C.yellow}40`,
+          boxShadow: '0 8px 28px rgba(0,0,0,0.12)',
+          fontFamily: F.body, whiteSpace: 'nowrap',
+        }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: status.success ? C.greenBg : C.yellowBg, flexShrink: 0 }}>
+            {status.success ? <CheckCircle size={18} color={C.green} strokeWidth={2.5} /> : <AlertCircle size={18} color={C.yellow} strokeWidth={2.5} />}
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 800, color: status.success ? C.greenDark : '#7A5C00' }}>{status.message}</span>
         </div>
       )}
     </div>

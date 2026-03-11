@@ -1,16 +1,6 @@
-/* src/components/FullExam/components/Modals/SubmitModal.jsx
- *
- * FIX: usePartStatuses dùng ABSOLUTE part number
- *   listening: parts 1-4
- *   reading:   parts 5-8  ← đây là bug gốc
- *
- * FIX: borderColor warning → dùng border shorthand nhất quán
- */
-
 import React, { memo, useState, useEffect, useRef, useMemo } from 'react';
 import { Flag, AlertTriangle, CheckCircle, ChevronRight, X } from 'lucide-react';
-import { EXAM_STRUCTURE, EXAM_SECTIONS } from '../../constants/examConfig';
-import { generateAnswerKey } from '../../utils/answerKey';
+import { EXAM_SECTIONS } from '../../constants/examConfig';
 
 const STYLE_ID = '__submitmodal_styles__';
 if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
@@ -42,43 +32,43 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Part status — KEY FIX:
-// Reading part numbers là ABSOLUTE (5,6,7,8), không phải (1,2,3,4)
-// Phải match với key được tạo bởi handleSelectAnswer trong FullExamMode
+// 💡 HOOK QUÉT DỮ LIỆU CHUẨN XÁC 100%
 // ─────────────────────────────────────────────────────────────
 function usePartStatuses(examData, answers, section) {
   return useMemo(() => {
-    if (!examData || !section) return [];
-    const cfg = EXAM_STRUCTURE[section];
-    if (!cfg) return [];
+    if (!examData?.parts || !section) return [];
+    
+    const partsArr = Array.isArray(examData.parts) 
+      ? examData.parts 
+      : Object.values(examData.parts);
 
-    // FIX: absolute start
-    // listening → 1,2,3,4 | reading → 5,6,7,8
-    const startP = section === EXAM_SECTIONS.LISTENING ? 1 : 5;
+    const currentSectionParts = partsArr.filter(p => p.type === section);
 
-    return Array.from({ length: cfg.parts }, (_, i) => {
-      const partNum = startP + i; // ABSOLUTE part number
+    return currentSectionParts.map((partData, index) => {
+      const qCount = partData.questions?.length || 0;
       let answered = 0;
 
-      for (let q = 1; q <= cfg.questionsPerPart; q++) {
-        // Dùng cùng generateAnswerKey với handleSelectAnswer
-        const key = generateAnswerKey({ section, part: partNum, question: q });
-        if (answers[key] !== undefined) answered++;
+      for (let q = 1; q <= qCount; q++) {
+        // ✅ DÙNG CHUỖI TRỰC TIẾP THAY VÌ GỌI generateAnswerKey
+        const key = `${section}-${partData.id}-q${q}`;
+        if (answers[key] !== undefined && answers[key] !== null) {
+          answered++;
+        }
       }
 
       return {
-        part:     partNum,
+        id: partData.id,
+        displayIndex: index + 1,
         answered,
-        total:    cfg.questionsPerPart,
-        complete: answered === cfg.questionsPerPart,
+        total: qCount,
+        complete: answered === qCount && qCount > 0,
       };
     });
   }, [examData, answers, section]);
 }
 
 // ─────────────────────────────────────────────────────────────
-// Part Review Grid
-// FIX: dùng border shorthand thay vì borderColor riêng để tránh warning
+// Giao diện lưới hiển thị
 // ─────────────────────────────────────────────────────────────
 const PartReviewGrid = memo(({ statuses, section }) => (
   <div style={{
@@ -87,18 +77,15 @@ const PartReviewGrid = memo(({ statuses, section }) => (
     gap: '10px',
     margin: '16px 0',
   }}>
-    {statuses.map(({ part, answered, total, complete }) => {
-      // Label thân thiện: Part 5 → "Reading 1", Part 1 → "Listening 1"
-      const isReading = section === EXAM_SECTIONS.READING;
-      const label = isReading
-        ? `Reading ${part - 4}`   // 5→1, 6→2, 7→3, 8→4
-        : `Listening ${part}`;    // 1→1, 2→2 ...
+    {statuses.map(({ id, displayIndex, answered, total, complete }) => {
+      const label = section === EXAM_SECTIONS.READING 
+        ? `Đọc hiểu ${displayIndex}` 
+        : `Nghe ${displayIndex}`;
 
       return (
-        <div key={part} style={{
+        <div key={id} style={{
           borderRadius: '10px',
           padding: '12px',
-          // FIX: dùng border shorthand, không mix borderColor + border
           border: `2px solid ${complete ? '#2E7D32' : '#F57F17'}`,
           background: complete ? '#F1F8E9' : '#FFFDE7',
           display: 'flex',
@@ -135,35 +122,23 @@ const PartReviewGrid = memo(({ statuses, section }) => (
 ));
 PartReviewGrid.displayName = 'PartReviewGrid';
 
-// ─────────────────────────────────────────────────────────────
-// Main Modal
-// ─────────────────────────────────────────────────────────────
 export const SubmitModal = memo(({
-  visible,
-  unansweredCount,
-  saveError,
-  isOnline,
-  isSubmitting,
-  examData,
-  answers,
-  section,
-  onConfirm,
-  onCancel,
+  visible, saveError, isOnline, isSubmitting, examData, answers, section, onConfirm, onCancel,
 }) => {
   const [step, setStep] = useState('review');
   const firstFocusRef   = useRef(null);
   const statuses = usePartStatuses(examData, answers, section);
 
+  const unansweredCount = useMemo(() => {
+    return statuses.reduce((sum, s) => sum + (s.total - s.answered), 0);
+  }, [statuses]);
+
   useEffect(() => {
     if (visible) {
       setStep('review');
-      // Log để debug — xóa sau khi confirm fix
-      console.log('📋 SubmitModal open | section:', section);
-      console.log('🗝️  Answer keys:', Object.keys(answers));
-      console.log('📊 Statuses:', statuses);
       setTimeout(() => firstFocusRef.current?.focus(), 50);
     }
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   useEffect(() => {
     if (!visible) return;
@@ -203,7 +178,6 @@ export const SubmitModal = memo(({
         overflowY: 'auto',
         position: 'relative',
       }}>
-        {/* Close */}
         <button className="sm-btn" onClick={onCancel} aria-label="Đóng" style={{
           position: 'absolute', top: '12px', right: '12px',
           background: '#F1F5F9', color: '#64748B',
@@ -212,7 +186,6 @@ export const SubmitModal = memo(({
           <X size={16} />
         </button>
 
-        {/* ── STEP 1: Review ── */}
         {step === 'review' && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
@@ -229,9 +202,7 @@ export const SubmitModal = memo(({
 
             {!allDone && (
               <p style={{ fontSize: '14px', color: '#4A5568', lineHeight: 1.6, marginBottom: '4px' }}>
-                Bạn còn{' '}
-                <strong style={{ color: '#B45309' }}>{unansweredCount} câu</strong>{' '}
-                chưa trả lời.
+                Bạn còn <strong style={{ color: '#B45309' }}>{unansweredCount} câu</strong> chưa trả lời trong phần này.
               </p>
             )}
 
@@ -241,8 +212,7 @@ export const SubmitModal = memo(({
               <div style={{
                 display: 'flex', alignItems: 'flex-start', gap: '8px',
                 padding: '10px 14px', borderRadius: '8px',
-                background: '#FFF3E0',
-                border: '1px solid #FFB74D', // FIX: không dùng borderColor riêng
+                background: '#FFF3E0', border: '1px solid #FFB74D',
                 marginBottom: '16px', fontSize: '13px', color: '#7C4A03',
               }}>
                 <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
@@ -253,8 +223,7 @@ export const SubmitModal = memo(({
             {saveError && (
               <div style={{
                 padding: '10px 14px', borderRadius: '8px',
-                background: '#FFEBEE',
-                border: '1px solid #EF9A9A', // FIX: không dùng borderColor riêng
+                background: '#FFEBEE', border: '1px solid #EF9A9A', 
                 color: '#B71C1C', fontSize: '13px', marginBottom: '16px',
               }}>
                 ⚠ {saveError}
@@ -279,14 +248,11 @@ export const SubmitModal = memo(({
           </>
         )}
 
-        {/* ── STEP 2: Confirm ── */}
         {step === 'confirm' && (
           <>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <Flag size={36} color="#C62828" style={{ margin: '0 auto 10px' }} />
-              <h2 id="sm-title" style={{
-                fontSize: '19px', fontWeight: 800, color: '#1A2330', margin: '0 0 8px',
-              }}>
+              <h2 id="sm-title" style={{ fontSize: '19px', fontWeight: 800, color: '#1A2330', margin: '0 0 8px' }}>
                 Xác nhận nộp bài?
               </h2>
               <p style={{ fontSize: '14px', color: '#4A5568', lineHeight: 1.6 }}>
@@ -295,37 +261,24 @@ export const SubmitModal = memo(({
             </div>
 
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button className="sm-btn" ref={firstFocusRef}
-                onClick={() => setStep('review')}
+              <button className="sm-btn" ref={firstFocusRef} onClick={() => setStep('review')}
                 style={{ background: '#F1F5F9', color: '#374151', border: '1.5px solid #CBD5E1' }}>
                 Quay lại
               </button>
               <button
-                className="sm-btn"
-                onClick={onConfirm}
-                disabled={isSubmitting}
-                aria-busy={isSubmitting}
-                style={{
-                  background: 'linear-gradient(135deg,#C62828,#E53935)',
-                  color: '#fff',
-                  minWidth: '140px',
-                }}
+                className="sm-btn" onClick={onConfirm} disabled={isSubmitting} aria-busy={isSubmitting}
+                style={{ background: 'linear-gradient(135deg,#C62828,#E53935)', color: '#fff', minWidth: '140px' }}
               >
                 {isSubmitting ? (
                   <>
                     <span style={{
                       display: 'inline-block', width: '14px', height: '14px',
-                      border: '2px solid rgba(255,255,255,.4)',
-                      borderTopColor: '#fff', borderRadius: '50%',
-                      animation: 'spin 1s linear infinite',
-                    }} />
-                    Đang nộp...
+                      border: '2px solid rgba(255,255,255,.4)', borderTopColor: '#fff', 
+                      borderRadius: '50%', animation: 'spin 1s linear infinite',
+                    }} /> Đang nộp...
                   </>
                 ) : (
-                  <>
-                    <Flag size={16} />
-                    Nộp bài ngay
-                  </>
+                  <><Flag size={16} /> Nộp bài ngay</>
                 )}
               </button>
             </div>
@@ -337,4 +290,4 @@ export const SubmitModal = memo(({
 });
 
 SubmitModal.displayName = 'SubmitModal';
-export default SubmitModal;
+export default SubmitModal; 

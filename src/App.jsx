@@ -1,8 +1,8 @@
-import React, { useMemo, useState, lazy, Suspense, memo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
-import { loadExamData, getAllExamMetadataAsync } from './data/examData';
+import { loadExamData } from './data/examData';
 import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
@@ -34,6 +34,7 @@ import MigrateData from './admin/scripts/MigrateFirestoreToSupabase.jsx';
 import UserManagement from './admin/pages/Users/UserManagement.jsx';
 
 // Lazy Loaded Components
+import { lazy, Suspense } from 'react';
 const AdminApp      = lazy(() => import('./admin/AdminApp'));
 const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
@@ -41,7 +42,7 @@ const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'
 const HistoryTest   = lazy(() => import('./components/HistoryTest.jsx'));
 
 // ─────────────────────────────────────────────────────────────────
-// 🛡️ TRANSLATION PROTECTION (unchanged)
+// 🛡️ TRANSLATION PROTECTION
 // ─────────────────────────────────────────────────────────────────
 function patchNodePrototype() {
   if (typeof window === 'undefined' || window.__translatePatchApplied) return;
@@ -59,7 +60,6 @@ function patchNodePrototype() {
     return origInsertBefore.call(this, newNode, refNode);
   };
 }
-
 patchNodePrototype();
 
 function useTranslationProtection() {
@@ -116,21 +116,19 @@ function useTranslationProtection() {
     const scheduleRestore = (flags) => {
       clearTimeout(restoreTimer);
       restoreTimer = setTimeout(() => {
-        if (flags.lock)    lockHtmlAttrs();
-        if (flags.unwrap)  unwrapFontNodes();
-        if (flags.kill)    killGTElements();
+        if (flags.lock)   lockHtmlAttrs();
+        if (flags.unwrap) unwrapFontNodes();
+        if (flags.kill)   killGTElements();
         clearTranslateCookies();
       }, 50);
     };
 
     const observer = new MutationObserver((mutations) => {
       const flags = { lock: false, unwrap: false, kill: false };
-
       for (const mutation of mutations) {
         if (mutation.type === 'attributes' && mutation.target === document.documentElement) {
           flags.lock = true;
         }
-
         if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
             if (node.nodeName === 'FONT') flags.unwrap = true;
@@ -147,14 +145,11 @@ function useTranslationProtection() {
           }
         }
       }
-
       if (flags.lock || flags.unwrap || flags.kill) scheduleRestore(flags);
     });
 
     observer.observe(document.documentElement, {
-      childList:       true,
-      subtree:         true,
-      attributes:      true,
+      childList: true, subtree: true, attributes: true,
       attributeFilter: ['class', 'lang', 'translate'],
     });
 
@@ -244,52 +239,52 @@ const PartTestContent = memo(({
   testType, handleTestTypeChange,
   selectedPart, handlePartChange,
   partData,
-  currentExamData,  // ✅ ADDED: needed for testType sync
+  currentExamData,
   currentQuestionIndex, setCurrentQuestionIndex,
   answers, handleAnswerSelect,
   showResults, handleSubmit, handleReset,
   score,
-  isLoadingExam,  // ✅ ADDED: track loading state
+  isLoadingExam,
 }) => {
-  // ✅ FIX #1: Auto-sync part when testType changes
+
   useEffect(() => {
     if (!currentExamData?.parts) return;
 
-    const availableParts = Object.entries(currentExamData.parts)
-      .filter(([, data]) => data.type === testType)
-      .map(([key]) => key);
-
-    if (availableParts.length === 0) {
-      console.warn(`No parts found for testType: ${testType}`);
-      return;
+    let availableParts = [];
+    if (Array.isArray(currentExamData.parts)) {
+      availableParts = currentExamData.parts
+        .filter(p => p.type === testType)
+        .map(p => String(p.id));
+    } else {
+      availableParts = Object.entries(currentExamData.parts)
+        .filter(([, data]) => data.type === testType)
+        .map(([key]) => String(key));
     }
 
-    const isCurrentPartValid = availableParts.includes(selectedPart);
+    if (availableParts.length === 0) return;
+    const isCurrentPartValid = availableParts.includes(String(selectedPart));
     if (!isCurrentPartValid) {
-      console.log(`Switching ${selectedPart} → ${availableParts[0]} (for ${testType})`);
       handlePartChange({ target: { value: availableParts[0] } });
     }
   }, [testType, currentExamData, selectedPart, handlePartChange]);
 
-  // ✅ Scroll to results when showing
   useEffect(() => {
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [showResults]);
 
-  // ✅ Scroll to content when part/testType changes
   useEffect(() => {
-    const contentDisplay = document.querySelector('[data-testid="content-display"]');
-    if (contentDisplay) {
-      contentDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    const timer = setTimeout(() => {
+      const contentDisplay = document.querySelector('[data-testid="content-display"]');
+      if (contentDisplay) {
+        contentDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, [selectedPart, testType]);
 
-  // ✅ FIX #2: Handle selection from empty state
   const handleSelectPart = useCallback(() => {
     const selector = document.querySelector('[role="listbox"]');
-    if (selector) {
-      selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    if (selector) selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, []);
 
   return (
@@ -298,27 +293,26 @@ const PartTestContent = memo(({
         selectedExam={selectedExam}
         onExamChange={handleExamChange}
         testType={testType}
-        onTestTypeChange={(e) => handleTestTypeChange(e.target.value)}
+        onTestTypeChange={handleTestTypeChange}
         selectedPart={selectedPart}
         onPartChange={handlePartChange}
       />
-
       {showResults ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <ResultsDisplay score={score} partData={partData} answers={answers} onReset={handleReset} />
           <StatsGrid score={score} isSignedIn={isSignedIn} />
         </div>
       ) : (
-        <div className="w-full space-y-8">
+        <div className="w-full space-y-8 min-h-[100vh] relative transition-all duration-300">
           <ContentDisplay
             partData={partData}
             selectedPart={selectedPart}
             currentQuestionIndex={currentQuestionIndex}
             testType={testType}
             examId={selectedExam}
-            isLoading={isLoadingExam}  // ✅ ADDED
-            onSelectPart={handleSelectPart}  // ✅ ADDED
-            data-testid="content-display"  // ✅ For scroll ref
+            isLoading={isLoadingExam}
+            onSelectPart={handleSelectPart}
+            data-testid="content-display"
           />
           <QuestionDisplay
             selectedPart={selectedPart}
@@ -340,43 +334,11 @@ const PartTestContent = memo(({
 PartTestContent.displayName = 'PartTestContent';
 
 // ─────────────────────────────────────────────
-// FullExamContainer
+// ✅ FIX: FullExamContainer — chỉ render FullExamMode, không preload
 // ─────────────────────────────────────────────
-const FullExamContainer = memo(({ onComplete }) => {
-  const [examData, setExamData] = useState(null);
-  const [loading, setLoading]   = useState(true);
-
-  useEffect(() => {
-    const loadAll = async () => {
-      try {
-        const list       = await getAllExamMetadataAsync(); 
-        const loaded     = await Promise.all(list.map((ex) => loadExamData(ex.id)));
-        const dataMap    = {};
-        list.forEach((ex, i) => { dataMap[ex.id] = loaded[i]; });
-        setExamData(dataMap);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadAll();
-  }, []);
-
-  if (loading) return <LoadingSpinner message="Đang tải dữ liệu toàn bộ đề thi..." />;
-
-  if (!examData || Object.keys(examData).length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-          <Lock className="w-8 h-8 text-slate-400" strokeWidth={1.5} />
-        </div>
-        <h2 className="text-xl font-black text-slate-900 mb-2">Chưa có đề thi nào</h2>
-        <p className="text-slate-500 text-sm">Hệ thống đang cập nhật đề thi mới, vui lòng quay lại sau.</p>
-      </div>
-    );
-  }
-
-  return <FullExamMode examData={examData} onComplete={onComplete} />;
-});
+const FullExamContainer = memo(({ onComplete }) => (
+  <FullExamMode onComplete={onComplete} />
+));
 FullExamContainer.displayName = 'FullExamContainer';
 
 // ─────────────────────────────────────────────
@@ -386,7 +348,7 @@ const AppContent = memo(() => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal]     = useState(false);
   const [currentExamData, setCurrentExamData] = useState(null);
-  const [isLoadingExam, setIsLoadingExam]     = useState(false);  // ✅ ADDED
+  const [isLoadingExam, setIsLoadingExam]     = useState(false);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
   useTranslationProtection();
@@ -401,22 +363,23 @@ const AppContent = memo(() => {
     isSignedIn, user,
   } = useAppState();
 
-  // ✅ FIX: Track loading state when exam data loads
   useEffect(() => {
-    if (selectedExam) {
-      setIsLoadingExam(true);
-      loadExamData(selectedExam)
-        .then(setCurrentExamData)
-        .catch(() => setCurrentExamData(null))
-        .finally(() => setIsLoadingExam(false));
-    }
+    if (!selectedExam) return;
+    setIsLoadingExam(true);
+    loadExamData(selectedExam)
+      .then(setCurrentExamData)
+      .catch(() => setCurrentExamData(null))
+      .finally(() => setIsLoadingExam(false));
   }, [selectedExam]);
 
-  const partData = useMemo(() =>
-    (!practiceType && currentExamData)
-      ? (currentExamData.parts?.[selectedPart] || null)
-      : null
-  , [practiceType, currentExamData, selectedPart]);
+  const partData = useMemo(() => {
+    if (practiceType || !currentExamData?.parts) return null;
+    const safeSelectedPart = String(selectedPart);
+    if (Array.isArray(currentExamData.parts)) {
+      return currentExamData.parts.find(p => String(p.id) === safeSelectedPart) || null;
+    }
+    return currentExamData.parts[safeSelectedPart] || currentExamData.parts[selectedPart] || null;
+  }, [practiceType, currentExamData, selectedPart]);
 
   const score = useMemo(() => {
     if (!partData?.questions) return { correct: 0, total: 0, percentage: 0 };
@@ -451,7 +414,7 @@ const AppContent = memo(() => {
                 testType={testType}                  handleTestTypeChange={handleTestTypeChange}
                 selectedPart={selectedPart}          handlePartChange={handlePartChange}
                 partData={partData}
-                currentExamData={currentExamData}  // ✅ ADDED
+                currentExamData={currentExamData}
                 currentQuestionIndex={currentQuestionIndex}
                 setCurrentQuestionIndex={setCurrentQuestionIndex}
                 answers={answers}                    handleAnswerSelect={handleAnswerSelect}
@@ -459,13 +422,11 @@ const AppContent = memo(() => {
                 handleSubmit={handleSubmitWithData}
                 handleReset={handleReset}
                 score={score}
-                isLoadingExam={isLoadingExam}  // ✅ ADDED
+                isLoadingExam={isLoadingExam}
               />
             } />
             <Route path={ROUTES.FULL_EXAM} element={
-              <FullExamContainer
-                onComplete={() => handleTestTypeChange('')}
-              />
+              <FullExamContainer onComplete={() => handleTestTypeChange('')} />
             } />
             <Route path={ROUTES.GRAMMAR} element={
               <GrammarReview
@@ -503,7 +464,6 @@ export default function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
-
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/admin/exams" element={<ExamManagement />} />
           <Route path="/admin/exams/create" element={<CreateExam />} />
@@ -511,7 +471,6 @@ export default function App() {
           <Route path="/admin/exams/edit/:id" element={<EditExam />} />
           <Route path="/migrate-data" element={<MigrateData />} />
           <Route path="/admin/users" element={<UserManagement />} />
-          
           <Route path="/*" element={<AppContent />} />
         </Routes>
       </Suspense>
