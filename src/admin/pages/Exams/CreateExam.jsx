@@ -13,6 +13,9 @@ import PartPanel from './components/PartPanel';
 import ReusableSettingCard from './components/ReusableSettingCard';
 import { DEFAULT_PARTS, LISTENING_PARTS, READING_PARTS } from './components/examConstants';
 
+// ── IMPORT HÀM GHI LOG ──
+import { logAdminAction } from '../../utils/adminLogger';
+
 const INITIAL_FORM = {
   title:       '',
   description: '',
@@ -115,13 +118,26 @@ const CreateExam = () => {
     updatePart(partId, { audioUrl: '', audioStoragePath: '', audioName: '' });
   };
 
-  // ── Save ───────────────────────────────────────────────────────
+  // ── Save (Đã cập nhật tính năng Log) ───────────────────────────
   const handleSave = async () => {
     if (!form.title.trim()) { setError('Vui lòng nhập tiêu đề bộ đề'); return; }
     setSaving(true);
     setError(null);
     try {
+      // 1. Lưu đề thi vào database
       const newExam = await createExam(form);
+
+      // 2. Ghi Log thao tác của Admin
+      if (admin) {
+        await logAdminAction(
+          admin.id,
+          admin.email,
+          'CREATE_EXAM',
+          `Đề thi: ${form.title}` // Tên đề thi vừa tạo
+        );
+      }
+
+      // 3. Chuyển hướng
       navigate(`/admin/exams/detail/${newExam.id}`);
     } catch (err) {
       setError(err.message);

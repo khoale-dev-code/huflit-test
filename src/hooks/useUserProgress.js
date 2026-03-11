@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { normalizeScore } from '../utils/scoreUtils';
+import { supabase } from '../config/supabaseClient';  
 
 // ─────────────────────────────────────────────
 // Progressive XP Level System
@@ -327,7 +328,9 @@ export const useUserProgress = () => {
     }
     try {
       const numericScore = normalizeScore(testData);
-      const payload = {
+      
+      // -- 1. VẪN LƯU VÀO FIREBASE (Giữ nguyên code cũ của bạn) --
+      const firebasePayload = {
         ...testData,
         score:       numericScore,
         firebaseUid: firebaseUser.uid,
@@ -336,10 +339,31 @@ export const useUserProgress = () => {
         completedAt: serverTimestamp(),
       };
       if (testData.score && typeof testData.score === 'object') {
-        payload.correct = testData.score.correct ?? testData.correct;
-        payload.total   = testData.score.total   ?? testData.total;
+        firebasePayload.correct = testData.score.correct ?? testData.correct;
+        firebasePayload.total   = testData.score.total   ?? testData.total;
       }
-      await addDoc(collection(db, 'userProgress'), payload);
+      await addDoc(collection(db, 'userProgress'), firebasePayload);
+
+      // -- 2. THÊM ĐOẠN NÀY ĐỂ LƯU VÀO SUPABASE (Cho Admin) --
+      const supabasePayload = {
+        // Tạm thời mình map các trường cơ bản, bạn có thể thêm/bớt tùy theo 
+        // các cột thực tế trong bảng exam_results trên Supabase của bạn nhé
+        user_id: firebaseUser.uid, // Cần khớp với kiểu dữ liệu bên Supabase (text hoặc uuid)
+        exam_id: testData.exam,
+        score: numericScore,
+        // created_at: Supabase thường tự động sinh ra nên không cần truyền
+      };
+
+      const { error: supaError } = await supabase
+        .from('exam_results')
+        .insert([supabasePayload]);
+
+      if (supaError) {
+        console.error('Lỗi khi lưu sang Supabase:', supaError);
+      } else {
+        console.log('Đã lưu thành công sang Supabase!');
+      }
+
       return true;
     } catch (err) {
       console.error('[saveProgress] error:', err);

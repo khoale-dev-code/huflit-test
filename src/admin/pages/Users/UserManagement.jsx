@@ -5,15 +5,19 @@ import {
   Search, Shield, User, Clock, ShieldAlert, 
   Loader2, RefreshCw, Users, TrendingUp, 
   Activity, MoreVertical, Trash2, AlertTriangle,
-  ArrowUpRight, CheckCircle2
+  ArrowUpRight, CheckCircle2, ShieldCheck, Info
 } from 'lucide-react';
 import { getUsers, updateUserRole, deleteUser } from '../../services/userService';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminNavbar from '../../components/AdminNavbar';
 
+// ── IMPORT HOOK VÀ HÀM GHI LOG ──
+import { useAdminAuth } from '../../hooks/useAdminAuth';
+import { logAdminAction } from '../../utils/adminLogger';
+
 // ─── Component: Modal Xác Nhận Xóa ────────────────────────────────
 const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, user, isDeleting }) => {
-  if (!isOpen) return null;
+  if (!isOpen || !user) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
@@ -38,8 +42,65 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, user, isDeleting }) =>
   );
 };
 
+// ─── Component: Modal Phân Quyền (MỚI) ────────────────────────────
+const RoleChangeModal = ({ isOpen, onClose, onConfirm, user, isUpdating }) => {
+  if (!isOpen || !user) return null;
+
+  const isCurrentlyAdmin = user.role === 'admin';
+  const newRole = isCurrentlyAdmin ? 'student' : 'admin';
+  const newRoleText = isCurrentlyAdmin ? 'Học viên (Student)' : 'Quản trị viên (Admin)';
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+        <div className="p-8">
+          <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-6 
+            ${isCurrentlyAdmin ? 'bg-amber-50 text-amber-500' : 'bg-purple-50 text-purple-600'}`}>
+            {isCurrentlyAdmin ? <ShieldAlert className="w-8 h-8" /> : <ShieldCheck className="w-8 h-8" />}
+          </div>
+          
+          <h3 className="text-2xl font-black text-slate-900 mb-2">Thay đổi phân quyền</h3>
+          <p className="text-slate-500 text-sm mb-6">
+            Bạn đang chuẩn bị đổi quyền của <span className="font-bold text-slate-900">{user.full_name || user.email}</span> thành <span className="font-bold text-slate-900">{newRoleText}</span>.
+          </p>
+
+          {/* Hộp Cảnh Báo */}
+          <div className={`p-4 rounded-2xl mb-8 flex items-start gap-3 border 
+            ${isCurrentlyAdmin 
+              ? 'bg-amber-50/50 border-amber-100 text-amber-800' 
+              : 'bg-purple-50/50 border-purple-100 text-purple-800'}`}>
+            <Info className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isCurrentlyAdmin ? 'text-amber-500' : 'text-purple-500'}`} />
+            <div className="text-sm">
+              <span className="font-bold block mb-1">Lưu ý quan trọng:</span>
+              {isCurrentlyAdmin 
+                ? 'Tài khoản này sẽ mất quyền truy cập vào trang Admin và không thể quản lý hệ thống nữa.'
+                : 'Tài khoản này sẽ có toàn quyền Quản trị: thêm, sửa, xóa đề thi và quản lý tất cả học viên.'}
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <button onClick={onClose} disabled={isUpdating} className="flex-1 px-6 py-4 border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-50">
+              Hủy
+            </button>
+            <button 
+              onClick={onConfirm} 
+              disabled={isUpdating} 
+              className={`flex-1 px-6 py-4 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2
+                ${isCurrentlyAdmin 
+                  ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-200' 
+                  : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'}`}
+            >
+              {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Xác nhận'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Component: User Row với Trạng thái Hoạt động ──────────────────
-const UserRow = ({ user, isUpdating, onRoleChange, onDelete }) => {
+const UserRow = ({ user, onRoleChange, onDelete }) => {
   const isAdmin = user.role === 'admin';
 
   // Hàm xử lý trạng thái thời gian thực
@@ -76,14 +137,14 @@ const UserRow = ({ user, isUpdating, onRoleChange, onDelete }) => {
         </div>
       </td>
       <td className="px-8 py-5 text-center">
+        {/* Chỉ mở Modal thay vì update trực tiếp */}
         <button
-          onClick={() => onRoleChange(user.id, user.role)}
-          disabled={isUpdating}
+          onClick={() => onRoleChange(user)}
           className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
             isAdmin ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
-          {isUpdating ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : (isAdmin ? 'Admin' : 'Student')}
+          {isAdmin ? 'Admin' : 'Student'}
         </button>
       </td>
       <td className="px-8 py-5 text-right hidden sm:table-cell">
@@ -109,14 +170,20 @@ const UserRow = ({ user, isUpdating, onRoleChange, onDelete }) => {
 // ─── MAIN COMPONENT ──────────────────────────────────────────────
 const UserManagement = () => {
   const navigate = useNavigate();
+  // ── Thêm Auth để lấy thông tin Admin ──
+  const { admin, signOut } = useAdminAuth();
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [updatingId, setUpdatingId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
+  // ── States cho Modal ──
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
+  const [roleModal, setRoleModal] = useState({ isOpen: false, user: null });
+  
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -129,21 +196,48 @@ const UserManagement = () => {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  const handleRoleChange = async (userId, currentRole) => {
-    const newRole = currentRole === 'admin' ? 'student' : 'admin';
-    setUpdatingId(userId);
+  // ── Xử lý khi xác nhận Đổi Quyền trong Modal ──
+  const handleConfirmRoleChange = async () => {
+    const user = roleModal.user;
+    const newRole = user.role === 'admin' ? 'student' : 'admin';
+    
+    setIsUpdatingRole(true);
     try {
-      await updateUserRole(userId, newRole);
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-    } catch (err) { alert("Lỗi cập nhật"); }
-    finally { setUpdatingId(null); }
+      await updateUserRole(user.id, newRole);
+      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u));
+
+      // Ghi Log Thao Tác
+      if (admin) {
+        await logAdminAction(
+          admin.id,
+          admin.email,
+          'UPDATE_USER',
+          `Cấp quyền ${newRole} cho: ${user.email || user.full_name}`
+        );
+      }
+      setRoleModal({ isOpen: false, user: null });
+    } catch (err) { alert("Lỗi cập nhật quyền"); }
+    finally { setIsUpdatingRole(false); }
   };
 
+  // ── Ghi Log Xóa User ──
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteUser(deleteModal.user.id);
-      setUsers(prev => prev.filter(u => u.id !== deleteModal.user.id));
+      const userToDelete = deleteModal.user;
+      await deleteUser(userToDelete.id);
+      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      
+      // Ghi Log Thao Tác
+      if (admin) {
+        await logAdminAction(
+          admin.id,
+          admin.email,
+          'DELETE_USER',
+          `Người dùng: ${userToDelete.email || userToDelete.full_name}`
+        );
+      }
+
       setDeleteModal({ isOpen: false, user: null });
     } catch (err) { alert("Lỗi xóa"); }
     finally { setIsDeleting(false); }
@@ -158,7 +252,15 @@ const UserManagement = () => {
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
-      <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} onSignOut={() => {}} />
+      <AdminSidebar 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen} 
+        admin={admin} 
+        onSignOut={async () => {
+          const r = await signOut();
+          if (r.success) navigate('/admin/login');
+        }} 
+      />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => {}} />
@@ -197,11 +299,11 @@ const UserManagement = () => {
                <div className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đang Online</p>
                   <h4 className="text-2xl font-black text-emerald-500 mt-1">{users.filter(u => {
+                    if (!u.last_login) return false;
                     const diff = (new Date() - new Date(u.last_login)) / 60000;
                     return diff < 5;
                   }).length}</h4>
                </div>
-               {/* Thêm các stat card khác nếu cần */}
             </div>
 
             {/* Users Table */}
@@ -223,8 +325,7 @@ const UserManagement = () => {
                       <UserRow 
                         key={user.id} 
                         user={user} 
-                        isUpdating={updatingId === user.id} 
-                        onRoleChange={handleRoleChange}
+                        onRoleChange={(u) => setRoleModal({ isOpen: true, user: u })}
                         onDelete={(u) => setDeleteModal({ isOpen: true, user: u })}
                       />
                     ))}
@@ -236,12 +337,21 @@ const UserManagement = () => {
         </main>
       </div>
 
+      {/* ── Modals ── */}
       <DeleteConfirmModal 
         isOpen={deleteModal.isOpen}
         user={deleteModal.user}
         isDeleting={isDeleting}
         onClose={() => setDeleteModal({ isOpen: false, user: null })}
         onConfirm={handleConfirmDelete}
+      />
+
+      <RoleChangeModal 
+        isOpen={roleModal.isOpen}
+        user={roleModal.user}
+        isUpdating={isUpdatingRole}
+        onClose={() => setRoleModal({ isOpen: false, user: null })}
+        onConfirm={handleConfirmRoleChange}
       />
     </div>
   );
