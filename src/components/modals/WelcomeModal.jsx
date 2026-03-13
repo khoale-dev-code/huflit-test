@@ -1,98 +1,28 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Sparkles, ArrowRight, ShieldCheck, Globe, ChevronDown } from 'lucide-react';
+import { X, Heart, Sparkles, ArrowRight, ShieldCheck, Globe, ChevronDown, Rocket } from 'lucide-react';
 
 // ─────────────────────────────────────────────
-// Pure CSS injected once — no Tailwind dependency
-// ─────────────────────────────────────────────
-const GLOBAL_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
-
-  .wm-wrap * { font-family: 'Be Vietnam Pro', sans-serif; box-sizing: border-box; }
-
-  .wm-scroll::-webkit-scrollbar { width: 3px; }
-  .wm-scroll::-webkit-scrollbar-track { background: transparent; }
-  .wm-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
-
-  .wm-grad-text {
-    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .wm-feature:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  }
-
-  .wm-btn-on {
-    background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
-    box-shadow: 0 4px 20px rgba(37,99,235,0.35);
-    color: #fff;
-    cursor: pointer;
-  }
-  .wm-btn-on:hover {
-    box-shadow: 0 6px 28px rgba(37,99,235,0.45);
-    transform: translateY(-1px);
-  }
-  .wm-btn-off {
-    background: #F1F5F9;
-    color: #94A3B8;
-    cursor: not-allowed;
-  }
-
-  @keyframes wmFloat {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
-  .wm-float { animation: wmFloat 5s ease-in-out infinite; }
-
-  @keyframes wmBounce {
-    0%,100% { transform: translateY(0); opacity: 0.5; }
-    50% { transform: translateY(5px); opacity: 1; }
-  }
-  .wm-bounce { animation: wmBounce 1.4s ease-in-out infinite; }
-
-  .wm-blob1 {
-    position:absolute; width:200px; height:200px; border-radius:50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 70%);
-    top:-60px; right:-60px; pointer-events:none;
-  }
-  .wm-blob2 {
-    position:absolute; width:160px; height:160px; border-radius:50%;
-    background: radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 70%);
-    bottom:10px; left:-40px; pointer-events:none;
-  }
-`;
-
-// ─────────────────────────────────────────────
-// FEATURES
+// FEATURES DATA (Gamified Themes)
 // ─────────────────────────────────────────────
 const FEATURES = [
   {
     Icon: Globe,
     title: 'Tài nguyên mở',
     desc: 'Hàng ngàn đề thi cập nhật hàng ngày từ các nguồn uy tín.',
-    bg: 'linear-gradient(135deg,#EFF6FF,#DBEAFE)',
-    iconColor: '#2563EB',
-    dot: '#93C5FD',
+    theme: { bg: 'bg-[#EAF6FE]', text: 'text-[#1CB0F6]', border: 'border-[#BAE3FB]', iconBg: 'bg-[#1CB0F6]', iconColor: 'text-white' },
   },
   {
     Icon: ShieldCheck,
     title: 'An toàn & Bảo mật',
     desc: 'Dữ liệu mã hóa, quyền riêng tư được bảo vệ tuyệt đối.',
-    bg: 'linear-gradient(135deg,#ECFDF5,#D1FAE5)',
-    iconColor: '#059669',
-    dot: '#6EE7B7',
+    theme: { bg: 'bg-[#f1faeb]', text: 'text-[#46A302]', border: 'border-[#bcf096]', iconBg: 'bg-[#58CC02]', iconColor: 'text-white' },
   },
   {
     Icon: Heart,
     title: 'Vì cộng đồng',
     desc: 'Phi lợi nhuận, đồng hành cùng học sinh sinh viên Việt Nam.',
-    bg: 'linear-gradient(135deg,#FFF1F2,#FFE4E6)',
-    iconColor: '#E11D48',
-    dot: '#FCA5A5',
+    theme: { bg: 'bg-[#fff0f0]', text: 'text-[#E54343]', border: 'border-[#ffc1c1]', iconBg: 'bg-[#FF4B4B]', iconColor: 'text-white' },
   },
 ];
 
@@ -113,207 +43,188 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
   useEffect(() => {
     if (isOpen) {
       setCanClose(false);
-      setTimeout(() => scrollRef.current?.scrollTo({ top: 0 }), 50);
+      setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' }), 50);
     }
   }, [isOpen]);
 
   const handleScroll = useCallback((e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 32) setCanClose(true);
+    // Trừ hao 50px để dễ trigger trên Mobile
+    if (scrollHeight - scrollTop <= clientHeight + 50) setCanClose(true);
   }, []);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div
-          className="wm-wrap"
-          style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-        >
-          {/* Inject CSS once */}
-          <style>{GLOBAL_CSS}</style>
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6 font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+          
+          {/* Inject Scrollbar Style */}
+          <style>{`
+            .wm-scroll::-webkit-scrollbar { width: 6px; }
+            .wm-scroll::-webkit-scrollbar-track { background: transparent; }
+            .wm-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+            .wm-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+          `}</style>
 
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={canClose ? onClose : undefined}
-            style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(10px)' }}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           />
 
-          {/* Sheet */}
+          {/* Gamified Sheet / Modal */}
           <motion.div
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            style={{
-              position: 'relative',
-              width: '100%',
-              maxWidth: 520,
-              maxHeight: '92dvh',
-              display: 'flex',
-              flexDirection: 'column',
-              background: '#fff',
-              borderRadius: '28px 28px 0 0',
-              boxShadow: '0 -12px 60px rgba(0,0,0,0.25)',
-              overflow: 'hidden',
-            }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="relative w-full max-w-[540px] max-h-[92dvh] md:max-h-[85vh] bg-white flex flex-col rounded-t-[32px] md:rounded-[32px] border-x-2 border-t-2 border-b-0 md:border-b-[8px] border-slate-200 shadow-2xl overflow-hidden"
           >
-            {/* Pill */}
-            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
-              <div style={{ width: 36, height: 4, borderRadius: 99, background: '#E2E8F0' }} />
+            {/* Pill (Chỉ hiện trên Mobile) */}
+            <div className="md:hidden flex justify-center pt-3 pb-2 bg-white shrink-0">
+              <div className="w-12 h-1.5 rounded-full bg-slate-200" />
             </div>
 
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px 12px', borderBottom: '1px solid #F1F5F9' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#2563EB,#7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ color: '#fff', fontWeight: 800, fontSize: 13 }}>H</span>
+            <div className="flex items-center justify-between px-6 py-4 border-b-2 border-slate-100 bg-white shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-[12px] bg-[#1CB0F6] border-b-[3px] border-[#1899D6] flex items-center justify-center shadow-sm">
+                  <span className="text-white font-quick font-black text-[16px]">H</span>
                 </div>
-                <span style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>Hub Study</span>
+                <span className="font-quick font-black text-[18px] text-slate-800">HubStudy</span>
               </div>
 
               <AnimatePresence>
                 {canClose && (
                   <motion.button
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -90 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
                     onClick={onClose}
-                    style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors outline-none"
                   >
-                    <X size={16} color="#64748B" />
+                    <X size={20} strokeWidth={3} />
                   </motion.button>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Scrollable body */}
+            {/* Scrollable Body */}
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className="wm-scroll"
-              style={{ flex: 1, overflowY: 'auto' }}
+              className="flex-1 overflow-y-auto wm-scroll"
             >
-              {/* Hero */}
-              <div style={{ background: 'linear-gradient(160deg,#EFF6FF 0%,#F5F3FF 55%,#FDF2F8 100%)', padding: '32px 24px 28px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                <div className="wm-blob1" />
-                <div className="wm-blob2" />
+              {/* Hero Banner (Gamified Vibrant) */}
+              <div className="relative bg-[#1CB0F6] px-6 py-10 text-center overflow-hidden border-b-[6px] border-[#1899D6]">
+                {/* Decorative Blobs */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-900/20 rounded-full blur-2xl" />
 
-                <div className="wm-float" style={{ display: 'inline-flex', padding: 16, borderRadius: 24, background: 'rgba(255,255,255,0.85)', boxShadow: '0 4px 24px rgba(99,102,241,0.18)', marginBottom: 20 }}>
-                  <Sparkles size={30} color="#4F46E5" fill="#4F46E5" fillOpacity={0.2} />
-                </div>
+                <motion.div 
+                  animate={{ y: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                  className="inline-flex p-4 rounded-[20px] bg-white shadow-lg border-b-[4px] border-slate-200 mb-6 relative z-10"
+                >
+                  <Sparkles size={36} className="text-[#FFC800] fill-[#FFC800]" strokeWidth={1.5} />
+                </motion.div>
 
-                <h2 style={{ fontSize: 'clamp(20px,5vw,26px)', fontWeight: 800, color: '#0F172A', lineHeight: 1.3, margin: '0 0 10px' }}>
-                  Nâng tầm tri thức<br />
-                  <span className="wm-grad-text">cùng Hub Study</span>
+                <h2 className="font-quick font-black text-[26px] md:text-[32px] text-white leading-tight mb-3 drop-shadow-sm relative z-10">
+                  Nâng tầm tri thức <br /> cùng HubStudy!
                 </h2>
-
-                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.7, margin: '0 auto', maxWidth: 300 }}>
+                <p className="font-nunito font-bold text-[15px] text-blue-100 max-w-[300px] mx-auto relative z-10">
                   Khám phá kho tài liệu học tập được cá nhân hóa — hoàn toàn miễn phí.
                 </p>
 
-                {/* Stats */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
-                  {[['1000+', 'Đề thi'], ['50K+', 'Học sinh'], ['100%', 'Miễn phí']].map(([val, label]) => (
-                    <div key={label} style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 12, padding: '8px 14px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                      <div style={{ fontWeight: 800, fontSize: 15, color: '#2563EB' }}>{val}</div>
-                      <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, marginTop: 1 }}>{label}</div>
+                {/* Stats Pills */}
+                <div className="flex justify-center gap-3 mt-6 flex-wrap relative z-10">
+                  {[['1000+', 'Đề thi'], ['50K+', 'Học viên'], ['100%', 'Miễn phí']].map(([val, label]) => (
+                    <div key={label} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2 shadow-sm">
+                      <div className="font-quick font-black text-[18px] text-white">{val}</div>
+                      <div className="font-quick font-bold text-[10px] text-blue-100 uppercase tracking-widest mt-0.5">{label}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Features */}
-              <div style={{ padding: '20px 20px 8px' }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12, marginTop: 0 }}>
-                  Tại sao chọn chúng tôi
+              {/* Features List */}
+              <div className="p-6">
+                <p className="font-quick font-black text-[12px] text-slate-400 uppercase tracking-widest mb-4 pl-1">
+                  Tại sao chọn chúng tôi?
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {FEATURES.map(({ Icon, title, desc, bg, iconColor, dot }, i) => (
-                    <motion.div
-                      key={i}
-                      className="wm-feature"
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + i * 0.08 }}
-                      style={{ display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 18, background: bg, border: '1px solid rgba(255,255,255,0.9)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
-                    >
-                      <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                        <Icon size={20} color={iconColor} />
+                <div className="flex flex-col gap-4">
+                  {FEATURES.map(({ Icon, title, desc, theme }, i) => (
+                    <div key={i} className={`flex items-start gap-4 p-4 rounded-[24px] border-2 border-b-[4px] ${theme.bg} ${theme.border}`}>
+                      <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${theme.iconBg} border-black/10`}>
+                        <Icon size={24} className={theme.iconColor} strokeWidth={2.5} />
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                          <span style={{ fontWeight: 700, fontSize: 14, color: '#0F172A' }}>{title}</span>
-                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-                        </div>
-                        <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.55 }}>{desc}</p>
+                      <div>
+                        <span className={`block font-quick font-black text-[16px] mb-1 ${theme.text}`}>{title}</span>
+                        <p className="font-nunito font-bold text-[14px] text-slate-600 leading-snug">{desc}</p>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* Donate QR */}
-              <div style={{ margin: '16px 20px 28px', padding: '18px', borderRadius: 20, background: 'linear-gradient(135deg,#F8FAFF,#FDF4FF)', border: '1px solid #E0E7FF', display: 'flex', gap: 16, alignItems: 'center' }}>
-                <div style={{ background: '#fff', padding: 8, borderRadius: 14, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', flexShrink: 0 }}>
+              {/* Donate Box (Bonus Quest) */}
+              <div className="mx-6 mb-8 p-5 rounded-[24px] bg-[#FFC800]/10 border-2 border-[#FFC800]/40 border-b-[4px] flex gap-5 items-center">
+                <div className="bg-white p-2 rounded-[16px] border-2 border-slate-200 border-b-[4px] shrink-0 shadow-sm hover:scale-105 transition-transform">
                   <img
                     src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SupportHubStudy"
                     alt="Donate QR"
-                    style={{ width: 76, height: 76, display: 'block', borderRadius: 8 }}
+                    className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl"
                   />
                 </div>
                 <div>
-                  <span style={{ display: 'inline-block', padding: '2px 8px', background: '#EDE9FE', color: '#7C3AED', fontSize: 10, fontWeight: 700, borderRadius: 99, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-                    Ủng hộ dự án
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFC800] text-white font-quick font-black text-[10px] uppercase tracking-widest rounded-xl mb-2 border-b-2 border-[#E5B400]">
+                    <Rocket size={12} strokeWidth={3} /> Ủng hộ dự án
                   </span>
-                  <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0 }}>
-                    Sự ủng hộ của bạn giúp duy trì máy chủ và phát triển thêm tính năng mới.
+                  <p className="font-nunito font-bold text-[13px] md:text-[14px] text-amber-900/80 leading-snug">
+                    Sự ủng hộ của bạn giúp duy trì máy chủ và phát triển thêm các tính năng học tập mới.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Footer */}
-            <div style={{ padding: '12px 20px 20px', background: '#fff', borderTop: '1px solid #F1F5F9' }}>
-              {!canClose && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 10 }}>
-                  <ChevronDown size={13} color="#94A3B8" className="wm-bounce" />
-                  <span style={{ fontSize: 12, color: '#94A3B8' }}>Cuộn xuống để tiếp tục</span>
-                  <ChevronDown size={13} color="#94A3B8" className="wm-bounce" />
-                </div>
-              )}
+            {/* Footer Action Area */}
+            <div className="p-5 md:p-6 bg-white border-t-2 border-slate-100 shrink-0">
+              
+              <AnimatePresence mode="wait">
+                {!canClose ? (
+                  <motion.div 
+                    key="scrolldown"
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center justify-center gap-2 mb-4"
+                  >
+                    <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}><ChevronDown size={16} className="text-slate-400" strokeWidth={3} /></motion.div>
+                    <span className="font-quick font-bold text-[13px] text-slate-400 uppercase tracking-widest">Cuộn xuống để tiếp tục</span>
+                    <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}><ChevronDown size={16} className="text-slate-400" strokeWidth={3} /></motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div key="spacer" className="h-2" />
+                )}
+              </AnimatePresence>
 
               <button
                 onClick={canClose ? onClose : undefined}
                 disabled={!canClose}
-                className={canClose ? 'wm-btn-on' : 'wm-btn-off'}
-                style={{
-                  width: '100%',
-                  padding: '15px',
-                  borderRadius: 99,
-                  border: 'none',
-                  fontFamily: 'Be Vietnam Pro, sans-serif',
-                  fontWeight: 700,
-                  fontSize: 15,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  transition: 'all 0.2s ease',
-                  letterSpacing: '0.01em',
-                }}
+                className={`
+                  w-full py-4 rounded-[20px] font-quick font-black text-[18px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all outline-none border-2
+                  ${canClose 
+                    ? 'bg-[#58CC02] text-white border-[#46A302] border-b-[6px] active:border-b-0 active:translate-y-[6px] shadow-sm' 
+                    : 'bg-slate-100 text-slate-400 border-slate-200 border-b-[6px] cursor-not-allowed'
+                  }
+                `}
               >
                 Bắt đầu học ngay
-                <ArrowRight size={17} />
+                <ArrowRight size={22} strokeWidth={3} />
               </button>
 
-              <p style={{ textAlign: 'center', fontSize: 11, color: '#CBD5E1', marginTop: 10, marginBottom: 0 }}>
+              <p className="text-center font-nunito font-bold text-[12px] text-slate-400 mt-4 mb-1">
                 Bằng cách tiếp tục, bạn đồng ý với{' '}
-                <span style={{ color: '#94A3B8', textDecoration: 'underline', cursor: 'pointer' }}>điều khoản sử dụng</span>
+                <span className="text-[#1CB0F6] underline cursor-pointer hover:text-blue-700">điều khoản sử dụng</span>
               </p>
             </div>
+
           </motion.div>
         </div>
       )}

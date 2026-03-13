@@ -35,6 +35,9 @@ import UserManagement from './admin/pages/Users/UserManagement.jsx';
 
 // Lazy Loaded Components
 import { lazy, Suspense } from 'react';
+import LessonManagement from './admin/pages/Lessons/LessonManagement.jsx';
+import LessonForm from './admin/pages/Lessons/LessonForm.jsx';
+import LessonDetails from './admin/pages/Lessons/LessonDetails.jsx';
 const AdminApp      = lazy(() => import('./admin/AdminApp'));
 const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
@@ -471,6 +474,10 @@ export default function App() {
           <Route path="/admin/exams/edit/:id" element={<EditExam />} />
           <Route path="/migrate-data" element={<MigrateData />} />
           <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/lessons" element={<LessonManagement />} />
+          <Route path="/admin/lessons/create" element={<LessonForm />} />
+          <Route path="/admin/lessons/edit/:id" element={<LessonForm />} />
+          <Route path="/admin/lessons/detail/:id" element={<LessonDetails />} />
           <Route path="/*" element={<AppContent />} />
         </Routes>
       </Suspense>
