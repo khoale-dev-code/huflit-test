@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 
 // --- Helper Functions ---
-// Hàm định dạng thời gian tương đối (Không cần cài thêm thư viện date-fns để giữ code nhẹ)
 const formatRelativeTime = (dateString) => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);

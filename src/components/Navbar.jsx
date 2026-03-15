@@ -3,34 +3,26 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Headphones, BookOpen, GraduationCap, Sparkles,
-  LogOut, User, X, Languages, Home, FileText,
-  ChevronRight, Star,
+  LogOut, User, X, Home, FileText, ChevronRight, Star,
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { ROUTES } from '../config/routes';
 
 /* ─── Config ─────────────────────────────────────────────── */
 const ALL_MENU_ITEMS = [
-  { id: 'home',       label: 'Trang chủ', icon: Home,          path: ROUTES.HOME,   type: 'link'     },
-  { id: 'listening',  label: 'Nghe',      icon: Headphones,    path: '/test',       type: 'test'     },
-  { id: 'reading',    label: 'Đọc',       icon: BookOpen,      path: '/test',       type: 'test'     },
-  { id: 'full',       label: 'Thi Thử',   icon: GraduationCap, path: '/full-exam',  type: 'exam'     },
-  { id: 'grammar',    label: 'Ngữ Pháp',  icon: Sparkles,      path: '/grammar',    type: 'practice' },
-  { id: 'vocabulary', label: 'Từ Vựng',   icon: Languages,     path: '/vocabulary', type: 'practice' },
+  { id: 'home',       label: 'Trang chủ', icon: Home,          path: ROUTES.HOME,   type: 'link' },
+  { id: 'listening',  label: 'Nghe',      icon: Headphones,    path: '/test',       type: 'test' },
+  { id: 'reading',    label: 'Đọc',       icon: BookOpen,      path: '/test',       type: 'test' },
+  { id: 'full',       label: 'Thi Thử',   icon: GraduationCap, path: '/full-exam',  type: 'exam' },
+  { id: 'lessons',    label: 'Bài Học',   icon: Sparkles,      path: '/learn',      type: 'link' }, 
 ];
-const BOTTOM_NAV_ITEMS   = [ALL_MENU_ITEMS[0], ALL_MENU_ITEMS[1], ALL_MENU_ITEMS[3]];
+
+// Thanh điều hướng Mobile (Chỉ lấy Home, Thi Thử, Bài Học)
+const BOTTOM_NAV_ITEMS   = [ALL_MENU_ITEMS[0], ALL_MENU_ITEMS[3], ALL_MENU_ITEMS[4]];
+// Thanh điều hướng Desktop (Bỏ Home vì đã có Logo)
 const DESKTOP_MENU_ITEMS = ALL_MENU_ITEMS.slice(1);
 
-const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' });
-
-/* ─── Design tokens ──────────────────────────────────────── */
-const C = {
-  blue: '#1CB0F6', blueDark: '#1899D6', blueBg: '#EAF6FE',
-  green: '#58CC02', greenDark: '#46A302',
-  n100: '#F1F5F9', n200: '#E2E8F0', n400: '#94A3B8', n500: '#64748B', n800: '#1E293B',
-  red: '#FF4B4B', redBg: '#FFF0F0',
-};
-const F = { body: '"Nunito", "Baloo 2", sans-serif', display: '"Baloo 2", "Nunito", sans-serif' };
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
 /* ─── Animation presets ──────────────────────────────────── */
 const drawerVariants = {
@@ -43,7 +35,7 @@ const itemVariants = {
   visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.04, duration: 0.25, type: 'spring' } }),
 };
 
-/* ─── Desktop nav button ─────────────────────────────────── */
+/* ─── Desktop Nav Button (Gamified 3D) ───────────────────── */
 const DesktopNavBtn = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
   return (
@@ -51,26 +43,19 @@ const DesktopNavBtn = ({ item, isActive, onClick }) => {
       onClick={onClick}
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '7px 13px', borderRadius: 13,
-        fontFamily: F.body, fontSize: 13, fontWeight: 800,
-        whiteSpace: 'nowrap', cursor: 'pointer', outline: 'none',
-        border: `2px solid ${isActive ? `${C.blue}40` : 'transparent'}`,
-        borderBottom: `${isActive ? 3 : 2}px solid ${isActive ? `${C.blue}60` : 'transparent'}`,
-        background: isActive ? C.blueBg : 'transparent',
-        color: isActive ? C.blue : C.n500,
-        transform: isActive ? 'translateY(-1px)' : 'none',
-        transition: 'all 0.15s',
-      }}
+      className={`flex items-center gap-2 px-4 lg:px-5 py-2.5 lg:py-3 rounded-[16px] lg:rounded-[20px] font-display font-bold text-[14px] lg:text-[16px] uppercase tracking-wider border-2 transition-all outline-none ${
+        isActive 
+          ? 'bg-[#EAF6FE] text-[#1CB0F6] border-[#1CB0F6] border-b-[4px] -translate-y-1 shadow-sm' 
+          : 'bg-transparent text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700 active:bg-slate-200'
+      }`}
     >
-      <Icon size={15} strokeWidth={isActive ? 3 : 2.5} aria-hidden="true" />
+      <Icon size={18} strokeWidth={isActive ? 3 : 2.5} className="lg:w-5 lg:h-5" aria-hidden="true" />
       {item.label}
     </button>
   );
 };
 
-/* ─── Bottom nav tab ─────────────────────────────────────── */
+/* ─── Bottom Nav Tab (Mobile) ────────────────────────────── */
 const BottomTab = ({ item, isActive, onClick }) => {
   const Icon = item.icon;
   return (
@@ -78,32 +63,23 @@ const BottomTab = ({ item, isActive, onClick }) => {
       onClick={onClick}
       aria-label={item.label}
       aria-current={isActive ? 'page' : undefined}
-      style={{
-        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', gap: 3, paddingTop: 8, paddingBottom: 4,
-        background: 'none', border: 'none', cursor: 'pointer', outline: 'none',
-      }}
+      className="flex-1 flex flex-col items-center justify-center gap-1 pt-2 pb-1 bg-transparent border-none cursor-pointer outline-none group"
     >
-      <div style={{
-        padding: '5px 14px', borderRadius: 12,
-        background: isActive ? C.blueBg : 'transparent',
-        color: isActive ? C.blue : C.n400,
-        transition: 'all 0.2s',
-        transform: isActive ? 'scale(1.1)' : 'scale(1)',
-      }}>
-        <Icon size={20} strokeWidth={isActive ? 3 : 2.5} aria-hidden="true" />
+      <div className={`px-4 py-1.5 rounded-[12px] transition-all duration-200 ${
+        isActive ? 'bg-[#EAF6FE] text-[#1CB0F6] scale-110' : 'bg-transparent text-slate-400 group-hover:bg-slate-50'
+      }`}>
+        <Icon size={22} strokeWidth={isActive ? 3 : 2.5} aria-hidden="true" />
       </div>
-      <span style={{
-        fontFamily: F.body, fontSize: 10, fontWeight: 800, letterSpacing: '0.03em',
-        color: isActive ? C.blue : C.n400, transition: 'color 0.2s',
-      }}>
+      <span className={`font-display font-bold text-[10px] uppercase tracking-widest transition-colors ${
+        isActive ? 'text-[#1CB0F6]' : 'text-slate-400'
+      }`}>
         {item.label}
       </span>
     </button>
   );
 };
 
-/* ─── More Drawer ────────────────────────────────────────── */
+/* ─── More Drawer (Mobile Menu Khám phá) ─────────────────── */
 const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSignedIn, onProfile, onAnswers, onSignOut, onSignIn }) => (
   <AnimatePresence>
     {open && (
@@ -114,7 +90,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
           transition={{ duration: 0.2 }}
           onClick={onClose}
           aria-hidden="true"
-          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(2px)', zIndex: 60 }}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden"
         />
 
         <motion.div
@@ -122,60 +98,51 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
           variants={drawerVariants}
           initial="hidden" animate="visible" exit="exit"
           role="dialog" aria-modal="true"
-          style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 70,
-            background: C.n100, borderRadius: '28px 28px 0 0',
-            boxShadow: '0 -8px 32px rgba(0,0,0,0.08)',
-            borderTop: `3px solid ${C.n200}`,
-            maxHeight: '92vh', display: 'flex', flexDirection: 'column',
-            fontFamily: F.body,
-          }}
+          className="fixed bottom-0 left-0 right-0 z-[70] bg-slate-50 rounded-t-[32px] shadow-2xl border-t-4 border-slate-200 flex flex-col max-h-[90vh] font-sans lg:hidden"
+          style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}
         >
           {/* Knob */}
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 6px', background: '#fff', borderRadius: '28px 28px 0 0' }}>
-            <div style={{ width: 40, height: 5, background: C.n200, borderRadius: 99 }} aria-hidden="true" />
+          <div className="flex justify-center py-3 bg-white rounded-t-[32px]">
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full" aria-hidden="true" />
           </div>
 
           {/* Header */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 20px 12px', background: '#fff', borderBottom: `2px solid ${C.n100}`,
-          }}>
-            <h2 style={{ fontFamily: F.display, fontSize: 16, fontWeight: 900, color: C.n800, margin: 0 }}>Menu khám phá</h2>
+          <div className="flex items-center justify-between px-6 pb-4 bg-white border-b-2 border-slate-100">
+            <h2 className="font-display font-black text-[18px] text-slate-800 m-0">Menu khám phá</h2>
             <button
               onClick={onClose}
-              style={{ padding: 8, background: C.n100, border: `1.5px solid ${C.n200}`, borderRadius: 12, cursor: 'pointer', display: 'flex', color: C.n500 }}
+              className="p-2 bg-slate-50 border-2 border-slate-200 border-b-[3px] rounded-[12px] text-slate-500 hover:text-slate-700 active:border-b-[1px] active:translate-y-[2px] transition-all"
             >
-              <X size={18} strokeWidth={3} />
+              <X size={20} strokeWidth={3} />
             </button>
           </div>
 
-          <div style={{ overflowY: 'auto', padding: '16px 16px 40px', flex: 1 }}>
+          <div className="overflow-y-auto px-5 py-6 flex-1 custom-scrollbar">
 
             {/* Profile / Sign in */}
             {isSignedIn && user ? (
-              <div style={{ marginBottom: 18, padding: '12px 14px', background: '#fff', borderRadius: 20, border: `2px solid ${C.n200}`, boxShadow: `0 3px 0 ${C.n200}`, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img src={user.photoURL} alt={user.displayName || 'User'} style={{ width: 44, height: 44, borderRadius: 13, border: `2px solid ${C.blueBg}`, objectFit: 'cover', flexShrink: 0 }} />
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 800, color: C.n800, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.displayName || 'Người dùng'}</p>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: C.n400, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
+              <div className="mb-6 p-3 bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] flex items-center gap-4 shadow-sm">
+                <img src={user.photoURL} alt={user.displayName || 'User'} className="w-12 h-12 rounded-[14px] border-2 border-[#EAF6FE] object-cover shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-display font-black text-[16px] text-slate-800 m-0 truncate">{user.displayName || 'Người dùng'}</p>
+                  <p className="font-body font-bold text-[12px] text-slate-400 m-0 mt-0.5 truncate">{user.email}</p>
                 </div>
               </div>
             ) : (
-              <div style={{ marginBottom: 18 }}>
+              <div className="mb-6">
                 <button
                   onClick={() => { onSignIn(); onClose(); }}
-                  style={{ width: '100%', padding: '13px', background: C.green, color: '#fff', border: 'none', borderBottom: `4px solid ${C.greenDark}`, borderRadius: 18, fontFamily: F.display, fontSize: 14, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', cursor: 'pointer' }}
+                  className="w-full py-3.5 bg-[#58CC02] text-white border-2 border-[#46A302] border-b-[4px] rounded-[16px] font-display font-black text-[15px] uppercase tracking-wider active:border-b-[1px] active:translate-y-[3px] transition-all shadow-sm"
                 >
                   Đăng nhập ngay
                 </button>
-                <p style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: C.n400, marginTop: 8 }}>Lưu tiến trình học tập của bạn</p>
+                <p className="text-center font-body font-bold text-[12px] text-slate-400 mt-3">Lưu tiến trình học tập của bạn</p>
               </div>
             )}
 
             {/* Menu grid */}
-            <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.n400, marginBottom: 10, paddingLeft: 4 }}>Khu vực rèn luyện</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+            <p className="font-display font-black text-[11px] text-slate-400 uppercase tracking-widest mb-3 ml-2">Khu vực rèn luyện</p>
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {allItems.map((item, i) => {
                 const Icon = item.icon;
                 const active = isItemActive(item);
@@ -183,21 +150,16 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
                   <motion.button
                     key={item.id} custom={i} variants={itemVariants} initial="hidden" animate="visible"
                     onClick={() => { onNav(item); onClose(); }}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10,
-                      padding: '14px 14px', borderRadius: 20, cursor: 'pointer', textAlign: 'left', outline: 'none',
-                      fontFamily: F.body,
-                      background: active ? C.blueBg : '#fff',
-                      border: `2px solid ${active ? `${C.blue}50` : C.n200}`,
-                      boxShadow: `0 ${active ? 2 : 3}px 0 ${active ? `${C.blue}30` : C.n200}`,
-                      color: active ? C.blue : C.n500,
-                      transition: 'all 0.15s',
-                    }}
+                    className={`flex flex-col items-start gap-3 p-4 rounded-[20px] border-2 border-b-[4px] transition-all outline-none text-left ${
+                      active 
+                        ? 'bg-[#EAF6FE] border-[#1CB0F6] text-[#1CB0F6] shadow-sm' 
+                        : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 active:border-b-2 active:translate-y-[2px]'
+                    }`}
                   >
-                    <div style={{ padding: 8, borderRadius: 12, background: active ? C.blue : C.n100, color: active ? '#fff' : C.n500, display: 'flex' }}>
-                      <Icon size={18} strokeWidth={2.5} />
+                    <div className={`p-2.5 rounded-[12px] ${active ? 'bg-[#1CB0F6] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                      <Icon size={22} strokeWidth={2.5} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 800 }}>{item.label}</span>
+                    <span className="font-display font-black text-[14px] leading-tight">{item.label}</span>
                   </motion.button>
                 );
               })}
@@ -206,29 +168,25 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
             {/* Account actions */}
             {isSignedIn && (
               <>
-                <p style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.n400, marginBottom: 10, paddingLeft: 4 }}>Tài khoản</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <p className="font-display font-black text-[11px] text-slate-400 uppercase tracking-widest mb-3 ml-2">Tài khoản</p>
+                <div className="flex flex-col gap-2.5">
                   {[
                     { label: 'Hồ sơ của tôi',  icon: User,     onClick: () => { onProfile(); onClose(); }, danger: false },
-                    { label: 'Lịch sử đáp án',  icon: FileText, onClick: () => { onAnswers(); onClose(); }, danger: false },
-                    { label: 'Đăng xuất',        icon: LogOut,   onClick: () => { onSignOut(); onClose(); }, danger: true  },
+                    { label: 'Lịch sử đáp án', icon: FileText, onClick: () => { onAnswers(); onClose(); }, danger: false },
+                    { label: 'Đăng xuất',      icon: LogOut,   onClick: () => { onSignOut(); onClose(); }, danger: true  },
                   ].map((btn) => (
                     <button
                       key={btn.label}
                       onClick={btn.onClick}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '12px 16px', borderRadius: 16, cursor: 'pointer', textAlign: 'left', outline: 'none',
-                        fontFamily: F.body, fontSize: 13, fontWeight: 800,
-                        background: btn.danger ? C.redBg : '#fff',
-                        border: `2px solid ${btn.danger ? '#FFCDD2' : C.n200}`,
-                        boxShadow: `0 3px 0 ${btn.danger ? '#FFCDD2' : C.n200}`,
-                        color: btn.danger ? C.red : C.n800,
-                      }}
+                      className={`flex items-center gap-3 p-4 rounded-[18px] border-2 border-b-[4px] transition-all text-left outline-none ${
+                        btn.danger 
+                          ? 'bg-[#fff0f0] border-[#ffc1c1] text-[#FF4B4B] hover:bg-[#FF4B4B] hover:border-[#E54343] hover:text-white active:border-b-2 active:translate-y-[2px]' 
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50 active:border-b-2 active:translate-y-[2px]'
+                      }`}
                     >
-                      <btn.icon size={17} strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                      <span style={{ flex: 1 }}>{btn.label}</span>
-                      <ChevronRight size={15} strokeWidth={3} style={{ opacity: 0.35 }} />
+                      <btn.icon size={20} strokeWidth={2.5} className="shrink-0" />
+                      <span className="font-display font-bold text-[15px] flex-1">{btn.label}</span>
+                      <ChevronRight size={18} strokeWidth={3} className={btn.danger ? 'opacity-50' : 'text-slate-300'} />
                     </button>
                   ))}
                 </div>
@@ -244,6 +202,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
 /* ─── Desktop Profile Dropdown ───────────────────────────── */
 const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick, onSignOut }) => {
   const ref = useRef(null);
+  
   useEffect(() => {
     if (!showMenu) return;
     const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setShowMenu(false); };
@@ -256,39 +215,24 @@ const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick
       {showMenu && (
         <motion.div
           ref={ref}
-          initial={{ opacity: 0, y: 8, scale: 0.95 }}
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 8, scale: 0.95 }}
+          exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ duration: 0.15, type: 'spring', stiffness: 320 }}
-          role="menu"
-          style={{
-            position: 'absolute', right: 0, top: 'calc(100% + 8px)',
-            width: 200, background: '#fff', borderRadius: 20,
-            boxShadow: '0 10px 36px rgba(0,0,0,0.1)', border: `2px solid ${C.n200}`,
-            padding: '6px', zIndex: 50, display: 'flex', flexDirection: 'column', gap: 2,
-            fontFamily: F.body,
-          }}
+          className="absolute right-0 top-[calc(100%+12px)] w-56 bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-xl p-2.5 z-50 flex flex-col gap-1.5 hidden lg:flex"
         >
           {[
             { label: 'Trang cá nhân', icon: User,     fn: onProfileClick },
             { label: 'Đáp án của tôi', icon: FileText, fn: onAnswersClick  },
           ].map(({ label, icon: Icon, fn }) => (
-            <button key={label} onClick={fn} role="menuitem"
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 13, fontSize: 13, fontWeight: 800, color: C.n800, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', outline: 'none', fontFamily: F.body }}
-              onMouseEnter={e => e.currentTarget.style.background = C.n100}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}
-            >
-              <Icon size={15} strokeWidth={2.5} />
+            <button key={label} onClick={fn} className="flex items-center gap-3 p-3 rounded-[16px] font-display font-bold text-[14px] text-slate-700 hover:bg-slate-100 transition-colors text-left outline-none">
+              <Icon size={18} strokeWidth={2.5} className="text-slate-500" />
               {label}
             </button>
           ))}
-          <div style={{ height: 1, background: C.n100, margin: '2px 8px' }} />
-          <button onClick={onSignOut} role="menuitem"
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 13, fontSize: 13, fontWeight: 800, color: C.red, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', outline: 'none', fontFamily: F.body }}
-            onMouseEnter={e => e.currentTarget.style.background = C.redBg}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            <LogOut size={15} strokeWidth={2.5} />
+          <div className="h-0.5 bg-slate-100 my-1 mx-2 rounded-full" />
+          <button onClick={onSignOut} className="flex items-center gap-3 p-3 rounded-[16px] font-display font-bold text-[14px] text-[#FF4B4B] hover:bg-[#fff0f0] transition-colors text-left outline-none">
+            <LogOut size={18} strokeWidth={2.5} />
             Đăng xuất
           </button>
         </motion.div>
@@ -327,10 +271,10 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 
   const isItemActive = useCallback((item) => {
-    const pathMatch = location.pathname === item.path;
+    const pathMatch = location.pathname.startsWith(item.path);
     if (item.type === 'test')     return pathMatch && testType     === item.id;
     if (item.type === 'practice') return pathMatch && practiceType === item.id;
-    return pathMatch;
+    return location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
   }, [location.pathname, testType, practiceType]);
 
   const handleNav = useCallback((item) => {
@@ -345,82 +289,68 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
   const handleSignOut = useCallback(() => { signOut(); setShowProfileMenu(false); }, [signOut]);
 
   return (
-    <div style={{ fontFamily: F.body }}>
+    <div className="font-sans" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+      
       {/* ── Desktop Top Nav ── */}
       <nav
         role="navigation"
-        style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 40,
-          background: isScrolled ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(14px)',
-          borderBottom: `2px solid ${isScrolled ? C.n200 : C.n100}`,
-          boxShadow: isScrolled ? '0 2px 12px rgba(0,0,0,0.06)' : 'none',
-          transition: 'all 0.2s',
-          padding: isScrolled ? '2px 0' : '4px 0',
-        }}
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm py-1.5 lg:py-2' : 'bg-white/80 backdrop-blur-md border-b-2 border-slate-100 py-2.5 lg:py-3'
+        }`}
       >
-        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-14 lg:h-[72px]">
 
             {/* Logo */}
             <button
               onClick={() => { navigate(ROUTES.HOME); scrollToTop(); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', outline: 'none', flexShrink: 0 }}
+              className="flex items-center gap-2.5 lg:gap-3 bg-transparent border-none cursor-pointer outline-none shrink-0 group"
             >
-              <div style={{ width: 38, height: 38, background: C.blue, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: `0 3px 0 ${C.blueDark}` }}>
-                <Star size={18} color="#fff" fill="#fff" strokeWidth={1.5} />
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#1CB0F6] rounded-[12px] lg:rounded-[14px] flex items-center justify-center border-b-[3px] lg:border-b-[4px] border-[#1899D6] shadow-sm group-active:translate-y-[2px] group-active:border-b-[1px] transition-all">
+                <Star className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="white" strokeWidth={1.5} />
               </div>
-              <span style={{ fontFamily: F.display, fontSize: 19, fontWeight: 900, color: C.n800, letterSpacing: '-0.02em' }}>HubStudy</span>
+              <span className="font-display text-[22px] lg:text-[26px] font-black text-slate-800 tracking-tight">HubStudy</span>
             </button>
 
-            {/* Desktop menu */}
-            <div style={{ display: 'none', alignItems: 'center', gap: 4 }} className="lg-flex">
+            {/* Desktop menu (Hidden on Mobile) */}
+            <div className="hidden lg:flex items-center gap-3">
               {DESKTOP_MENU_ITEMS.map(item => (
                 <DesktopNavBtn key={item.id} item={item} isActive={isItemActive(item)} onClick={() => handleNav(item)} />
               ))}
             </div>
 
             {/* Right actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="flex items-center gap-3 lg:gap-4">
               {isSignedIn ? (
-                <div style={{ position: 'relative' }}>
+                <div className="relative hidden lg:block">
                   <button
                     onClick={() => setShowProfileMenu(v => !v)}
-                    style={{ display: 'flex', padding: 3, background: 'none', border: `2px solid ${C.n200}`, borderRadius: 13, cursor: 'pointer', outline: 'none' }}
+                    className="p-1 lg:p-1.5 bg-transparent border-2 border-slate-200 border-b-[4px] rounded-[14px] lg:rounded-[18px] cursor-pointer outline-none hover:border-[#1CB0F6] hover:-translate-y-0.5 active:translate-y-[2px] active:border-b-[2px] transition-all"
                   >
-                    <img src={user?.photoURL} alt={user?.displayName || 'Hồ sơ'} style={{ width: 32, height: 32, borderRadius: 9, objectFit: 'cover', background: C.n100, display: 'block' }} loading="lazy" />
+                    <img src={user?.photoURL} alt={user?.displayName || 'Hồ sơ'} className="w-8 h-8 lg:w-10 lg:h-10 rounded-[10px] lg:rounded-[12px] object-cover bg-slate-100 block" loading="lazy" />
                   </button>
                   <ProfileDropdown showMenu={showProfileMenu} setShowMenu={setShowProfileMenu} onProfileClick={handleProfile} onAnswersClick={handleAnswers} onSignOut={handleSignOut} />
                 </div>
               ) : (
                 <button
                   onClick={() => navigate('/login')}
-                  style={{
-                    padding: '8px 18px', background: C.green, color: '#fff',
-                    border: 'none', borderBottom: `3px solid ${C.greenDark}`,
-                    borderRadius: 13, fontFamily: F.display, fontSize: 13, fontWeight: 900,
-                    textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', outline: 'none',
-                  }}
+                  className="px-5 py-2.5 lg:px-6 lg:py-3.5 bg-[#58CC02] text-white border-2 border-[#46A302] border-b-[4px] rounded-[16px] lg:rounded-[20px] font-display font-black uppercase text-[13px] lg:text-[15px] tracking-wider cursor-pointer outline-none hover:bg-[#46A302] hover:-translate-y-0.5 active:translate-y-[3px] active:border-b-[1px] transition-all shadow-sm"
                 >
                   Bắt đầu ngay
                 </button>
               )}
             </div>
+
           </div>
         </div>
       </nav>
 
-      {/* Desktop spacer */}
-      <div style={{ height: 64, pointerEvents: 'none' }} className="lg-block" />
+      {/* Spacer bù đắp chiều cao Header bị fixed */}
+      <div className="h-[76px] lg:h-[100px] pointer-events-none" />
 
       {/* ── Mobile Bottom Nav ── */}
-      <div className="lg-hidden" style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 45,
-        background: '#fff', borderTop: `2px solid ${C.n200}`,
-        boxShadow: '0 -3px 16px rgba(0,0,0,0.05)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'stretch', height: 62 }}>
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-slate-200 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-safe">
+        <div className="flex items-stretch h-[68px]">
           {BOTTOM_NAV_ITEMS.map(item => (
             <BottomTab key={item.id} item={item} isActive={isItemActive(item)} onClick={() => handleNav(item)} />
           ))}
@@ -428,32 +358,28 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
           {/* More / Profile tab */}
           <button
             onClick={() => setDrawerOpen(true)}
-            style={{
-              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', gap: 3, paddingTop: 8, paddingBottom: 4,
-              background: 'none', border: 'none', cursor: 'pointer', outline: 'none',
-            }}
+            className="flex-1 flex flex-col items-center justify-center gap-1 pt-2 pb-1 bg-transparent border-none cursor-pointer outline-none group"
           >
             {isSignedIn && user?.photoURL ? (
-              <div style={{ padding: '4px 12px', borderRadius: 12, background: drawerOpen ? C.blueBg : 'transparent', transition: 'all 0.2s' }}>
-                <img src={user.photoURL} alt="" style={{ width: 22, height: 22, borderRadius: '50%', border: `2px solid ${drawerOpen ? C.blue : C.n200}`, objectFit: 'cover', display: 'block', transition: 'border-color 0.2s' }} />
+              <div className={`p-1 rounded-[14px] transition-all duration-200 ${drawerOpen ? 'bg-[#EAF6FE] scale-110' : 'bg-transparent group-hover:bg-slate-50'}`}>
+                <img src={user.photoURL} alt="" className={`w-7 h-7 rounded-full border-2 object-cover block transition-colors ${drawerOpen ? 'border-[#1CB0F6]' : 'border-slate-300'}`} />
               </div>
             ) : (
-              <div style={{ padding: '6px 14px', borderRadius: 12, background: drawerOpen ? C.blueBg : 'transparent', color: drawerOpen ? C.blue : C.n400, display: 'flex', gap: 3, alignItems: 'center', transition: 'all 0.2s' }}>
-                {[0,1,2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} />)}
+              <div className={`px-4 py-2.5 rounded-[12px] transition-all duration-200 flex gap-1 items-center ${drawerOpen ? 'bg-[#EAF6FE] text-[#1CB0F6] scale-110' : 'bg-transparent text-slate-400 group-hover:bg-slate-50'}`}>
+                {[0,1,2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-current" />)}
               </div>
             )}
-            <span style={{ fontFamily: F.body, fontSize: 10, fontWeight: 800, color: drawerOpen ? C.blue : C.n400, letterSpacing: '0.03em', transition: 'color 0.2s' }}>
+            <span className={`font-display font-bold text-[10px] uppercase tracking-widest transition-colors ${drawerOpen ? 'text-[#1CB0F6]' : 'text-slate-400'}`}>
               {isSignedIn ? 'Hồ sơ' : 'Thêm'}
             </span>
           </button>
         </div>
       </div>
 
-      {/* Mobile spacer */}
-      <div className="lg-hidden" style={{ height: 62, pointerEvents: 'none' }} />
+      {/* Mobile spacer dưới cùng */}
+      <div className="lg:hidden h-[68px] pb-safe pointer-events-none" />
 
-      {/* Drawer */}
+      {/* Drawer Mobile */}
       <MoreDrawer
         open={drawerOpen} onClose={() => setDrawerOpen(false)}
         allItems={ALL_MENU_ITEMS} isItemActive={isItemActive} onNav={handleNav}
@@ -462,18 +388,6 @@ const Navbar = ({ testType, onTestTypeChange, practiceType, onPracticeTypeChange
         onSignOut={handleSignOut} onSignIn={() => navigate('/login')}
       />
 
-      {/* Responsive helpers */}
-      <style>{`
-        @media (min-width: 1024px) {
-          .lg-flex  { display: flex !important; }
-          .lg-block { display: block !important; }
-          .lg-hidden { display: none !important; }
-        }
-        @media (max-width: 1023px) {
-          .lg-flex  { display: none !important; }
-          .lg-block { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 };

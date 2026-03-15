@@ -42,3 +42,28 @@ export const deleteLesson = async (id) => {
   if (error) throw error;
   return true;
 };
+// Lấy danh sách các bài học công khai
+export const getPublishedLessons = async () => {
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('is_published', true)
+    .order('order_index', { ascending: true }) // Sắp xếp theo order
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+// Lấy chi tiết bài học qua slug
+export const getLessonBySlug = async (slug) => {
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_published', true) // Chỉ cho xem bài đã xuất bản
+    .single();
+
+  if (error) throw error;
+  return data;
+};

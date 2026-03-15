@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 // ✅ SỬ DỤNG BẢN REACT-QUILL-NEW DÀNH CHO REACT ĐỜI MỚI
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css'; 
 
-import { ArrowLeft, Save, Image, Link as LinkIcon, BookOpen, Hash, Eye, EyeOff, LayoutTemplate, Type, Link2 } from 'lucide-react';
+import { ArrowLeft, Save, Image, Link as LinkIcon, BookOpen, Hash, Eye, EyeOff, LayoutTemplate, Type, Link2, UploadCloud, Loader2, Trash2 } from 'lucide-react';
 import { createLesson, updateLesson, getLessonById } from '../../../data/lessonApi';
+
+// Import hàm upload ảnh của bạn (Hãy điều chỉnh lại đường dẫn nếu cần)
+import { uploadImage, deleteImage } from '../../services/examService'; 
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ==========================================
@@ -94,8 +98,11 @@ const LessonForm = () => {
   const { id } = useParams();
   const isEditMode = Boolean(id);
 
+  const fileInputRef = useRef(null);
+
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -103,6 +110,7 @@ const LessonForm = () => {
     category: 'grammar',
     content: '',
     thumbnail_url: '',
+    imageStoragePath: '', // Thêm trường lưu đường dẫn ảnh để xóa sau này
     video_url: '',
     order_index: 1,
     is_published: true,
@@ -136,6 +144,41 @@ const LessonForm = () => {
     }));
   };
 
+  // Hàm xử lý Upload Ảnh
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      // Dùng hàm uploadImage chung của hệ thống (giống bên Question)
+      const result = await uploadImage(file, 'new', 'lesson');
+      setFormData(prev => ({ 
+        ...prev, 
+        thumbnail_url: result.url,
+        imageStoragePath: result.path 
+      }));
+    } catch (error) {
+      console.error("Lỗi upload:", error);
+      alert('Đã xảy ra lỗi khi tải ảnh lên!');
+    } finally {
+      setIsUploadingImage(false);
+      e.target.value = ''; // Reset input file
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    // Nếu ảnh nằm trên storage của bạn, có thể gọi deleteImage(formData.imageStoragePath) ở đây
+    if (formData.imageStoragePath) {
+      try {
+        await deleteImage(formData.imageStoragePath);
+      } catch (error) {
+        console.error("Lỗi khi xóa ảnh trên storage:", error);
+      }
+    }
+    setFormData(prev => ({ ...prev, thumbnail_url: '', imageStoragePath: '' }));
+  };
+
   useEffect(() => {
     if (isEditMode) {
       const fetchLesson = async () => {
@@ -153,7 +196,7 @@ const LessonForm = () => {
     }
   }, [id, isEditMode]);
 
-  const handleSave = async () => {
+ const handleSave = async () => {
     if (!formData.title || !formData.slug) {
       alert('Vui lòng nhập đầy đủ Tiêu đề và Đường dẫn (Slug)!');
       return;
@@ -161,20 +204,25 @@ const LessonForm = () => {
 
     setIsSaving(true);
     try {
+      // 🔥 FIX LỖI SUPABASE Ở ĐÂY: 
+      // Tách id, created_at, updated_at và trường tạm (imageStoragePath) ra khỏi dữ liệu.
+      // Chỉ gửi lên Supabase những cột (cleanData) thực sự tồn tại trong DB.
+      const { id: _id, created_at, updated_at, imageStoragePath, ...cleanData } = formData;
+      
       if (isEditMode) {
-        await updateLesson(id, formData);
+        await updateLesson(id, cleanData);
       } else {
-        await createLesson(formData);
+        // Dùng luôn cleanData cho phần Tạo mới để tránh lỗi
+        await createLesson(cleanData);
       }
       navigate('/admin/lessons');
     } catch (error) {
       console.error("Lỗi lưu bài học:", error);
-      alert("Đã xảy ra lỗi khi lưu bài học. Hãy kiểm tra lại Slug xem có bị trùng không!");
+      alert("Đã xảy ra lỗi khi lưu bài học. Vui lòng xem log để biết chi tiết!");
     } finally {
       setIsSaving(false);
     }
   };
-
   const quillModules = {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
@@ -220,7 +268,7 @@ const LessonForm = () => {
 
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isUploadingImage}
             className="w-full md:w-auto inline-flex items-center justify-center gap-3 bg-[#1CB0F6] text-white px-8 py-4 rounded-[20px] font-display font-bold text-[16px] md:text-[18px] uppercase tracking-wider border-2 border-[#1899D6] border-b-[6px] hover:bg-[#1899D6] hover:translate-y-[2px] hover:border-b-[4px] active:border-b-0 active:translate-y-[6px] transition-all outline-none shadow-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-b-[6px]"
           >
             {isSaving ? (
@@ -385,30 +433,65 @@ const LessonForm = () => {
             {/* Card Media (Ảnh & Video) */}
             <div className="bg-white p-6 md:p-8 rounded-[28px] border-2 border-slate-200 border-b-[6px] shadow-sm space-y-6">
               
+              {/* Input Ẩn Để Chọn Ảnh */}
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                onChange={handleImageUpload} 
+                className="hidden" 
+              />
+
               <div>
                 <label className="flex items-center gap-2 text-[12px] font-display font-black text-slate-500 uppercase tracking-widest mb-3">
                   <div className="p-1.5 bg-rose-100 text-rose-600 rounded-lg"><Image size={16} strokeWidth={3} /></div>
-                  Ảnh Bìa (Link)
+                  Ảnh Bìa (Tải Lên)
                 </label>
-                <input
-                  type="text" name="thumbnail_url"
-                  value={formData.thumbnail_url} onChange={handleChange}
-                  placeholder="https://.../image.jpg"
-                  className="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-[20px] font-body font-medium text-[14px] text-slate-700 focus:outline-none focus:border-rose-400 focus:bg-white focus:ring-4 focus:ring-rose-500/10 transition-all placeholder:text-slate-400"
-                />
-                <AnimatePresence>
-                  {formData.thumbnail_url && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0, mt: 0 }} animate={{ opacity: 1, height: 'auto', mt: 12 }} exit={{ opacity: 0, height: 0, mt: 0 }}
-                      className="w-full aspect-video rounded-[16px] overflow-hidden border-2 border-slate-200 border-b-[4px] shadow-sm bg-slate-100"
-                    >
-                      <img src={formData.thumbnail_url} alt="Thumbnail preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+
+                {/* Khu vực hiển thị hoặc upload ảnh */}
+                {formData.thumbnail_url && formData.thumbnail_url.trim() !== '' ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }} 
+                    animate={{ opacity: 1, scale: 1 }} 
+                    className="relative w-full aspect-video rounded-[20px] border-2 border-slate-200 border-b-[4px] overflow-hidden bg-slate-100 group shadow-sm"
+                  >
+                    <img 
+                      src={formData.thumbnail_url} 
+                      alt="Thumbnail preview" 
+                      className="w-full h-full object-cover" 
+                    />
+                    <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                      <button 
+                        onClick={() => fileInputRef.current?.click()} 
+                        className="px-4 py-2 bg-white text-slate-700 font-display font-bold text-[13px] uppercase tracking-wider rounded-[14px] hover:bg-blue-50 hover:text-[#1CB0F6] active:scale-95 transition-all outline-none"
+                      >
+                        Đổi ảnh
+                      </button>
+                      <button 
+                        onClick={handleRemoveImage} 
+                        className="p-2.5 bg-[#FF4B4B] text-white rounded-[14px] hover:bg-[#E54343] active:scale-95 transition-all outline-none shadow-sm"
+                      >
+                        <Trash2 size={18} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <button 
+                    onClick={() => fileInputRef.current?.click()} 
+                    disabled={isUploadingImage} 
+                    className="w-full flex flex-col items-center justify-center gap-3 aspect-video bg-slate-50 border-2 border-dashed border-slate-300 rounded-[20px] hover:bg-blue-50 hover:border-[#1CB0F6] transition-all outline-none group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <div className="w-14 h-14 bg-white rounded-[16px] border-2 border-slate-200 border-b-[4px] flex items-center justify-center text-slate-400 group-hover:text-[#1CB0F6] group-hover:border-[#BAE3FB] transition-colors shadow-sm">
+                      {isUploadingImage ? <Loader2 className="w-7 h-7 animate-spin" /> : <UploadCloud className="w-7 h-7" strokeWidth={2.5} />}
+                    </div>
+                    <p className="font-display font-bold text-[14px] text-slate-500 group-hover:text-[#1CB0F6] transition-colors">
+                      {isUploadingImage ? 'Đang xử lý ảnh...' : 'Nhấn để chọn ảnh từ máy'}
+                    </p>
+                  </button>
+                )}
               </div>
 
-              <div className="pt-4 border-t-2 border-slate-100">
+              <div className="pt-6 border-t-2 border-slate-100">
                 <label className="flex items-center gap-2 text-[12px] font-display font-black text-slate-500 uppercase tracking-widest mb-3">
                   <div className="p-1.5 bg-red-100 text-red-600 rounded-lg"><LinkIcon size={16} strokeWidth={3} /></div>
                   Link YouTube (Tùy chọn)

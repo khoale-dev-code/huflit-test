@@ -12,66 +12,38 @@ import {
 import { useUserProgress } from '../hooks/useUserProgress.js';
 import { getAllExamMetadataAsync } from '../data/examData.js';
 
-/* ── Google Fonts: add to index.html ──
-   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-── */
-
 function usePrevious(value) {
   const ref = useRef();
   useEffect(() => { ref.current = value; });
   return ref.current;
 }
 
-/* ── Design tokens — compact & refined ── */
-const G = {
-  bg: '#F5F7FA',
-  blue: '#1CB0F6', blueDark: '#18A0E0', blueBg: '#EAF6FE',
-  green: '#58CC02', greenDark: '#46A302', greenBg: '#F0FAE8',
-  yellow: '#FFC200', yellowDark: '#D9A600', yellowBg: '#FFFBEA',
-  purple: '#CE82FF', purpleBg: '#F8EEFF',
-  red: '#FF4B4B', orange: '#FF9600',
-  n50: '#F8FAFC', n100: '#F1F5F9', n200: '#E2E8F0',
-  n400: '#94A3B8', n500: '#64748B', n600: '#475569', n800: '#1E293B',
-};
-const F = { display: '"Baloo 2", "Nunito", sans-serif', body: '"Nunito", "Baloo 2", sans-serif' };
-
 /* ── Custom chart tooltip ── */
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{
-      fontFamily: F.body, background: '#fff', padding: '8px 12px',
-      borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
-      border: `1px solid ${G.n200}`,
-    }}>
-      <p style={{ fontSize: 10, fontWeight: 800, color: G.n400, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>{label}</p>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
-        <span style={{ fontFamily: F.display, fontSize: 17, fontWeight: 900, color: G.blue }}>{payload[0].value}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: G.n500 }}>điểm</span>
+    <div className="bg-white p-3 rounded-[16px] shadow-lg border-2 border-slate-200">
+      <p className="text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+      <div className="flex items-baseline gap-1.5">
+        <span className="font-display text-[20px] font-black text-[#1CB0F6]">{payload[0].value}</span>
+        <span className="text-[12px] font-body font-bold text-slate-500">điểm</span>
       </div>
     </div>
   );
 };
 
-/* ── Stat Card — compact 2-col layout ── */
-const StatCard = ({ icon: Icon, label, value, sub, mainColor, bgLight }) => (
-  <div style={{
-    background: '#fff', borderRadius: 16, padding: '12px 14px',
-    border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-    display: 'flex', alignItems: 'center', gap: 12,
-  }}>
-    <div style={{
-      width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-      backgroundColor: bgLight, color: mainColor,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <Icon size={16} strokeWidth={2.5} />
+/* ── Stat Card — ĐÃ FIX LỖI UI (Chuyển sang xếp dọc) ── */
+const StatCard = ({ icon: Icon, label, value, sub, colorClass, bgLightClass, borderClass }) => (
+  <div className="relative bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-6 border-2 border-slate-200 border-b-[4px] shadow-sm flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+    {/* Biểu tượng phụ (Trend/Star) ghim ở góc phải trên cùng */}
+    <div className="absolute top-4 right-4">{sub}</div>
+
+    <div className={`w-12 h-12 md:w-14 md:h-14 mb-3 md:mb-4 rounded-[14px] md:rounded-[16px] border-b-[3px] flex shrink-0 items-center justify-center shadow-sm ${bgLightClass} ${colorClass} ${borderClass}`}>
+      <Icon className="w-6 h-6 md:w-7 md:h-7" strokeWidth={2.5} />
     </div>
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <p style={{ fontFamily: F.display, fontSize: 18, fontWeight: 900, color: G.n800, margin: 0, lineHeight: 1 }}>{value}</p>
-      <p style={{ fontFamily: F.body, fontSize: 10, fontWeight: 800, color: G.n400, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '3px 0 0' }}>{label}</p>
-    </div>
-    <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{sub}</div>
+    
+    <p className="font-display text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1 md:mb-1.5 leading-none">{label}</p>
+    <p className="font-display text-[24px] md:text-[30px] font-black text-slate-800 m-0 leading-none">{value}</p>
   </div>
 );
 
@@ -79,8 +51,11 @@ const StatCard = ({ icon: Icon, label, value, sub, mainColor, bgLight }) => (
 const HistoryItem = ({ item, onClick, examMap }) => {
   const score = item.score;
   const isGood = score >= 80, isMid = score >= 50;
-  const color  = isGood ? G.green  : isMid ? G.yellow  : G.red;
-  const bgCol  = isGood ? G.greenBg : isMid ? G.yellowBg : '#FFF0F0';
+  
+  // Theme logic
+  const color = isGood ? 'text-[#58CC02]' : isMid ? 'text-[#FF9600]' : 'text-[#FF4B4B]';
+  const bgCol = isGood ? 'bg-[#F0FAE8]' : isMid ? 'bg-[#FFFBEA]' : 'bg-[#FFF0F0]';
+  const borderCol = isGood ? 'border-[#bcf096]' : isMid ? 'border-[#FFD8A8]' : 'border-[#ffc1c1]';
 
   const examTitle = examMap[item.exam_id || item.exam] || 'Bài tập rèn luyện';
   const targetDate = item.created_at || item.completedAt || item.timestamp;
@@ -89,48 +64,29 @@ const HistoryItem = ({ item, onClick, examMap }) => {
   return (
     <button
       onClick={() => onClick(item)}
-      style={{
-        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-        padding: '8px 10px', marginBottom: 4,
-        background: '#fff', border: `1.5px solid ${G.n200}`,
-        borderRadius: 12, cursor: 'pointer', textAlign: 'left',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
-        fontFamily: F.body, outline: 'none',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = G.blue; e.currentTarget.style.boxShadow = `0 2px 10px rgba(28,176,246,0.1)`; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = G.n200; e.currentTarget.style.boxShadow = 'none'; }}
+      className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 mb-3 bg-white border-2 border-slate-200 border-b-[4px] rounded-[16px] md:rounded-[20px] cursor-pointer text-left transition-all hover:-translate-y-0.5 hover:border-[#1CB0F6] active:translate-y-[2px] active:border-b-2 outline-none group"
     >
-      {/* Score badge */}
-      <div style={{
-        width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: F.display, fontWeight: 900, fontSize: 13, color,
-        background: bgCol,
-      }}>
+      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-[12px] md:rounded-[14px] border-b-[3px] shrink-0 flex items-center justify-center font-display font-black text-[14px] md:text-[16px] shadow-sm ${bgCol} ${color} ${borderCol}`}>
         {score}
       </div>
 
-      {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          fontFamily: F.body, fontSize: 12, fontWeight: 800, color: G.n800,
-          margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3,
-        }}>
+      <div className="flex-1 min-w-0 pt-0.5">
+        {/* ĐÃ FIX: Cho phép chữ rớt xuống 2 dòng thay vì bị cắt ngang */}
+        <p className="font-display text-[14px] md:text-[16px] font-bold text-slate-800 m-0 line-clamp-2 leading-snug group-hover:text-[#1CB0F6] transition-colors">
           {examTitle}
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, fontWeight: 700, color: G.n400 }}>
-            <Clock size={10} strokeWidth={2.5} />
+        <div className="flex items-center gap-2 mt-1.5 md:mt-2">
+          <span className="flex items-center gap-1 text-[10px] md:text-[11px] font-body font-bold text-slate-400">
+            <Clock size={12} strokeWidth={2.5} />
             {targetDate ? new Date(targetDate).toLocaleDateString('vi-VN') : 'Gần đây'}
           </span>
-          <span style={{ width: 2, height: 2, borderRadius: '50%', background: G.n300, flexShrink: 0 }} />
-          <span style={{ fontSize: 10, fontWeight: 800, color: G.n500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{partLabel}</span>
+          <span className="w-1 h-1 rounded-full bg-slate-300 shrink-0" />
+          <span className="text-[10px] md:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest">{partLabel}</span>
         </div>
       </div>
 
-      {/* Arrow */}
-      <div style={{ width: 22, height: 22, borderRadius: '50%', background: G.n100, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: G.n400 }}>
-        <ChevronRight size={12} strokeWidth={2.5} />
+      <div className="w-8 h-8 rounded-[10px] bg-slate-50 border-2 border-slate-100 flex items-center justify-center shrink-0 text-slate-400 group-hover:text-[#1CB0F6] group-hover:bg-[#EAF6FE] group-hover:border-[#BAE3FB] transition-colors">
+        <ChevronRight size={16} strokeWidth={3} />
       </div>
     </button>
   );
@@ -179,14 +135,14 @@ export default function DetailedDashboard() {
 
   /* ── Loading ── */
   if (!isLoaded || loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: G.bg }}>
-      <div style={{ width: 32, height: 32, border: `4px solid ${G.n200}`, borderTop: `4px solid ${G.blue}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div className="min-h-screen flex items-center justify-center bg-[#F4F7FA] flex-col gap-3">
+      <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin" />
+      <p className="font-display font-bold text-slate-500 text-[14px]">Đang tải dữ liệu...</p>
     </div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: G.bg, fontFamily: F.body, paddingBottom: 64 }}>
+    <div className="min-h-screen bg-[#F4F7FA] font-sans pb-16 selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
 
       {/* ── LEVEL UP TOAST ── */}
       <AnimatePresence>
@@ -196,20 +152,13 @@ export default function DetailedDashboard() {
             animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
             exit={{ opacity: 0, scale: 0.92, y: -20, x: '-50%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-            style={{
-              position: 'fixed', top: 72, left: '50%', zIndex: 100,
-              display: 'flex', alignItems: 'center', gap: 12,
-              padding: '12px 18px', borderRadius: 16,
-              background: '#fff', border: `1.5px solid #FDE68A`,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
-              maxWidth: '88vw',
-            }}
+            className="fixed top-20 left-1/2 z-50 flex items-center gap-3 p-3 md:p-4 bg-white rounded-[20px] border-2 border-[#FFC200] border-b-[6px] shadow-xl max-w-[90vw] w-max"
           >
-            <div style={{ width: 40, height: 40, background: G.yellowBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🎉</div>
-            <div>
-              <p style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: G.n800, margin: 0 }}>Tuyệt vời! Thăng Cấp!</p>
-              <p style={{ fontFamily: F.body, fontSize: 12, fontWeight: 700, color: G.n500, margin: '1px 0 0' }}>
-                Bạn vừa đạt <strong style={{ color: G.yellow }}>Level {analytics.level}</strong>
+            <div className="w-12 h-12 bg-[#FFFBEA] rounded-[14px] flex items-center justify-center text-[26px] border-b-[3px] border-[#FFD8A8]">🎉</div>
+            <div className="pr-2">
+              <p className="font-display text-[16px] md:text-[18px] font-black text-slate-800 m-0 leading-none">Tuyệt vời! Thăng Cấp!</p>
+              <p className="font-body text-[13px] md:text-[14px] font-bold text-slate-500 mt-1">
+                Bạn vừa đạt <strong className="text-[#FF9600]">Level {analytics.level}</strong>
               </p>
             </div>
           </motion.div>
@@ -217,214 +166,174 @@ export default function DetailedDashboard() {
       </AnimatePresence>
 
       {/* ── HEADER ── */}
-      <div style={{ background: '#fff', borderBottom: `1.5px solid ${G.n200}`, padding: '14px 0' }}>
-        <div style={{
-          maxWidth: 960, margin: '0 auto', padding: '0 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: 10,
-        }}>
-          {/* User */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: '50%',
-              background: G.n100, border: `1.5px solid ${G.n200}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', flexShrink: 0,
-            }}>
+      <div className="bg-white sticky top-0 z-30 border-b-2 border-slate-200 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 md:py-5 flex items-center justify-between flex-wrap gap-4">
+          
+          {/* User Info */}
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-[14px] md:rounded-[18px] bg-slate-100 border-2 border-slate-200 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
               {currentUser?.photoURL
-                ? <img src={currentUser.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <User size={18} strokeWidth={2} color={G.n400} />}
+                ? <img src={currentUser.photoURL} alt="Avatar" className="w-full h-full object-cover" />
+                : <User size={24} strokeWidth={2.5} className="text-slate-400" />}
             </div>
-            <div>
-              <h1 style={{ fontFamily: F.display, fontSize: 16, fontWeight: 900, color: G.n800, margin: 0, lineHeight: 1.2 }}>
+            <div className="pt-0.5">
+              <h1 className="font-display text-[20px] md:text-[24px] font-black text-slate-800 m-0 leading-tight">
                 Chào {currentUser?.name?.split(' ').pop() || 'bạn'}! 👋
               </h1>
-              <p style={{ fontFamily: F.body, fontSize: 11, fontWeight: 700, color: G.n500, margin: '2px 0 0' }}>Sẵn sàng phá kỷ lục hôm nay chưa?</p>
+              <p className="font-body text-[12px] md:text-[14px] font-bold text-slate-500 mt-0.5">Sẵn sàng phá kỷ lục hôm nay chưa?</p>
             </div>
           </div>
 
           {/* Streak + XP pills */}
-          <div style={{ display: 'flex', gap: 6 }}>
-            {[
-              { icon: <Flame size={14} color={G.orange} strokeWidth={2} />, label: `${analytics.streak} chuỗi`, bg: '#FFF4E6', border: '#FEDDAD', color: G.orange },
-              { icon: <Zap  size={14} color={G.blue}   strokeWidth={2} />, label: `${analytics.xp.toLocaleString()} XP`, bg: G.blueBg, border: '#BAE3FB', color: G.blue },
-            ].map((p, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '5px 10px', borderRadius: 10,
-                background: p.bg, border: `1.5px solid ${p.border}`,
-              }}>
-                {p.icon}
-                <span style={{ fontFamily: F.display, fontSize: 12, fontWeight: 800, color: p.color }}>{p.label}</span>
-              </div>
-            ))}
+          <div className="flex gap-2.5 md:gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-[12px] md:rounded-[14px] bg-[#FFF4E6] border-2 border-[#FEDDAD] border-b-[3px] shadow-sm">
+              <Flame size={18} className="text-[#FF9600]" strokeWidth={2.5} fill="#FF9600" />
+              <span className="font-display text-[14px] md:text-[15px] font-black text-[#FF9600] mt-0.5">{analytics.streak} chuỗi</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-[12px] md:rounded-[14px] bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] shadow-sm">
+              <Zap size={18} className="text-[#1CB0F6]" strokeWidth={2.5} fill="#1CB0F6" />
+              <span className="font-display text-[14px] md:text-[15px] font-black text-[#1CB0F6] mt-0.5">{analytics.xp.toLocaleString()} XP</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── MAIN ── */}
-      <main style={{ maxWidth: 960, margin: '0 auto', padding: '16px 16px 0' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* ── MAIN CONTENT ── */}
+      <main className="max-w-6xl mx-auto px-4 md:px-8 pt-6 md:pt-8 space-y-5 md:space-y-8">
 
-          {/* LEVEL BAR */}
-          <div style={{
-            background: '#fff', borderRadius: 16, padding: '12px 16px',
-            border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: G.yellowBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Star size={18} color={G.yellow} fill={G.yellow} strokeWidth={1.5} />
-              </div>
-              <div>
-                <p style={{ fontFamily: F.body, fontSize: 10, fontWeight: 800, color: G.n400, textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>Level</p>
-                <p style={{ fontFamily: F.display, fontSize: 20, fontWeight: 900, color: G.n800, margin: 0, lineHeight: 1 }}>{analytics.level}</p>
-              </div>
+        {/* LEVEL BAR (BIG BANNER) */}
+        <div className="bg-white rounded-[24px] md:rounded-[32px] p-5 md:p-8 border-2 border-slate-200 border-b-[6px] shadow-sm flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
+          
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-[16px] md:rounded-[20px] bg-[#FFFBEA] border-2 border-[#FFD8A8] border-b-[4px] flex items-center justify-center shadow-sm">
+              <Star className="w-8 h-8 md:w-10 md:h-10 text-[#FFC200]" fill="#FFC200" strokeWidth={1.5} />
             </div>
-            <div style={{ flex: 1, minWidth: 140 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontFamily: F.body, fontSize: 11, fontWeight: 700, color: G.n500 }}>Tới Level {analytics.level + 1}</span>
-                <span style={{ fontFamily: F.display, fontSize: 12, fontWeight: 900, color: G.yellow }}>
-                  {analytics.xpIntoLevel} <span style={{ color: G.n400, fontWeight: 700 }}>/ {analytics.xpRequiredForLevel} XP</span>
-                </span>
-              </div>
-              <div style={{ height: 8, background: G.n100, borderRadius: 99, overflow: 'hidden' }}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${analytics.levelProgressPercent}%` }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                  style={{ height: '100%', background: `linear-gradient(90deg, ${G.yellow}, ${G.orange})`, borderRadius: 99 }}
-                />
-              </div>
+            <div className="pt-1">
+              <p className="font-display text-[11px] md:text-[13px] font-black text-slate-400 uppercase tracking-widest m-0 leading-none">Cấp độ hiện tại</p>
+              <p className="font-display text-[32px] md:text-[40px] font-black text-slate-800 m-0 leading-none mt-2">Level {analytics.level}</p>
             </div>
           </div>
 
-          {/* STATS GRID — 2 rows × 2 cols on mobile, 4 cols on wide */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-            <StatCard icon={Target}    label="Chính xác"  value={`${analytics.accuracy}%`}   mainColor={G.green}  bgLight={G.greenBg}
-              sub={analytics.trend > 0 ? <TrendingUp size={13} strokeWidth={2.5} color={G.green} /> : <TrendingDown size={13} strokeWidth={2.5} color={G.red} />} />
-            <StatCard icon={Trophy}    label="Cao nhất"   value={analytics.bestScore}         mainColor={G.yellow} bgLight={G.yellowBg}
-              sub={<Star size={13} color={G.yellow} fill={G.yellow} />} />
-            <StatCard icon={BarChart2} label="Trung bình" value={analytics.averageScore}      mainColor={G.blue}   bgLight={G.blueBg}
-              sub={<Activity size={13} strokeWidth={2.5} color={G.blue} />} />
-            <StatCard icon={BookOpen}  label="Hoàn thành" value={analytics.totalAttempts}     mainColor={G.purple} bgLight={G.purpleBg}
-              sub={<FileText size={13} strokeWidth={2.5} color={G.purple} />} />
-          </div>
-
-          {/* CHART + HISTORY */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12, alignItems: 'start' }}>
-
-            {/* Chart */}
-            <div style={{
-              background: '#fff', borderRadius: 16, padding: '14px 14px',
-              border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-            }}>
-              <div style={{ marginBottom: 12 }}>
-                <h3 style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: G.n800, margin: 0 }}>Biểu đồ học tập</h3>
-                <p style={{ fontFamily: F.body, fontSize: 11, fontWeight: 700, color: G.n400, margin: '3px 0 0' }}>Xu hướng điểm số qua các bài test</p>
-              </div>
-              <div style={{ height: 220 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 6, right: 6, left: -28, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor={G.blue} stopOpacity={0.22} />
-                        <stop offset="95%" stopColor={G.blue} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={G.n100} />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false}
-                      tick={{ fill: G.n400, fontSize: 10, fontWeight: 700, fontFamily: F.body }} dy={6} />
-                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false}
-                      tick={{ fill: G.n400, fontSize: 10, fontWeight: 700, fontFamily: F.body }} />
-                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: G.n200, strokeWidth: 1, strokeDasharray: '4 4' }} />
-                    <Area type="monotone" dataKey="avg" stroke={G.blue} strokeWidth={2.5}
-                      fillOpacity={1} fill="url(#colorScore)"
-                      dot={{ r: 3.5, fill: '#fff', stroke: G.blue, strokeWidth: 2 }}
-                      activeDot={{ r: 5, fill: G.blue, stroke: '#fff', strokeWidth: 2 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+          <div className="flex-1 w-full mt-2 md:mt-0">
+            <div className="flex justify-between items-end mb-3">
+              <span className="font-display text-[12px] md:text-[14px] font-bold text-slate-500 uppercase tracking-widest">Tới Level {analytics.level + 1}</span>
+              <span className="font-display text-[16px] md:text-[20px] font-black text-[#FF9600]">
+                {analytics.xpIntoLevel} <span className="text-slate-400 font-bold text-[13px] md:text-[15px]">/ {analytics.xpRequiredForLevel} XP</span>
+              </span>
             </div>
-
-            {/* History */}
-            <div style={{
-              background: '#fff', borderRadius: 16, padding: '14px 14px',
-              border: `1.5px solid ${G.n200}`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-              display: 'flex', flexDirection: 'column', height: 360,
-            }}>
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <h3 style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: G.n800, margin: 0 }}>Lịch sử bài làm</h3>
-                <span style={{
-                  fontFamily: F.body, fontSize: 10, fontWeight: 800, color: G.n500,
-                  background: G.n100, border: `1px solid ${G.n200}`,
-                  padding: '2px 7px', borderRadius: 7,
-                }}>
-                  {progress.length} BÀI
-                </span>
-              </div>
-
-              {/* Tabs */}
-              <div style={{ display: 'flex', gap: 3, padding: 3, background: G.n100, borderRadius: 11, marginBottom: 10 }}>
-                {[
-                  { id: 'all',  label: 'Tất cả' },
-                  { id: 'good', label: 'Tốt ≥80' },
-                  { id: 'bad',  label: 'Cần cố' },
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    style={{
-                      flex: 1, padding: '6px 4px', border: 'none', borderRadius: 8, cursor: 'pointer',
-                      fontFamily: F.body, fontSize: 11, fontWeight: 800,
-                      background: activeTab === tab.id ? '#fff' : 'transparent',
-                      color: activeTab === tab.id ? G.blue : G.n500,
-                      boxShadow: activeTab === tab.id ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* List */}
-              <div style={{ flex: 1, overflowY: 'auto', paddingRight: 2 }}>
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {filteredHistory.length > 0
-                      ? filteredHistory.map(item => (
-                        <HistoryItem key={item.id} item={item} examMap={examMap} onClick={handleHistoryClick} />
-                      ))
-                      : (
-                        <div style={{ paddingTop: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                          <div style={{ width: 40, height: 40, background: G.n50, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <BookOpen size={20} strokeWidth={2} color={G.n200} />
-                          </div>
-                          <p style={{ fontFamily: F.body, fontSize: 12, fontWeight: 700, color: G.n400, margin: 0 }}>Chưa có bài tập nào</p>
-                        </div>
-                      )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+            <div className="h-6 md:h-7 bg-slate-100 border-2 border-slate-200 rounded-full overflow-hidden shadow-inner p-[3px]">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${analytics.levelProgressPercent}%` }}
+                transition={{ duration: 1, ease: 'easeOut', type: "spring", bounce: 0.2 }}
+                className="h-full bg-gradient-to-r from-[#FFC200] to-[#FF9600] rounded-full relative"
+              >
+                <div className="absolute top-0 left-0 right-0 h-1/3 bg-white/30 rounded-full" />
+              </motion.div>
             </div>
           </div>
         </div>
-      </main>
 
-      <style>{`
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: ${G.n200}; border-radius: 8px; }
-        @media (min-width: 640px) {
-          .stats-grid { grid-template-columns: repeat(4, 1fr) !important; }
-        }
-      `}</style>
+        {/* STATS GRID */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <StatCard icon={Target}    label="Chính xác"  value={`${analytics.accuracy}%`}   colorClass="text-[#58CC02]" bgLightClass="bg-[#F0FAE8]" borderClass="border-[#bcf096]"
+            sub={analytics.trend > 0 ? <TrendingUp size={20} strokeWidth={3} className="text-[#58CC02]" /> : <TrendingDown size={20} strokeWidth={3} className="text-[#FF4B4B]" />} />
+          <StatCard icon={Trophy}    label="Cao nhất"   value={analytics.bestScore}        colorClass="text-[#FF9600]" bgLightClass="bg-[#FFFBEA]" borderClass="border-[#FFD8A8]"
+            sub={<Star size={20} className="text-[#FFC200]" fill="#FFC200" />} />
+          <StatCard icon={BarChart2} label="Trung bình" value={analytics.averageScore}     colorClass="text-[#1CB0F6]" bgLightClass="bg-[#EAF6FE]" borderClass="border-[#BAE3FB]"
+            sub={<Activity size={20} strokeWidth={3} className="text-[#1CB0F6]" />} />
+          <StatCard icon={BookOpen}  label="Hoàn thành" value={analytics.totalAttempts}    colorClass="text-[#CE82FF]" bgLightClass="bg-[#F8EEFF]" borderClass="border-[#eec9ff]"
+            sub={<FileText size={20} strokeWidth={3} className="text-[#CE82FF]" />} />
+        </div>
+
+        {/* CHART + HISTORY (ĐÃ ĐỔI THÀNH 50/50 GRID-COLS-2) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6 items-start">
+
+          {/* Chart Section */}
+          <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm p-5 md:p-7">
+            <div className="mb-5 md:mb-8">
+              <h3 className="font-display text-[20px] md:text-[24px] font-black text-slate-800 m-0 leading-none">Biểu đồ học tập</h3>
+              <p className="font-body text-[13px] md:text-[15px] font-bold text-slate-500 mt-2">Xu hướng điểm số qua các bài test</p>
+            </div>
+            <div className="h-[240px] md:h-[340px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -24, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#1CB0F6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#1CB0F6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 700, fontFamily: '"Nunito", sans-serif' }} dy={10} />
+                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 700, fontFamily: '"Nunito", sans-serif' }} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#cbd5e1', strokeWidth: 2, strokeDasharray: '4 4' }} />
+                  <Area type="monotone" dataKey="avg" stroke="#1CB0F6" strokeWidth={4} fillOpacity={1} fill="url(#colorScore)"
+                    dot={{ r: 5, fill: '#fff', stroke: '#1CB0F6', strokeWidth: 3 }}
+                    activeDot={{ r: 8, fill: '#1CB0F6', stroke: '#fff', strokeWidth: 3 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* History Section */}
+          <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm p-5 md:p-6 flex flex-col h-[450px] md:h-[480px]">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display text-[20px] md:text-[24px] font-black text-slate-800 m-0 leading-none">Lịch sử bài làm</h3>
+              <span className="font-display text-[11px] md:text-[12px] font-black text-slate-500 bg-slate-100 border-2 border-slate-200 px-3 py-1.5 rounded-[8px] uppercase tracking-widest shrink-0">
+                {progress.length} BÀI
+              </span>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 p-1.5 bg-slate-100 border-2 border-slate-200 rounded-[14px] mb-5 shrink-0">
+              {[
+                { id: 'all',  label: 'Tất cả' },
+                { id: 'good', label: 'Tốt ≥80' },
+                { id: 'bad',  label: 'Cần cố' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-2 rounded-[10px] font-display font-bold text-[13px] md:text-[14px] transition-all outline-none border-2 ${
+                    activeTab === tab.id 
+                      ? 'bg-white text-[#1CB0F6] border-slate-200 border-b-[3px] shadow-sm -translate-y-px' 
+                      : 'bg-transparent text-slate-500 border-transparent hover:bg-slate-200/50'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {filteredHistory.length > 0
+                    ? filteredHistory.map(item => (
+                      <HistoryItem key={item.id} item={item} examMap={examMap} onClick={handleHistoryClick} />
+                    ))
+                    : (
+                      <div className="pt-12 flex flex-col items-center gap-3">
+                        <div className="w-16 h-16 bg-slate-50 border-2 border-slate-200 border-b-[4px] rounded-[16px] flex items-center justify-center shadow-sm">
+                          <BookOpen size={28} strokeWidth={2.5} className="text-slate-400" />
+                        </div>
+                        <p className="font-body text-[15px] font-bold text-slate-400 m-0 mt-1">Chưa có bài tập nào</p>
+                      </div>
+                    )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+        </div>
+      </main>
     </div>
   );
 }

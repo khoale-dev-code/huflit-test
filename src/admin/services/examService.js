@@ -186,3 +186,50 @@ export const deleteAudio = async (path) => {
     throw error;
   }
 };
+// 8. UPLOAD HÌNH ẢNH
+export const uploadImage = async (file, examId, prefixId) => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `img_${prefixId}_${Date.now()}.${fileExt}`;
+    const folderName = (examId && examId !== 'new' && examId !== 'create') ? examId : 'drafts';
+    
+    // Gom ảnh vào thư mục con 'images' cho gọn
+    const filePath = `${folderName}/images/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('exams')
+      .upload(filePath, file, { 
+        cacheControl: '3600', 
+        upsert: true 
+      });
+
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('exams')
+      .getPublicUrl(data.path);
+
+    return { path: data.path, url: publicUrl, name: file.name };
+  } catch (error) {
+    console.error('❌ Lỗi upload hình ảnh:', error.message);
+    throw error;
+  }
+};
+
+// 9. XÓA HÌNH ẢNH
+export const deleteImage = async (path) => {
+  if (!path) return;
+  try {
+    let filePath = path;
+    if (path.includes('http')) {
+      const urlParts = path.split('/exams/');
+      if (urlParts.length > 1) filePath = urlParts[1].split('?')[0];
+    }
+    const { error } = await supabase.storage.from('exams').remove([filePath]);
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('❌ Lỗi xóa hình ảnh:', error.message);
+    throw error;
+  }
+};

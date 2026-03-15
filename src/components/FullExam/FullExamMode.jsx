@@ -15,7 +15,6 @@ import { EXAM_TIMINGS }         from './constants/timings';
 import { AnswersContext }       from './context/AnswersContext';
 
 // Components
-import StepIndicator            from './StepIndicator';
 import { ExamSetup }            from './components/ExamSetup/ExamSetup';
 import { ExamScreen }           from './components/ExamScreen/ExamScreen';
 import { ResultsScreen }        from './components/Results/ResultsScreen';
@@ -225,49 +224,57 @@ const FullExamMode = ({ onComplete }) => {
 
   const currentPartData = state.examData?.parts?.find(p => p.id === state.part);
 
+  // Setup Theme Styles based on Section
+  const isListening = state.section === 'listening';
+  const badgeTheme = isListening 
+    ? 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]' 
+    : 'bg-[#f1faeb] text-[#58CC02] border-[#bcf096]';
+
   return (
     <AnswersContext.Provider value={answersContextValue}>
-      <div className="min-h-screen bg-[#F4F7FA] font-sans selection:bg-blue-200 relative">
+      <div className="min-h-screen bg-[#F4F7FA] font-sans selection:bg-blue-200 relative pb-10" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
         
-        {/* ── CÁC THÔNG BÁO GLOBAL (Đặt trước Header để nó nổi lên cao nhất) ── */}
-        <TimeWarning visible={showWarning} section={state.section} isLastListeningPart={isLastListeningPart} timeLeft={state.timeLeft} />
-        <OfflineWarning isOnline={isOnline} />
+        {/* ── CÁC THÔNG BÁO GLOBAL (Nổi lên trên cùng) ── */}
+        <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+          <TimeWarning visible={showWarning} section={state.section} isLastListeningPart={isLastListeningPart} timeLeft={state.timeLeft} />
+          <OfflineWarning isOnline={isOnline} />
+        </div>
 
-        {/* ── HEADER BÀI THI (Gamified) ── */}
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-slate-200 shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 py-3 md:py-4 flex items-center justify-between gap-4 flex-wrap">
+        {/* ── HEADER BÀI THI (Gamified & Glassmorphism) ── */}
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm transition-all">
+          <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-4">
+            
             {/* Tên phần thi */}
-            <div className="flex items-center gap-3">
-              <span className="hidden md:flex w-10 h-10 rounded-xl bg-blue-100 items-center justify-center font-black text-blue-600 border-b-2 border-blue-200">
-                {state.section === 'listening' ? '🎧' : '📖'}
-              </span>
-              <div>
-                <span className="text-[10px] md:text-[12px] font-black uppercase tracking-widest text-slate-400">
-                  {state.section === 'listening' ? 'Listening' : 'Reading'} Section
+            <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+              <div className={`hidden md:flex w-12 h-12 rounded-[14px] items-center justify-center font-black text-[22px] border-2 border-b-[4px] shadow-sm shrink-0 ${badgeTheme}`}>
+                {isListening ? '🎧' : '📖'}
+              </div>
+              <div className="min-w-0 pt-0.5">
+                <span className="text-[10px] md:text-[11px] font-display font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                  {isListening ? 'Listening' : 'Reading'} Section
                 </span>
-                <h2 className="text-[16px] md:text-[20px] font-black text-slate-800 leading-tight m-0">
+                <h2 className="text-[16px] md:text-[20px] font-display font-black text-slate-800 leading-tight m-0 truncate">
                   {currentPartData?.title || 'Đang tải dữ liệu...'}
                 </h2>
               </div>
             </div>
 
             {/* Đồng hồ và Trạng thái lưu */}
-            <div className="flex items-center gap-3 md:gap-5">
-              <AutosaveIndicator isSaving={isSaving} lastSaved={lastSaved} isOnline={isOnline} saveError={saveError} />
+            <div className="flex items-center gap-3 md:gap-5 shrink-0">
+              <div className="hidden sm:block">
+                <AutosaveIndicator isSaving={isSaving} lastSaved={lastSaved} isOnline={isOnline} saveError={saveError} />
+              </div>
               <Timer timeLeft={state.timeLeft} isWarning={showWarning} />
             </div>
-          </div>
-
-          {/* Thanh Tiến trình (Step Indicator) */}
-          <div className="bg-slate-50/80 border-t-2 border-slate-100 px-4 py-3">
-            <div className="max-w-5xl mx-auto">
-              <StepIndicator currentMode={EXAM_MODES.EXAM} listeningComplete={state.section === EXAM_SECTIONS.READING} />
-            </div>
+            
           </div>
         </header>
 
-        {/* ── NỘI DUNG CHÍNH ── */}
-        <main id="main-content" ref={mainContentRef} tabIndex={-1} className="outline-none" aria-label={`${state.section} – Part`}>
+        {/* Spacer nhẹ nhàng để bù lại chiều cao của Header nếu cần */}
+        <div className="h-4 md:h-6 pointer-events-none" />
+
+        {/* ── NỘI DUNG CHÍNH (Đã xóa StepIndicator) ── */}
+        <main id="main-content" ref={mainContentRef} tabIndex={-1} className="outline-none max-w-5xl mx-auto" aria-label={`${state.section} – Part`}>
           {state.examData && state.part && (
             <ExamScreen
               examData={state.examData}

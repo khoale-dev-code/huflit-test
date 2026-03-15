@@ -7,6 +7,7 @@ import {
   Activity, MoreVertical, Trash2, AlertTriangle,
   ArrowUpRight, CheckCircle2, ShieldCheck, Info
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getUsers, updateUserRole, deleteUser } from '../../services/userService';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminNavbar from '../../components/AdminNavbar';
@@ -15,162 +16,199 @@ import AdminNavbar from '../../components/AdminNavbar';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { logAdminAction } from '../../utils/adminLogger';
 
-// ─── Component: Modal Xác Nhận Xóa ────────────────────────────────
+// ─── Component: Modal Xác Nhận Xóa (Gamified 3D) ──────────────────
 const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, user, isDeleting }) => {
-  if (!isOpen || !user) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
-        <div className="p-8 text-center">
-          <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <AlertTriangle className="w-10 h-10 text-red-500" />
-          </div>
-          <h3 className="text-2xl font-black text-slate-900 mb-2">Xác nhận xóa?</h3>
-          <p className="text-slate-500 text-sm mb-8 px-4">
-            Bạn đang chuẩn bị xóa tài khoản của <span className="font-bold text-slate-900">{user?.full_name}</span>. 
-            Mọi dữ liệu học tập sẽ bị mất vĩnh viễn.
-          </p>
-          <div className="flex gap-4">
-            <button onClick={onClose} disabled={isDeleting} className="flex-1 px-6 py-4 border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-50">Hủy</button>
-            <button onClick={onConfirm} disabled={isDeleting} className="flex-1 px-6 py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 shadow-lg shadow-red-200 transition-all flex items-center justify-center gap-2">
-              {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Xóa ngay'}
-            </button>
-          </div>
+    <AnimatePresence>
+      {isOpen && user && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={!isDeleting ? onClose : undefined}
+          />
+          
+          {/* Dialog */}
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0, y: 15 }} 
+            animate={{ scale: 1, opacity: 1, y: 0 }} 
+            exit={{ scale: 0.9, opacity: 0, y: 15 }} 
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-[360px] bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-2xl p-6 text-center"
+          >
+            {/* Icon Nổi */}
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-[#FF4B4B] rounded-[16px] border-b-[4px] border-[#E54343] flex items-center justify-center shadow-sm">
+              <AlertTriangle size={32} strokeWidth={2.5} className="text-white" />
+            </div>
+            
+            <div className="mt-8 mb-6">
+              <h3 className="text-[20px] font-display font-black text-slate-800 mb-2">Xác nhận xóa?</h3>
+              <p className="text-[14px] font-body font-bold text-slate-500 leading-snug">
+                Bạn đang chuẩn bị xóa tài khoản <span className="text-[#FF4B4B] font-black">{user?.full_name || user?.email}</span>. Mọi dữ liệu học tập sẽ bị mất vĩnh viễn!
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={onClose} disabled={isDeleting} className="flex-1 py-3 bg-slate-50 text-slate-500 border-2 border-slate-200 border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider hover:bg-slate-100 hover:text-slate-700 active:border-b-[2px] active:translate-y-[2px] transition-all outline-none disabled:opacity-50">
+                Hủy bỏ
+              </button>
+              <button onClick={onConfirm} disabled={isDeleting} className="flex-1 py-3 bg-[#FF4B4B] text-white border-2 border-[#E54343] border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider hover:bg-[#E54343] active:border-b-[2px] active:translate-y-[2px] transition-all outline-none shadow-sm flex items-center justify-center gap-2 disabled:opacity-70">
+                {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Xóa ngay'}
+              </button>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 
-// ─── Component: Modal Phân Quyền (MỚI) ────────────────────────────
+// ─── Component: Modal Phân Quyền (Gamified 3D) ────────────────────
 const RoleChangeModal = ({ isOpen, onClose, onConfirm, user, isUpdating }) => {
   if (!isOpen || !user) return null;
 
   const isCurrentlyAdmin = user.role === 'admin';
-  const newRole = isCurrentlyAdmin ? 'student' : 'admin';
   const newRoleText = isCurrentlyAdmin ? 'Học viên (Student)' : 'Quản trị viên (Admin)';
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
-        <div className="p-8">
-          <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-6 
-            ${isCurrentlyAdmin ? 'bg-amber-50 text-amber-500' : 'bg-purple-50 text-purple-600'}`}>
-            {isCurrentlyAdmin ? <ShieldAlert className="w-8 h-8" /> : <ShieldCheck className="w-8 h-8" />}
-          </div>
+    <AnimatePresence>
+      {isOpen && user && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={!isUpdating ? onClose : undefined}
+          />
           
-          <h3 className="text-2xl font-black text-slate-900 mb-2">Thay đổi phân quyền</h3>
-          <p className="text-slate-500 text-sm mb-6">
-            Bạn đang chuẩn bị đổi quyền của <span className="font-bold text-slate-900">{user.full_name || user.email}</span> thành <span className="font-bold text-slate-900">{newRoleText}</span>.
-          </p>
-
-          {/* Hộp Cảnh Báo */}
-          <div className={`p-4 rounded-2xl mb-8 flex items-start gap-3 border 
-            ${isCurrentlyAdmin 
-              ? 'bg-amber-50/50 border-amber-100 text-amber-800' 
-              : 'bg-purple-50/50 border-purple-100 text-purple-800'}`}>
-            <Info className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isCurrentlyAdmin ? 'text-amber-500' : 'text-purple-500'}`} />
-            <div className="text-sm">
-              <span className="font-bold block mb-1">Lưu ý quan trọng:</span>
-              {isCurrentlyAdmin 
-                ? 'Tài khoản này sẽ mất quyền truy cập vào trang Admin và không thể quản lý hệ thống nữa.'
-                : 'Tài khoản này sẽ có toàn quyền Quản trị: thêm, sửa, xóa đề thi và quản lý tất cả học viên.'}
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0, y: 15 }} 
+            animate={{ scale: 1, opacity: 1, y: 0 }} 
+            exit={{ scale: 0.9, opacity: 0, y: 15 }} 
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-[380px] bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-2xl p-6 text-center"
+          >
+            <div className={`absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 rounded-[16px] border-b-[4px] flex items-center justify-center shadow-sm ${isCurrentlyAdmin ? 'bg-[#FF9600] border-[#E58700]' : 'bg-[#CE82FF] border-[#B975E5]'}`}>
+              {isCurrentlyAdmin ? <ShieldAlert size={32} strokeWidth={2.5} className="text-white" /> : <ShieldCheck size={32} strokeWidth={2.5} className="text-white" />}
             </div>
-          </div>
+            
+            <div className="mt-8 mb-6">
+              <h3 className="text-[20px] font-display font-black text-slate-800 mb-2">Thay đổi phân quyền</h3>
+              <p className="text-[14px] font-body font-bold text-slate-500 leading-snug">
+                Đổi quyền của <span className="text-[#1CB0F6] font-black">{user.full_name || user.email}</span> thành <span className={`font-black ${isCurrentlyAdmin ? 'text-slate-600' : 'text-[#CE82FF]'}`}>{newRoleText}</span>.
+              </p>
+            </div>
 
-          <div className="flex gap-4">
-            <button onClick={onClose} disabled={isUpdating} className="flex-1 px-6 py-4 border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-50">
-              Hủy
-            </button>
-            <button 
-              onClick={onConfirm} 
-              disabled={isUpdating} 
-              className={`flex-1 px-6 py-4 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2
-                ${isCurrentlyAdmin 
-                  ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-200' 
-                  : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'}`}
-            >
-              {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Xác nhận'}
-            </button>
-          </div>
+            {/* Hộp Cảnh Báo */}
+            <div className={`p-4 rounded-[16px] mb-6 flex items-start gap-3 border-2 text-left ${isCurrentlyAdmin ? 'bg-[#FFFBEA] border-[#FFD8A8]' : 'bg-[#F8EEFF] border-[#eec9ff]'}`}>
+              <Info className={`w-5 h-5 shrink-0 mt-0.5 ${isCurrentlyAdmin ? 'text-[#FF9600]' : 'text-[#CE82FF]'}`} strokeWidth={2.5} />
+              <div className="text-[13px] font-body font-bold">
+                <span className={`font-display font-black uppercase tracking-wider block mb-1 ${isCurrentlyAdmin ? 'text-[#FF9600]' : 'text-[#CE82FF]'}`}>Lưu ý quan trọng:</span>
+                <span className={isCurrentlyAdmin ? 'text-amber-800' : 'text-purple-800'}>
+                  {isCurrentlyAdmin 
+                    ? 'Tài khoản này sẽ mất quyền truy cập vào trang Admin.'
+                    : 'Tài khoản này sẽ có toàn quyền Quản trị: thêm, sửa, xóa hệ thống.'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={onClose} disabled={isUpdating} className="flex-1 py-3 bg-slate-50 text-slate-500 border-2 border-slate-200 border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider hover:bg-slate-100 active:border-b-[2px] active:translate-y-[2px] transition-all outline-none">
+                Hủy
+              </button>
+              <button 
+                onClick={onConfirm} disabled={isUpdating} 
+                className={`flex-1 py-3 text-white border-2 border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider transition-all outline-none shadow-sm flex items-center justify-center gap-2
+                  ${isCurrentlyAdmin 
+                    ? 'bg-[#FF9600] border-[#E58700] hover:bg-[#E58700] active:border-b-[2px] active:translate-y-[2px]' 
+                    : 'bg-[#CE82FF] border-[#B975E5] hover:bg-[#B975E5] active:border-b-[2px] active:translate-y-[2px]'}`}
+              >
+                {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Xác nhận'}
+              </button>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 
-// ─── Component: User Row với Trạng thái Hoạt động ──────────────────
-const UserRow = ({ user, onRoleChange, onDelete }) => {
+// ─── Component: User Card 3D ───────────────────────────────────────
+const UserCard = ({ user, onRoleChange, onDelete }) => {
   const isAdmin = user.role === 'admin';
 
-  // Hàm xử lý trạng thái thời gian thực
   const getStatus = (iso) => {
-    if (!iso) return { label: 'Chưa truy cập', color: 'bg-slate-300', dot: 'bg-slate-300' };
+    if (!iso) return { label: 'Chưa truy cập', color: 'text-slate-400', dot: 'bg-slate-300' };
     
     const now = new Date();
     const lastLogin = new Date(iso);
     const diffInMin = Math.floor((now - lastLogin) / 60000);
     const diffInHours = Math.floor(diffInMin / 60);
 
-    if (diffInMin < 5) return { label: 'Đang hoạt động', color: 'text-emerald-600', dot: 'bg-emerald-500 animate-pulse' };
-    if (diffInMin < 60) return { label: `${diffInMin} phút trước`, color: 'text-emerald-500', dot: 'bg-emerald-400' };
-    if (diffInHours < 24) return { label: `${diffInHours} giờ trước`, color: 'text-amber-500', dot: 'bg-amber-400' };
+    if (diffInMin < 5) return { label: 'Đang hoạt động', color: 'text-[#58CC02]', dot: 'bg-[#58CC02] animate-pulse' };
+    if (diffInMin < 60) return { label: `${diffInMin} phút trước`, color: 'text-[#1CB0F6]', dot: 'bg-[#1CB0F6]' };
+    if (diffInHours < 24) return { label: `${diffInHours} giờ trước`, color: 'text-[#FF9600]', dot: 'bg-[#FF9600]' };
     return { label: lastLogin.toLocaleDateString('vi-VN'), color: 'text-slate-400', dot: 'bg-slate-300' };
   };
 
   const status = getStatus(user.last_login);
 
   return (
-    <tr className="group border-b border-slate-50 hover:bg-blue-50/30 transition-all duration-300">
-      <td className="px-8 py-5">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center font-black text-blue-600 shadow-sm overflow-hidden">
-              {user.avatar_url ? <img src={user.avatar_url} className="w-full h-full object-cover" /> : user.full_name?.charAt(0).toUpperCase()}
-            </div>
-            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-white ${status.dot}`}></div>
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+      className="bg-white border-2 border-slate-200 border-b-[4px] rounded-[20px] p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-300 hover:-translate-y-1 transition-all shadow-sm group"
+    >
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="relative shrink-0">
+          <div className={`w-12 h-12 md:w-14 md:h-14 rounded-[14px] border-b-[3px] flex items-center justify-center font-display font-black text-[18px] shadow-sm overflow-hidden ${isAdmin ? 'bg-[#F8EEFF] text-[#CE82FF] border-[#eec9ff]' : 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]'}`}>
+            {user.avatar_url ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="avatar" /> : user.full_name?.charAt(0).toUpperCase()}
           </div>
-          <div className="min-w-0">
-            <p className="text-[15px] font-black text-slate-900 truncate">{user.full_name || 'Học viên ẩn danh'}</p>
-            <p className="text-[11px] font-medium text-slate-400 truncate tracking-tight">{user.email}</p>
+          <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-white ${status.dot}`} />
+        </div>
+        
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-[16px] md:text-[18px] font-display font-black text-slate-800 truncate m-0 leading-tight">
+              {user.full_name || 'Học viên ẩn danh'}
+            </h3>
+            <span className={`px-2.5 py-0.5 rounded-[8px] text-[10px] font-display font-black uppercase tracking-widest shrink-0 border ${isAdmin ? 'bg-[#F8EEFF] text-[#CE82FF] border-[#eec9ff]' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+              {isAdmin ? 'Admin' : 'Student'}
+            </span>
           </div>
+          <p className="text-[12px] md:text-[13px] font-body font-bold text-slate-400 truncate m-0">{user.email}</p>
         </div>
-      </td>
-      <td className="px-8 py-5 text-center">
-        {/* Chỉ mở Modal thay vì update trực tiếp */}
-        <button
-          onClick={() => onRoleChange(user)}
-          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-            isAdmin ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
-        >
-          {isAdmin ? 'Admin' : 'Student'}
-        </button>
-      </td>
-      <td className="px-8 py-5 text-right hidden sm:table-cell">
-        <div className="flex flex-col items-end">
-          <span className={`text-[11px] font-black uppercase tracking-tighter ${status.color}`}>{status.label}</span>
-          <span className="text-[10px] text-slate-300 font-bold">Lần cuối truy cập</span>
+      </div>
+
+      <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto border-t-2 border-slate-100 pt-3 md:border-none md:pt-0">
+        <div className="flex flex-col md:items-end">
+          <span className={`text-[11px] font-display font-black uppercase tracking-widest leading-tight ${status.color}`}>{status.label}</span>
+          <span className="text-[11px] text-slate-400 font-body font-bold">Lần cuối truy cập</span>
         </div>
-      </td>
-      <td className="px-8 py-5 text-right">
-        <div className="flex justify-end items-center gap-2">
-          <button onClick={() => onDelete(user)} className="p-2.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100">
-            <Trash2 className="w-5 h-5" />
+        
+        <div className="flex gap-2">
+          <button 
+            onClick={() => onRoleChange(user)} 
+            title="Đổi phân quyền"
+            className="w-10 h-10 rounded-[12px] bg-[#FFFBEA] text-[#FF9600] flex items-center justify-center border-2 border-[#FFD8A8] border-b-[3px] hover:bg-[#FF9600] hover:text-white hover:border-[#E58700] active:border-b-[2px] active:translate-y-[2px] transition-all outline-none shadow-sm"
+          >
+            <Shield size={18} strokeWidth={2.5} />
           </button>
-          <button className="p-2.5 text-slate-300 hover:text-blue-600 rounded-xl opacity-0 group-hover:opacity-100">
-            <MoreVertical className="w-5 h-5" />
+          <button 
+            onClick={() => onDelete(user)} 
+            title="Xóa tài khoản"
+            className="w-10 h-10 rounded-[12px] bg-[#fff0f0] text-[#FF4B4B] flex items-center justify-center border-2 border-[#ffc1c1] border-b-[3px] hover:bg-[#FF4B4B] hover:text-white hover:border-[#E54343] active:border-b-[2px] active:translate-y-[2px] transition-all outline-none shadow-sm"
+          >
+            <Trash2 size={18} strokeWidth={2.5} />
           </button>
         </div>
-      </td>
-    </tr>
+      </div>
+    </motion.div>
   );
 };
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────
 const UserManagement = () => {
   const navigate = useNavigate();
-  // ── Thêm Auth để lấy thông tin Admin ──
   const { admin, signOut } = useAdminAuth();
 
   const [users, setUsers] = useState([]);
@@ -178,7 +216,6 @@ const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
-  // ── States cho Modal ──
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
   const [roleModal, setRoleModal] = useState({ isOpen: false, user: null });
   
@@ -196,7 +233,6 @@ const UserManagement = () => {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  // ── Xử lý khi xác nhận Đổi Quyền trong Modal ──
   const handleConfirmRoleChange = async () => {
     const user = roleModal.user;
     const newRole = user.role === 'admin' ? 'student' : 'admin';
@@ -206,21 +242,14 @@ const UserManagement = () => {
       await updateUserRole(user.id, newRole);
       setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u));
 
-      // Ghi Log Thao Tác
       if (admin) {
-        await logAdminAction(
-          admin.id,
-          admin.email,
-          'UPDATE_USER',
-          `Cấp quyền ${newRole} cho: ${user.email || user.full_name}`
-        );
+        await logAdminAction(admin.id, admin.email, 'UPDATE_USER', `Cấp quyền ${newRole} cho: ${user.email || user.full_name}`);
       }
       setRoleModal({ isOpen: false, user: null });
     } catch (err) { alert("Lỗi cập nhật quyền"); }
     finally { setIsUpdatingRole(false); }
   };
 
-  // ── Ghi Log Xóa User ──
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
@@ -228,16 +257,9 @@ const UserManagement = () => {
       await deleteUser(userToDelete.id);
       setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
       
-      // Ghi Log Thao Tác
       if (admin) {
-        await logAdminAction(
-          admin.id,
-          admin.email,
-          'DELETE_USER',
-          `Người dùng: ${userToDelete.email || userToDelete.full_name}`
-        );
+        await logAdminAction(admin.id, admin.email, 'DELETE_USER', `Người dùng: ${userToDelete.email || userToDelete.full_name}`);
       }
-
       setDeleteModal({ isOpen: false, user: null });
     } catch (err) { alert("Lỗi xóa"); }
     finally { setIsDeleting(false); }
@@ -251,7 +273,7 @@ const UserManagement = () => {
   }, [users, searchQuery]);
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#F4F7FA] overflow-hidden font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
       <AdminSidebar 
         isOpen={sidebarOpen} 
         setIsOpen={setSidebarOpen} 
@@ -265,73 +287,82 @@ const UserManagement = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => {}} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-10">
-          <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar">
+          <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-10">
             
             {/* Header Title */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Quản lý <span className="text-blue-600">Thành viên</span></h2>
-                <p className="text-slate-500 text-sm mt-1 font-medium">Phân quyền và theo dõi hoạt động của học viên HubStudy.</p>
-              </div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div className="flex items-center gap-3">
-                <div className="relative w-64">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <div className="w-12 h-12 rounded-[14px] bg-[#EAF6FE] flex items-center justify-center border-b-[4px] border-[#BAE3FB] shadow-sm shrink-0">
+                  <Users className="text-[#1CB0F6] w-6 h-6" strokeWidth={2.5} />
+                </div>
+                <div className="pt-0.5">
+                  <h1 className="text-[24px] sm:text-[28px] font-display font-black text-slate-800 leading-none m-0">
+                    Quản lý Thành viên
+                  </h1>
+                  <p className="text-[13px] font-body font-bold text-slate-500 mt-1">
+                    Theo dõi hoạt động và phân quyền tài khoản.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={3} />
                   <input 
                     type="text" 
-                    placeholder="Tìm tên hoặc email..." 
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all"
+                    placeholder="Tìm tên, email..." 
+                    className="w-full pl-11 pr-4 py-3 bg-white border-2 border-slate-200 rounded-[16px] text-[14px] font-body font-bold focus:outline-none focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all placeholder:font-medium placeholder:text-slate-400"
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <button onClick={fetchUsers} className="p-3 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 transition-all shadow-sm">
-                  <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
+                <button onClick={fetchUsers} className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-200 border-b-[4px] rounded-[16px] hover:bg-slate-50 hover:text-[#1CB0F6] active:border-b-2 active:translate-y-[2px] transition-all shadow-sm shrink-0 outline-none">
+                  <RefreshCw className={`w-5 h-5 text-slate-500 ${loading ? 'animate-spin text-[#1CB0F6]' : ''}`} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-               <div className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tổng thành viên</p>
-                  <h4 className="text-2xl font-black text-slate-900 mt-1">{users.length}</h4>
-               </div>
-               <div className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đang Online</p>
-                  <h4 className="text-2xl font-black text-emerald-500 mt-1">{users.filter(u => {
-                    if (!u.last_login) return false;
-                    const diff = (new Date() - new Date(u.last_login)) / 60000;
-                    return diff < 5;
-                  }).length}</h4>
-               </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+              <div className="bg-white p-5 md:p-6 rounded-[24px] border-2 border-slate-200 border-b-[5px] shadow-sm hover:-translate-y-1 transition-transform">
+                 <p className="text-[10px] md:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-1.5">Tổng cộng</p>
+                 <h4 className="text-[28px] md:text-[32px] font-display font-black text-slate-800 leading-none m-0">{users.length} <span className="text-[14px] text-slate-400">user</span></h4>
+              </div>
+              <div className="bg-white p-5 md:p-6 rounded-[24px] border-2 border-slate-200 border-b-[5px] shadow-sm hover:-translate-y-1 transition-transform">
+                 <p className="text-[10px] md:text-[11px] font-display font-black text-[#58CC02] uppercase tracking-widest mb-1.5">Đang Online</p>
+                 <h4 className="text-[28px] md:text-[32px] font-display font-black text-[#58CC02] leading-none m-0">{users.filter(u => {
+                   if (!u.last_login) return false;
+                   const diff = (new Date() - new Date(u.last_login)) / 60000;
+                   return diff < 5;
+                 }).length} <span className="text-[14px] text-green-400">active</span></h4>
+              </div>
             </div>
 
-            {/* Users Table */}
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden transition-all hover:shadow-md">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-slate-50/50">
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Thông tin thành viên</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Vai trò</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right hidden sm:table-cell">Hoạt động</th>
-                      <th className="px-8 py-5 w-20"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {loading ? (
-                      <tr><td colSpan="4" className="py-24 text-center"><Loader2 className="w-12 h-12 animate-spin mx-auto text-blue-600 opacity-20" /></td></tr>
-                    ) : filteredUsers.map(user => (
-                      <UserRow 
-                        key={user.id} 
-                        user={user} 
-                        onRoleChange={(u) => setRoleModal({ isOpen: true, user: u })}
-                        onDelete={(u) => setDeleteModal({ isOpen: true, user: u })}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            {/* Users List (Cards) */}
+            <div className="space-y-3 md:space-y-4">
+              {loading ? (
+                <div className="py-20 flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin mb-4" />
+                  <p className="font-display font-bold text-slate-500 text-[15px]">Đang tải dữ liệu người dùng...</p>
+                </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="text-center py-16 bg-white border-2 border-dashed border-slate-300 rounded-[24px]">
+                  <div className="w-16 h-16 bg-slate-100 border-2 border-slate-200 border-b-[4px] rounded-[16px] flex items-center justify-center mx-auto mb-4">
+                    <Search size={28} className="text-slate-400" strokeWidth={2.5} />
+                  </div>
+                  <h3 className="text-[18px] font-display font-black text-slate-700 m-0">Trống trơn!</h3>
+                  <p className="text-[14px] font-body font-bold text-slate-500 mt-1">Không tìm thấy người dùng nào.</p>
+                </div>
+              ) : (
+                filteredUsers.map((user, i) => (
+                  <UserCard 
+                    key={user.id} 
+                    user={user} 
+                    onRoleChange={(u) => setRoleModal({ isOpen: true, user: u })}
+                    onDelete={(u) => setDeleteModal({ isOpen: true, user: u })}
+                  />
+                ))
+              )}
             </div>
           </div>
         </main>
@@ -339,17 +370,13 @@ const UserManagement = () => {
 
       {/* ── Modals ── */}
       <DeleteConfirmModal 
-        isOpen={deleteModal.isOpen}
-        user={deleteModal.user}
-        isDeleting={isDeleting}
+        isOpen={deleteModal.isOpen} user={deleteModal.user} isDeleting={isDeleting}
         onClose={() => setDeleteModal({ isOpen: false, user: null })}
         onConfirm={handleConfirmDelete}
       />
 
       <RoleChangeModal 
-        isOpen={roleModal.isOpen}
-        user={roleModal.user}
-        isUpdating={isUpdatingRole}
+        isOpen={roleModal.isOpen} user={roleModal.user} isUpdating={isUpdatingRole}
         onClose={() => setRoleModal({ isOpen: false, user: null })}
         onConfirm={handleConfirmRoleChange}
       />
