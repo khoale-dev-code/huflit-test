@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
@@ -7,7 +7,7 @@ import { useAppState } from './hooks/useAppState';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
 
-// Components
+// Components (Common)
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 import UserProfile from './components/Auth/UserProfile.jsx';
@@ -15,7 +15,6 @@ import PartSelector from './components/Display/PartSelector.jsx';
 import ContentDisplay from './components/Display/ContentDisplay';
 import QuestionDisplay from './components/Display/QuestionDisplay.jsx';
 import ResultsDisplay from './components/Display/Result/ResultsDisplay.jsx';
-import VocabularyPractice from './components/Voca/VocabularyPractice.jsx';
 import AuthModal from './components/Auth/AuthModal.jsx';
 import WelcomeModal from './components/modals/WelcomeModal.jsx';
 import ExamAnswersPage from './components/pages/ExamAnswersPage.jsx';
@@ -24,25 +23,33 @@ import AuthPage from './components/Auth/AuthPage.jsx';
 import { ROUTES } from './config/routes';
 
 // Icons
-import { Trophy, FileText, Zap, BarChart3, Lock, Star } from 'lucide-react';
+import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
+
+// Admin Components
+import AdminApp from './admin/AdminApp';
 import ExamManagement from './admin/pages/Exams/ExamManagement.jsx';
 import CreateExam from './admin/pages/Exams/CreateExam.jsx';
 import DetailsExam from './admin/pages/Exams/DetailsExam.jsx';
 import EditExam from './admin/pages/Exams/EditExam.jsx';
-import ImportExamsPage from './admin/scripts/importExamsToFirebase.jsx';
 import MigrateData from './admin/scripts/MigrateFirestoreToSupabase.jsx';
 import UserManagement from './admin/pages/Users/UserManagement.jsx';
+import LessonManagement from './admin/pages/Lessons/LessonManagement.jsx';
+import LessonForm from './admin/pages/Lessons/LessonForm.jsx';
+import AdminLessonDetails from './admin/pages/Lessons/LessonDetails.jsx'; // Đổi tên import để không nhầm với User
 
-// Lazy Loaded Components
-import { lazy, Suspense } from 'react';
-const AdminApp      = lazy(() => import('./admin/AdminApp'));
+// User Components (Lazy Loaded)
 const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
-const GrammarReview = lazy(() => import('./components/Grama/GrammarReview.jsx'));
 const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
 const HistoryTest   = lazy(() => import('./components/HistoryTest.jsx'));
 
+// 🔥 SỬA LỖI: Import đúng component Lesson của Người Dùng
+import LessonList from './components/Lessons/LessonList.jsx';
+// ĐẢM BẢO BẠN ĐÃ TẠO FILE NÀY DỰA THEO CODE MÌNH CUNG CẤP Ở BƯỚC TRƯỚC
+const LessonDetailUser = lazy(() => import('./components/Lessons/LessonDetail.jsx')); 
+
+
 // ─────────────────────────────────────────────────────────────────
-// 🛡️ TRANSLATION PROTECTION
+// 🛡️ TRANSLATION PROTECTION (Giữ nguyên)
 // ─────────────────────────────────────────────────────────────────
 function patchNodePrototype() {
   if (typeof window === 'undefined' || window.__translatePatchApplied) return;
@@ -334,7 +341,7 @@ const PartTestContent = memo(({
 PartTestContent.displayName = 'PartTestContent';
 
 // ─────────────────────────────────────────────
-// ✅ FIX: FullExamContainer — chỉ render FullExamMode, không preload
+// FullExamContainer
 // ─────────────────────────────────────────────
 const FullExamContainer = memo(({ onComplete }) => (
   <FullExamMode onComplete={onComplete} />
@@ -407,6 +414,8 @@ const AppContent = memo(() => {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path={ROUTES.HOME} element={<HomePage />} />
+            
+            {/* Luyện Test */}
             <Route path={ROUTES.TEST} element={
               <PartTestContent
                 isSignedIn={isSignedIn}
@@ -425,17 +434,17 @@ const AppContent = memo(() => {
                 isLoadingExam={isLoadingExam}
               />
             } />
+            
+            {/* Thi Thử */}
             <Route path={ROUTES.FULL_EXAM} element={
               <FullExamContainer onComplete={() => handleTestTypeChange('')} />
             } />
-            <Route path={ROUTES.GRAMMAR} element={
-              <GrammarReview
-                answers={answers}
-                onAnswerSelect={handleAnswerSelect}
-                onSubmit={handleSubmitWithData}
-              />
-            } />
-            <Route path={ROUTES.VOCABULARY} element={<VocabularyPractice />} />
+            
+            {/* Bài Học (Lessons) */}
+            <Route path="/learn" element={<LessonList />} />
+            <Route path="/learn/:slug" element={<LessonDetailUser />} /> {/* Dùng component của User */}
+            
+            {/* Account & Other */}
             <Route path={ROUTES.PROFILE}    element={<UserProfile />} />
             <Route path={ROUTES.ANSWERS}    element={<ExamAnswersPage />} />
             <Route path="/history/:id"      element={<HistoryTest />} />
@@ -464,13 +473,25 @@ export default function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
+          
+          {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminApp />} />
           <Route path="/admin/exams" element={<ExamManagement />} />
           <Route path="/admin/exams/create" element={<CreateExam />} />
           <Route path="/admin/exams/detail/:id" element={<DetailsExam />} />
           <Route path="/admin/exams/edit/:id" element={<EditExam />} />
-          <Route path="/migrate-data" element={<MigrateData />} />
           <Route path="/admin/users" element={<UserManagement />} />
+          
+          {/* Admin Lessons Routes */}
+          <Route path="/admin/lessons" element={<LessonManagement />} />
+          <Route path="/admin/lessons/create" element={<LessonForm />} />
+          <Route path="/admin/lessons/edit/:id" element={<LessonForm />} />
+          <Route path="/admin/lessons/detail/:id" element={<AdminLessonDetails />} /> 
+          
+          {/* Tool Route */}
+          <Route path="/migrate-data" element={<MigrateData />} />
+          
+          {/* User Routes (Catch all) */}
           <Route path="/*" element={<AppContent />} />
         </Routes>
       </Suspense>

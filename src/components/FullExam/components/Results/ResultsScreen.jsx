@@ -1,28 +1,35 @@
 import React, { memo, useMemo } from 'react';
-import { Trophy, TrendingUp, Target, RotateCcw, ChevronLeft, AlertCircle, Zap } from 'lucide-react';
-import StepIndicator from '../../StepIndicator';
-import { COLORS } from '../../constants/colors';
+import { Trophy, TrendingUp, Target, RotateCcw, ChevronLeft, AlertCircle, Zap, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { ScoreDisplay } from './ScoreDisplay';
 import { PartResults } from './PartResults';
 
-// Format answer key consistent with system
-const generateAnswerKey = ({ section, part, question }) => `${section}-${part}-q${question}`;
+// 🔥 IMPORT HÀM TÍNH ĐIỂM TOEIC
+import { calculateToeicScore } from '../../../../utils/gradeUtils';
+
+// Format answer key consistent with system (Dùng cho cả câu đơn và câu trong group)
+const generateAnswerKey = (section, partId, qId, subIdx = null) => {
+  if (subIdx !== null) return `${section}-${partId}-${qId}-sub${subIdx}`;
+  return `${section}-${partId}-${qId}`;
+};
 
 export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
 
   if (!examData || !examData.parts) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="text-center">
-          <AlertCircle className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600 font-medium">Đang tải kết quả...</p>
+      <div className="min-h-screen bg-[#F4F7FA] flex items-center justify-center p-6 font-sans">
+        <div className="text-center flex flex-col items-center gap-3">
+          <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin" />
+          <p className="text-slate-500 font-display font-bold text-[15px]">Đang tính toán kết quả...</p>
         </div>
       </div>
     );
   }
 
-  // ─── 1. CALCULATE SCORES DIRECTLY FROM ARRAY ───
-  const { results, partResults, allParts } = useMemo(() => {
+  const isToeicExam = examData.category === 'toeic';
+
+  // ─── 1. CALCULATE SCORES THÔNG MINH (HỖ TRỢ GROUP & BỎ QUA VÍ DỤ) ───
+  const { results, convertedScore, partResults, allParts } = useMemo(() => {
     let listeningCorrect = 0;
     let listeningTotal = 0;
     let readingCorrect = 0;
@@ -37,51 +44,66 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
     const listeningParts = partsArr.filter(p => p.type === 'listening');
     const readingParts = partsArr.filter(p => p.type === 'reading');
 
-    // Score Listening
-    listeningParts.forEach((part, index) => {
-      const qCount = part.questions?.length || 0;
-      let partCorrect = 0;
+    // Hàm tiện ích đếm điểm cho 1 Part
+    const scorePart = (part, sectionType) => {
+      let pTotal = 0;
+      let pCorrect = 0;
 
-      part.questions?.forEach((q, qIdx) => {
-        listeningTotal++;
-        const key = generateAnswerKey({ section: 'listening', part: part.id, question: qIdx + 1 });
-        const userAnswer = answers[key];
-        if (userAnswer !== undefined && userAnswer !== null && String(userAnswer) === String(q.correct)) {
-          listeningCorrect++;
-          partCorrect++;
+      (part.questions || []).forEach((q, qIdx) => {
+        if (q.type === 'group') {
+          // Lặp qua các câu hỏi con
+          (q.subQuestions || []).forEach((sq, sqIdx) => {
+            if (!sq.isExample) {
+              pTotal++;
+              const key = generateAnswerKey(sectionType, part.id, q.id, sqIdx + 1);
+              if (answers[key] !== undefined && String(answers[key]) === String(sq.correct)) {
+                pCorrect++;
+              }
+            }
+          });
+        } else {
+          // Câu hỏi đơn
+          if (!q.isExample) {
+            pTotal++;
+            // Chú ý: Ở ExamScreen, câu hỏi đơn dùng key dạng `section-part-qIndex`
+            const key = generateAnswerKey(sectionType, part.id, `q${qIdx + 1}`);
+            if (answers[key] !== undefined && String(answers[key]) === String(q.correct)) {
+              pCorrect++;
+            }
+          }
         }
       });
 
+      return { pTotal, pCorrect };
+    };
+
+    // Score Listening
+    listeningParts.forEach((part, index) => {
+      const { pTotal, pCorrect } = scorePart(part, 'listening');
+      listeningTotal += pTotal;
+      listeningCorrect += pCorrect;
+      
       const displayIndex = index + 1;
-      listeningByPart[displayIndex] = partCorrect;
-      partsStats.push({ name: `Nghe ${displayIndex}`, score: partCorrect, max: qCount, section: 'listening' });
+      listeningByPart[displayIndex] = pCorrect;
+      partsStats.push({ name: `Nghe ${displayIndex}`, score: pCorrect, max: pTotal, section: 'listening' });
     });
 
     // Score Reading
     readingParts.forEach((part, index) => {
-      const qCount = part.questions?.length || 0;
-      let partCorrect = 0;
-
-      part.questions?.forEach((q, qIdx) => {
-        readingTotal++;
-        const key = generateAnswerKey({ section: 'reading', part: part.id, question: qIdx + 1 });
-        const userAnswer = answers[key];
-        if (userAnswer !== undefined && userAnswer !== null && String(userAnswer) === String(q.correct)) {
-          readingCorrect++;
-          partCorrect++;
-        }
-      });
+      const { pTotal, pCorrect } = scorePart(part, 'reading');
+      readingTotal += pTotal;
+      readingCorrect += pCorrect;
 
       const displayIndex = index + 1;
-      readingByPart[displayIndex] = partCorrect;
-      partsStats.push({ name: `Đọc ${displayIndex}`, score: partCorrect, max: qCount, section: 'reading' });
+      readingByPart[displayIndex] = pCorrect;
+      partsStats.push({ name: `Đọc ${displayIndex}`, score: pCorrect, max: pTotal, section: 'reading' });
     });
 
     const totalCorrect = listeningCorrect + readingCorrect;
     const totalQuestions = listeningTotal + readingTotal;
     const averageScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
-    const listeningScore = listeningTotal > 0 ? Math.round((listeningCorrect / listeningTotal) * 100) : 0;
-    const readingScore = readingTotal > 0 ? Math.round((readingCorrect / readingTotal) * 100) : 0;
+    const listeningPercent = listeningTotal > 0 ? Math.round((listeningCorrect / listeningTotal) * 100) : 0;
+    const readingPercent = readingTotal > 0 ? Math.round((readingCorrect / readingTotal) * 100) : 0;
 
     let cefrLevel = 'A1';
     if (averageScore >= 90) cefrLevel = 'C1';
@@ -89,15 +111,19 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
     else if (averageScore >= 50) cefrLevel = 'B1';
     else if (averageScore >= 30) cefrLevel = 'A2';
 
+    // 🔥 QUY ĐỔI ĐIỂM TOEIC NẾU LÀ ĐỀ TOEIC
+    const toeicScores = isToeicExam ? calculateToeicScore(listeningCorrect, readingCorrect) : null;
+
     return {
       results: {
         totalCorrect,
         totalQuestions,
         averageScore,
-        listeningScore,
-        readingScore,
+        listeningPercent,
+        readingPercent,
         cefrLevel
       },
+      convertedScore: toeicScores, // Truyền điểm TOEIC (Nghe/Đọc/Tổng) ra ngoài
       partResults: {
         listeningByPart,
         readingByPart,
@@ -106,7 +132,7 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
       },
       allParts: partsStats.filter(p => p.max > 0)
     };
-  }, [examData, answers]);
+  }, [examData, answers, isToeicExam]);
 
   // ─── 2. FIND STRENGTHS & WEAKNESSES ───
   const { strongest, weakest } = useMemo(() => {
@@ -128,88 +154,107 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
   }, [allParts]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12 font-sans" style={{ fontFamily: '-apple-system, "Segoe UI", "Roboto", sans-serif' }}>
+    <div className="min-h-screen bg-[#F4F7FA] pb-16 font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
       
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-xs">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4">
+      {/* Header nhẹ nhàng */}
+      <div className="bg-white border-b-2 border-slate-200 shadow-sm sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 md:py-5">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight italic leading-tight">
-                HUBSTUDY <span className="text-blue-600">Results</span>
+              <h1 className="text-[24px] md:text-[28px] font-display font-black text-slate-800 tracking-tight leading-none flex items-center gap-2">
+                HubStudy <span className="text-[#1CB0F6]">Results</span>
               </h1>
-              <p className="text-gray-600 text-xs md:text-sm font-medium mt-1">Báo cáo điểm chi tiết và phân tích kỹ năng của bạn.</p>
+              <p className="text-slate-500 text-[13px] font-body font-bold mt-1">Báo cáo năng lực chi tiết.</p>
             </div>
-            <div className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-green-50 border border-green-200 rounded-lg w-fit">
-              <Trophy className="w-5 h-5 md:w-6 md:h-6 text-green-600 flex-shrink-0" strokeWidth={2} />
-              <span className="text-sm md:text-base font-bold text-green-700">Hoàn thành</span>
+            <div className="flex items-center gap-2 px-3 py-2 bg-[#f1faeb] border-2 border-[#bcf096] border-b-[3px] rounded-[12px] shadow-sm shrink-0">
+              <Trophy className="w-5 h-5 text-[#58CC02]" strokeWidth={2.5} />
+              <span className="text-[12px] font-display font-black text-[#58CC02] uppercase tracking-widest hidden sm:block pt-0.5">Hoàn thành</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Step Indicator */}
-      <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 md:py-5">
-        <div className="max-w-6xl mx-auto">
-          <StepIndicator currentMode="results" listeningComplete={true} />
         </div>
       </div>
 
       {/* Results Content */}
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-4 md:space-y-6">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8 space-y-6 md:space-y-8">
         
-        {/* Completion Message */}
-        <div className="bg-white rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-emerald-50 p-5 md:p-6 text-center shadow-xs">
-          <Trophy className="w-12 h-12 md:w-14 md:h-14 text-green-600 mx-auto mb-2 md:mb-3" />
-          <h2 className="text-xl md:text-2xl font-bold text-green-900 mb-1">Hoàn thành bài thi!</h2>
-          <p className="text-sm md:text-base font-medium text-green-800">
-            Bài làm của bạn đã được nộp và chấm điểm thành công.
+        {/* Completion Message (Gamified Banner) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: "spring", bounce: 0.4 }}
+          className="bg-gradient-to-br from-[#FFFBEA] to-[#FFf0B3] rounded-[32px] border-2 border-[#FFD8A8] border-b-[6px] p-6 md:p-8 text-center shadow-sm relative overflow-hidden"
+        >
+          {/* Sparkles trang trí */}
+          <Star className="absolute top-6 left-6 text-[#FFC200] opacity-50 w-8 h-8" fill="#FFC200" />
+          <Star className="absolute bottom-6 right-6 text-[#FFC200] opacity-50 w-10 h-10" fill="#FFC200" />
+          
+          <div className="w-20 h-20 md:w-24 md:h-24 bg-[#FFC200] rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+            <Trophy className="w-10 h-10 md:w-12 md:h-12 text-white mb-1" strokeWidth={2.5} />
+          </div>
+          <h2 className="text-[28px] md:text-[34px] font-display font-black text-[#D9A600] mb-1 leading-tight">Xuất sắc!</h2>
+          <p className="text-[14px] md:text-[16px] font-body font-bold text-[#B38800]">
+            Bạn đã nỗ lực hết mình. Cùng xem thành quả nhé!
           </p>
-        </div>
+        </motion.div>
 
         {/* Main Results Grid - Centered Score */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6 shadow-xs">
+        <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-5 md:p-8 shadow-sm relative z-10 -mt-10 sm:-mt-12 mx-2 sm:mx-8">
           <div className="max-w-sm mx-auto">
-            <ScoreDisplay results={results} />
+            {/* Truyền thêm category và convertedScore xuống ScoreDisplay */}
+            <ScoreDisplay 
+              results={results} 
+              convertedScore={convertedScore} 
+              examCategory={examData.category} 
+            />
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {/* Total Score */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3 md:p-4 text-center shadow-xs">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Tổng</p>
-            <p className="text-lg md:text-2xl font-bold text-gray-900">
-              {results.totalCorrect}/{results.totalQuestions}
-            </p>
-            <p className="text-xs font-medium text-gray-600 mt-1">câu đúng</p>
-          </div>
+        {/* Quick Stats (3D Blocks) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+          {/* Total Score Block */}
+          {isToeicExam ? (
+             <div className="bg-white rounded-[20px] border-2 border-[#FFD8A8] border-b-[4px] p-4 text-center shadow-sm hover:-translate-y-1 transition-transform">
+               <p className="text-[10px] md:text-[11px] font-display font-black text-[#FF9600] uppercase tracking-widest mb-1.5">Điểm TOEIC</p>
+               <p className="text-[28px] md:text-[32px] font-display font-black text-[#FF9600] leading-none">
+                 {convertedScore.total}<span className="text-[16px] text-amber-300">/990</span>
+               </p>
+               <p className="text-[12px] font-body font-bold text-amber-500 mt-1.5">tổng điểm</p>
+             </div>
+          ) : (
+             <div className="bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] p-4 text-center shadow-sm hover:-translate-y-1 transition-transform">
+               <p className="text-[10px] md:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-1.5">Tổng điểm</p>
+               <p className="text-[28px] md:text-[32px] font-display font-black text-slate-800 leading-none">
+                 {results.totalCorrect}<span className="text-[16px] text-slate-400">/{results.totalQuestions}</span>
+               </p>
+               <p className="text-[12px] font-body font-bold text-slate-500 mt-1.5">câu đúng</p>
+             </div>
+          )}
 
           {/* Listening Score */}
-          <div className="bg-white rounded-lg border border-blue-200 p-3 md:p-4 text-center shadow-xs">
-            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Nghe</p>
-            <p className="text-lg md:text-2xl font-bold text-blue-900">
-              {results.listeningScore}%
+          <div className="bg-white rounded-[20px] border-2 border-[#BAE3FB] border-b-[4px] p-4 text-center shadow-sm hover:-translate-y-1 transition-transform">
+            <p className="text-[10px] md:text-[11px] font-display font-black text-[#1CB0F6] uppercase tracking-widest mb-1.5">Nghe (Listening)</p>
+            <p className="text-[28px] md:text-[32px] font-display font-black text-[#1CB0F6] leading-none">
+              {isToeicExam ? convertedScore.listening : `${results.listeningPercent}%`}
             </p>
-            <p className="text-xs font-medium text-blue-700 mt-1">điểm</p>
+            <p className="text-[12px] font-body font-bold text-blue-400 mt-1.5">{isToeicExam ? 'điểm' : 'chính xác'}</p>
           </div>
 
           {/* Reading Score */}
-          <div className="bg-white rounded-lg border border-amber-200 p-3 md:p-4 text-center shadow-xs">
-            <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Đọc</p>
-            <p className="text-lg md:text-2xl font-bold text-amber-900">
-              {results.readingScore}%
+          <div className="bg-white rounded-[20px] border-2 border-[#bcf096] border-b-[4px] p-4 text-center shadow-sm hover:-translate-y-1 transition-transform">
+            <p className="text-[10px] md:text-[11px] font-display font-black text-[#58CC02] uppercase tracking-widest mb-1.5">Đọc (Reading)</p>
+            <p className="text-[28px] md:text-[32px] font-display font-black text-[#58CC02] leading-none">
+              {isToeicExam ? convertedScore.reading : `${results.readingPercent}%`}
             </p>
-            <p className="text-xs font-medium text-amber-700 mt-1">điểm</p>
+            <p className="text-[12px] font-body font-bold text-green-500 mt-1.5">{isToeicExam ? 'điểm' : 'chính xác'}</p>
           </div>
 
           {/* CEFR Level */}
-          <div className="bg-white rounded-lg border border-purple-200 p-3 md:p-4 text-center shadow-xs">
-            <p className="text-xs font-bold text-purple-600 uppercase tracking-widest mb-1">Trình độ</p>
-            <p className="text-lg md:text-2xl font-bold text-purple-900">
+          <div className="bg-white rounded-[20px] border-2 border-[#eec9ff] border-b-[4px] p-4 text-center shadow-sm hover:-translate-y-1 transition-transform">
+            <p className="text-[10px] md:text-[11px] font-display font-black text-[#CE82FF] uppercase tracking-widest mb-1.5">Trình độ</p>
+            <p className="text-[28px] md:text-[32px] font-display font-black text-[#CE82FF] leading-none">
               {results.cefrLevel}
             </p>
-            <p className="text-xs font-medium text-purple-700 mt-1">CEFR</p>
+            <p className="text-[12px] font-body font-bold text-purple-400 mt-1.5">chuẩn CEFR</p>
           </div>
         </div>
 
@@ -218,112 +263,122 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             
             {/* Strengths */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 shadow-xs">
-              <h3 className="font-bold text-base md:text-lg text-gray-900 mb-4 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-green-600" strokeWidth={2.5} />
+            <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[5px] p-5 shadow-sm flex flex-col h-full">
+              <h3 className="font-display font-black text-[18px] text-slate-800 mb-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-[12px] bg-[#f1faeb] flex items-center justify-center border-2 border-[#bcf096] shadow-sm shrink-0">
+                  <TrendingUp className="w-5 h-5 text-[#58CC02]" strokeWidth={3} />
                 </div>
                 Điểm mạnh
               </h3>
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm font-bold text-green-900 mb-2">
+              <div className="p-4 bg-slate-50 border-2 border-slate-100 rounded-[16px] flex-1">
+                <p className="text-[14px] font-display font-black text-slate-700 mb-2 truncate">
                   🎯 {strongest.name}
                 </p>
-                <div className="flex items-center justify-between mb-2.5">
-                  <p className="text-xs font-medium text-green-800">
-                    {strongest.score}/{strongest.max} câu
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[12px] font-body font-bold text-slate-500">
+                    Đúng {strongest.score}/{strongest.max} câu
                   </p>
-                  <p className="text-sm font-bold text-green-700">
+                  <p className="text-[14px] font-display font-black text-[#58CC02]">
                     {Math.round((strongest.score / strongest.max) * 100)}%
                   </p>
                 </div>
-                <div className="w-full h-2.5 bg-green-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-green-600 transition-all duration-1000"
-                    style={{ width: `${(strongest.score / strongest.max) * 100}%` }}
-                  />
+                <div className="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden shadow-inner p-[2px]">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${(strongest.score / strongest.max) * 100}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, type: "spring", bounce: 0.2 }}
+                    className="h-full bg-[#58CC02] rounded-full relative"
+                  >
+                    <div className="absolute top-0 left-0 right-0 h-1/3 bg-white/30 rounded-full" />
+                  </motion.div>
                 </div>
               </div>
             </div>
 
             {/* Areas for Improvement */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 shadow-xs">
-              <h3 className="font-bold text-base md:text-lg text-gray-900 mb-4 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-orange-600" strokeWidth={2.5} />
+            <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[5px] p-5 shadow-sm flex flex-col h-full">
+              <h3 className="font-display font-black text-[18px] text-slate-800 mb-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-[12px] bg-[#FFFBEA] flex items-center justify-center border-2 border-[#FFD8A8] shadow-sm shrink-0">
+                  <Target className="w-5 h-5 text-[#FF9600]" strokeWidth={3} />
                 </div>
                 Cần cải thiện
               </h3>
-              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="text-sm font-bold text-orange-900 mb-2">
+              <div className="p-4 bg-slate-50 border-2 border-slate-100 rounded-[16px] flex-1">
+                <p className="text-[14px] font-display font-black text-slate-700 mb-2 truncate">
                   📚 {weakest.name}
                 </p>
-                <div className="flex items-center justify-between mb-2.5">
-                  <p className="text-xs font-medium text-orange-800">
-                    {weakest.score}/{weakest.max} câu
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[12px] font-body font-bold text-slate-500">
+                    Đúng {weakest.score}/{weakest.max} câu
                   </p>
-                  <p className="text-sm font-bold text-orange-700">
+                  <p className="text-[14px] font-display font-black text-[#FF9600]">
                     {Math.round((weakest.score / weakest.max) * 100)}%
                   </p>
                 </div>
-                <div className="w-full h-2.5 bg-orange-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-orange-600 transition-all duration-1000"
-                    style={{ width: `${(weakest.score / weakest.max) * 100}%` }}
-                  />
+                <div className="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden shadow-inner p-[2px]">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${(weakest.score / weakest.max) * 100}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, type: "spring", bounce: 0.2 }}
+                    className="h-full bg-[#FF9600] rounded-full relative"
+                  >
+                    <div className="absolute top-0 left-0 right-0 h-1/3 bg-white/30 rounded-full" />
+                  </motion.div>
                 </div>
               </div>
             </div>
+
           </div>
         )}
 
         {/* Part-by-Part Results */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 shadow-xs">
+        <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[5px] p-5 md:p-6 shadow-sm">
           <PartResults partResults={partResults} />
         </div>
 
         {/* Recommendations */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-5 shadow-xs">
-          <h3 className="font-bold text-base md:text-lg text-blue-900 mb-3 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-blue-600" strokeWidth={2} />
-            Gợi ý cải thiện
+        <div className="bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[5px] rounded-[24px] p-5 md:p-6 shadow-sm">
+          <h3 className="font-display font-black text-[18px] text-[#1899D6] mb-4 flex items-center gap-2.5">
+            <Zap className="w-6 h-6 text-[#1CB0F6] fill-[#1CB0F6]" strokeWidth={2} />
+            Gợi ý học tập
           </h3>
-          <ul className="space-y-2 text-xs md:text-sm font-medium text-blue-900">
+          <ul className="space-y-3 text-[14px] font-body font-bold text-slate-700 m-0 p-0 list-none">
             {results.averageScore >= 75 ? (
               <>
-                <li>✅ Trình độ rất tốt! Sẵn sàng cho môi trường sử dụng tiếng Anh nâng cao.</li>
-                <li>✅ Hãy duy trì thói quen luyện tập để giữ vững phong độ.</li>
+                <li className="flex gap-3 items-start"><span className="shrink-0 text-[18px]">🌟</span> Trình độ rất tốt! Sẵn sàng cho môi trường sử dụng tiếng Anh nâng cao.</li>
+                <li className="flex gap-3 items-start"><span className="shrink-0 text-[18px]">🔥</span> Hãy duy trì thói quen luyện tập để giữ vững chuỗi (streak) này nhé.</li>
               </>
             ) : results.averageScore >= 50 ? (
               <>
-                <li>✅ Khá tốt! Bạn có nền tảng tiếng Anh ổn định.</li>
-                {weakest && <li>✅ Dành thêm thời gian luyện tập cho <strong>{weakest.name}</strong> để nâng cao tổng điểm.</li>}
+                <li className="flex gap-3 items-start"><span className="shrink-0 text-[18px]">👍</span> Khá tốt! Bạn có nền tảng tiếng Anh tương đối ổn định.</li>
+                {weakest && <li className="flex gap-3 items-start"><span className="shrink-0 text-[18px]">💪</span> Cày thêm phần <strong>{weakest.name}</strong> để "gánh" điểm tổng lên nha!</li>}
               </>
             ) : (
               <>
-                <li>✅ Đừng nản chí! Hãy bắt đầu ôn tập từ những chủ điểm cơ bản.</li>
-                {weakest && <li>✅ Ưu tiên cải thiện <strong>{weakest.name}</strong> đầu tiên.</li>}
+                <li className="flex gap-3 items-start"><span className="shrink-0 text-[18px]">🌱</span> Đừng nản chí! Vạn sự khởi đầu nan, hãy ôn lại từ những từ vựng cơ bản nhất.</li>
+                {weakest && <li className="flex gap-3 items-start"><span className="shrink-0 text-[18px]">🎯</span> Mục tiêu tuần này: Tăng điểm cho phần <strong>{weakest.name}</strong>.</li>}
               </>
             )}
           </ul>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <button
             onClick={onRetry}
-            className="flex-1 py-3 md:py-4 rounded-lg font-bold text-white text-base md:text-lg uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-2 hover:opacity-90 active:scale-95"
-            style={{ backgroundColor: COLORS.blue }}
+            className="flex-1 py-4 md:py-4.5 rounded-[20px] font-display font-black text-white text-[15px] md:text-[16px] uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 bg-[#1CB0F6] border-2 border-[#1899D6] border-b-[5px] hover:bg-[#18A0E0] active:border-b-[2px] active:translate-y-[3px] shadow-sm outline-none"
           >
-            <RotateCcw className="w-5 h-5" strokeWidth={2} />
-            <span>Làm lại</span>
+            <RotateCcw className="w-5 h-5" strokeWidth={3} />
+            Làm lại bài
           </button>
           <button
             onClick={onExit}
-            className="flex-1 py-3 md:py-4 rounded-lg font-bold text-gray-700 bg-gray-100 border border-gray-300 transition-all duration-200 flex items-center justify-center gap-2 hover:bg-gray-200 active:scale-95 text-base md:text-lg uppercase tracking-wide"
+            className="flex-1 py-4 md:py-4.5 rounded-[20px] font-display font-black text-slate-500 text-[15px] md:text-[16px] uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 bg-white border-2 border-slate-200 border-b-[5px] hover:bg-slate-50 hover:text-slate-700 active:border-b-[2px] active:translate-y-[3px] shadow-sm outline-none"
           >
-            <ChevronLeft className="w-5 h-5" strokeWidth={2} />
-            <span>Thoát</span>
+            <ChevronLeft className="w-5 h-5" strokeWidth={3} />
+            Trở về trang chủ
           </button>
         </div>
       </div>

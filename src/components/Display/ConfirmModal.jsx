@@ -1,8 +1,9 @@
-import React, { memo, useCallback } from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { memo } from 'react';
+import { HelpCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ══════════════════════════════════════════════════════
-   CONFIRM MODAL — M3 Dialog
+   CONFIRM MODAL — Gamified 3D Compact
    Usage:
      import ConfirmModal from './ConfirmModal';
      <ConfirmModal
@@ -14,82 +15,92 @@ import { AlertCircle } from 'lucide-react';
      />
 ══════════════════════════════════════════════════════ */
 const ConfirmModal = memo(({ open, answersCount, totalQuestions, onConfirm, onCancel }) => {
-  if (!open) return null;
-
   const remaining  = totalQuestions - answersCount;
   const percentage = Math.round((answersCount / totalQuestions) * 100);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0 font-sans-m3">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-m3-fadein"
-        onClick={onCancel}
-        aria-hidden="true"
-      />
-
-      {/* Dialog */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="confirm-title"
-        className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl overflow-hidden animate-m3-slidein"
-      >
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#FFF3CD] flex items-center justify-center mb-4">
-            <AlertCircle size={24} className="text-[#B45309]" />
-          </div>
-          <h2 id="confirm-title" className="text-lg font-semibold text-[#1A1B1F] font-display-m3 mb-1">
-            Nộp bài chưa hoàn thành?
-          </h2>
-          <p className="text-sm text-[#44464F] leading-relaxed">
-            Bạn còn{' '}
-            <span className="font-semibold text-[#B45309]">{remaining} câu</span>{' '}
-            chưa trả lời. Các câu bỏ trống sẽ bị tính sai.
-          </p>
-        </div>
-
-        {/* Progress mini */}
-        <div className="px-6 pb-5">
-          <div className="bg-[#F1F3F9] rounded-2xl p-3.5 flex items-center gap-3">
-            <div className="flex-1">
-              <div className="flex justify-between mb-1.5">
-                <span className="text-xs text-[#44464F]">Tiến độ</span>
-                <span className="text-xs font-semibold text-[#1A56DB]">
-                  {answersCount}/{totalQuestions} câu
-                </span>
-              </div>
-              <div className="h-1.5 bg-[#E1E2EC] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[#1A56DB] to-[#4D8FFF] rounded-full transition-all duration-500"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-[#D8E2FF] flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-[#1A56DB]">{percentage}%</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="px-6 pb-6 flex gap-2.5">
-          <button
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+          
+          {/* Backdrop Kính Mờ */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             onClick={onCancel}
-            className="flex-1 py-3 rounded-2xl border-[1.5px] border-[#C4C6D0] text-[#44464F] text-sm font-semibold hover:bg-[#F1F3F9] active:bg-[#E1E2EC] transition-colors"
+            aria-hidden="true"
+          />
+
+          {/* Dialog 3D Nhỏ Gọn */}
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+            initial={{ scale: 0.9, opacity: 0, y: 15 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 15 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-[340px] bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-2xl p-5 sm:p-6"
           >
-            Làm tiếp
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-3 rounded-2xl bg-[#00358E] text-white text-sm font-semibold hover:bg-[#002763] active:scale-[0.97] transition-all shadow-[0_2px_12px_rgba(0,53,142,0.3)]"
-          >
-            Vẫn nộp
-          </button>
+            {/* Icon Cảnh báo Vàng 3D (Đè lên viền trên) */}
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 bg-[#FFC800] rounded-[16px] border-b-[4px] border-[#E5B400] flex items-center justify-center shadow-sm">
+              <HelpCircle size={28} strokeWidth={2.5} className="text-white" />
+            </div>
+
+            {/* Nội dung */}
+            <div className="mt-5 text-center">
+              <h2 id="confirm-title" className="text-[18px] font-display font-black text-slate-800 mb-1.5">
+                Nộp bài luôn sao?
+              </h2>
+              <p className="text-[13px] font-body font-bold text-slate-500 mb-5 leading-snug">
+                Bạn còn <span className="text-[#FF9600] font-black">{remaining} câu</span> chưa trả lời. Bỏ trống sẽ không có điểm đâu nhé!
+              </p>
+
+              {/* Progress Bar 3D Mini */}
+              <div className="bg-slate-50 border-2 border-slate-100 rounded-[16px] p-3 mb-6 text-left">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-[10px] font-display font-black text-slate-400 uppercase tracking-widest">Tiến độ hiện tại</span>
+                  <span className="text-[13px] font-display font-black text-[#1CB0F6]">
+                    {answersCount}/{totalQuestions} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">câu</span>
+                  </span>
+                </div>
+                {/* Thanh chạy bóng lóa */}
+                <div className="h-3.5 bg-slate-200 rounded-full overflow-hidden shadow-inner p-[2px]">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="h-full bg-[#1CB0F6] rounded-full relative"
+                  >
+                    <div className="absolute top-0 left-0 right-0 h-[40%] bg-white/30 rounded-full" />
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Nút hành động */}
+              <div className="flex gap-2.5">
+                {/* Nút phụ: Chấp nhận hi sinh điểm */}
+                <button
+                  onClick={onConfirm}
+                  className="flex-1 py-3 rounded-[14px] border-2 border-slate-200 border-b-[4px] bg-slate-50 text-slate-500 text-[13px] font-display font-bold hover:bg-slate-100 hover:text-slate-600 hover:border-slate-300 active:border-b-2 active:translate-y-[2px] transition-all outline-none"
+                >
+                  Vẫn nộp
+                </button>
+                {/* Nút chính: Khuyến khích làm tiếp */}
+                <button
+                  onClick={onCancel}
+                  className="flex-1 py-3 rounded-[14px] border-2 border-[#1899D6] border-b-[4px] bg-[#1CB0F6] text-white text-[13px] font-display font-bold hover:bg-[#18A0E0] active:border-b-2 active:translate-y-[2px] transition-all outline-none shadow-sm"
+                >
+                  Làm tiếp
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 });
 

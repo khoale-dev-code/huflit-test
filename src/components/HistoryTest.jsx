@@ -1,108 +1,71 @@
 // src/components/pages/HistoryTest.jsx
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, X, AlertCircle, Lightbulb, CalendarDays, BookOpen, Trophy, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Check, X, AlertCircle, Lightbulb, CalendarDays, BookOpen, Trophy } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { loadExamData } from '../data/examData';
-
-/* ── Design tokens ── */
-const T = {
-  green: '#10B981', greenDark: '#059669', greenBg: '#ECFDF5',
-  blue: '#3B82F6', blueDark: '#2563EB', blueBg: '#EFF6FF',
-  red: '#EF4444', redDark: '#DC2626', redBg: '#FEF2F2',
-  amber: '#F59E0B', amberDark: '#D97706', amberBg: '#FFFBEB',
-  n50: '#F9FAFB', n100: '#F3F4F6', n200: '#E5E7EB',
-  n400: '#9CA3AF', n600: '#4B5563', n800: '#1F2937',
-  n900: '#111827', white: '#FFFFFF',
-};
-
-const Fd = { fontFamily: '-apple-system, "Segoe UI", "Roboto", sans-serif' };
 
 /* ── Score pill ── */
 const ScorePill = ({ score }) => {
   const isHigh = score >= 80, isMid = score >= 50;
-  const bg = isHigh ? T.green : isMid ? T.amber : T.red;
-  const border = isHigh ? T.greenDark : isMid ? T.amberDark : T.redDark;
+  const bgClass = isHigh ? 'bg-[#58CC02]' : isMid ? 'bg-[#FF9600]' : 'bg-[#FF4B4B]';
+  const borderClass = isHigh ? 'border-[#46A302]' : isMid ? 'border-[#E58700]' : 'border-[#E54343]';
+  
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 6,
-      background: bg, color: T.white,
-      border: `1px solid ${border}`,
-      borderRadius: 10, padding: '6px 12px',
-      boxShadow: `0 2px 8px ${bg}40`,
-    }}>
-      <Trophy size={16} strokeWidth={2} />
-      <span style={{ ...Fd, fontWeight: 700, fontSize: 14 }}>{score}%</span>
+    <div className={`flex items-center gap-2 ${bgClass} border-2 ${borderClass} border-b-[4px] text-white rounded-[14px] px-3 sm:px-4 py-1.5 sm:py-2 shadow-sm`}>
+      <Trophy size={18} strokeWidth={2.5} className="mb-0.5" />
+      <span className="font-display font-black text-[16px] sm:text-[18px] leading-none">{score}%</span>
     </div>
   );
 };
 
 /* ── Tag pill ── */
-const TagPill = ({ children, color = T.blue }) => (
-  <span style={{
-    ...Fd,
-    display: 'inline-block',
-    background: `${color}15`, color,
-    border: `1px solid ${color}30`,
-    borderRadius: 6, padding: '3px 10px',
-    fontSize: 11, fontWeight: 700,
-    letterSpacing: '0.05em', textTransform: 'uppercase',
-  }}>
+const TagPill = ({ children, isBlue }) => (
+  <span className={`inline-block border-2 border-b-[3px] rounded-[10px] px-2.5 py-1 font-display font-black text-[10px] sm:text-[11px] uppercase tracking-widest ${
+    isBlue 
+      ? 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]' 
+      : 'bg-slate-100 text-slate-500 border-slate-200'
+  }`}>
     {children}
   </span>
 );
 
 /* ── Option row ── */
 const OptionRow = ({ opt, optIdx, isSelected, isActualCorrect, isWrongSelected }) => {
-  let bg, border, textColor, badgeBg, badgeColor;
-
+  let stateClass = 'bg-white border-slate-200 text-slate-600';
+  let badgeClass = 'bg-slate-100 text-slate-400 border-slate-200';
+  
   if (isActualCorrect) {
-    bg = T.greenBg; border = T.green;
-    textColor = T.n900; badgeBg = T.green; badgeColor = T.white;
+    stateClass = 'bg-[#f1faeb] border-[#bcf096] text-[#58CC02] border-b-[3px]';
+    badgeClass = 'bg-[#58CC02] text-white border-transparent';
   } else if (isWrongSelected) {
-    bg = T.redBg; border = T.red;
-    textColor = T.n900; badgeBg = T.red; badgeColor = T.white;
-  } else {
-    bg = T.white; border = T.n200;
-    textColor = T.n600; badgeBg = T.n100; badgeColor = T.n400;
+    stateClass = 'bg-[#fff0f0] border-[#ffc1c1] text-[#FF4B4B] border-b-[3px]';
+    badgeClass = 'bg-[#FF4B4B] text-white border-transparent';
+  } else if (isSelected && !isActualCorrect && !isWrongSelected) {
+     // Trường hợp hiếm khi state chưa rõ ràng
+     stateClass = 'bg-blue-50 border-blue-200 text-blue-600 border-b-[3px]';
+     badgeClass = 'bg-blue-500 text-white border-transparent';
   }
 
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '10px 12px',
-      background: bg, border: `1px solid ${border}`,
-      borderRadius: 10,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-        <span style={{
-          ...Fd,
-          width: 32, height: 32, flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: badgeBg, color: badgeColor,
-          borderRadius: 8, fontSize: 13, fontWeight: 700,
-        }}>
+    <div className={`flex items-center justify-between p-3 border-2 rounded-[16px] transition-colors ${stateClass}`}>
+      <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+        <span className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-[10px] border-2 border-b-[3px] font-display font-black text-[13px] ${badgeClass}`}>
           {String.fromCharCode(65 + optIdx)}
         </span>
-        <span style={{ ...Fd, fontSize: 13, fontWeight: 500, color: textColor, lineHeight: 1.4, flex: 1 }}>
+        <span className="font-body font-bold text-[14px] sm:text-[15px] leading-snug pt-1">
           {opt}
         </span>
       </div>
 
       {isActualCorrect && (
-        <div style={{
-          width: 24, height: 24, borderRadius: '50%', flexShrink: 0, marginLeft: 8,
-          background: T.green, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Check size={14} color="white" strokeWidth={3} />
+        <div className="w-7 h-7 shrink-0 ml-3 bg-[#58CC02] border-2 border-[#46A302] border-b-[3px] rounded-full flex items-center justify-center">
+          <Check size={16} color="white" strokeWidth={3} />
         </div>
       )}
       {isWrongSelected && (
-        <div style={{
-          width: 24, height: 24, borderRadius: '50%', flexShrink: 0, marginLeft: 8,
-          background: T.red, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <X size={14} color="white" strokeWidth={3} />
+        <div className="w-7 h-7 shrink-0 ml-3 bg-[#FF4B4B] border-2 border-[#E54343] border-b-[3px] rounded-full flex items-center justify-center">
+          <X size={16} color="white" strokeWidth={3} />
         </div>
       )}
     </div>
@@ -116,49 +79,29 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
   const isCorrect = isAnswered && userAnswerIdx === q.correct;
 
   return (
-    <div style={{
-      position: 'relative',
-      background: T.white,
-      border: `1px solid ${T.n200}`,
-      borderRadius: 12,
-      padding: '14px 12px 12px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-    }}>
+    <div className="relative bg-white border-2 border-slate-200 border-b-[4px] rounded-[24px] p-4 sm:p-5 pt-7 sm:pt-8 shadow-sm">
       {/* Number badge */}
-      <div style={{
-        ...Fd,
-        position: 'absolute', top: -10, left: 12,
-        width: 28, height: 28,
-        background: T.blue, color: T.white,
-        borderRadius: 8,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontWeight: 700, fontSize: 13,
-        boxShadow: `0 2px 6px ${T.blue}40`,
-        zIndex: 2,
-      }}>
+      <div className="absolute -top-4 sm:-top-5 left-4 sm:left-5 w-10 h-10 sm:w-12 sm:h-12 bg-[#1CB0F6] border-2 border-[#1899D6] border-b-[4px] text-white rounded-[14px] sm:rounded-[16px] flex items-center justify-center font-display font-black text-[16px] sm:text-[18px] shadow-sm">
         {idx + 1}
       </div>
 
-      <div style={{ paddingTop: 6 }}>
+      <div className="mt-2">
         {/* Script */}
         {q.script && (
-          <div style={{
-            marginBottom: 10, padding: '10px 12px',
-            background: T.n50, border: `1px solid ${T.n200}`, borderRadius: 8,
-          }}>
-            <p style={{ ...Fd, fontSize: 12, fontWeight: 500, color: T.n600, fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+          <div className="mb-4 p-3 sm:p-4 bg-slate-50 border-2 border-slate-200 rounded-[16px]">
+            <p className="font-body font-bold text-[13px] sm:text-[14px] text-slate-500 italic leading-relaxed m-0">
               "{q.script}"
             </p>
           </div>
         )}
 
-        {/* Question */}
-        <p style={{ ...Fd, fontSize: 13, fontWeight: 600, color: T.n900, lineHeight: 1.5, margin: '0 0 11px 0' }}>
+        {/* Question Text */}
+        <p className="font-body font-bold text-[15px] sm:text-[16px] text-slate-800 leading-snug mb-4">
           {q.question}
         </p>
 
         {/* Options */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="flex flex-col gap-2.5 sm:gap-3">
           {q.options.map((opt, optIdx) => (
             <OptionRow
               key={optIdx}
@@ -172,13 +115,9 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
 
         {/* Skipped */}
         {!isAnswered && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            marginTop: 11, padding: '10px 12px',
-            background: T.amberBg, border: `1px solid ${T.amber}40`, borderRadius: 8,
-          }}>
-            <AlertCircle size={16} color={T.amber} strokeWidth={2} style={{ flexShrink: 0 }} />
-            <p style={{ ...Fd, fontSize: 12, fontWeight: 500, color: T.amberDark, margin: 0 }}>
+          <div className="flex items-center gap-3 mt-4 p-3 bg-[#FFFBEA] border-2 border-[#FFD8A8] border-b-[3px] rounded-[16px]">
+            <AlertCircle size={20} className="text-[#FF9600] shrink-0" strokeWidth={2.5} />
+            <p className="font-display font-bold text-[13px] text-[#FF9600] m-0 uppercase tracking-wide pt-0.5">
               Bạn đã bỏ trống câu này
             </p>
           </div>
@@ -186,25 +125,16 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
 
         {/* Explanation */}
         {q.explanation && (
-          <div style={{
-            marginTop: 12, padding: '11px 12px',
-            background: T.blueBg, border: `1px solid ${T.blue}30`,
-            borderRadius: 8,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                background: T.blue,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: `0 2px 6px ${T.blue}40`,
-              }}>
-                <Lightbulb size={14} color="white" strokeWidth={2} />
+          <div className="mt-4 p-4 sm:p-5 bg-[#EAF6FE] border-2 border-[#BAE3FB] rounded-[20px]">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-[10px] bg-[#1CB0F6] border-b-[3px] border-[#1899D6] flex items-center justify-center shrink-0 shadow-sm">
+                <Lightbulb size={16} color="white" strokeWidth={2.5} />
               </div>
-              <span style={{ ...Fd, fontSize: 11, fontWeight: 700, color: T.blue, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <span className="font-display font-black text-[12px] sm:text-[13px] text-[#1CB0F6] uppercase tracking-widest pt-0.5">
                 Giải thích
               </span>
             </div>
-            <p style={{ ...Fd, fontSize: 12, fontWeight: 500, color: T.n800, lineHeight: 1.5, margin: 0 }}>
+            <p className="font-body font-bold text-[13px] sm:text-[14px] text-slate-700 leading-relaxed m-0">
               {q.explanation}
             </p>
           </div>
@@ -218,36 +148,26 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
 const PartSection = ({ partData, pIndex, userAnswers }) => {
   if (!partData?.questions) return null;
   return (
-    <section style={{ marginBottom: 20 }}>
+    <section className="mb-8 sm:mb-10">
       {/* Part header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        marginBottom: 12, padding: '11px 12px',
-        background: T.white,
-        border: `1px solid ${T.n200}`,
-        borderRadius: 10,
-      }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-          background: T.blueBg,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <BookOpen size={18} color={T.blue} strokeWidth={2} />
+      <div className="flex items-center gap-3 mb-5 p-4 bg-white border-2 border-slate-200 border-b-[4px] rounded-[20px] shadow-sm">
+        <div className="w-12 h-12 rounded-[14px] bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center shrink-0 shadow-sm">
+          <BookOpen size={22} className="text-[#1CB0F6]" strokeWidth={2.5} />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ ...Fd, fontSize: 13, fontWeight: 700, color: T.n900, margin: 0, lineHeight: 1.2 }}>
+        <div className="flex-1 min-w-0 pt-0.5">
+          <p className="font-display font-black text-[16px] sm:text-[18px] text-slate-800 m-0 leading-none truncate">
             {partData.title || `Phần ${partData.id}`}
           </p>
           {partData.description && (
-            <p style={{ ...Fd, fontSize: 11, fontWeight: 500, color: T.n400, margin: '2px 0 0', lineHeight: 1.3 }}>
+            <p className="font-body font-bold text-[12px] sm:text-[13px] text-slate-500 m-0 mt-1 truncate">
               {partData.description}
             </p>
           )}
         </div>
-        <TagPill color={T.blue}>{partData.questions.length} câu</TagPill>
+        <TagPill isBlue>{partData.questions.length} câu</TagPill>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="flex flex-col gap-6">
         {partData.questions.map((q, idx) => (
           <QuestionCard key={q.id} q={q} idx={idx} userAnswers={userAnswers} />
         ))}
@@ -300,36 +220,28 @@ const HistoryTest = () => {
 
   /* Loading */
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: T.n50, gap: 12, ...Fd }}>
-      <div style={{ width: 40, height: 40, border: `3px solid ${T.blueBg}`, borderTop: `3px solid ${T.blue}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <p style={{ color: T.n400, fontWeight: 600, fontSize: 13 }}>Đang tải bài làm...</p>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div className="min-h-screen flex items-center justify-center bg-[#F4F7FA] flex-col gap-3 font-sans selection:bg-blue-200">
+      <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin" />
+      <p className="font-display font-bold text-slate-500 text-[14px]">Đang tải bài làm...</p>
     </div>
   );
 
   /* Error */
   if (error || !examData) return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: T.n50, padding: '24px', ...Fd }}>
-      <div style={{ width: 64, height: 64, borderRadius: 16, background: T.redBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-        <AlertCircle size={32} color={T.red} strokeWidth={1.5} />
+    <div className="min-h-screen flex items-center justify-center bg-[#F4F7FA] font-sans p-4 selection:bg-blue-200">
+      <div className="bg-white border-2 border-slate-200 border-b-[6px] rounded-[24px] p-6 max-w-sm w-full text-center shadow-sm">
+        <div className="w-16 h-16 bg-[#fff0f0] border-2 border-[#ffc1c1] border-b-[4px] rounded-[16px] flex items-center justify-center mx-auto mb-4">
+          <AlertCircle size={32} className="text-[#FF4B4B]" strokeWidth={2.5} />
+        </div>
+        <h2 className="font-display font-black text-[20px] text-slate-800 mb-2">Đã có lỗi xảy ra</h2>
+        <p className="font-body font-bold text-[14px] text-slate-500 mb-6">{error}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="w-full py-3 bg-slate-100 border-2 border-slate-200 border-b-[4px] text-slate-600 font-display font-bold text-[14px] uppercase tracking-wider rounded-[14px] hover:bg-slate-200 active:border-b-2 active:translate-y-[2px] transition-all outline-none"
+        >
+          Quay lại danh sách
+        </button>
       </div>
-      <h2 style={{ ...Fd, fontSize: 17, fontWeight: 700, color: T.n900, marginBottom: 8, textAlign: 'center' }}>Đã có lỗi xảy ra</h2>
-      <p style={{ ...Fd, fontSize: 13, fontWeight: 500, color: T.n400, textAlign: 'center', maxWidth: 320, marginBottom: 24, lineHeight: 1.6 }}>{error}</p>
-      <button
-        onClick={() => navigate(-1)}
-        style={{
-          ...Fd, padding: '10px 24px',
-          background: T.blue, color: T.white,
-          border: 'none', borderRadius: 8,
-          fontSize: 13, fontWeight: 600, cursor: 'pointer',
-          boxShadow: `0 2px 8px ${T.blue}40`,
-          transition: 'all 0.2s',
-        }}
-        onMouseEnter={e => e.currentTarget.style.background = T.blueDark}
-        onMouseLeave={e => e.currentTarget.style.background = T.blue}
-      >
-        ← Quay lại danh sách
-      </button>
     </div>
   );
 
@@ -356,120 +268,88 @@ const HistoryTest = () => {
   const wrongQ = totalQ - correctQ - skippedQ;
 
   return (
-    <div style={{ minHeight: '100vh', background: T.n50, ...Fd }}>
+    <div className="min-h-screen bg-[#F4F7FA] font-sans pb-16 selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
 
-      {/* ── STICKY HEADER ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        background: 'rgba(255,255,255,0.95)',
-        backdropFilter: 'blur(8px)',
-        borderBottom: `1px solid ${T.n200}`,
-        padding: '12px 16px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-      }}>
-        <div style={{
-          maxWidth: 720, margin: '0 auto',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 12,
-        }}>
-          {/* Back button + title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+      {/* ── STICKY HEADER (An toàn không đè Layer) ── */}
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm px-4 md:px-6 py-3 md:py-4">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
             <button
               onClick={() => navigate(-1)}
-              style={{
-                width: 40, height: 40, flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: T.n100, border: `1px solid ${T.n200}`,
-                borderRadius: 8, cursor: 'pointer', color: T.n600,
-                transition: 'all 0.2s',
-                fontSize: 0,
-              }}
+              className="w-10 h-10 sm:w-11 sm:h-11 bg-white border-2 border-slate-200 border-b-[3px] rounded-[12px] sm:rounded-[14px] flex items-center justify-center text-slate-500 hover:text-[#1CB0F6] hover:border-blue-200 hover:bg-blue-50 active:border-b-2 active:translate-y-[1px] transition-all outline-none shrink-0"
               title="Quay lại"
-              onMouseEnter={e => { e.currentTarget.style.background = T.blue; e.currentTarget.style.color = T.white; e.currentTarget.style.borderColor = T.blue; }}
-              onMouseLeave={e => { e.currentTarget.style.background = T.n100; e.currentTarget.style.color = T.n600; e.currentTarget.style.borderColor = T.n200; }}
             >
-              <ArrowLeft size={18} strokeWidth={2.5} />
+              <ArrowLeft size={20} strokeWidth={3} />
             </button>
 
-            <div style={{ minWidth: 0 }}>
-              <h1 style={{
-                ...Fd,
-                fontSize: 14, fontWeight: 700, color: T.n900,
-                margin: 0, lineHeight: 1.3,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
+            <div className="min-w-0 pt-0.5">
+              <h1 className="font-display font-black text-[16px] sm:text-[18px] text-slate-800 m-0 truncate">
                 {examData.title}
               </h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3, flexWrap: 'wrap' }}>
-                <TagPill color={T.blue}>{partLabel}</TagPill>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <TagPill isBlue>{partLabel}</TagPill>
                 {examDate && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: T.n400 }}>
-                    <CalendarDays size={12} />
-                    {new Date(examDate).toLocaleDateString('vi-VN')}
-                  </span>
+                  <>
+                    <span className="w-1 h-1 rounded-full bg-slate-300 shrink-0" />
+                    <span className="flex items-center gap-1.5 font-display font-bold text-[10px] sm:text-[11px] text-slate-400 uppercase tracking-widest">
+                      <CalendarDays size={12} strokeWidth={2.5} />
+                      {new Date(examDate).toLocaleDateString('vi-VN')}
+                    </span>
+                  </>
                 )}
               </div>
             </div>
           </div>
 
-          <ScorePill score={progressItem.score} />
+          <div className="shrink-0 self-start sm:self-auto">
+            <ScorePill score={progressItem.score} />
+          </div>
         </div>
       </header>
 
-      {/* ── SUMMARY STRIP ── */}
-      <div style={{ background: T.white, borderBottom: `1px solid ${T.n100}` }}>
-        <div style={{
-          maxWidth: 720, margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-          padding: '0 16px',
-        }}>
+      {/* ── SUMMARY STRIP (Thống kê ngang) ── */}
+      <div className="bg-white border-b-2 border-slate-200 mb-6 sm:mb-8">
+        <div className="max-w-4xl mx-auto flex items-center px-2 sm:px-4">
           {[
-            { label: 'Đúng',   value: correctQ,  color: T.green  },
-            { label: 'Sai',    value: wrongQ,    color: T.red    },
-            { label: 'Bỏ qua', value: skippedQ,  color: T.amber  },
-            { label: 'Tổng',   value: totalQ,    color: T.blue   },
+            { label: 'Đúng',   value: correctQ, color: 'text-[#58CC02]' },
+            { label: 'Sai',    value: wrongQ,   color: 'text-[#FF4B4B]' },
+            { label: 'Bỏ qua', value: skippedQ, color: 'text-[#FF9600]' },
+            { label: 'Tổng',   value: totalQ,   color: 'text-[#1CB0F6]', noBorder: true },
           ].map((stat, i) => (
-            <div key={i} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              padding: '12px 8px',
-              borderRight: i < 3 ? `1px solid ${T.n100}` : 'none',
-            }}>
-              <span style={{ ...Fd, fontSize: 16, fontWeight: 700, color: stat.color, lineHeight: 1 }}>{stat.value}</span>
-              <span style={{ ...Fd, fontSize: 11, fontWeight: 600, color: T.n400, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 4 }}>{stat.label}</span>
+            <div key={i} className={`flex-1 flex flex-col items-center justify-center py-3 sm:py-4 ${!stat.noBorder ? 'border-r-2 border-slate-100' : ''}`}>
+              <span className={`font-display font-black text-[18px] sm:text-[22px] leading-none ${stat.color}`}>{stat.value}</span>
+              <span className="font-display font-bold text-[9px] sm:text-[11px] text-slate-400 uppercase tracking-widest mt-1 sm:mt-1.5">{stat.label}</span>
             </div>
           ))}
         </div>
-        {/* Progress bar */}
-        <div style={{ height: 4, background: T.n100 }}>
-          <div style={{
-            height: '100%',
-            width: `${totalQ > 0 ? (correctQ / totalQ) * 100 : 0}%`,
-            background: `linear-gradient(90deg, ${T.green} 0%, ${T.blue} 100%)`,
-            transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
-          }} />
+        {/* Progress bar gradient mỏng phía dưới cùng */}
+        <div className="h-1.5 bg-slate-100 w-full">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${totalQ > 0 ? (correctQ / totalQ) * 100 : 0}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-[#58CC02] to-[#1CB0F6]" 
+          />
         </div>
       </div>
 
       {/* ── CONTENT ── */}
-      <main style={{ maxWidth: 720, margin: '0 auto', padding: '16px 16px 72px' }}>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6">
         {partsToRender.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <p style={{ ...Fd, color: T.n400, fontWeight: 500, fontSize: 13 }}>
-              Không tìm thấy phần thi nào hoặc cấu trúc đề đã bị thay đổi.
-            </p>
+          <div className="text-center py-16 bg-white border-2 border-dashed border-slate-300 rounded-[24px] shadow-sm">
+            <div className="w-16 h-16 bg-slate-100 rounded-[16px] border-b-[3px] border-slate-200 flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="w-8 h-8 text-slate-400" strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[18px] sm:text-[20px] font-display font-black text-slate-700 mb-1">Trống rỗng</h3>
+            <p className="text-slate-500 font-body font-bold text-[13px] sm:text-[14px]">Không tìm thấy phần thi nào hoặc cấu trúc đề đã bị thay đổi.</p>
           </div>
         )}
+        
         {partsToRender.map((partData, pIndex) => (
           <PartSection key={partData.id || pIndex} partData={partData} pIndex={pIndex} userAnswers={userAnswers} />
         ))}
       </main>
-
-      <style>{`
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: ${T.n200}; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: ${T.n300}; }
-      `}</style>
     </div>
   );
 };

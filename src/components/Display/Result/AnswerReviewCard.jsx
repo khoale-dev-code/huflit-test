@@ -10,19 +10,22 @@ import ExplanationSection from '../ExplanationDisplay';
  * - Dễ control (đóng tất cả, mở tất cả)
  *
  * @param {{
- *   question: object,
- *   isCorrect: boolean,
- *   userAnswer: number,
- *   correctAnswer: number,
- *   options: string[],
- *   isExpanded: boolean,
- *   onToggle: (id: string|number) => void
+ * question: object,
+ * questionNum: number,   // <-- Đã thêm biến nhận số thứ tự từ file cha
+ * isCorrect: boolean,
+ * userAnswer: number,
+ * correctAnswer: number,
+ * options: string[],
+ * isExpanded: boolean,
+ * onToggle: (id: string|number) => void
  * }} props
  */
 const AnswerReviewCard = memo(
-  ({ question, isCorrect, userAnswer, correctAnswer, options, isExpanded, onToggle }) => {
+  ({ question, questionNum, isCorrect, userAnswer, correctAnswer, options, isExpanded, onToggle }) => {
     const userAnswerText =
-      userAnswer !== undefined ? String.fromCharCode(65 + userAnswer) : 'Chưa chọn';
+      userAnswer !== undefined && userAnswer !== null 
+        ? String.fromCharCode(65 + userAnswer) 
+        : 'Chưa chọn';
     const correctAnswerText = String.fromCharCode(65 + correctAnswer);
 
     return (
@@ -36,7 +39,7 @@ const AnswerReviewCard = memo(
         {/* Toggle Button */}
         <button
           onClick={() => onToggle(question.id)}
-          className="w-full p-4 flex items-start gap-4 text-left"
+          className="w-full p-4 flex items-start gap-4 text-left outline-none hover:bg-slate-50/30 transition-colors rounded-xl"
           aria-expanded={isExpanded}
         >
           {/* Status Icon */}
@@ -54,9 +57,23 @@ const AnswerReviewCard = memo(
 
           {/* Question Info */}
           <div className="flex-1 min-w-0">
+            {/* 👇 ĐÃ SỬA: Đổi {question.id} thành {questionNum} 👇 */}
             <p className="text-sm font-bold text-slate-800 mb-2 truncate md:whitespace-normal text-wrap">
-              Câu {question.id}: {question.question}
+              Câu {questionNum}: {question.question || <span className="italic text-slate-400">(Chọn đáp án theo hình ảnh)</span>}
             </p>
+            
+            {/* 👇 ĐÃ THÊM: Hiển thị hình ảnh câu hỏi nếu có 👇 */}
+            {question.imageUrl && (
+               <div className="mb-3">
+                 <img 
+                   src={question.imageUrl} 
+                   alt={`Câu hỏi ${questionNum}`} 
+                   loading="lazy"
+                   className="max-w-full max-h-[160px] object-contain rounded border border-slate-200 bg-white" 
+                 />
+               </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               <span
                 className={`text-[10px] font-bold px-2 py-1 rounded ${

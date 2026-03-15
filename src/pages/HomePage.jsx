@@ -1,9 +1,9 @@
 import React, { memo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowRight, Zap, TrendingUp,
+  ArrowRight, Zap, TrendingUp, Target, // Đã thêm Target
   Headphones, FileText, Brain, Database, Rocket, Star,
-  Users, Sparkles
+  Users, Sparkles, Briefcase, Globe, Award, Flame
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { ROUTES } from '../config/routes'
@@ -37,12 +37,46 @@ const FEATURES = [
   },
 ]
 
+const EXAM_TYPES = [
+  {
+    id: 'toeic',
+    title: 'TOEIC',
+    subtitle: 'Chinh phục đỉnh cao',
+    desc: 'Bộ đề thi chuẩn format mới nhất. Rèn luyện phản xạ thực chiến cho kỹ năng Nghe & Đọc.',
+    badge: 'Phổ biến',
+    badgeTheme: 'bg-[#fff0f0] text-[#FF4B4B] border-[#ffc1c1]',
+    Icon: Briefcase,
+    theme: { bg: 'bg-[#EAF6FE]', text: 'text-[#1CB0F6]', border: 'border-[#BAE3FB]', iconBg: 'bg-[#1CB0F6]' }
+  },
+  {
+    id: 'ielts',
+    title: 'IELTS',
+    subtitle: 'Vươn tầm quốc tế',
+    desc: 'Kho đề Academic & General Training phong phú. Bám sát xu hướng ra đề thực tế.',
+    badge: 'Học thuật',
+    badgeTheme: 'bg-[#F8EEFF] text-[#CE82FF] border-[#eec9ff]',
+    Icon: Globe,
+    theme: { bg: 'bg-[#f1faeb]', text: 'text-[#58CC02]', border: 'border-[#bcf096]', iconBg: 'bg-[#58CC02]' }
+  },
+  {
+    id: 'thpt',
+    title: 'THPT Quốc Gia',
+    subtitle: 'Vượt ải đại học',
+    desc: 'Trọn bộ đề thi minh họa và chính thức được cập nhật chuẩn cấu trúc mới nhất năm 2026.',
+    badge: 'MỚI 2026',
+    badgeTheme: 'bg-[#FFFBEA] text-[#FF9600] border-[#FFD8A8]',
+    badgeIcon: Flame,
+    Icon: Award,
+    theme: { bg: 'bg-[#FFF0F0]', text: 'text-[#FF4B4B]', border: 'border-[#ffc1c1]', iconBg: 'bg-[#FF4B4B]' }
+  }
+]
+
 // ─── Gamified FeatureCard ──────────────────────────────────────────────────────
 const FeatureCard = memo(({ Icon, title, desc, theme, onClick }) => (
   <motion.button
     onClick={onClick}
     whileHover={{ y: -4 }}
-    className={`w-full text-left bg-white border-2 border-slate-200 border-b-[6px] p-5 sm:p-6 rounded-[28px] transition-colors duration-200 active:border-b-2 active:translate-y-[4px] outline-none ${theme.hoverBorder} group`}
+    className={`w-full text-left bg-white border-2 border-slate-200 border-b-[6px] p-5 sm:p-6 rounded-[28px] transition-colors duration-200 active:border-b-2 active:translate-y-[4px] outline-none ${theme.hoverBorder} group shadow-sm`}
   >
     <div className={`w-14 h-14 rounded-[18px] ${theme.bg} flex items-center justify-center mb-5 shadow-sm border-b-[4px] ${theme.iconBg} transition-transform group-hover:scale-110`}>
       <Icon className="w-7 h-7 text-white" strokeWidth={2.5} aria-hidden="true" />
@@ -56,13 +90,47 @@ const FeatureCard = memo(({ Icon, title, desc, theme, onClick }) => (
 ))
 FeatureCard.displayName = 'FeatureCard'
 
+// ─── Gamified ExamTypeCard ─────────────────────────────────────────────────────
+const ExamTypeCard = memo(({ data, onClick }) => {
+  const { Icon, title, subtitle, desc, badge, badgeTheme, badgeIcon: BadgeIcon, theme } = data;
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ y: -6 }}
+      className={`relative w-full text-left bg-white border-2 border-slate-200 border-b-[8px] p-6 md:p-8 rounded-[32px] transition-all duration-200 active:border-b-[3px] active:translate-y-[5px] outline-none hover:border-${theme.text.split('-')[1]}-200 group shadow-sm flex flex-col h-full`}
+    >
+      {/* Badge */}
+      <div className={`absolute -top-4 right-6 px-3 py-1.5 rounded-[12px] border-2 border-b-[4px] font-quick font-black text-[12px] uppercase tracking-wider shadow-sm flex items-center gap-1.5 z-10 ${badgeTheme}`}>
+        {BadgeIcon && <BadgeIcon size={14} strokeWidth={3} />}
+        {badge}
+      </div>
+
+      <div className={`w-16 h-16 rounded-[20px] ${theme.bg} flex items-center justify-center mb-5 border-2 ${theme.border} border-b-[4px] shadow-sm group-hover:scale-110 transition-transform`}>
+        <Icon className={`w-8 h-8 ${theme.text}`} strokeWidth={2.5} />
+      </div>
+      
+      <div className="flex-1">
+        <h3 className={`text-[24px] sm:text-[28px] font-quick font-black mb-1 ${theme.text}`}>{title}</h3>
+        <p className="text-[14px] font-display font-black text-slate-400 uppercase tracking-widest mb-3">{subtitle}</p>
+        <p className="text-[15px] font-nunito font-bold text-slate-600 leading-relaxed mb-6">{desc}</p>
+      </div>
+
+      <div className={`w-full py-3.5 rounded-[16px] border-2 border-slate-100 font-quick font-black text-[15px] uppercase tracking-wider text-center text-slate-500 group-hover:bg-slate-50 group-hover:${theme.text} transition-colors`}>
+        Vào luyện đề
+      </div>
+    </motion.button>
+  )
+})
+ExamTypeCard.displayName = 'ExamTypeCard'
+
+
 // ─── Gamified StatCard ─────────────────────────────────────────────────────────
 const StatCard = memo(({ Icon, value, label, theme }) => (
-  <div className={`bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-4 sm:p-5 flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-transform`}>
+  <div className={`bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-4 sm:p-5 flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-transform shadow-sm`}>
     <div className={`w-12 h-12 rounded-[16px] ${theme.bg} ${theme.border} border-2 flex items-center justify-center mb-3`}>
       <Icon className={`w-6 h-6 ${theme.text}`} strokeWidth={2.5} aria-hidden="true" />
     </div>
-    <p className="text-[24px] sm:text-[28px] font-black text-slate-800 font-quick leading-none mb-1">{value}</p>
+    <p className="text-[24px] sm:text-[28px] font-black text-slate-800 font-quick leading-none mb-1.5">{value}</p>
     <p className="text-[11px] sm:text-[12px] font-extrabold text-slate-400 uppercase tracking-widest">{label}</p>
   </div>
 ))
@@ -88,12 +156,12 @@ const HomePage = memo(() => {
   return (
     <div className="w-full bg-[#F4F7FA] min-h-screen font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
 
-      {/* Hero Section (Vẫn giữ nguyên component của bạn) */}
+      {/* Hero Section */}
       <MemoizedHeaderSection isSignedIn={isSignedIn} user={user} />
 
       <main className="w-full pb-20">
 
-        {/* ═══ FEATURES ══════════════════════════════════════════════════════ */}
+        {/* ═══ KHỐI KIẾN THỨC NỀN TẢNG (FEATURES) ════════════════════════════════ */}
         <section className="px-4 sm:px-6 py-12 sm:py-16">
           <div className="max-w-5xl mx-auto">
             <motion.div
@@ -109,7 +177,7 @@ const HomePage = memo(() => {
                 </span>
               </h2>
               <p className="text-[15px] sm:text-[17px] font-bold text-slate-500">
-                Chinh phục bài thi tiếng Anh một cách dễ dàng và thú vị nhất!
+                Xây dựng nền tảng tiếng Anh vững chắc một cách dễ dàng và thú vị.
               </p>
             </motion.div>
 
@@ -135,8 +203,46 @@ const HomePage = memo(() => {
           </div>
         </section>
 
+        {/* ═══ KHO ĐỀ THI (EXAM TYPES) ══════════════════════════════════════════ */}
+        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-slate-50 border-y-2 border-slate-200">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-10 sm:mb-14"
+            >
+              <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#FFFBEA] border-2 border-[#FFD8A8] border-b-[4px] rounded-[16px] mb-5 shadow-sm">
+                <Target className="w-5 h-5 text-[#FF9600]" strokeWidth={3} />
+                <span className="font-quick font-black text-[14px] text-[#FF9600] uppercase tracking-widest">Đấu trường trí tuệ</span>
+              </div>
+              <h2 className="text-[28px] sm:text-[40px] font-black text-slate-800 mb-4 font-quick">
+                Chọn Đấu Trường Của Bạn
+              </h2>
+              <p className="text-[15px] sm:text-[17px] font-bold text-slate-500 max-w-2xl mx-auto">
+                Từ các chứng chỉ quốc tế đến kỳ thi quan trọng nhất cấp 3. Hãy chọn mục tiêu và bắt đầu chinh phục!
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              {EXAM_TYPES.map((exam, i) => (
+                <motion.div
+                  key={exam.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15, type: "spring", stiffness: 150 }}
+                  className="h-full"
+                >
+                  <ExamTypeCard data={exam} onClick={handleFullTest} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ═══ STATS ═════════════════════════════════════════════════════════ */}
-        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y-2 border-slate-200">
+        <section className="px-4 sm:px-6 py-12 sm:py-20">
           <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -145,7 +251,7 @@ const HomePage = memo(() => {
               className="flex items-center justify-center gap-3 mb-8 sm:mb-12"
             >
               <Sparkles className="text-[#FFC800]" size={28} strokeWidth={2.5} />
-              <h2 className="text-center text-[22px] sm:text-[30px] font-black text-slate-800 font-quick">
+              <h2 className="text-center text-[24px] sm:text-[32px] font-black text-slate-800 font-quick">
                 Cộng đồng học tập sôi nổi
               </h2>
               <Sparkles className="text-[#FFC800]" size={28} strokeWidth={2.5} />
@@ -168,7 +274,7 @@ const HomePage = memo(() => {
         </section>
 
         {/* ═══ CTA BANNER ════════════════════════════════════════════════════ */}
-        <section className="px-4 sm:px-6 py-12 sm:py-20">
+        <section className="px-4 sm:px-6 py-12 pb-24">
           <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -181,7 +287,7 @@ const HomePage = memo(() => {
               <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-white opacity-10 rounded-full blur-[30px]" />
 
               <div className="relative z-10 flex flex-col items-center">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
+                <div className="w-20 h-20 bg-white rounded-[24px] flex items-center justify-center mb-6 shadow-lg border-b-[4px] border-slate-200">
                   <Rocket className="w-10 h-10 text-[#FF9600]" strokeWidth={2.5} />
                 </div>
                 
