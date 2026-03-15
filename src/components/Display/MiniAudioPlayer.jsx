@@ -1,5 +1,5 @@
 // src/components/FullExam/components/ExamScreen/MiniAudioPlayer.jsx
-import React, { memo } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { Play, Pause, Volume2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';

@@ -11,7 +11,6 @@ export default defineConfig({
     port: 5173,
     open: true,
     cors: true,
-    // ✅ QUAN TRỌNG: Fix lỗi COOP (Cross-Origin-Opener-Policy) 
     // Giúp Popup đăng nhập Google của Firebase hoạt động ổn định trên localhost
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
@@ -24,44 +23,40 @@ export default defineConfig({
     alias: {
       // Giúp bạn import theo kiểu: import { ... } from '@/components/...'
       '@': path.resolve(__dirname, './src'),
+      
+      // ✅ FIX LỖI CREATECONTEXT: Ép tất cả các thư viện dùng chung 1 bản React duy nhất
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
 
   // ─── Cấu hình Build (Production) ───────────────────────────────
   build: {
     outDir: 'dist',
-    target: 'esnext', // Sử dụng công nghệ JS mới nhất cho trình duyệt hiện đại
+    target: 'esnext',
     sourcemap: false, // Tắt sourcemap để bảo mật code và giảm dung lượng build
-    chunkSizeWarningLimit: 1500, // Tăng giới hạn cảnh báo dung lượng file
+    chunkSizeWarningLimit: 1500,
 
     rollupOptions: {
       output: {
-        // ✅ TỐI ƯU CHUNKING: Chia nhỏ ứng dụng để tải nhanh hơn
+        // ✅ TỐI ƯU CHUNKING (Đã fix lỗi Circular Chunk)
         manualChunks(id) {
-          // 1. Tách các thư viện Core (Firebase & Supabase)
-          if (id.includes('node_modules/firebase')) {
-            return 'firebase-bundle';
-          }
-          if (id.includes('node_modules/@supabase')) {
-            return 'supabase-bundle';
-          }
+          // 1. Tách DB & Backend (Nặng, ít thay đổi)
+          if (id.includes('node_modules/firebase')) return 'firebase-bundle';
+          if (id.includes('node_modules/@supabase')) return 'supabase-bundle';
 
-          // 2. Tách UI & Icons (Nặng nhưng ít khi thay đổi)
+          // 2. GOM CHUNG React Core và UI Libraries vào 1 cục "vendor"
+          // Điều này phá vỡ vòng lặp vô tận giữa framer-motion và react
           if (
-            id.includes('node_modules/lucide-react') ||
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/react-router') ||
             id.includes('node_modules/framer-motion') ||
-            id.includes('node_modules/recharts')
+            id.includes('node_modules/lucide-react') ||
+            id.includes('node_modules/recharts') ||
+            id.includes('node_modules/zustand')
           ) {
-            return 'ui-visuals';
-          }
-
-          // 3. Tách các tiện ích React Core
-          if (
-            id.includes('node_modules/react') ||
-            id.includes('node_modules/react-dom') ||
-            id.includes('node_modules/react-router-dom')
-          ) {
-            return 'react-vendor';
+            return 'react-vendor'; 
           }
         },
         
@@ -73,8 +68,15 @@ export default defineConfig({
     },
   },
   
-  // Tối ưu hóa việc nạp (pre-bundling) các thư viện nặng
+  // Tối ưu hóa việc nạp các thư viện ngay khi khởi động dev server
   optimizeDeps: {
-    include: ['firebase/app', 'firebase/auth', 'firebase/firestore', '@supabase/supabase-js'],
+    include: [
+      'firebase/app', 
+      'firebase/auth', 
+      'firebase/firestore', 
+      '@supabase/supabase-js',
+      'react',
+      'react-dom'
+    ],
   }
 });
