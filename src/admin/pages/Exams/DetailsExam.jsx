@@ -4,15 +4,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Edit3, ArrowLeft, Loader2, AlertTriangle,
   Clock, HelpCircle, Headphones, BookOpen,
-  Users, CheckCircle, Target, Check, PenTool, Mic, LayoutTemplate, FileText
+  Users, CheckCircle, Target, Check, PenTool, Mic, 
+  LayoutTemplate, FileText, ChevronDown, ChevronUp, Image as ImageIcon, Music, Star, Layers,
+  Eye, EyeOff // 🔒 Thêm 2 Icon này để dùng cho Badge trạng thái
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { getExamById } from '../../services/examService';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminNavbar from '../../components/AdminNavbar';
-import { EXAM_CATEGORIES } from './CreateExam';
-
+ 
+// ─── Cấu hình Danh mục ──────────────────────────────────────────
+const EXAM_CATEGORIES = [
+  { value: 'toeic',  label: 'Luyện thi TOEIC' },
+  { value: 'ielts',  label: 'Luyện thi IELTS' },
+  { value: 'huflit', label: 'Đề thi trường HUFLIT' },
+  { value: 'thpt',   label: 'Đề thi THPT Quốc Gia' },
+  { value: 'other',  label: 'Khác / Chưa phân loại' },
+];
 // ─── Cấu hình Icon & Màu sắc Gamification ────────────────────────
 const TYPE_CONFIG = {
   listening: { icon: Headphones, color: 'text-[#1CB0F6]', bg: 'bg-[#EAF6FE]', border: 'border-[#BAE3FB]', label: 'LISTENING' },
@@ -55,6 +64,62 @@ const UsageStat = ({ icon: Icon, label, value }) => (
   </div>
 );
 
+// ─── Question Preview Card (Câu hỏi đơn) ────────────────────────────
+const PreviewQuestionCard = ({ question }) => {
+  const isExample = question.isExample;
+  return (
+    <div className={`p-4 rounded-[16px] border-2 border-b-[4px] mb-4 ${isExample ? 'bg-[#FFFBEA] border-[#FFD8A8]' : 'bg-white border-slate-200'}`}>
+      <div className="flex items-start gap-3 mb-3">
+        <div className={`w-8 h-8 rounded-[10px] shrink-0 flex items-center justify-center border-b-[3px] text-[12px] font-display font-black text-white ${isExample ? 'bg-[#FF9600] border-[#E58700]' : 'bg-[#1CB0F6] border-[#1899D6]'}`}>
+          {question.displayIndex}
+        </div>
+        <div className="flex-1 min-w-0 pt-1">
+          {/* Các cờ Media & Trạng thái */}
+          <div className="flex flex-wrap gap-2 mb-2">
+            {isExample && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#FF9600]/20 text-[#FF9600] text-[10px] font-display font-black uppercase"><Star size={10} strokeWidth={3} /> Câu Ví Dụ</span>}
+            {question.imageUrl && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-display font-black uppercase"><ImageIcon size={10} strokeWidth={3} /> Có Ảnh</span>}
+            {question.audioUrl && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF6FE] text-[#1CB0F6] text-[10px] font-display font-black uppercase"><Music size={10} strokeWidth={3} /> Có Audio riêng</span>}
+          </div>
+          
+          <h4 className={`text-[14px] sm:text-[15px] font-body font-bold leading-snug whitespace-pre-wrap ${isExample ? 'text-[#D9A600]' : 'text-slate-800'}`}>
+            {question.question || <span className="italic text-slate-400">(Không có nội dung câu hỏi)</span>}
+          </h4>
+        </div>
+      </div>
+
+      {/* Hiển thị các Option đáp án */}
+      {question.options && question.options.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-11">
+          {question.options.map((opt, i) => {
+            const isCorrect = question.correct === i;
+            return (
+              <div key={i} className={`flex items-center gap-2 p-2 rounded-[12px] border-2 ${isCorrect ? 'bg-[#f1faeb] border-[#bcf096]' : 'bg-slate-50 border-slate-100'}`}>
+                <div className={`w-6 h-6 rounded-[6px] flex items-center justify-center text-[11px] font-display font-black shrink-0 ${isCorrect ? 'bg-[#58CC02] text-white' : 'bg-slate-200 text-slate-500'}`}>
+                  {String.fromCharCode(65 + i)}
+                </div>
+                <span className={`text-[13px] font-body font-bold truncate ${isCorrect ? 'text-[#46A302]' : 'text-slate-600'}`}>
+                  {opt || <span className="italic text-slate-400">Đáp án trong Audio</span>}
+                </span>
+                {isCorrect && <Check size={14} className="text-[#58CC02] ml-auto shrink-0" strokeWidth={3} />}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Hiển thị Giải thích */}
+      {question.explanation && (
+        <div className="mt-3 pl-11">
+          <div className="bg-[#EAF6FE] border-2 border-[#BAE3FB] rounded-[12px] p-3 text-[13px] font-body font-bold text-slate-600">
+            <span className="text-[#1CB0F6] uppercase tracking-wider font-display font-black mr-2">💡 Giải thích:</span>
+            {question.explanation}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── MAIN COMPONENT ────────────────────────────────────────────────
 const DetailsExam = () => {
   const { id }   = useParams();
@@ -65,6 +130,9 @@ const DetailsExam = () => {
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Quản lý việc đóng mở từng Part để dễ xem
+  const [expandedParts, setExpandedParts] = useState({});
 
   useEffect(() => {
     if (window.innerWidth < 768) setSidebarOpen(false);
@@ -81,18 +149,17 @@ const DetailsExam = () => {
       setLoading(true);
       try {
         const data = await getExamById(id);
-        
-        // LOGIC CHUYỂN ĐỔI TƯƠNG THÍCH NGƯỢC
         if (data.parts && !Array.isArray(data.parts) && typeof data.parts === 'object') {
           data.parts = Object.entries(data.parts).map(([key, val]) => {
-            let type = val.type;
-            if (!type) {
-              type = ['part1', 'part2', 'part3', 'part4'].includes(key) ? 'listening' : 'reading';
-            }
+            let type = val.type || (['part1', 'part2', 'part3', 'part4'].includes(key) ? 'listening' : 'reading');
             return { ...val, id: key, type };
           });
         }
         setExam(data);
+        // Mặc định mở Part đầu tiên
+        if (data.parts && data.parts.length > 0) {
+          setExpandedParts({ [data.parts[0].id]: true });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -102,7 +169,7 @@ const DetailsExam = () => {
     load();
   }, [id]);
 
-  // ── Tính toán thống kê từ mảng parts ──
+  // ── Tính toán thống kê & INDEX CHUẨN cho mảng parts ──
   const stats = useMemo(() => {
     if (!exam) return null;
     const partsArr = Array.isArray(exam.parts) ? exam.parts : [];
@@ -111,17 +178,39 @@ const DetailsExam = () => {
     let counts = { listening: 0, reading: 0, writing: 0, speaking: 0 };
     let partsCount = { listening: 0, reading: 0, writing: 0, speaking: 0 };
 
-    partsArr.forEach(p => {
-      const qCount = p.questions?.length || 0;
-      total += qCount;
-      if (counts[p.type] !== undefined) {
-        counts[p.type] += qCount;
-        partsCount[p.type] += 1;
+    // Tính toán lại mảng để gán `displayIndex` (1 đến 200) cho từng câu
+    let globalIndex = 1;
+    const indexedParts = partsArr.map(part => {
+      let partQCount = 0;
+      const indexedQuestions = (part.questions || []).map(q => {
+        if (q.type === 'group') {
+          const indexedSubQs = (q.subQuestions || []).map(sq => {
+            if (sq.isExample) return { ...sq, displayIndex: 'VD' };
+            partQCount++;
+            return { ...sq, displayIndex: globalIndex++ };
+          });
+          return { ...q, subQuestions: indexedSubQs };
+        } else {
+          if (q.isExample) return { ...q, displayIndex: 'VD' };
+          partQCount++;
+          return { ...q, displayIndex: globalIndex++ };
+        }
+      });
+      
+      total += partQCount;
+      if (counts[part.type] !== undefined) {
+        counts[part.type] += partQCount;
+        partsCount[part.type] += 1;
       }
+      return { ...part, questions: indexedQuestions, qCount: partQCount };
     });
 
-    return { total, counts, partsCount, partsArr };
+    return { total, counts, partsCount, partsArr: indexedParts };
   }, [exam]);
+
+  const togglePart = (partId) => {
+    setExpandedParts(prev => ({ ...prev, [partId]: !prev[partId] }));
+  };
 
   // ── Loading / Error ──
   if (loading) return (
@@ -137,7 +226,7 @@ const DetailsExam = () => {
         <AlertTriangle className="w-12 h-12 text-[#FF4B4B] mx-auto mb-3" strokeWidth={2.5} />
         <h3 className="text-[18px] font-display font-black text-slate-800 mb-1">Lỗi tải dữ liệu!</h3>
         <p className="text-[14px] font-body text-slate-500 mb-5">{error ?? 'Không tìm thấy bộ đề'}</p>
-        <button onClick={() => navigate('/admin/exams')} className="w-full py-2.5 bg-slate-100 text-slate-600 font-display font-bold rounded-[12px] hover:bg-slate-200 transition-colors">
+        <button onClick={() => navigate('/admin/exams')} className="w-full py-2.5 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[4px] rounded-[14px] font-display font-black uppercase tracking-wider active:translate-y-[2px] transition-all">
           Quay lại danh sách
         </button>
       </div>
@@ -153,7 +242,7 @@ const DetailsExam = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => navigate('/admin/exams/create')} />
 
-        {/* ── STICKY HEADER (Glassmorphism) ── */}
+        {/* ── STICKY HEADER ── */}
         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b-2 border-slate-200 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 shrink-0 shadow-sm">
           <nav className="flex items-center gap-2 min-w-0 overflow-hidden">
             <button 
@@ -172,10 +261,10 @@ const DetailsExam = () => {
 
           <button 
             onClick={() => navigate(`/admin/exams/edit/${id}`)} 
-            className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 bg-[#1CB0F6] text-white rounded-[14px] border-2 border-[#1899D6] border-b-[4px] hover:bg-[#18A0E0] active:border-b-2 active:translate-y-[2px] font-display font-bold text-[13px] sm:text-[14px] uppercase tracking-wider transition-all outline-none shadow-sm shrink-0"
+            className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 bg-[#1CB0F6] text-white rounded-[14px] border-2 border-[#1899D6] border-b-[4px] hover:bg-[#18A0E0] active:border-b-2 active:translate-y-[2px] font-display font-black text-[13px] sm:text-[14px] uppercase tracking-wider transition-all outline-none shadow-sm shrink-0"
           >
             <Edit3 size={18} strokeWidth={2.5} />
-            <span className="hidden sm:inline">Chỉnh sửa</span>
+            <span className="hidden sm:inline pt-0.5">Vào Chỉnh sửa</span>
           </button>
         </div>
 
@@ -184,14 +273,29 @@ const DetailsExam = () => {
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-6 sm:space-y-8">
 
             {/* ── HERO BANNER ── */}
-            <div className="bg-white p-6 sm:p-8 rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm relative overflow-hidden">
+            <div className="bg-white p-6 sm:p-8 rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-start justify-between gap-6">
               <div className="absolute -top-4 -right-4 p-6 opacity-[0.03] pointer-events-none">
                 <FileText className="w-40 h-40" />
               </div>
-              <div className="relative z-10">
-                <span className="inline-block px-3 py-1 bg-slate-100 border border-slate-200 text-slate-500 font-display font-black text-[10px] uppercase tracking-widest rounded-[8px] mb-3">
-                  {catInfo.label}
-                </span>
+              
+              <div className="relative z-10 flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="inline-block px-3 py-1 bg-slate-100 border border-slate-200 text-slate-500 font-display font-black text-[10px] uppercase tracking-widest rounded-[8px]">
+                    {catInfo.label}
+                  </span>
+                  
+                  {/* 🔒 FIX: Thêm Badge Trạng thái Public / Draft */}
+                  {exam.is_public ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f1faeb] border border-[#bcf096] text-[#58CC02] font-display font-black text-[10px] uppercase tracking-widest rounded-[8px]">
+                      <CheckCircle size={12} strokeWidth={3} /> Đã xuất bản
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#fff8e6] border border-[#FFC800]/40 text-[#e5b400] font-display font-black text-[10px] uppercase tracking-widest rounded-[8px]">
+                      <EyeOff size={12} strokeWidth={3} /> Bản nháp (Đang ẩn)
+                    </span>
+                  )}
+                </div>
+
                 <h1 className="text-[24px] sm:text-[32px] font-display font-black text-slate-800 tracking-tight leading-tight mb-2">
                   {exam.title}
                 </h1>
@@ -210,27 +314,25 @@ const DetailsExam = () => {
               
               {stats.partsCount.listening > 0 && <StatCard icon={Headphones} label="Listening" value={`${stats.partsCount.listening} Parts`} accent="blue" />}
               {stats.partsCount.reading > 0 && <StatCard icon={BookOpen} label="Reading" value={`${stats.partsCount.reading} Parts`} accent="purple" />}
-              {stats.partsCount.writing > 0 && <StatCard icon={PenTool} label="Writing" value={`${stats.partsCount.writing} Parts`} accent="amber" />}
-              {stats.partsCount.speaking > 0 && <StatCard icon={Mic} label="Speaking" value={`${stats.partsCount.speaking} Parts`} accent="purple" />}
             </div>
 
-            {/* ── PARTS STRUCTURE (CẤU TRÚC ĐỀ THI) ── */}
+            {/* ── HIỂN THỊ CHI TIẾT TỪNG PHẦN THI (FULL PREVIEW) ── */}
             <div className="bg-white rounded-[24px] border-2 border-slate-200 shadow-sm overflow-hidden">
               
-              {/* Header Box */}
-              <div className="px-5 py-4 border-b-2 border-slate-100 flex items-center gap-3 bg-slate-50/50">
-                <div className="w-10 h-10 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[12px] flex items-center justify-center shadow-sm shrink-0">
-                  <LayoutTemplate size={20} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h3 className="text-[16px] font-display font-black text-slate-800">Cấu trúc chi tiết</h3>
-                  <p className="text-[12px] font-body font-bold text-slate-500 mt-0.5">
-                    {stats.partsArr.length} phần thi · {stats.total} câu hỏi
-                  </p>
+              <div className="px-5 py-4 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[12px] flex items-center justify-center shadow-sm shrink-0">
+                    <LayoutTemplate size={20} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-display font-black text-slate-800">Cấu trúc đề thi</h3>
+                    <p className="text-[12px] font-body font-bold text-slate-500 mt-0.5">
+                      Bấm vào từng phần để xem chi tiết câu hỏi
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* List Parts */}
               <div className="divide-y-2 divide-slate-100">
                 {stats.partsArr.length === 0 ? (
                   <div className="p-10 text-center font-display font-bold text-[14px] text-slate-400">Đề thi chưa có cấu trúc.</div>
@@ -238,88 +340,94 @@ const DetailsExam = () => {
                   stats.partsArr.map((part, index) => {
                     const config = TYPE_CONFIG[part.type] || TYPE_CONFIG.reading;
                     const Icon = config.icon;
-                    const qCount = part.questions?.length || 0;
+                    const isExpanded = !!expandedParts[part.id];
 
                     return (
-                      <div key={part.id} className="p-5 sm:p-6 hover:bg-slate-50/50 transition-colors">
+                      <div key={part.id} className="transition-colors">
                         
-                        {/* Part header */}
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-                          <div className="flex items-start gap-4 min-w-0 flex-1">
+                        {/* ── HEADER CỦA TỪNG PART (Accordion) ── */}
+                        <button 
+                          onClick={() => togglePart(part.id)}
+                          className={`w-full p-5 sm:p-6 flex items-center justify-between gap-4 outline-none transition-colors ${isExpanded ? 'bg-slate-50/80' : 'hover:bg-slate-50'}`}
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
                             <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-2 border-b-[4px] shadow-sm ${config.bg} ${config.border}`}>
                               <Icon size={22} strokeWidth={2.5} className={config.color} />
                             </div>
-                            <div className="min-w-0 pt-0.5">
+                            <div className="text-left min-w-0 pt-0.5">
                               <div className="flex items-center gap-2 mb-1.5">
                                 <span className={`text-[10px] font-display font-black px-2 py-0.5 rounded-[6px] uppercase tracking-widest ${config.bg} ${config.color}`}>
                                   Phần {index + 1}
                                 </span>
-                                <span className="text-[10px] font-display font-bold text-slate-400 uppercase tracking-widest">
-                                  {config.label}
-                                </span>
+                                {part.audioUrl && <span className="bg-[#EAF6FE] text-[#1CB0F6] px-2 py-0.5 rounded-[6px] text-[10px] font-display font-black flex items-center gap-1 uppercase"><Headphones size={10} /> Có Audio tổng</span>}
                               </div>
-                              <h4 className="text-[15px] font-display font-bold text-slate-800 leading-snug">{part.title}</h4>
-                              {(part.description || part.instruction) && (
-                                <p className="text-[13px] font-body font-medium text-slate-500 mt-1 italic">
-                                  {part.description || part.instruction}
-                                </p>
-                              )}
+                              <h4 className="text-[16px] font-display font-black text-slate-800 leading-snug">{part.title}</h4>
                             </div>
                           </div>
                           
-                          <div className="flex-shrink-0 self-start">
-                            <span className="text-[13px] font-display font-black text-slate-800 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-[10px]">
-                              {qCount} Câu
+                          <div className="flex items-center gap-4 shrink-0">
+                            <span className="hidden sm:inline-block text-[13px] font-display font-black text-slate-500 bg-white border-2 border-slate-200 px-3 py-1 rounded-[10px]">
+                              {part.qCount} Câu
                             </span>
+                            <div className="w-8 h-8 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center text-slate-400">
+                              {isExpanded ? <ChevronUp size={18} strokeWidth={3} /> : <ChevronDown size={18} strokeWidth={3} />}
+                            </div>
                           </div>
-                        </div>
+                        </button>
 
-                        {/* Nôi dung Audio / Text preview */}
-                        <div className="pl-0 sm:pl-16 space-y-3">
-                          {config.label === 'LISTENING' && part.audioUrl && (
-                            <div className="bg-slate-100 border border-slate-200 rounded-[14px] px-4 py-3 flex items-center gap-3">
-                              <span className="text-[13px] font-body font-bold text-slate-700 truncate flex-1">🎧 {part.audioName}</span>
-                              <a href={part.audioUrl} target="_blank" rel="noreferrer" className="text-[12px] font-display font-bold text-[#1CB0F6] hover:text-[#1899D6] uppercase tracking-wider">Nghe thử</a>
-                            </div>
-                          )}
+                        {/* ── NỘI DUNG CHI TIẾT CỦA PART ── */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div 
+                              initial={{ height: 0, opacity: 0 }} 
+                              animate={{ height: 'auto', opacity: 1 }} 
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden bg-slate-50/50"
+                            >
+                              <div className="px-5 sm:px-20 pb-6 space-y-4 pt-2">
+                                
+                                {/* Hướng dẫn làm bài */}
+                                {(part.description || part.instruction) && (
+                                  <div className="bg-white border-2 border-slate-200 rounded-[14px] p-4 shadow-sm mb-6">
+                                    <p className="text-[13px] font-body font-bold text-slate-600 italic">
+                                      <span className="text-slate-400 uppercase font-display font-black tracking-widest mr-2 not-italic">Hướng dẫn:</span>
+                                      {part.description || part.instruction}
+                                    </p>
+                                  </div>
+                                )}
 
-                          {(config.label === 'READING' || config.label === 'WRITING') && part.text && (
-                            <div className="bg-slate-50 border border-slate-100 rounded-[14px] p-4">
-                              <p className="text-[13px] font-body font-medium text-slate-600 line-clamp-3 italic leading-relaxed">
-                                "{part.text}"
-                              </p>
-                            </div>
-                          )}
+                                {/* Lặp các câu hỏi */}
+                                {(part.questions || []).map(q => {
+                                  
+                                  if (q.type === 'group') {
+                                    return (
+                                      <div key={q.id} className="bg-[#F8EEFF] border-2 border-[#eec9ff] rounded-[24px] p-5 shadow-sm mb-6">
+                                        <div className="flex items-center gap-2 mb-3">
+                                          <Layers size={16} strokeWidth={3} className="text-[#CE82FF]" />
+                                          <span className="text-[11px] font-display font-black text-[#CE82FF] uppercase tracking-widest">Nhóm câu hỏi (Đoạn văn/Hội thoại)</span>
+                                        </div>
+                                        
+                                        <div className="bg-white border-2 border-[#eec9ff] rounded-[16px] p-4 mb-5 whitespace-pre-wrap text-[14px] font-body font-bold text-slate-700">
+                                          {q.imageUrl && <img src={q.imageUrl} alt="Group" className="max-h-40 rounded-xl mb-3 border border-slate-100 object-contain" />}
+                                          {q.audioUrl && <div className="flex items-center gap-2 text-[#1CB0F6] bg-[#EAF6FE] p-2 rounded-xl mb-3 w-fit font-display font-black text-[12px]"><Music size={14} /> Có Audio kèm theo</div>}
+                                          {q.content || <span className="italic text-slate-400">Chưa có nội dung đoạn văn</span>}
+                                        </div>
 
-                          {/* Questions preview */}
-                          {qCount > 0 && (
-                            <div className="bg-white border-2 border-slate-100 rounded-[16px] p-4 space-y-3 shadow-sm">
-                              {(part.questions ?? []).slice(0, 3).map((q, i) => (
-                                <div key={q.id} className="flex items-start gap-3">
-                                  <span className="w-6 h-6 bg-slate-100 border border-slate-200 rounded-[8px] flex items-center justify-center text-[11px] font-display font-black text-slate-500 shrink-0 mt-0.5">
-                                    {i + 1}
-                                  </span>
-                                  <p className="text-[14px] font-body font-bold text-slate-700 leading-snug truncate flex-1 pt-0.5">
-                                    {q.question}
-                                  </p>
-                                  {q.correct !== undefined && (
-                                    <span className="text-[11px] font-display font-black text-[#58CC02] bg-[#f1faeb] border border-[#bcf096] px-2 py-1 rounded-[8px] flex items-center gap-1 shrink-0">
-                                      <Check size={12} strokeWidth={3} />
-                                      {String.fromCharCode(65 + q.correct)}
-                                    </span>
-                                  )}
-                                </div>
-                              ))}
-                              {qCount > 3 && (
-                                <div className="text-center pt-3 mt-3 border-t-2 border-dashed border-slate-100">
-                                  <p className="text-[11px] font-display font-black uppercase tracking-widest text-slate-400">
-                                    + {qCount - 3} câu hỏi ẩn
-                                  </p>
-                                </div>
-                              )}
-                            </div>
+                                        <div className="pl-4 border-l-4 border-[#eec9ff] space-y-3">
+                                          {q.subQuestions?.map(sq => (
+                                            <PreviewQuestionCard key={sq.id} question={sq} />
+                                          ))}
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+
+                                  return <PreviewQuestionCard key={q.id} question={q} />;
+                                })}
+                              </div>
+                            </motion.div>
                           )}
-                        </div>
+                        </AnimatePresence>
 
                       </div>
                     );

@@ -1,50 +1,44 @@
-// ============================================================
 // src/components/FullExam/utils/answerKey.js
 //
-// FIX TỐI THƯỢNG: Hỗ trợ ID động (UUID/String) của Supabase
-// Format chuẩn mới: "listening-part_123abc-q1" 
-// ============================================================
+// NGUỒN SỰ THẬT DUY NHẤT cho answer key format.
+// Tất cả file đều import từ đây — không tự tạo key ở bất kỳ chỗ nào khác.
+//
+// Format:
+//   Câu đơn lẻ : "{section}-{partId}-q{questionArrayIndex+1}"
+//   Câu trong group: "{section}-{partId}-{groupId}-sub{subQuestionArrayIndex+1}"
 
 /**
- * Tạo answer key chuẩn hóa hỗ trợ ID chuỗi.
- * @param {object} params
- * @param {string} params.section  - 'listening' | 'reading'
- * @param {string|number} params.part - ID của part (từ Supabase) hoặc số
- * @param {number} params.question - question number
- * @returns {string} e.g. "listening-part_1739...-q1"
+ * Tạo key cho câu đơn lẻ
+ * @param {string} section  - 'listening' | 'reading'
+ * @param {string} partId   - part.id
+ * @param {number} qIdx     - index trong mảng questions (0-based)
  */
-export const generateAnswerKey = ({ section, part, question }) => {
-  // Đã bỏ chữ "p" cứng, dùng thẳng part ID
-  return `${section}-${part}-q${question}`;
-};
+export function makeStandaloneKey(section, partId, qIdx) {
+  return `${section}-${partId}-q${qIdx + 1}`;
+}
 
 /**
- * Parse an answer key back to its components.
- * @param {string} key
- * @returns {{ section: string, part: string, question: number } | null}
+ * Tạo key cho câu trong group (subQuestion)
+ * @param {string} section  - 'listening' | 'reading'
+ * @param {string} partId   - part.id
+ * @param {string} groupId  - group.id
+ * @param {number} subIdx   - index trong mảng subQuestions (0-based)
  */
-export const parseAnswerKey = (key) => {
-  // Đã thay (\d+) thành (.+) để có thể đọc được chuỗi UUID/chữ cái
-  const match = key?.match(/^(listening|reading)-(.+)-q(\d+)$/);
-  
-  if (!match) return null;
-  
-  return {
-    section:  match[1],
-    part:     match[2], // Không dùng parseInt nữa vì đây là chuỗi ID
-    question: parseInt(match[3], 10),
-  };
-};
+export function makeGroupKey(section, partId, groupId, subIdx) {
+  return `${section}-${partId}-${groupId}-sub${subIdx + 1}`;
+}
 
 /**
- * Lấy tất cả answers của một section cụ thể.
- * @param {object} answers - toàn bộ answers object
- * @param {string} section - 'listening' | 'reading'
- * @returns {object} filtered answers
+ * Legacy wrapper — giữ tương thích với code cũ gọi generateAnswerKey({...})
+ * @deprecated Dùng makeStandaloneKey / makeGroupKey trực tiếp
  */
-export const getAnswersBySection = (answers, section) => {
-  if (!answers) return {};
-  return Object.fromEntries(
-    Object.entries(answers).filter(([key]) => key.startsWith(`${section}-`))
-  );
-};
+export function generateAnswerKey({ section, part, question, groupId, subIdx }) {
+  if (groupId !== undefined && subIdx !== undefined) {
+    return makeGroupKey(section, part, groupId, subIdx);
+  }
+  // question ở đây là qIdx (0-based) hoặc string "q3"
+  if (typeof question === 'string' && question.startsWith('q')) {
+    return `${section}-${part}-${question}`;
+  }
+  return makeStandaloneKey(section, part, question);
+}
