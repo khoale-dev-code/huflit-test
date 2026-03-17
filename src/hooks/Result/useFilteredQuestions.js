@@ -1,28 +1,50 @@
 import { useMemo } from 'react';
 
-/**
- * Các filter type hợp lệ
- */
 export const FILTER_TYPES = {
   ALL: 'all',
   WRONG: 'wrong',
 };
 
 /**
- * Hook filter danh sách câu hỏi theo kết quả
- *
- * @param {object} partData   - Dữ liệu đề (có `questions`)
- * @param {object} answers    - Map { questionId: selectedOptionIndex }
- * @param {string} filterType - 'all' | 'wrong'
- * @returns {Array} Danh sách câu hỏi đã filter
+ * Kiểm tra một câu hỏi có "sai" không (bao gồm chưa làm/bỏ qua)
  */
+function isWrong(q, answers) {
+  if (q.isExample) return false;
+  
+  const ua = answers[q.id];
+  
+  // FIX: Nếu chưa làm (null/undefined) => Tính là sai
+  if (ua === undefined || ua === null) return true;
+  
+  // FIX: Ép kiểu String để so sánh an toàn
+  return String(ua) !== String(q.correct);
+}
+
 export function useFilteredQuestions(partData, answers, filterType) {
   return useMemo(() => {
     const questions = partData?.questions ?? [];
-    if (filterType === FILTER_TYPES.WRONG) {
-      return questions.filter((q) => answers[q.id] !== q.correct);
-    }
-    return questions;
+
+    if (filterType === FILTER_TYPES.ALL) return questions;
+
+    const result = [];
+
+    questions.forEach((q) => {
+      if (q.type === 'group') {
+        const wrongSubs = (q.subQuestions ?? []).filter(
+          (sq) => !sq.isExample && isWrong(sq, answers)
+        );
+        // Chỉ push group nếu có ít nhất 1 câu con sai
+        if (wrongSubs.length > 0) {
+          result.push({ ...q, subQuestions: wrongSubs });
+        }
+      } else {
+        if (!q.isExample && isWrong(q, answers)) {
+          result.push(q);
+        }
+      }
+    });
+
+    return result;
   }, [partData, answers, filterType]);
 }
 

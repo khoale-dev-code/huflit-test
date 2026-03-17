@@ -1,12 +1,14 @@
+// App.jsx
 import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Data & Hooks
 import { loadExamData } from './data/examData';
 import { useAppState } from './hooks/useAppState';
+import { useExamResult } from './hooks/useExamResult';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
-
+import { useTranslationProtection } from './hooks/useTranslationProtection.jsx';
 // Components (Common)
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
@@ -25,174 +27,28 @@ import { ROUTES } from './config/routes';
 // Icons
 import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
 
-// Admin Components
-import AdminApp from './admin/AdminApp';
-import ExamManagement from './admin/pages/Exams/ExamManagement.jsx';
-import CreateExam from './admin/pages/Exams/CreateExam.jsx';
-import DetailsExam from './admin/pages/Exams/DetailsExam.jsx';
-import EditExam from './admin/pages/Exams/EditExam.jsx';
-import MigrateData from './admin/scripts/MigrateFirestoreToSupabase.jsx';
-import UserManagement from './admin/pages/Users/UserManagement.jsx';
-import LessonManagement from './admin/pages/Lessons/LessonManagement.jsx';
-import LessonForm from './admin/pages/Lessons/LessonForm.jsx';
-import AdminLessonDetails from './admin/pages/Lessons/LessonDetails.jsx'; // Đổi tên import để không nhầm với User
+// 🚀 TỐI ƯU 1: Đưa TOÀN BỘ Admin Components vào Lazy Load để giảm Bundle Size cho User
+const AdminApp = lazy(() => import('./admin/AdminApp'));
+const ExamManagement = lazy(() => import('./admin/pages/Exams/ExamManagement.jsx'));
+const CreateExam = lazy(() => import('./admin/pages/Exams/CreateExam.jsx'));
+const DetailsExam = lazy(() => import('./admin/pages/Exams/DetailsExam.jsx'));
+const EditExam = lazy(() => import('./admin/pages/Exams/Edit-Exam/EditExam.jsx'));
+const MigrateData = lazy(() => import('./admin/scripts/MigrateFirestoreToSupabase.jsx'));
+const UserManagement = lazy(() => import('./admin/pages/Users/UserManagement.jsx'));
+const LessonManagement = lazy(() => import('./admin/pages/Lessons/LessonManagement.jsx'));
+const LessonForm = lazy(() => import('./admin/pages/Lessons/LessonForm.jsx'));
+const AdminLessonDetails = lazy(() => import('./admin/pages/Lessons/LessonDetails.jsx'));
 
-// User Components (Lazy Loaded)
-const NotFoundPage  = lazy(() => import('./components/pages/NotFoundPage.jsx'));
-const FullExamMode  = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
-const HistoryTest   = lazy(() => import('./components/HistoryTest.jsx'));
-
-// 🔥 SỬA LỖI: Import đúng component Lesson của Người Dùng
-import LessonList from './components/Lessons/LessonList.jsx';
-// ĐẢM BẢO BẠN ĐÃ TẠO FILE NÀY DỰA THEO CODE MÌNH CUNG CẤP Ở BƯỚC TRƯỚC
-const LessonDetailUser = lazy(() => import('./components/Lessons/LessonDetail.jsx')); 
-
-
-// ─────────────────────────────────────────────────────────────────
-// 🛡️ TRANSLATION PROTECTION (Giữ nguyên)
-// ─────────────────────────────────────────────────────────────────
-function patchNodePrototype() {
-  if (typeof window === 'undefined' || window.__translatePatchApplied) return;
-  window.__translatePatchApplied = true;
-
-  const origRemoveChild = Node.prototype.removeChild;
-  Node.prototype.removeChild = function (child) {
-    if (child.parentNode !== this) return child;
-    return origRemoveChild.call(this, child);
-  };
-
-  const origInsertBefore = Node.prototype.insertBefore;
-  Node.prototype.insertBefore = function (newNode, refNode) {
-    if (refNode && refNode.parentNode !== this) return this.appendChild(newNode);
-    return origInsertBefore.call(this, newNode, refNode);
-  };
-}
-patchNodePrototype();
-
-function useTranslationProtection() {
-  useEffect(() => {
-    const clearTranslateCookies = () => {
-      try {
-        ['', `; domain=${window.location.hostname}`, `; domain=.${window.location.hostname}`].forEach((suffix) => {
-          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${suffix}`;
-        });
-        sessionStorage.removeItem('googtrans');
-        localStorage.removeItem('googtrans');
-      } catch { }
-    };
-    clearTranslateCookies();
-
-    const lockHtmlAttrs = () => {
-      const html = document.documentElement;
-      html.setAttribute('translate', 'no');
-      if (!html.classList.contains('notranslate')) html.classList.add('notranslate');
-      [...html.classList].filter((c) => c.startsWith('translated-')).forEach((c) => html.classList.remove(c));
-      if (html.lang !== 'vi') html.setAttribute('lang', 'vi');
-    };
-    lockHtmlAttrs();
-
-    const killGTElements = () => {
-      document.querySelectorAll([
-        'script[src*="translate.google"]',
-        'script[src*="translate.googleapis"]',
-        '[id^="goog-gt-"]',
-        '.goog-te-banner-frame',
-        '.skiptranslate',
-        'iframe[id^="deepl"]',
-        '#google_translate_element',
-        '.goog-te-gadget',
-      ].join(',')).forEach((el) => {
-        try { el.remove(); } catch { }
-      });
-    };
-    killGTElements();
-
-    const unwrapFontNodes = (root = document.getElementById('root')) => {
-      if (!root) return;
-      [...root.querySelectorAll('font')].forEach((font) => {
-        const parent = font.parentNode;
-        if (!parent) return;
-        while (font.firstChild) {
-          try { parent.insertBefore(font.firstChild, font); } catch { }
-        }
-        try { parent.removeChild(font); } catch { }
-      });
-    };
-
-    let restoreTimer = null;
-    const scheduleRestore = (flags) => {
-      clearTimeout(restoreTimer);
-      restoreTimer = setTimeout(() => {
-        if (flags.lock)   lockHtmlAttrs();
-        if (flags.unwrap) unwrapFontNodes();
-        if (flags.kill)   killGTElements();
-        clearTranslateCookies();
-      }, 50);
-    };
-
-    const observer = new MutationObserver((mutations) => {
-      const flags = { lock: false, unwrap: false, kill: false };
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.target === document.documentElement) {
-          flags.lock = true;
-        }
-        if (mutation.type === 'childList') {
-          for (const node of mutation.addedNodes) {
-            if (node.nodeName === 'FONT') flags.unwrap = true;
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              if (node.hasAttribute?.('_mstmutation')) {
-                try { node.remove(); } catch { }
-              }
-              if (node.nodeName === 'SCRIPT' &&
-                  (node.src?.includes('translate.google') || node.src?.includes('translate.googleapis'))) {
-                flags.kill = true;
-                try { node.remove(); } catch { }
-              }
-            }
-          }
-        }
-      }
-      if (flags.lock || flags.unwrap || flags.kill) scheduleRestore(flags);
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true, subtree: true, attributes: true,
-      attributeFilter: ['class', 'lang', 'translate'],
-    });
-
-    const interval = setInterval(() => {
-      killGTElements();
-      clearTranslateCookies();
-      lockHtmlAttrs();
-    }, 3000);
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        clearTranslateCookies();
-        lockHtmlAttrs();
-        killGTElements();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-
-    return () => {
-      observer.disconnect();
-      clearInterval(interval);
-      clearTimeout(restoreTimer);
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, []);
-}
-
-export const NoTranslate = memo(({ children, as: Tag = 'span', className = '', style }) => (
-  <Tag translate="no" className={`notranslate ${className}`.trim()} style={style} data-nosnippet>
-    {children}
-  </Tag>
-));
-NoTranslate.displayName = 'NoTranslate';
+// Lazy load User Components
+const LessonList = lazy(() => import('./components/Lessons/LessonList.jsx'));
+const NotFoundPage = lazy(() => import('./components/pages/NotFoundPage.jsx'));
+const FullExamMode = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
+const HistoryTest = lazy(() => import('./components/HistoryTest.jsx'));
+const LessonDetailUser = lazy(() => import('./components/Lessons/LessonDetail.jsx'));
 
 // ─────────────────────────────────────────────
-// InfoBadge
+// InfoBadge & StatsGrid
+// (💡 Tip: Tương lai bạn nên tách 2 component này ra file riêng ở thư mục /components)
 // ─────────────────────────────────────────────
 const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   const colorMap = {
@@ -213,11 +69,8 @@ const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
 });
 InfoBadge.displayName = 'InfoBadge';
 
-// ─────────────────────────────────────────────
-// StatsGrid
-// ─────────────────────────────────────────────
-const StatsGrid = memo(({ score, isSignedIn }) => {
-  if (!isSignedIn || score.total === 0) return null;
+const StatsGrid = memo(({ scoreResult, isSignedIn }) => {
+  if (!isSignedIn || !scoreResult || scoreResult.total === 0) return null;
   return (
     <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm mt-6">
       <div className="flex items-center gap-3 mb-4">
@@ -227,10 +80,10 @@ const StatsGrid = memo(({ score, isSignedIn }) => {
         <h3 className="text-lg font-bold text-slate-900">Kết quả bài làm</h3>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <InfoBadge icon={FileText} label="Tổng câu" value={score.total}                       color="indigo"  />
-        <InfoBadge icon={Trophy}   label="Câu đúng" value={score.correct}                     color="emerald" />
-        <InfoBadge icon={FileText} label="Câu sai"  value={score.total - score.correct}       color="amber"   />
-        <InfoBadge icon={Zap}      label="Tỉ lệ"    value={`${score.percentage.toFixed(0)}%`} color="purple"  />
+        <InfoBadge icon={FileText} label="Tổng câu"  value={scoreResult.total}                              color="indigo"  />
+        <InfoBadge icon={Trophy}   label="Câu đúng"  value={scoreResult.correct}                            color="emerald" />
+        <InfoBadge icon={FileText} label="Câu sai"   value={scoreResult.total - scoreResult.correct}        color="amber"   />
+        <InfoBadge icon={Zap}      label="Tỉ lệ"     value={`${scoreResult.percentage.toFixed(0)}%`}        color="purple"  />
       </div>
     </div>
   );
@@ -241,38 +94,24 @@ StatsGrid.displayName = 'StatsGrid';
 // PartTestContent
 // ─────────────────────────────────────────────
 const PartTestContent = memo(({
-  isSignedIn,
-  selectedExam, handleExamChange,
-  testType, handleTestTypeChange,
-  selectedPart, handlePartChange,
-  partData,
-  currentExamData,
-  currentQuestionIndex, setCurrentQuestionIndex,
-  answers, handleAnswerSelect,
-  showResults, handleSubmit, handleReset,
-  score,
-  isLoadingExam,
+  isSignedIn, selectedExam, handleExamChange, testType, handleTestTypeChange,
+  selectedPart, handlePartChange, partData, currentExamData,
+  currentQuestionIndex, setCurrentQuestionIndex, answers, handleAnswerSelect,
+  showResults, handleSubmit, handleReset, scoreResult, convertedScore,
+  examCategory, isLoadingExam,
 }) => {
 
   useEffect(() => {
     if (!currentExamData?.parts) return;
-
     let availableParts = [];
     if (Array.isArray(currentExamData.parts)) {
-      availableParts = currentExamData.parts
-        .filter(p => p.type === testType)
-        .map(p => String(p.id));
+      availableParts = currentExamData.parts.filter(p => p.type === testType).map(p => String(p.id));
     } else {
-      availableParts = Object.entries(currentExamData.parts)
-        .filter(([, data]) => data.type === testType)
-        .map(([key]) => String(key));
+      availableParts = Object.entries(currentExamData.parts).filter(([, data]) => data.type === testType).map(([key]) => String(key));
     }
-
     if (availableParts.length === 0) return;
     const isCurrentPartValid = availableParts.includes(String(selectedPart));
-    if (!isCurrentPartValid) {
-      handlePartChange({ target: { value: availableParts[0] } });
-    }
+    if (!isCurrentPartValid) handlePartChange({ target: { value: availableParts[0] } });
   }, [testType, currentExamData, selectedPart, handlePartChange]);
 
   useEffect(() => {
@@ -282,9 +121,7 @@ const PartTestContent = memo(({
   useEffect(() => {
     const timer = setTimeout(() => {
       const contentDisplay = document.querySelector('[data-testid="content-display"]');
-      if (contentDisplay) {
-        contentDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      if (contentDisplay) contentDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
     return () => clearTimeout(timer);
   }, [selectedPart, testType]);
@@ -297,17 +134,22 @@ const PartTestContent = memo(({
   return (
     <div className="w-full space-y-6">
       <PartSelector
-        selectedExam={selectedExam}
-        onExamChange={handleExamChange}
-        testType={testType}
-        onTestTypeChange={handleTestTypeChange}
-        selectedPart={selectedPart}
-        onPartChange={handlePartChange}
+        selectedExam={selectedExam}    onExamChange={handleExamChange}
+        testType={testType}            onTestTypeChange={handleTestTypeChange}
+        selectedPart={selectedPart}    onPartChange={handlePartChange}
       />
+
       {showResults ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <ResultsDisplay score={score} partData={partData} answers={answers} onReset={handleReset} />
-          <StatsGrid score={score} isSignedIn={isSignedIn} />
+          <ResultsDisplay
+            scoreResult={scoreResult}
+            convertedScore={convertedScore}
+            examCategory={examCategory}
+            partData={partData}
+            answers={answers}
+            onReset={handleReset}
+          />
+          <StatsGrid scoreResult={scoreResult} isSignedIn={isSignedIn} />
         </div>
       ) : (
         <div className="w-full space-y-8 min-h-[100vh] relative transition-all duration-300">
@@ -340,12 +182,7 @@ const PartTestContent = memo(({
 });
 PartTestContent.displayName = 'PartTestContent';
 
-// ─────────────────────────────────────────────
-// FullExamContainer
-// ─────────────────────────────────────────────
-const FullExamContainer = memo(({ onComplete }) => (
-  <FullExamMode onComplete={onComplete} />
-));
+const FullExamContainer = memo(({ onComplete }) => <FullExamMode onComplete={onComplete} />);
 FullExamContainer.displayName = 'FullExamContainer';
 
 // ─────────────────────────────────────────────
@@ -358,7 +195,7 @@ const AppContent = memo(() => {
   const [isLoadingExam, setIsLoadingExam]     = useState(false);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
-  useTranslationProtection();
+  useTranslationProtection(); // Gọi Hook bảo vệ ở đây
 
   const {
     selectedExam, testType, handleTestTypeChange,
@@ -370,34 +207,47 @@ const AppContent = memo(() => {
     isSignedIn, user,
   } = useAppState();
 
+  // 🚀 TỐI ƯU 2: Vá lỗ hổng Đề Thi Ẩn (is_public)
   useEffect(() => {
     if (!selectedExam) return;
     setIsLoadingExam(true);
+    
     loadExamData(selectedExam)
-      .then(setCurrentExamData)
+      .then((data) => {
+        // Nếu đề thi tồn tại nhưng bị đánh dấu ẩn (Bảo vệ từ phía User App)
+        if (data && data.is_public === false) {
+          console.warn("Đề thi này đang được Admin bảo trì.");
+          alert("Đề thi này tạm thời không khả dụng do đang bảo trì!");
+          handleExamChange({ target: { value: null } }); // Reset lựa chọn
+          setCurrentExamData(null);
+          return;
+        }
+        setCurrentExamData(data);
+      })
       .catch(() => setCurrentExamData(null))
       .finally(() => setIsLoadingExam(false));
-  }, [selectedExam]);
+  }, [selectedExam, handleExamChange]);
 
   const partData = useMemo(() => {
     if (practiceType || !currentExamData?.parts) return null;
     const safeSelectedPart = String(selectedPart);
+
     if (Array.isArray(currentExamData.parts)) {
-      return currentExamData.parts.find(p => String(p.id) === safeSelectedPart) || null;
+      const found = currentExamData.parts.find((p) => String(p.id) === safeSelectedPart) || null;
+      if (process.env.NODE_ENV === 'development' && !found) {
+        console.warn(`[partData] Không tìm thấy part "${safeSelectedPart}".`, 'IDs hiện có:', currentExamData.parts.map((p) => p.id));
+      }
+      return found;
     }
     return currentExamData.parts[safeSelectedPart] || currentExamData.parts[selectedPart] || null;
   }, [practiceType, currentExamData, selectedPart]);
 
-  const score = useMemo(() => {
-    if (!partData?.questions) return { correct: 0, total: 0, percentage: 0 };
-    const total   = partData.questions.length;
-    const correct = partData.questions.filter((q) => answers[q.id] === q.correct).length;
-    return { correct, total, percentage: total > 0 ? (correct / total) * 100 : 0 };
-  }, [partData, answers]);
+  const examCategory = useMemo(() => currentExamData?.category ?? null, [currentExamData]);
+  const { scoreResult, convertedScore } = useExamResult(partData, answers, examCategory);
 
-  const handleSubmitWithData = useMemo(
-    () => () => handleSubmit(partData),
-    [handleSubmit, partData]
+  const handleSubmitWithData = useCallback(
+    () => handleSubmit(partData, scoreResult, convertedScore, examCategory),
+    [handleSubmit, partData, scoreResult, convertedScore, examCategory]
   );
 
   return (
@@ -411,11 +261,9 @@ const AppContent = memo(() => {
         onAuthClick={() => setShowAuthModal(true)}
         onProfileClick={() => navigate(ROUTES.PROFILE)}
       >
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<LoadingSpinner message="Đang tải dữ liệu..." />}>
           <Routes>
             <Route path={ROUTES.HOME} element={<HomePage />} />
-            
-            {/* Luyện Test */}
             <Route path={ROUTES.TEST} element={
               <PartTestContent
                 isSignedIn={isSignedIn}
@@ -430,31 +278,23 @@ const AppContent = memo(() => {
                 showResults={showResults}
                 handleSubmit={handleSubmitWithData}
                 handleReset={handleReset}
-                score={score}
+                scoreResult={scoreResult}
+                convertedScore={convertedScore}
+                examCategory={examCategory}
                 isLoadingExam={isLoadingExam}
               />
             } />
-            
-            {/* Thi Thử */}
-            <Route path={ROUTES.FULL_EXAM} element={
-              <FullExamContainer onComplete={() => handleTestTypeChange('')} />
-            } />
-            
-            {/* Bài Học (Lessons) */}
-            <Route path="/learn" element={<LessonList />} />
-            <Route path="/learn/:slug" element={<LessonDetailUser />} /> {/* Dùng component của User */}
-            
-            {/* Account & Other */}
-            <Route path={ROUTES.PROFILE}    element={<UserProfile />} />
-            <Route path={ROUTES.ANSWERS}    element={<ExamAnswersPage />} />
-            <Route path="/history/:id"      element={<HistoryTest />} />
-            <Route path="*"                 element={<NotFoundPage />} />
+            <Route path={ROUTES.FULL_EXAM} element={<FullExamContainer onComplete={() => handleTestTypeChange('')} />} />
+            <Route path="/learn"        element={<LessonList />} />
+            <Route path="/learn/:slug"  element={<LessonDetailUser />} />
+            <Route path={ROUTES.PROFILE} element={<UserProfile />} />
+            <Route path={ROUTES.ANSWERS} element={<ExamAnswersPage />} />
+            <Route path="/history/:id"  element={<HistoryTest />} />
+            <Route path="*"             element={<NotFoundPage />} />
           </Routes>
         </Suspense>
-
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       </MainLayout>
-
       <WelcomeModal isOpen={showWelcome} onClose={closeWelcome} />
     </>
   );
@@ -470,29 +310,21 @@ export default function App() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<div className="flex h-screen items-center justify-center"><LoadingSpinner message="Đang tải hệ thống..." /></div>}>
         <Routes>
-          <Route path="/login" element={<AuthPage />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/*" element={<AdminApp />} />
-          <Route path="/admin/exams" element={<ExamManagement />} />
-          <Route path="/admin/exams/create" element={<CreateExam />} />
-          <Route path="/admin/exams/detail/:id" element={<DetailsExam />} />
-          <Route path="/admin/exams/edit/:id" element={<EditExam />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          
-          {/* Admin Lessons Routes */}
-          <Route path="/admin/lessons" element={<LessonManagement />} />
-          <Route path="/admin/lessons/create" element={<LessonForm />} />
-          <Route path="/admin/lessons/edit/:id" element={<LessonForm />} />
-          <Route path="/admin/lessons/detail/:id" element={<AdminLessonDetails />} /> 
-          
-          {/* Tool Route */}
-          <Route path="/migrate-data" element={<MigrateData />} />
-          
-          {/* User Routes (Catch all) */}
-          <Route path="/*" element={<AppContent />} />
+          <Route path="/login"                   element={<AuthPage />} />
+          <Route path="/admin/*"                 element={<AdminApp />} />
+          <Route path="/admin/exams"             element={<ExamManagement />} />
+          <Route path="/admin/exams/create"      element={<CreateExam />} />
+          <Route path="/admin/exams/detail/:id"  element={<DetailsExam />} />
+          <Route path="/admin/exams/edit/:id"    element={<EditExam />} />
+          <Route path="/admin/users"             element={<UserManagement />} />
+          <Route path="/admin/lessons"           element={<LessonManagement />} />
+          <Route path="/admin/lessons/create"    element={<LessonForm />} />
+          <Route path="/admin/lessons/edit/:id"  element={<LessonForm />} />
+          <Route path="/admin/lessons/detail/:id" element={<AdminLessonDetails />} />
+          <Route path="/migrate-data"            element={<MigrateData />} />
+          <Route path="/*"                       element={<AppContent />} />
         </Routes>
       </Suspense>
     </Router>

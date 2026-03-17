@@ -1,88 +1,99 @@
 import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 
-// Layout sections
-import ResultsHeader from './ResultsHeader';
-import ResultsStats from './ResultsStats';
-import ResultsAnalytics from './ResultsAnalytics';
-import ResultsControls from './ResultsControls';
+import ResultsHeader     from './ResultsHeader';
+import ResultsStats      from './ResultsStats';
+import ResultsAnalytics  from './ResultsAnalytics';
+import ResultsControls   from './ResultsControls';
 import ResultsDetailList from './ResultsDetailList';
 
-// Custom hooks
-import { useScrollTop } from '../../../hooks/Result/useScrollTop';
-import { useSkillAnalytics } from '../../../hooks/Result/useSkillAnalytics';
-import { useFilteredQuestions, FILTER_TYPES } from '../../../hooks/Result/useFilteredQuestions';
+import { useScrollTop }                          from '../../../hooks/Result/useScrollTop';
+import { useExamResult }                         from '../../../hooks/useExamResult';
+import { useSkillAnalytics }                     from '../../../hooks/Result/useSkillAnalytics';
+import { useFilteredQuestions, FILTER_TYPES }    from '../../../hooks/Result/useFilteredQuestions';
 
-/**
- * ResultsDisplay — Orchestrator Component (Gamified 3D UI)
- *
- * @param {{
- * score: { correct: number, total: number, percentage: number },
- * convertedScore: { listening: number, reading: number, total: number } | null,
- * examCategory: string,
- * partData: object,
- * answers: object,
- * onReset: () => void
- * }} props
- */
-const ResultsDisplay = ({ score, convertedScore, examCategory, partData, answers, onReset }) => {
-  // ── Hooks ──────────────────────────────────────────────────────────────────
-  useScrollTop(); // Scroll lên đầu khi mount
+/* ══════════════════════════════════════════════════════════
+   ResultsDisplay — Orchestrator
+
+   Props:
+     scoreResult    — { correct, total, percentage }   từ useAppState
+     convertedScore — { listening, reading, total }    từ useAppState (TOEIC only)
+     examCategory   — string                           từ useAppState
+     score          — legacy fallback nếu cha chưa cập nhật
+     partData       — dữ liệu đề thi
+     answers        — { [questionId]: selectedIndex }
+     onReset        — callback làm lại bài
+══════════════════════════════════════════════════════════ */
+const ResultsDisplay = memo(({
+  scoreResult,
+  convertedScore,
+  examCategory,
+  score,          // legacy fallback
+  partData,
+  answers,
+  onReset,
+}) => {
+  useScrollTop();
 
   const [activeFilter, setActiveFilter] = useState(FILTER_TYPES.ALL);
 
-  const skillAnalytics = useSkillAnalytics(partData, answers);
+  // Dùng lại allValidQuestions từ useExamResult để useSkillAnalytics
+  // và useFilteredQuestions đều dùng chung 1 nguồn — không flatten 2 lần
+  const { allValidQuestions } = useExamResult(partData, answers, examCategory);
+
+  const skillAnalytics    = useSkillAnalytics(allValidQuestions, answers);
   const filteredQuestions = useFilteredQuestions(partData, answers, activeFilter);
 
-  // ── Guard ──────────────────────────────────────────────────────────────────
-  if (!partData) return null;
+  // Ưu tiên scoreResult (mới), fallback về score (legacy)
+  const resolvedScore = scoreResult ?? score;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  if (!partData || !resolvedScore) return null;
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
       className="relative min-h-[calc(100vh-80px)] bg-[#F4F7FA] w-full flex flex-col font-sans selection:bg-blue-200 overflow-x-hidden"
       style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}
     >
-      {/* 1. Hero Header (Cúp vàng rực rỡ) */}
+      {/* 1. Hero Header — đổi icon/màu/title theo examCategory */}
       <ResultsHeader examCategory={examCategory} />
 
-      {/* 2. Main Content Container */}
+      {/* 2. Main Content */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 sm:-mt-6 pb-24 flex flex-col gap-5 sm:gap-6">
-        
-        {/* Box 1: Điểm số tổng quan (Tự động thay đổi giao diện theo examCategory) */}
-        <ResultsStats 
-          score={score} 
-          convertedScore={convertedScore} 
-          examCategory={examCategory} 
+
+        {/* Điểm số — layout tự thay đổi theo loại đề */}
+        <ResultsStats
+          score={resolvedScore}
+          convertedScore={convertedScore}
+          examCategory={examCategory}
         />
 
-        {/* Box 2: Phân tích kỹ năng chi tiết */}
+        {/* Phân tích kỹ năng */}
         <ResultsAnalytics skillAnalytics={skillAnalytics} />
 
-        {/* Box 3: Cụm Nút Điều hướng 3D */}
+        {/* Nút điều hướng */}
         <ResultsControls onReset={onReset} />
 
-        {/* Cầu nối trang trí (Decorative divider) */}
+        {/* Divider trang trí */}
         <div className="w-full flex items-center justify-center py-2 opacity-50">
-          <div className="w-2 h-2 rounded-full bg-slate-300 mx-1"></div>
-          <div className="w-3 h-3 rounded-full bg-slate-300 mx-1"></div>
-          <div className="w-2 h-2 rounded-full bg-slate-300 mx-1"></div>
+          <div className="w-2 h-2 rounded-full bg-slate-300 mx-1" />
+          <div className="w-3 h-3 rounded-full bg-slate-300 mx-1" />
+          <div className="w-2 h-2 rounded-full bg-slate-300 mx-1" />
         </div>
 
-        {/* Box 4: Danh sách bộ lọc & Cấu trúc câu hỏi chi tiết */}
+        {/* Chi tiết đáp án + transcript */}
         <ResultsDetailList
           filteredQuestions={filteredQuestions}
           answers={answers}
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
         />
-        
       </div>
     </motion.div>
   );
-};
+});
 
-export default memo(ResultsDisplay);
+ResultsDisplay.displayName = 'ResultsDisplay';
+export default ResultsDisplay;

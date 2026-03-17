@@ -233,3 +233,39 @@ export const deleteImage = async (path) => {
     throw error;
   }
 };
+// Hàm cập nhật trạng thái Ẩn/Hiện đề thi
+export const updateExamStatus = async (examId, isPublic) => {
+  const { data, error } = await supabase
+    .from('exams')
+    .update({ 
+      is_public: isPublic,
+      updated_at: new Date().toISOString() 
+    })
+    .eq('id', examId)
+    .select();
+
+  if (error) throw error;
+  return data[0];
+};
+
+export const importExam = async (examData) => {
+  // 🔒 Ép cứng is_public = false (Bản nháp) để tránh việc import nhầm file lỗi lên thẳng app người dùng
+  const safeData = {
+    ...examData,
+    is_public: false, 
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('exams')
+    .insert([safeData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Lỗi Import:", error);
+    throw error;
+  }
+  return data;
+};

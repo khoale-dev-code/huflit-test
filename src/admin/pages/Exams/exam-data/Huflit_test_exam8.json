@@ -1,0 +1,911 @@
+{
+  "title": "Exam 8: Full TOEIC-style Test",
+  "description": "Complete exam with listening (Parts 1-4) and reading (Parts 5-8) sections, covering leadership, shopping, individuality, fishing, grammar, green technology, modern progress, and team communication.",
+  "parts": {
+    "part1": {
+      "id": "part1",
+      "type": "listening",
+      "title": "PART 1: Listening - Leadership Qualities",
+      "instruction": "Listen to the conversation between Randall and Aubrey about leadership qualities. Then choose the best answer for each question.",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "standalone",
+          "isExample": false,
+          "question": "1. What is the main focus of the conversation?",
+          "options": [
+            "The challenges of working in the pizza industry.",
+            "Effective ways to handle difficult customers.",
+            "The characteristics of an ideal boss or leader.",
+            "How to write a comprehensive training manual."
+          ],
+          "correct": 2,
+          "explanation": "Randall mở đầu bằng cụm 'talk about the qualities of a good leader' và Aubrey tập trung vào 'bosses'. Toàn bộ bài đối thoại xoay quanh các phẩm chất cần có của người lãnh đạo."
+        },
+        {
+          "id": "q2",
+          "type": "standalone",
+          "isExample": false,
+          "question": "2. According to Aubrey, how should a boss handle a conflict between a worker and a customer?",
+          "options": [
+            "By giving the customer a free drink to resolve the issue quickly.",
+            "By providing the customer with everything they ask for.",
+            "By supporting the employee’s decision if there is a valid reason.",
+            "By retraining the employee immediately in front of the customer."
+          ],
+          "correct": 2,
+          "explanation": "Aubrey nói: 'I want them to back up my play' (Tôi muốn họ ủng hộ quyết định của tôi) thay vì việc 'give all the free stuff' chỉ để làm hài lòng khách hàng."
+        },
+        {
+          "id": "q3",
+          "type": "standalone",
+          "isExample": false,
+          "question": "3. What does Randall mean by the term 'information dump'?",
+          "options": [
+            "Overwhelming a new employee with too much information at once.",
+            "Failing to provide any written policies to new staff members.",
+            "Throwing away old training manuals that are no longer useful.",
+            "Organizing a meeting to discuss company's financial slips."
+          ],
+          "correct": 0,
+          "explanation": "Randall dùng 'information dump' để mô tả việc đưa một cuốn sổ tay 342 trang ngay ngày đầu đi làm, ám chỉ việc cung cấp quá nhiều thông tin dồn dập khiến nhân viên khó tiếp nhận."
+        },
+        {
+          "id": "q4",
+          "type": "standalone",
+          "isExample": false,
+          "question": "4. What was the main problem with Aubrey’s training at the pizza place?",
+          "options": [
+            "She had to memorize a 342-page manual.",
+            "She was given almost no instruction on how to perform her tasks.",
+            "The charts on the wall were too confusing to follow.",
+            "She was penalized for putting too much cheese on the pepperoni pizza."
+          ],
+          "correct": 1,
+          "explanation": "Aubrey kể lại trải nghiệm thực tế: 'Aubrey, Go make that pizza. That was the entirety of my training' (Aubrey, đi làm pizza đi. Đó là toàn bộ quá trình đào tạo của tôi) – tức là không có hướng dẫn gì."
+        },
+        {
+          "id": "q5",
+          "type": "standalone",
+          "isExample": false,
+          "question": "5. Why does Aubrey mention her experience in the hospital?",
+          "options": [
+            "To explain why she had to leave her previous job.",
+            "To show how her boss offered her a promotion.",
+            "To highlight a lack of empathy and validation from a leader.",
+            "To complain about the difficulty of calling clients while sick."
+          ],
+          "correct": 2,
+          "explanation": "Câu chuyện này minh họa cho ý kiến của Randall về việc 'validate the struggles' (công nhận những khó khăn). Sếp của Aubrey chỉ quan tâm đến công việc ('Have you called your clients yet?') thay vì quan tâm sức khỏe nhân viên."
+        }
+      ]
+    },
+    "part2": {
+      "id": "part2",
+      "type": "listening",
+      "title": "PART 2: Listening - At the Florist's",
+      "instruction": "Listen to the conversation between a customer and a florist. Then choose the best answer for each question.",
+      "questions": [
+        {
+          "id": "q6",
+          "type": "standalone",
+          "isExample": false,
+          "question": "6. Why did the customer come to the flower shop?",
+          "options": [
+            "To buy flowers for his wife’s birthday.",
+            "To apologize for forgetting their wedding anniversary.",
+            "To look for a job as a delivery driver.",
+            "To ask for directions to a nearby restaurant."
+          ],
+          "correct": 1,
+          "explanation": "Florist đoán: 'You forget your anniversary, and you’re trying to make things up, right?' và người đàn ông xác nhận: 'Oh. Yeah'."
+        },
+        {
+          "id": "q7",
+          "type": "standalone",
+          "isExample": false,
+          "question": "7. What was the florist’s initial opinion about the customer’s request for a dozen roses?",
+          "options": [
+            "She thought it was a very romantic and generous gesture.",
+            "She believed a dozen roses would not be enough to solve his problem.",
+            "She suggested that he should buy balloons instead of roses.",
+            "She told him that the shop had run out of roses."
+          ],
+          "correct": 1,
+          "explanation": "Florist hỏi ngược lại: 'Do you really think a dozen roses is going to cut it?' và dọa rằng nếu là chồng cô ấy, anh ta sẽ bị 'in the doghouse' (gặp rắc rối lớn)."
+        },
+        {
+          "id": "q8",
+          "type": "standalone",
+          "isExample": false,
+          "question": "8. How much money does the customer eventually find in his possession?",
+          "options": [
+            "Exactly ten dollars.",
+            "Twelve dollars and thirty-two cents.",
+            "Twenty dollars and fifty cents.",
+            "Twelve dollars even."
+          ],
+          "correct": 1,
+          "explanation": "Ban đầu anh ta nói có 10 đô, nhưng sau khi kiểm tra lại, anh ta nói: 'I actually have twelve dollars and... thirty-two cents'."
+        },
+        {
+          "id": "q9",
+          "type": "standalone",
+          "isExample": false,
+          "question": "9. What is the quality of the flowers that the florist finally arranges for the man?",
+          "options": [
+            "They are the freshest and most expensive roses in the shop.",
+            "They are plastic flowers that will last forever.",
+            "It is a small bouquet with some slightly wilted roses.",
+            "It is a large arrangement with a dozen balloons attached."
+          ],
+          "correct": 2,
+          "explanation": "Do ngân sách hạn hẹp, Florist nói: 'I can arrange a small bouquet of roses. A couple are a little wilted' (Một vài bông hơi bị héo)."
+        },
+        {
+          "id": "q10",
+          "type": "standalone",
+          "isExample": false,
+          "question": "10. What advice does the florist give the man at the end of the conversation?",
+          "options": [
+            "To call an ambulance because he is in physical danger.",
+            "To hide in the back room until his wife leaves the parking lot.",
+            "To promise to do household chores like washing dishes for six months.",
+            "To go to McDonald’s and buy his wife a hamburger."
+          ],
+          "correct": 2,
+          "explanation": "Florist khuyên anh ta nên đối mặt với sự thật ('face the music') và hứa sẽ 'wash the dishes and clean the bathroom for the next six months'."
+        }
+      ]
+    },
+    "part3": {
+      "id": "part3",
+      "type": "listening",
+      "title": "PART 3: Listening - The Power of Individuality",
+      "instruction": "Listen to the story about Sarah and Lisa. Then choose the best answer for each question.",
+      "questions": [
+        {
+          "id": "q11",
+          "type": "standalone",
+          "isExample": false,
+          "question": "11. What was the primary motivation behind Sarah’s choice of the yellow dress?",
+          "options": [
+            "She wanted to look as much like a banana as possible.",
+            "She intended to provoke a negative reaction from her classmates.",
+            "She had a desire to be distinctive and noticeable at the event.",
+            "She was following the latest trends for formal dance attire."
+          ],
+          "correct": 2,
+          "explanation": "Keyword: 'I want to stand out'. Sarah chọn váy vàng rực rỡ dù bị trêu là giống quả chuối vì cô muốn sự khác biệt (distinctive/noticeable) thay vì hòa lẫn vào đám đông."
+        },
+        {
+          "id": "q12",
+          "type": "standalone",
+          "isExample": false,
+          "question": "12. The phrase 'get decked out' in the second paragraph most likely means:",
+          "options": [
+            "To decorate a room for a special party.",
+            "To dress elaborately or finely for an occasion.",
+            "To purchase clothing at a discounted price.",
+            "To prepare a presentation for a formal event."
+          ],
+          "correct": 1,
+          "explanation": "Context: Cụm 'decked out for the formal dance' kết hợp với 'pick up some fancy dresses' cho thấy nghĩa là mặc diện, mặc đồ sang trọng cho dịp lễ."
+        },
+        {
+          "id": "q13",
+          "type": "standalone",
+          "isExample": false,
+          "question": "13. How did Sarah and Lisa’s perspective change after hearing the negative comments?",
+          "options": [
+            "They felt deeply discouraged and decided to leave the dance early.",
+            "They realized the critics were likely projecting their own lack of confidence.",
+            "They regretted their decision and wished they had chosen neutral colors.",
+            "They ignored the group entirely to avoid a heated argument."
+          ],
+          "correct": 1,
+          "explanation": "Inference: Bài viết nêu: 'they felt that the group was just expressing their own insecurities...'. Hai cô gái nhận ra lời chỉ trích đến từ sự thiếu tự tin của chính những người chê bai họ."
+        },
+        {
+          "id": "q14",
+          "type": "standalone",
+          "isExample": false,
+          "question": "14. What was the unexpected result of the conversation between the girls and the critics?",
+          "options": [
+            "The group of critics apologized and bought similar yellow dresses.",
+            "It led to a profound discussion about self-expression and happiness.",
+            "Sarah and Lisa were isolated from the rest of the crowd.",
+            "The school decided to implement a stricter dress code for future events."
+          ],
+          "correct": 1,
+          "explanation": "Key detail: 'Actually, the conversation started a deeper discussion about the idea of standing out...'. Cuộc đối thoại không dừng lại ở tranh cãi mà mở ra một cuộc thảo luận sâu sắc hơn về giá trị bản thân."
+        },
+        {
+          "id": "q15",
+          "type": "standalone",
+          "isExample": false,
+          "question": "15. According to the text, what is the broader lesson regarding 'standing out'?",
+          "options": [
+            "It is a lonely path that inevitably leads to being misunderstood.",
+            "It is only successful if everyone else gives you compliments.",
+            "It can foster a sense of community by celebrating diversity.",
+            "It is less important than fitting in to maintain social harmony."
+          ],
+          "correct": 2,
+          "explanation": "Conclusion: Đoạn cuối khẳng định: 'It can actually bring people together and create a sense of unity in celebrating our differences.' Việc sống thật với cá tính giúp kết nối mọi người thông qua sự đa dạng."
+        }
+      ]
+    },
+    "part4": {
+      "id": "part4",
+      "type": "listening",
+      "title": "PART 4: Listening - The Fishing Trip",
+      "instruction": "Listen to the conversation between a man and a woman on a fishing trip. Then choose the best answer for each question.",
+      "questions": [
+        {
+          "id": "q16",
+          "type": "standalone",
+          "isExample": false,
+          "question": "16. What does the man imply about his fishing ability at the beginning?",
+          "options": [
+            "He is a professional fishing instructor.",
+            "He has a natural talent for fishing inherited from his father.",
+            "He prefers listening to nature sounds over actual fishing.",
+            "He is currently frustrated because the water is not clear."
+          ],
+          "correct": 1,
+          "explanation": "Keyword: 'I was born to fish... my dad used to say.' Người đàn ông khẳng định mình có 'năng khiếu bẩm sinh' từ lời của bố mình."
+        },
+        {
+          "id": "q17",
+          "type": "standalone",
+          "isExample": false,
+          "question": "17. Which of the following was NOT mentioned by the man as an excuse for not catching fish lately?",
+          "options": [
+            "The weather conditions were unfavorable.",
+            "He was not wearing his specific fishing hat.",
+            "He forgot to bring the correct type of bait.",
+            "A fish pulled his equipment into the water."
+          ],
+          "correct": 2,
+          "explanation": "Elimination: Anh ta nêu 3 lý do: thời tiết xấu (A), cá kéo mất cần (D), và thiếu mũ câu cá (B). Việc 'quên mồi' (C) không hề được nhắc tới."
+        },
+        {
+          "id": "q18",
+          "type": "standalone",
+          "isExample": false,
+          "question": "18. What is the woman’s initial reaction to the man's boastful comments?",
+          "options": [
+            "She is impressed by his past experiences.",
+            "She is skeptical and reminds him of his recent failures.",
+            "She encourages him to try a different fishing spot.",
+            "She is too busy reading a book to pay attention."
+          ],
+          "correct": 1,
+          "explanation": "Inference: Người phụ nữ hỏi vặn lại: 'Didn’t you tell me that you went fishing 6 or 7 times last month and didn’t catch anything?' thể hiện sự hoài nghi (skeptical)."
+        },
+        {
+          "id": "q19",
+          "type": "standalone",
+          "isExample": false,
+          "question": "19. What happens when the woman tries to fish?",
+          "options": [
+            "Her line gets caught in a tree branch as the man predicted.",
+            "She catches a large fish almost immediately after casting the bait.",
+            "She loses the fishing pole in the water.",
+            "She decides to go back to the car because it is too difficult."
+          ],
+          "correct": 1,
+          "explanation": "Key detail: Dù người đàn ông trù ẻo cô sẽ mắc cành cây, nhưng cô nhanh chóng nói: 'I got a bite... That fish is huge.'"
+        },
+        {
+          "id": "q20",
+          "type": "standalone",
+          "isExample": false,
+          "question": "20. What is the man’s attitude at the end of the conversation?",
+          "options": [
+            "He is proud of the woman's achievement.",
+            "He is embarrassed and tries to dismiss her success.",
+            "He is eager to learn new techniques from her.",
+            "He is happy to have finally caught a huge fish."
+          ],
+          "correct": 1,
+          "explanation": "Tone Analysis: Anh ta nói 'Nothing!' và 'Forget it' khi bị trêu, đồng thời gọi đó là 'beginner’s luck' (may mắn của kẻ mới bắt đầu) để hạ thấp thành quả của cô ấy."
+        }
+      ]
+    },
+    "part5": {
+      "id": "part5",
+      "type": "reading",
+      "title": "PART 5: Reading - Grammar & Vocabulary",
+      "instruction": "Choose the best word or phrase to complete each sentence.",
+      "questions": [
+        {
+          "id": "q21",
+          "type": "standalone",
+          "isExample": false,
+          "question": "21. The corporation _______ a new sustainability initiative to reduce plastic waste since the beginning of this year.",
+          "options": [
+            "implements",
+            "has implemented",
+            "implemented",
+            "is implementing"
+          ],
+          "correct": 1,
+          "explanation": "Thì Hiện tại hoàn thành (Present Perfect): Dấu hiệu 'since the beginning of this year' cho thấy hành động bắt đầu trong quá khứ và kéo dài đến hiện tại."
+        },
+        {
+          "id": "q22",
+          "type": "standalone",
+          "isExample": false,
+          "question": "22. By the time the new medical center opens next month, the staff _______ their advanced training on the latest diagnostic technology.",
+          "options": [
+            "will finish",
+            "finishes",
+            "will have finished",
+            "have finished"
+          ],
+          "correct": 2,
+          "explanation": "Thì Tương lai hoàn thành (Future Perfect): Cấu trúc 'By the time + Hiện tại đơn, Tương lai hoàn thành' dùng để diễn tả một hành động sẽ hoàn tất trước một thời điểm/hành động khác trong tương lai."
+        },
+        {
+          "id": "q23",
+          "type": "standalone",
+          "isExample": false,
+          "question": "23. Many employees reported that they _______ a lack of work-life balance before the company introduced the remote work policy.",
+          "options": [
+            "are experiencing",
+            "experience",
+            "had been experiencing",
+            "have experienced"
+          ],
+          "correct": 2,
+          "explanation": "Thì Quá khứ hoàn thành tiếp diễn (Past Perfect Continuous): Diễn tả một hành động xảy ra liên tục và kéo dài trước một thời điểm hoặc hành động khác trong quá khứ ('before the company introduced...')."
+        },
+        {
+          "id": "q24",
+          "type": "standalone",
+          "isExample": false,
+          "question": "24. Rapid _______ in artificial intelligence are transforming the way people communicate and work in modern society.",
+          "options": [
+            "advancements",
+            "advantages",
+            "admissions",
+            "appearances"
+          ],
+          "correct": 0,
+          "explanation": "Từ vựng (Technology): Advancements (Sự tiến bộ/phát triển). Câu này nói về sự tiến bộ của AI đang thay đổi cách làm việc."
+        },
+        {
+          "id": "q25",
+          "type": "standalone",
+          "isExample": false,
+          "question": "25. To maintain good health, doctors suggest that people _______ regular physical activity into their daily routines.",
+          "options": [
+            "incorporate",
+            "cooperate",
+            "collaborate",
+            "compensate"
+          ],
+          "correct": 0,
+          "explanation": "Từ vựng (Health): Incorporate something into something (Kết hợp/lồng ghép cái gì vào cái gì). Bác sĩ khuyên kết hợp vận động vào thói quen hàng ngày."
+        },
+        {
+          "id": "q26",
+          "type": "standalone",
+          "isExample": false,
+          "question": "26. The environmental organization is looking for volunteers who are _______ about protecting endangered species and their habitats.",
+          "options": [
+            "enthusiastic",
+            "indifferent",
+            "suspicious",
+            "curious"
+          ],
+          "correct": 0,
+          "explanation": "Từ vựng (Environment): Enthusiastic (Nhiệt huyết/say mê). Phù hợp với ngữ cảnh tình nguyện viên bảo vệ động vật quý hiếm."
+        },
+        {
+          "id": "q27",
+          "type": "standalone",
+          "isExample": false,
+          "question": "27. While the marketing team _______ the new campaign, the power suddenly went out in the entire office building.",
+          "options": [
+            "discussed",
+            "was discussing",
+            "discusses",
+            "has discussed"
+          ],
+          "correct": 1,
+          "explanation": "Thì Quá khứ tiếp diễn (Past Continuous): Diễn tả một hành động đang xảy ra trong quá khứ ('discussing') thì có một hành động khác xen vào ('went out')."
+        },
+        {
+          "id": "q28",
+          "type": "standalone",
+          "isExample": false,
+          "question": "28. Students from diverse _______ backgrounds bring unique perspectives to the university’s international exchange program.",
+          "options": [
+            "industry",
+            "cultural",
+            "technical",
+            "commercial"
+          ],
+          "correct": 1,
+          "explanation": "Từ vựng (People/Society): Cultural backgrounds (Nền tảng văn hóa). Đây là cụm từ cố định thường gặp trong các bài nói về sự đa dạng."
+        },
+        {
+          "id": "q29",
+          "type": "standalone",
+          "isExample": false,
+          "question": "29. The government plans to _______ more funds into renewable energy projects to combat the effects of climate change.",
+          "options": [
+            "invest",
+            "investable",
+            "investment",
+            "investor"
+          ],
+          "correct": 0,
+          "explanation": "Từ vựng (Word Form): Sau 'plan to' cần một động từ nguyên mẫu (V-inf). Invest (Đầu tư) là động từ phù hợp nhất."
+        },
+        {
+          "id": "q30",
+          "type": "standalone",
+          "isExample": false,
+          "question": "30. It is essential for managers to _______ clear expectations to their team members to avoid any misunderstandings in the workplace.",
+          "options": [
+            "communicate",
+            "calculate",
+            "circulate",
+            "celebrate"
+          ],
+          "correct": 0,
+          "explanation": "Từ vựng (Workplace): Communicate expectations (Truyền đạt kỳ vọng). Đây là kỹ năng quan trọng của người quản lý trong môi trường công sở."
+        }
+      ]
+    },
+    "part6": {
+      "id": "part6",
+      "type": "reading",
+      "title": "PART 6: Reading - Text Completion (The Green Shift)",
+      "instruction": "Read the following passage. Choose the best word or phrase to fill in the blanks.",
+      "questions": [
+        {
+          "id": "q31",
+          "type": "standalone",
+          "isExample": false,
+          "question": "31. In recent years, the global community has become increasingly concerned about the environmental impact (31) _______ traditional business operations.",
+          "options": [
+            "at",
+            "on",
+            "in",
+            "of"
+          ],
+          "correct": 3,
+          "explanation": "Collocation: 'Impact of something' (Tác động của cái gì). Trong ngữ cảnh này là tác động của các hoạt động kinh doanh truyền thống."
+        },
+        {
+          "id": "q32",
+          "type": "standalone",
+          "isExample": false,
+          "question": "32. One of the most significant changes is the reduction of carbon (32) _______.",
+          "options": [
+            "resources",
+            "emissions",
+            "residents",
+            "qualities"
+          ],
+          "correct": 1,
+          "explanation": "Term: 'Carbon emissions' (Khí thải carbon). Đây là thuật ngữ phổ biến trong chủ đề môi trường."
+        },
+        {
+          "id": "q33",
+          "type": "standalone",
+          "isExample": false,
+          "question": "33. Furthermore, smart building technologies (33) _______ in many corporate offices to monitor energy usage.",
+          "options": [
+            "are installed",
+            "have been installed",
+            "were installing",
+            "is installing"
+          ],
+          "correct": 1,
+          "explanation": "Thì Hiện tại hoàn thành (Passive Voice): 'Technologies have been installed'. Diễn tả một sự việc vừa mới xảy ra hoặc vẫn còn để lại kết quả ở hiện tại."
+        },
+        {
+          "id": "q34",
+          "type": "standalone",
+          "isExample": false,
+          "question": "34. (34) _______, some critics argue that the initial cost of installing these technologies is too high for smaller enterprises.",
+          "options": [
+            "Therefore",
+            "Moreover",
+            "Nevertheless",
+            "Consequently"
+          ],
+          "correct": 2,
+          "explanation": "Transition word: 'Nevertheless' (Tuy nhiên/Mặc dù vậy). Dùng để chỉ sự tương phản giữa lợi ích của công nghệ và ý kiến của các nhà phê bình về chi phí."
+        },
+        {
+          "id": "q35",
+          "type": "standalone",
+          "isExample": false,
+          "question": "35. Employees also report feeling more motivated when they know their company is acting (35) _______ to protect the environment.",
+          "options": [
+            "responsible",
+            "responsibility",
+            "responsibly",
+            "responsibilities"
+          ],
+          "correct": 2,
+          "explanation": "Word Form: Cần một trạng từ (Adverb) để bổ nghĩa cho động từ 'acting'. Acting responsibly (Hành động một cách có trách nhiệm)."
+        },
+        {
+          "id": "q36",
+          "type": "standalone",
+          "isExample": false,
+          "question": "36. What is the primary focus of the passage?",
+          "options": [
+            "The history of traditional business operations.",
+            "The role of technology in promoting workplace sustainability.",
+            "The financial difficulties of small enterprises.",
+            "How to improve employee motivation through higher salaries."
+          ],
+          "correct": 1,
+          "explanation": "Bài viết thảo luận về việc tích hợp 'Green Tech' để cân bằng giữa hiệu quả công việc và bảo vệ môi trường."
+        },
+        {
+          "id": "q37",
+          "type": "standalone",
+          "isExample": false,
+          "question": "37. According to the text, how do digital communication tools help the environment?",
+          "options": [
+            "By reducing the amount of paper used in offices.",
+            "By increasing the speed of the internet.",
+            "By allowing employees to work longer hours.",
+            "By providing better lighting in the building."
+          ],
+          "correct": 0,
+          "explanation": "Keyword: 'digital communication tools... cut down their paper consumption.' (Công cụ kỹ thuật số giúp cắt giảm tiêu thụ giấy)."
+        },
+        {
+          "id": "q38",
+          "type": "standalone",
+          "isExample": false,
+          "question": "38. What do smart building technologies do in a corporate office?",
+          "options": [
+            "They replace human managers with robots.",
+            "They record all conversations for security purposes.",
+            "They regulate energy use by adjusting lights and temperature.",
+            "They provide free healthcare for all employees."
+          ],
+          "correct": 2,
+          "explanation": "Keyword: '...monitor energy usage... automatically adjust lighting and temperature.'"
+        },
+        {
+          "id": "q39",
+          "type": "standalone",
+          "isExample": false,
+          "question": "39. The word 'pivotal' in the last paragraph is closest in meaning to:",
+          "options": [
+            "Expensive",
+            "Crucial",
+            "Optional",
+            "Dangerous"
+          ],
+          "correct": 1,
+          "explanation": "Vocabulary: 'Pivotal' có nghĩa là rất quan trọng, mang tính then chốt (Crucial/Key)."
+        },
+        {
+          "id": "q40",
+          "type": "standalone",
+          "isExample": false,
+          "question": "40. What can be inferred about the transition to Green Technology?",
+          "options": [
+            "It is only beneficial for large, wealthy corporations.",
+            "It has no impact on how employees feel about their work.",
+            "It requires an initial investment but offers long-term benefits.",
+            "It is a trend that will likely disappear in a few years."
+          ],
+          "correct": 2,
+          "explanation": "Inference: Đoạn 3 nói rằng dù chi phí ban đầu cao nhưng tiết kiệm lâu dài và hình ảnh thương hiệu sẽ bù đắp lại."
+        }
+      ]
+    },
+    "part7": {
+      "id": "part7",
+      "type": "reading",
+      "title": "PART 7: Reading - The Double-Edged Sword of Modern Progress",
+      "instruction": "Read the following article and answer the questions.",
+      "questions": [
+        {
+          "id": "q41",
+          "type": "standalone",
+          "isExample": false,
+          "question": "41. What is the primary purpose of the first paragraph?",
+          "options": [
+            "To explain the history of the oil industry.",
+            "To introduce the conflicting forces affecting the current economy.",
+            "To argue that AI is more important than geopolitical stability.",
+            "To complain about the lack of productivity in modern offices."
+          ],
+          "correct": 1,
+          "explanation": "Đoạn 1 nêu ra hai mặt: một bên là cơ hội từ AI, một bên là thách thức từ giá dầu và chiến tranh."
+        },
+        {
+          "id": "q42",
+          "type": "standalone",
+          "isExample": false,
+          "question": "42. The word 'unprecedented' in paragraph 1 is closest in meaning to:",
+          "options": [
+            "Very expensive.",
+            "Never seen or known before.",
+            "Extremely predictable.",
+            "Historically insignificant."
+          ],
+          "correct": 1,
+          "explanation": "Unprecedented (Chưa từng có tiền lệ). Đồng nghĩa với 'Never seen before'."
+        },
+        {
+          "id": "q43",
+          "type": "standalone",
+          "isExample": false,
+          "question": "43. According to the second paragraph, how has the increase in oil prices affected businesses?",
+          "options": [
+            "It has encouraged them to hire more manual laborers.",
+            "It has made logistics cheaper and more efficient.",
+            "It has acted as a motivation to implement more automation.",
+            "It has led to a total collapse of the supply chain."
+          ],
+          "correct": 2,
+          "explanation": "Keyword: '...is a catalyst for automation.' Giá dầu tăng là chất xúc tác khiến doanh nghiệp tìm đến tự động hóa."
+        },
+        {
+          "id": "q44",
+          "type": "standalone",
+          "isExample": false,
+          "question": "44. The word 'volatile' in paragraph 2 is closest in meaning to:",
+          "options": [
+            "Stable.",
+            "Unpredictable and changing.",
+            "Low-cost.",
+            "Traditional."
+          ],
+          "correct": 1,
+          "explanation": "Volatile (Biến động, không ổn định). Trong ngữ cảnh thị trường nhiên liệu là 'Unpredictable'."
+        },
+        {
+          "id": "q45",
+          "type": "standalone",
+          "isExample": false,
+          "question": "45. Which of the following is NOT mentioned as a consequence of AI integration?",
+          "options": [
+            "Optimization of supply chains.",
+            "Reduction of human error.",
+            "Increase in energy consumption by data centers.",
+            "Immediate decrease in global fuel prices."
+          ],
+          "correct": 3,
+          "explanation": "Bài viết nói AI giúp tối ưu chuỗi cung ứng (A), giảm lỗi (B), tốn điện (C). Việc giảm giá dầu toàn cầu (D) không được nhắc tới."
+        },
+        {
+          "id": "q46",
+          "type": "standalone",
+          "isExample": false,
+          "question": "46. What 'paradox' does the author mention in paragraph 3?",
+          "options": [
+            "AI saves paper but uses huge amounts of electricity.",
+            "Digital tools are expensive but save money in the long run.",
+            "Older workers are more skilled but younger workers know more about AI.",
+            "Companies want to go green but continue to use paper."
+          ],
+          "correct": 0,
+          "explanation": "Nghịch lý là AI giúp giảm rác thải giấy nhưng chính nó lại tiêu thụ lượng điện khổng lồ từ các lưới điện không tái tạo."
+        },
+        {
+          "id": "q47",
+          "type": "standalone",
+          "isExample": false,
+          "question": "47. In paragraph 4, what does the word 'They' refer to?",
+          "options": [
+            "Algorithms.",
+            "Decisions.",
+            "Critics.",
+            "Government regulations."
+          ],
+          "correct": 2,
+          "explanation": "'Critics also point out... They argue...' -> 'They' ở đây thay thế cho chủ ngữ 'Critics' (Các nhà phê bình) ở câu trước."
+        },
+        {
+          "id": "q48",
+          "type": "standalone",
+          "isExample": false,
+          "question": "48. Which of the following statements is TRUE according to the passage?",
+          "options": [
+            "AI algorithms are currently free from any form of bias.",
+            "Rising energy prices have no impact on the use of technology.",
+            "There is a need for government intervention to prevent social inequality.",
+            "The gap between different social classes is shrinking thanks to AI."
+          ],
+          "correct": 2,
+          "explanation": "Keyword: '...without strict government regulation, the gap... will only widen.' (Nếu không có quy định, khoảng cách giàu nghèo sẽ tăng)."
+        },
+        {
+          "id": "q49",
+          "type": "standalone",
+          "isExample": false,
+          "question": "49. What can be inferred about the future of manual labor?",
+          "options": [
+            "It will become more popular as AI technology fails.",
+            "It is under threat as companies prioritize automation to save costs.",
+            "It will be completely replaced by robots by the end of next year.",
+            "It will only exist in the oil and gas industry."
+          ],
+          "correct": 1,
+          "explanation": "Inference: Vì doanh nghiệp ưu tiên tự động hóa để giảm chi phí do giá dầu tăng, nên lao động chân tay (manual labor) đang bị đe dọa."
+        },
+        {
+          "id": "q50",
+          "type": "standalone",
+          "isExample": false,
+          "question": "50. What is the author’s overall tone in the passage?",
+          "options": [
+            "Extremely optimistic and enthusiastic.",
+            "Dismissive and uninterested.",
+            "Cautious and analytical.",
+            "Angry and aggressive."
+          ],
+          "correct": 2,
+          "explanation": "Tác giả không chỉ trích hoàn toàn cũng không ủng hộ mù quáng, mà phân tích cả lợi và hại một cách cẩn trọng (Cautious & Analytical)."
+        }
+      ]
+    },
+    "part8": {
+      "id": "part8",
+      "type": "reading",
+      "title": "PART 8: Reading - Team Chat (Eco-Flow Campaign)",
+      "instruction": "Read the following group chat between team members and answer the questions.",
+      "questions": [
+        {
+          "id": "q51",
+          "type": "standalone",
+          "isExample": false,
+          "question": "51. Why did Alex start the group chat?",
+          "options": [
+            "To announce a new product called 'Eco-Flow'.",
+            "To check the progress of the campaign visuals.",
+            "To invite the team to a board meeting at 9:00 AM.",
+            "To complain about the printing company's schedule."
+          ],
+          "correct": 1,
+          "explanation": "Alex hỏi: 'Jamie, how are the designs coming along?' để kiểm tra tiến độ công việc."
+        },
+        {
+          "id": "q52",
+          "type": "standalone",
+          "isExample": false,
+          "question": "52. What is preventing Jamie from finishing the designs?",
+          "options": [
+            "He doesn't like the 'Eco-Flow' concept.",
+            "He is currently on vacation.",
+            "He lacks the necessary high-quality files.",
+            "His computer software is not working correctly."
+          ],
+          "correct": 2,
+          "explanation": "Jamie nói anh ấy đang chờ 'high-resolution logos' để hoàn thành bản vẽ cuối cùng."
+        },
+        {
+          "id": "q53",
+          "type": "standalone",
+          "isExample": false,
+          "question": "53. Why was Taylor unable to send the files yesterday?",
+          "options": [
+            "The client refused to send them.",
+            "Taylor was dealing with a health issue.",
+            "Taylor couldn't find the client's folder.",
+            "The internet in the office was down."
+          ],
+          "correct": 1,
+          "explanation": "Taylor giải thích: 'I had a terrible migraine' (bị đau nửa đầu) nên phải về sớm."
+        },
+        {
+          "id": "q54",
+          "type": "standalone",
+          "isExample": false,
+          "question": "54. What happens if the files are not sent to the printer by 4:30 PM?",
+          "options": [
+            "The board meeting will be canceled.",
+            "The product launch on Friday will be delayed.",
+            "Jamie will have to redo all the designs.",
+            "The client will find a new marketing agency."
+          ],
+          "correct": 1,
+          "explanation": "Alex cảnh báo: '...or we’ll miss the Friday launch.' (nếu không sẽ lỡ buổi ra mắt thứ Sáu)."
+        },
+        {
+          "id": "q55",
+          "type": "standalone",
+          "isExample": false,
+          "question": "55. What is the specific issue with the files Taylor found?",
+          "options": [
+            "They are corrupted and cannot be opened.",
+            "They are in a file format that is difficult to use immediately.",
+            "They are low-resolution versions of the logos.",
+            "They belong to a different campaign, not 'Eco-Flow'."
+          ],
+          "correct": 1,
+          "explanation": "File ở định dạng 'specialized CAD format', không phải PNG hay JPEG thông thường, gây khó khăn cho việc sử dụng ngay."
+        },
+        {
+          "id": "q56",
+          "type": "standalone",
+          "isExample": false,
+          "question": "56. In the message at 09:05 AM, the word 'stuck' is closest in meaning to:",
+          "options": [
+            "Unable to move forward.",
+            "Glued to a surface.",
+            "Very busy with other tasks.",
+            "Bored with the current project."
+          ],
+          "correct": 0,
+          "explanation": "Stuck trong ngữ cảnh công việc có nghĩa là bị tắc nghẽn, không thể tiến triển tiếp được."
+        },
+        {
+          "id": "q57",
+          "type": "standalone",
+          "isExample": false,
+          "question": "57. What does Jamie mean by the phrase 'pushes us past' at 09:22 AM?",
+          "options": [
+            "It helps the team finish earlier than expected.",
+            "It makes the team miss the original deadline.",
+            "It moves the meeting to a better location.",
+            "It forces the team to work harder."
+          ],
+          "correct": 1,
+          "explanation": "Pushes us past the deadline có nghĩa là làm cho công việc bị kéo dài quá thời hạn đã định."
+        },
+        {
+          "id": "q58",
+          "type": "standalone",
+          "isExample": false,
+          "question": "58. Why can't the client provide the correct files immediately?",
+          "options": [
+            "They have already closed their office for the day.",
+            "They don't have the standard versions of the logos.",
+            "The person who has access to the files is not available.",
+            "They are unhappy with Taylor’s phone call."
+          ],
+          "correct": 2,
+          "explanation": "Taylor báo lại: 'Their lead designer is on vacation... no one else has access.'"
+        },
+        {
+          "id": "q59",
+          "type": "standalone",
+          "isExample": false,
+          "question": "59. How does Alex decide to change the original plan?",
+          "options": [
+            "By canceling the board meeting entirely.",
+            "By asking Taylor to take over the design work.",
+            "By skipping the internal review and letting Jamie send the files directly.",
+            "By waiting until tomorrow for the client’s designer to return."
+          ],
+          "correct": 2,
+          "explanation": "Alex quyết định: 'We’ll skip the 3:00 PM review. Jamie, just send the final version directly to the printer.'"
+        },
+        {
+          "id": "q60",
+          "type": "standalone",
+          "isExample": false,
+          "question": "60. What is the overall atmosphere of this conversation?",
+          "options": [
+            "Relaxed and informal.",
+            "Urgent and problem-solving.",
+            "Aggressive and competitive.",
+            "Celebratory and happy."
+          ],
+          "correct": 1,
+          "explanation": "Cả đội đang đối mặt với deadline sát nút và liên tục đưa ra các phương án giải quyết vấn đề (Urgent & Problem-solving)."
+        }
+      ]
+    }
+  },
+  "questions": 60
+}

@@ -1,53 +1,72 @@
-// ============================================================
-// ContentDisplay.jsx — Hỗ trợ TOEIC & Dynamic Array
-// ============================================================
+// ContentDisplay.jsx
 import React, { useMemo, memo } from 'react';
-import { AlertCircle, Headphones, BookOpen, FileText, Loader2, ArrowRight, PenTool, Mic, ImageIcon } from 'lucide-react';
-import ReadingDisplay from './Readingdisplay';
+import {
+  AlertCircle, Headphones, BookOpen, FileText,
+  Loader2, ArrowRight, PenTool, Mic
+} from 'lucide-react';
+import ReadingDisplay from './Readingdisplay'; // Đảm bảo đúng tên file của bạn (chữ d thường/hoa)
 import ScriptDisplay from './ScriptDisplay';
 
-/* ─── Design tokens (Đồng bộ với QuestionDisplay) ───── */
+/* ─── Design tokens ─────────────────────────────────────── */
 const C = {
   blue: '#1CB0F6', blueDark: '#1899D6', blueBg: '#EAF6FE', blueBorder: '#BAE3FB',
   green: '#58CC02', greenDark: '#46A302', greenBg: '#F0FAE8',
-  yellow: '#FFC200', yellowDark: '#D9A600', yellowBg: '#FFFBEA',
   purple: '#CE82FF', purpleDark: '#B975E5', purpleBg: '#F8EEFF', purpleBorder: '#eec9ff',
-  n50: '#F8FAFC', n100: '#F1F5F9', n200: '#E2E8F0',
-  n400: '#94A3B8', n500: '#64748B', n600: '#475569', n800: '#1E293B',
+  n200: '#E2E8F0', n400: '#94A3B8', n500: '#64748B', n800: '#1E293B',
   white: '#FFFFFF',
 };
 
-// Cấu hình UI cho từng loại kỹ năng
-const TYPE_UI = {
-  listening: { icon: Headphones, color: 'text-[#1CB0F6]', bg: 'bg-[#EAF6FE]', border: 'border-[#BAE3FB]', title: 'Phần Nghe' },
-  reading:   { icon: BookOpen,   color: 'text-[#58CC02]', bg: 'bg-[#f1faeb]', border: 'border-[#bcf096]', title: 'Phần Đọc' },
-  writing:   { icon: PenTool,    color: 'text-[#FF9600]', bg: 'bg-[#FFFBEA]', border: 'border-[#FFD8A8]', title: 'Phần Viết' },
-  speaking:  { icon: Mic,        color: 'text-[#CE82FF]', bg: 'bg-[#F8EEFF]', border: 'border-[#eec9ff]', title: 'Phần Nói' }
-};
+/* ─── Helpers ────────────────────────────────────────────── */
 
-// ── MediaContent (Xử lý Audio/Script) ──
+/**
+ * 🚀 ĐÃ SỬA: Lấy nội dung văn bản từ partData.
+ * Bổ sung partData.script lên ưu tiên hàng đầu để tương thích với cấu trúc Admin mới.
+ */
+function getTextContent(partData) {
+  return (
+    partData?.script      || // <--- ĐÂY LÀ CHÌA KHÓA GIẢI QUYẾT VẤN ĐỀ
+    partData?.content     ||
+    partData?.text        ||
+    partData?.passageText ||
+    // Loại bỏ việc lấy description/instruction làm nội dung bài đọc để tránh bị hiển thị trùng lặp nhầm
+    ''
+  );
+}
+
+/**
+ * Lấy script (transcript) từ partData.
+ */
+function getScript(partData) {
+  return partData?.script || partData?.content || partData?.text || '';
+}
+
+/**
+ * Lấy danh sách group có audio riêng bên trong questions[].
+ * Dùng cho Part 3/4 TOEIC — mỗi group có audioUrl + script riêng.
+ */
+function getGroupsWithAudio(partData) {
+  if (!Array.isArray(partData?.questions)) return [];
+  return partData.questions.filter(
+    (q) => q.type === 'group' && q.audioUrl
+  );
+}
+
+/* ─── MediaContent ───────────────────────────────────────── */
 const MediaContent = memo(({
-  partData, isPartPlayed, onAudioStart, onAudioEnd
+  audioUrl,
+  script,
+  partTitle,
+  isPartPlayed,
+  onAudioStart,
+  onAudioEnd,
 }) => {
-  const script = useMemo(() => {
-    if (!partData) return '';
-    if (partData.script) return partData.script;
-    if (partData.text) return partData.text;
-    return '';
-  }, [partData]);
-
-  const audioUrl = partData?.audioUrl || null;
-  const partTitle = partData?.title || `Phần Thi`;
-
-  // 🚀 LOGIC QUAN TRỌNG: Nếu đây là Part 1, 2 (không có audio tổng), 
-  // ta trả về null để tránh hiện khung trống, vì Audio đã nằm trong từng câu hỏi.
   if (!audioUrl && !script) return null;
 
   return (
     <div className="animate-in fade-in duration-500 w-full">
       <ScriptDisplay
-        script={script}
-        audioUrl={audioUrl}
+        script={script || ''}
+        audioUrl={audioUrl || null}
         partTitle={partTitle}
         isPartPlayed={isPartPlayed}
         onAudioStart={onAudioStart}
@@ -58,34 +77,88 @@ const MediaContent = memo(({
 });
 MediaContent.displayName = 'MediaContent';
 
-// ── TextContent (Cho Reading / Writing / Speaking Prompt) ──
-const TextContent = memo(({ partData }) => {
-  const content = partData?.text || partData?.description || partData?.instruction || '';
-  if (!content.trim()) return null;
-
-  // Sử dụng màu tím cho Reading giống trang Admin
-  const isReading = partData.type === 'reading';
+/* ─── GroupAudioList ─────────────────────────────────────── */
+const GroupAudioList = memo(({
+  groups,
+  partTitle,
+  isPartPlayed,
+  onAudioStart,
+  onAudioEnd,
+}) => {
+  if (!groups.length) return null;
 
   return (
-    <div className={`rounded-[24px] border-2 border-b-[6px] p-6 md:p-8 shadow-sm animate-in fade-in duration-500 w-full ${isReading ? 'bg-[#F8EEFF] border-[#eec9ff]' : 'bg-white border-slate-200'}`}>
-      <div className="flex items-center gap-3 mb-4 pb-4 border-b border-black/5">
-        <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${isReading ? 'bg-white text-[#CE82FF]' : 'bg-blue-50 text-blue-500'}`}>
-           {isReading ? <FileText size={20} strokeWidth={2.5} /> : <PenTool size={20} strokeWidth={2.5} />}
-        </div>
-        <h3 className={`text-lg font-black leading-none pt-1 ${isReading ? 'text-[#CE82FF]' : 'text-slate-800'}`}>
-          {partData.title || 'Nội dung hướng dẫn'}
-        </h3>
-      </div>
-      
-      <div className={`prose max-w-none text-[15px] sm:text-[16px] leading-relaxed font-bold whitespace-pre-wrap ${isReading ? 'text-purple-900/80' : 'text-slate-700'}`}>
-        {content}
-      </div>
+    <div className="flex flex-col gap-4 w-full animate-in fade-in duration-500">
+      {groups.map((group, idx) => {
+        const isLast = idx === groups.length - 1;
+        const label = group.title || `${partTitle} — Đoạn ${idx + 1}`;
+
+        return (
+          <div
+            key={group.id}
+            className="rounded-[20px] border-2 overflow-hidden"
+            style={{ background: C.purpleBg, borderColor: C.purpleBorder }}
+          >
+            {/* Header nhóm */}
+            <div
+              className="px-4 py-3 flex items-center gap-2.5 border-b-2"
+              style={{ background: C.white, borderColor: C.purpleBorder }}
+            >
+              <div
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center border-2 shrink-0"
+                style={{ background: C.purpleBg, borderColor: C.purpleBorder }}
+              >
+                <FileText size={16} color={C.purpleDark} strokeWidth={2.5} />
+              </div>
+              <span
+                className="text-[12px] font-black uppercase tracking-wider pt-0.5"
+                style={{ color: C.purpleDark, fontFamily: '"Baloo 2", sans-serif' }}
+              >
+                {label}
+              </span>
+            </div>
+
+            {/* Audio + script của group */}
+            <div className="p-4">
+              <MediaContent
+                audioUrl={group.audioUrl}
+                script={getScript(group)}
+                partTitle={label}
+                isPartPlayed={isPartPlayed}
+                onAudioStart={onAudioStart}
+                onAudioEnd={isLast ? onAudioEnd : undefined}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 });
-TextContent.displayName = 'TextContent';
+GroupAudioList.displayName = 'GroupAudioList';
 
-// ── EmptyState ──
+/* ─── ReadingContent ─────────────────────────────────────── */
+const ReadingContent = memo(({ partData }) => {
+  // ReadingDisplay nhận prop `data` với shape { text, title, description, questions }
+  const data = {
+    text:        getTextContent(partData),
+    title:       partData.title       || '',
+    description: partData.description || partData.instruction || '',
+    questions:   partData.questions   || [],
+  };
+
+  // Nếu không có nội dung gì → không render (Ví dụ Part 5 ngữ pháp TOEIC)
+  if (!data.text.trim()) return null;
+
+  return (
+    <div className="animate-in fade-in duration-500 w-full">
+      <ReadingDisplay data={data} />
+    </div>
+  );
+});
+ReadingContent.displayName = 'ReadingContent';
+
+/* ─── EmptyState ─────────────────────────────────────────── */
 const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
   const states = {
     'no-part': {
@@ -112,7 +185,6 @@ const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
       </div>
       <p className="text-slate-900 font-black text-2xl mb-2">{state.title}</p>
       <p className="text-slate-500 font-bold max-w-sm leading-relaxed">{state.description}</p>
-      
       {state.cta && onSelectPart && (
         <button
           onClick={onSelectPart}
@@ -125,8 +197,11 @@ const EmptyState = memo(({ type = 'no-part', onSelectPart }) => {
     </div>
   );
 });
+EmptyState.displayName = 'EmptyState';
 
-// ── ContentDisplay (MAIN) ──
+/* ═══════════════════════════════════════════════════════════
+   MAIN — ContentDisplay
+═══════════════════════════════════════════════════════════ */
 const ContentDisplay = memo(({
   partData,
   selectedPart,
@@ -151,48 +226,62 @@ const ContentDisplay = memo(({
 
   const pType = partData.type || testType;
 
-  // Render dựa trên loại Part
-  switch (pType) {
-    case 'listening':
-      // 🎧 Chỉ hiện MediaContent nếu có Audio Url hoặc Script (Thường là Part 3, 4)
+  /* ── LISTENING ─────────────────────────────────────────── */
+  if (pType === 'listening') {
+    const partAudioUrl = partData.audioUrl || null;
+    const partScript   = getScript(partData);
+    const groupsWithAudio = getGroupsWithAudio(partData);
+
+    if (partAudioUrl) {
       return (
         <div className="w-full">
           <MediaContent
-            partData={partData}
+            audioUrl={partAudioUrl}
+            script={partScript}
+            partTitle={partData.title || 'Phần Nghe'}
             isPartPlayed={isPartPlayed}
             onAudioStart={onAudioStart}
             onAudioEnd={onAudioEnd}
           />
         </div>
       );
+    }
 
-    case 'reading':
-      // 📖 Nếu có text đoạn văn (Part 6, 7) thì hiện khung đọc
-      if (partData.text || partData.passageText) {
-         return <TextContent partData={partData} />;
-      }
-      // Các phần như Part 5 không có đoạn văn chung thì ẩn hẳn ContentDisplay
-      return null; 
-
-    case 'writing':
-    case 'speaking':
-      return (
-        <div className="flex flex-col gap-4 w-full">
-          <TextContent partData={partData} />
-          {partData.audioUrl && (
-            <MediaContent 
-              partData={partData} 
-              isPartPlayed={isPartPlayed}
-              onAudioStart={onAudioStart}
-              onAudioEnd={onAudioEnd}
-            />
-          )}
-        </div>
-      );
-
-    default:
-      return null;
+    if (groupsWithAudio.length > 0) return null;
+    return null;
   }
+
+  /* ── READING ───────────────────────────────────────────── */
+  if (pType === 'reading') {
+    return <ReadingContent partData={partData} />;
+  }
+
+  /* ── WRITING / SPEAKING ────────────────────────────────── */
+  if (pType === 'writing' || pType === 'speaking') {
+    const content = getTextContent(partData);
+    const hasAudio = !!partData?.audioUrl;
+
+    if (!content.trim() && !hasAudio) return null;
+
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        {content.trim() && <ReadingContent partData={partData} />}
+        {hasAudio && (
+          <MediaContent
+            audioUrl={partData.audioUrl}
+            script={getScript(partData)}
+            partTitle={partData.title || 'Phần Thi'}
+            isPartPlayed={isPartPlayed}
+            onAudioStart={onAudioStart}
+            onAudioEnd={onAudioEnd}
+          />
+        )}
+      </div>
+    );
+  }
+
+  return null;
 });
 
+ContentDisplay.displayName = 'ContentDisplay';
 export default ContentDisplay;

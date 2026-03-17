@@ -1,0 +1,434 @@
+    {
+  "title": "Đề thi thử TOEIC ETS 2024 - Test 2",
+  "description": "Đề thi TOEIC chuẩn định dạng mới",
+  "category": "toeic",
+  "duration": 120,
+  "showResults": true,
+  "parts": [
+    {
+      "id": "part1",
+      "type": "listening",
+      "title": "PART 1",
+      "instruction": "Directions: For each question in this part, you will hear four statements about a picture in your test book. When you hear the statements, you must select the one statement that best describes what you see in the picture. Then find the number of the question on your answer sheet and mark your answer. The statements will not be printed in your test book and will be spoken only one time.",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "standalone",
+          "isExample": false,
+          "question": "1.",
+          "options": [
+            "A man is closing a metal gate.",
+            "A man is walking down a stone path.",
+            "Some potted plants line a walkway.",
+            "Some flags are hanging from balconies."
+          ],
+          "correct": 1,
+          "explanation": "Trong ảnh, trọng tâm là một người đàn ông đang đi bộ trên lối đi bằng đá. Các lựa chọn khác không xuất hiện hoặc không phải là hành động chính."
+        },
+        {
+          "id": "q2",
+          "type": "standalone",
+          "isExample": false,
+          "question": "2.",
+          "options": [
+            "Some shopping bags have been placed on a train platform.",
+            "Some people are lined up to buy train tickets.",
+            "A woman is pulling her luggage behind her.",
+            "A man is leaning against a railing."
+          ],
+          "correct": 3,
+          "explanation": "Bức ảnh tập trung vào một người đàn ông đang dựa người vào lan can. Các chi tiết khác không phải là trọng tâm của bức ảnh."
+        },
+        {
+          "id": "q3",
+          "type": "standalone",
+          "isExample": false,
+          "question": "3.",
+          "options": [
+            "Some wooden planks are leaning against a wall.",
+            "A vehicle is parked next to a building.",
+            "Some stones have been stacked on a pallet.",
+            "A package has been left near a door."
+          ],
+          "correct": 1,
+          "explanation": "Đối tượng chính trong ảnh là một phương tiện (xe tải hoặc xe ô tô) đang đỗ sát bên cạnh một tòa nhà."
+        },
+        {
+          "id": "q4",
+          "type": "standalone",
+          "isExample": false,
+          "question": "4.",
+          "options": [
+            "A man is holding up his phone.",
+            "A man is pinning a note to a bulletin board.",
+            "A man is dropping an item into a bin.",
+            "A man is washing some windows."
+          ],
+          "correct": 0,
+          "explanation": "Hành động duy nhất được mô tả chính xác là người đàn ông đang cầm (giơ) chiếc điện thoại của mình lên."
+        },
+        {
+          "id": "q5",
+          "type": "standalone",
+          "isExample": false,
+          "question": "5.",
+          "options": [
+            "She's tying the back of her apron.",
+            "She's reaching for food on a shelf.",
+            "She's working at a counter.",
+            "She's putting food into a refrigerator."
+          ],
+          "correct": 2,
+          "explanation": "Người phụ nữ đang đứng và làm việc ở phía sau một quầy (có thể là quầy pha chế hoặc thu ngân)."
+        },
+        {
+          "id": "q6",
+          "type": "standalone",
+          "isExample": false,
+          "question": "6.",
+          "options": [
+            "He's setting up a buffet.",
+            "He's putting plates on dining tables.",
+            "He's watering some plants in a garden.",
+            "He's carrying food up a stairway."
+          ],
+          "correct": 0,
+          "explanation": "Người đàn ông đang sắp xếp các khay thức ăn hoặc dụng cụ lên một bàn tiệc tự chọn (buffet)."
+        }
+      ]
+    },
+    {
+      "id": "part2",
+      "type": "listening",
+      "title": "PART 2",
+      "instruction": "Directions: You will hear a question or statement and three responses spoken in English. They will not be printed in your test book and will be spoken only one time. Select the best response to the question or statement and mark the letter (A), (B), or (C) on your answer sheet.",
+      "questions": [
+        {
+          "id": "q7",
+          "type": "standalone",
+          "isExample": false,
+          "question": "7. Will you order the pasta or the chicken?",
+          "options": [
+            "I'll have the pasta.",
+            "Yes, I studied Italian.",
+            "I think we should paint the kitchen."
+          ],
+          "correct": 0,
+          "explanation": "Câu hỏi đưa ra hai lựa chọn (pasta hoặc gà). Câu trả lời phù hợp là chọn một trong hai."
+        },
+        {
+          "id": "q8",
+          "type": "standalone",
+          "isExample": false,
+          "question": "8. Who should I talk to about getting a ticket to Bangkok?",
+          "options": [
+            "How about after the conference?",
+            "The agent at the ticket counter.",
+            "In front of the theater."
+          ],
+          "correct": 1,
+          "explanation": "Câu hỏi 'Who' (ai) cần một người cụ thể. 'Người đại diện ở quầy vé' là một danh từ chỉ người phù hợp."
+        },
+        {
+          "id": "q9",
+          "type": "standalone",
+          "isExample": false,
+          "question": "9. Would you like the report to be e-mailed or printed out?",
+          "options": [
+            "An electric heater.",
+            "Page 25.",
+            "Either way is fine."
+          ],
+          "correct": 2,
+          "explanation": "Câu hỏi đưa ra hai lựa chọn (email hoặc in). 'Cách nào cũng được' là một câu trả lời chấp nhận cả hai, rất phổ biến."
+        },
+        {
+          "id": "q10",
+          "type": "standalone",
+          "isExample": false,
+          "question": "10. Have you decided how much to charge for your concert tickets?",
+          "options": [
+            "Yes—fifteen dollars each.",
+            "I've read about that.",
+            "A jazz band."
+          ],
+          "correct": 0,
+          "explanation": "Câu hỏi 'Have you decided...' (Bạn đã quyết định... chưa?) cần câu trả lời xác nhận (Yes/No) kèm thông tin. Đáp án A trả lời trực tiếp."
+        },
+        {
+          "id": "q11",
+          "type": "standalone",
+          "isExample": false,
+          "question": "11. How often does the store offer a sales promotion?",
+          "options": [
+            "A discount on appliances.",
+            "Sure, I can buy some.",
+            "Every three months."
+          ],
+          "correct": 2,
+          "explanation": "'How often' (Bao lâu một lần) hỏi về tần suất, câu trả lời phải là một khoảng thời gian."
+        },
+        {
+          "id": "q12",
+          "type": "standalone",
+          "isExample": false,
+          "question": "12. The tour starts at noon today, doesn't it?",
+          "options": [
+            "Please start this washing machine.",
+            "He's playing a folk tune.",
+            "No—it's been postponed an hour."
+          ],
+          "correct": 2,
+          "explanation": "Đây là câu hỏi đuôi (tag question) xác nhận thông tin. Đáp án C phủ định (No) và sửa lại thông tin (bị hoãn) là phản hồi phù hợp."
+        },
+        {
+          "id": "q13",
+          "type": "standalone",
+          "isExample": false,
+          "question": "13. Let's begin our meeting about the Taylor project.",
+          "options": [
+            "Good idea—we have a lot to get through.",
+            "Some project proposals.",
+            "No, in room 725."
+          ],
+          "correct": 0,
+          "explanation": "'Let's...' là một lời đề nghị. Đáp án A là một sự đồng tình và hưởng ứng tích cực."
+        },
+        {
+          "id": "q14",
+          "type": "standalone",
+          "isExample": false,
+          "question": "14. There's a dental clinic on Main Street, isn't there?",
+          "options": [
+            "Yes, it's very convenient.",
+            "A toothbrush and toothpaste.",
+            "I'll have the main dish, thanks."
+          ],
+          "correct": 0,
+          "explanation": "Câu hỏi xác nhận sự tồn tại của một địa điểm. 'Yes' xác nhận và 'it's very convenient' là một nhận xét hợp lý."
+        },
+        {
+          "id": "q15",
+          "type": "standalone",
+          "isExample": false,
+          "question": "15. Where is the book reading going to take place?",
+          "options": [
+            "Sure—I can give you a tour later.",
+            "At the library.",
+            "It lasts a while."
+          ],
+          "correct": 1,
+          "explanation": "'Where' hỏi về địa điểm, câu trả lời phải là một nơi chốn."
+        },
+        {
+          "id": "q16",
+          "type": "standalone",
+          "isExample": false,
+          "question": "16. When's the bus going to be here?",
+          "options": [
+            "A round-trip ticket.",
+            "Let's break for lunch.",
+            "At 3:30 P.M."
+          ],
+          "correct": 2,
+          "explanation": "'When' hỏi về thời gian, câu trả lời cần một mốc giờ cụ thể."
+        },
+        {
+          "id": "q17",
+          "type": "standalone",
+          "isExample": false,
+          "question": "17. The estimated price for this car insurance is higher than we expected.",
+          "options": [
+            "We'll check to see if there's a cheaper rate.",
+            "There's another filling station nearby.",
+            "The parking garage on the corner."
+          ],
+          "correct": 0,
+          "explanation": "Đây là một lời than phiền về giá cao. Phản hồi phù hợp là đưa ra giải pháp (tìm giá rẻ hơn)."
+        },
+        {
+          "id": "q18",
+          "type": "standalone",
+          "isExample": false,
+          "question": "18. Why haven't the renovations been completed yet?",
+          "options": [
+            "It's on the top shelf.",
+            "Because some materials were delayed.",
+            "Some guests haven't received an invitation."
+          ],
+          "correct": 1,
+          "explanation": "'Why' hỏi về lý do. Câu trả lời bắt đầu bằng 'Because' là phù hợp nhất."
+        },
+        {
+          "id": "q19",
+          "type": "standalone",
+          "isExample": false,
+          "question": "19. I'll give you my office number in case you have questions about the data.",
+          "options": [
+            "The theater is reserved for that date.",
+            "The file cabinet needs to be moved.",
+            "Thanks—I appreciate that."
+          ],
+          "correct": 2,
+          "explanation": "Đây là một lời đề nghị giúp đỡ. Phản hồi lịch sự là cảm ơn."
+        },
+        {
+          "id": "q20",
+          "type": "standalone",
+          "isExample": false,
+          "question": "20. Which parking area should we use?",
+          "options": [
+            "The fee is fifteen dollars.",
+            "About a twenty-minute delay.",
+            "The one by Smith's Pharmacy."
+          ],
+          "correct": 2,
+          "explanation": "'Which' hỏi về sự lựa chọn. Đáp án C chỉ định một khu vực cụ thể."
+        },
+        {
+          "id": "q21",
+          "type": "standalone",
+          "isExample": false,
+          "question": "21. Let's take a taxi to the airport.",
+          "options": [
+            "My seats are in section 21.",
+            "Sure, that will be the easiest.",
+            "The café is a few blocks away."
+          ],
+          "correct": 1,
+          "explanation": "'Let's' là một lời đề nghị. Đáp án B thể hiện sự đồng ý."
+        },
+        {
+          "id": "q22",
+          "type": "standalone",
+          "isExample": false,
+          "question": "22. Our team training session was well attended, wasn't it?",
+          "options": [
+            "They were delivered yesterday.",
+            "No, just down the hall.",
+            "Actually, not everyone was there."
+          ],
+          "correct": 2,
+          "explanation": "Câu hỏi đuôi xác nhận một sự thật. Đáp án C đưa ra thông tin ngược lại (không phải ai cũng đến) một cách lịch sự với 'Actually'."
+        },
+        {
+          "id": "q23",
+          "type": "standalone",
+          "isExample": false,
+          "question": "23. Why's the company discontinuing its newsletter?",
+          "options": [
+            "Only the print version.",
+            "Two to three times per week.",
+            "How far is the main office building?"
+          ],
+          "correct": 0,
+          "explanation": "'Why' hỏi lý do. 'Only the print version' ngụ ý lý do là họ chỉ ngừng bản in, còn bản điện tử vẫn hoạt động."
+        },
+        {
+          "id": "q24",
+          "type": "standalone",
+          "isExample": false,
+          "question": "24. Weren't you planning to take the afternoon off?",
+          "options": [
+            "The clients wanted to meet today.",
+            "I took it off the middle shelf.",
+            "He created a great project plan."
+          ],
+          "correct": 0,
+          "explanation": "Câu hỏi phủ định về kế hoạch. Đáp án A giải thích lý do tại sao kế hoạch đó không xảy ra (hoặc sẽ không xảy ra)."
+        },
+        {
+          "id": "q25",
+          "type": "standalone",
+          "isExample": false,
+          "question": "25. Dr. Molina sees patients in her Middleville office.",
+          "options": [
+            "The instructor was so patient with the students.",
+            "Oh, that's only two kilometers from my house.",
+            "We have some digital thermometers in stock."
+          ],
+          "correct": 1,
+          "explanation": "Đây là một câu cung cấp thông tin. Đáp án B là phản hồi tự nhiên, bình luận về khoảng cách của địa điểm đó."
+        },
+        {
+          "id": "q26",
+          "type": "standalone",
+          "isExample": false,
+          "question": "26. Who's going out for lunch?",
+          "options": [
+            "I enjoyed that book too.",
+            "I'll be leaving work before then.",
+            "What are you doing this weekend?"
+          ],
+          "correct": 1,
+          "explanation": "'Who' hỏi về người. Câu trả lời có thể là 'I will' hoặc 'I am'. Đáp án B 'Tôi sẽ rời văn phòng trước giờ đó' (ngụ ý không đi ăn trưa) cũng là một câu trả lời cho câu hỏi."
+        },
+        {
+          "id": "q27",
+          "type": "standalone",
+          "isExample": false,
+          "question": "27. Do the tickets go on sale this week or next?",
+          "options": [
+            "The cafeteria downstairs.",
+            "They're already sold out.",
+            "Sure, no problem."
+          ],
+          "correct": 1,
+          "explanation": "Câu hỏi đưa ra hai lựa chọn thời gian. Đáp án B 'Chúng đã được bán hết' là một câu trả lời hợp lý, cho thấy việc hỏi về thời gian bán là không còn ý nghĩa."
+        },
+        {
+          "id": "q28",
+          "type": "standalone",
+          "isExample": false,
+          "question": "28. When will you finish updating the sales data?",
+          "options": [
+            "I'm waiting for information from one more store.",
+            "In the top drawer.",
+            "Sales increased by five percent."
+          ],
+          "correct": 0,
+          "explanation": "'When' hỏi về thời gian hoàn thành. Đáp án A không trả lời trực tiếp về thời gian nhưng giải thích lý do chưa hoàn thành (đang chờ thông tin), đó là một cách trả lời gián tiếp phổ biến."
+        },
+        {
+          "id": "q29",
+          "type": "standalone",
+          "isExample": false,
+          "question": "29. Who's leading the planning session tomorrow?",
+          "options": [
+            "Leadership strategies.",
+            "I'll be out of the office.",
+            "Just a few hours."
+          ],
+          "correct": 1,
+          "explanation": "'Who' hỏi về người. Đáp án B trả lời gián tiếp bằng cách cho biết ai sẽ không ở đó, ngụ ý đó không phải là người dẫn dắt."
+        },
+        {
+          "id": "q30",
+          "type": "standalone",
+          "isExample": false,
+          "question": "30. Aren't we meeting with the clients this evening?",
+          "options": [
+            "No, it's on the opposite side.",
+            "The television was fixed.",
+            "My flight to Japan leaves at six."
+          ],
+          "correct": 2,
+          "explanation": "Câu hỏi phủ định về lịch trình. Đáp án C đưa ra một lý do cho thấy người nói không thể tham gia cuộc họp (có chuyến bay), đồng thời ngụ ý xác nhận lịch họp là có."
+        },
+        {
+          "id": "q31",
+          "type": "standalone",
+          "isExample": false,
+          "question": "31. They invited me to the opening, didn't they?",
+          "options": [
+            "I plan to submit my application.",
+            "A membership fee.",
+            "Check your inbox."
+          ],
+          "correct": 2,
+          "explanation": "Câu hỏi xác nhận về lời mời. 'Kiểm tra hộp thư đến của bạn' là một cách gợi ý để người nói tự xác nhận thông tin về lời mời."
+        }
+      ]
+    }
+  ]
+}
