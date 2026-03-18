@@ -1,504 +1,252 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+import { Eye, EyeOff, AlertCircle, Shield, ArrowRight, Loader2 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
-import { useFirebaseAuth } from '../../hooks/useFirebaseAuth'; // Import hook Google Login
+import { useFirebaseAuth } from '../../hooks/useFirebaseAuth';
 
-/* ─── Google M3 CSS (Giữ nguyên của Khoa) ───────────────── */
-const M3Styles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500&display=swap');
+const C = {
+  blue: '#1CB0F6', blueDark: '#0d8ecf', blueBg: '#EAF6FE', blueBorder: '#BAE3FB',
+  red: '#FF4B4B', redBg: '#FFF0F0', redBorder: '#ffd6d6',
+  n100: '#F4F7FA', n200: '#e2e8f0', n400: '#94a3b8', n600: '#475569', n800: '#1e293b',
+};
 
-    .al-root * { box-sizing: border-box; }
-
-    .al-root {
-      font-family: 'Google Sans Text', system-ui, sans-serif;
-      --m3-primary:        #1A56DB;
-      --m3-primary-dark:   #0D47A1;
-      --m3-on-primary:     #ffffff;
-      --m3-surface:        #F7F8FF;
-      --m3-surface-card:   #ffffff;
-      --m3-outline:        #C4C6D0;
-      --m3-outline-focus:  #1A56DB;
-      --m3-error:          #BA1A1A;
-      --m3-error-bg:       #FFF0EE;
-      --m3-error-border:   #FFBAB1;
-      --m3-success:        #006C51;
-      --m3-success-bg:     #F0FDF9;
-      --m3-on-surface:     #1A1B1F;
-      --m3-on-surface-var: #44464F;
-      --m3-scrim:          rgba(0,0,0,0.32);
-    }
-
-    /* Ripple */
-    .m3-ripple {
-      position: relative;
-      overflow: hidden;
-    }
-    .m3-ripple::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: currentColor;
-      opacity: 0;
-      transition: opacity 200ms;
-      border-radius: inherit;
-    }
-    .m3-ripple:hover::after  { opacity: 0.08; }
-    .m3-ripple:active::after { opacity: 0.16; }
-
-    /* Outlined text field */
-    .m3-field { position: relative; width: 100%; }
-
-    .m3-field input {
-      width: 100%;
-      height: 56px;
-      padding: 16px 16px 4px;
-      font-family: 'Google Sans Text', system-ui, sans-serif;
-      font-size: 16px;
-      color: var(--m3-on-surface);
-      background: var(--m3-surface-card);
-      border: 1.5px solid var(--m3-outline);
-      border-radius: 4px;
-      outline: none;
-      transition: border-color 200ms, box-shadow 200ms;
-      caret-color: var(--m3-primary);
-    }
-    .m3-field input:focus {
-      border-color: var(--m3-outline-focus);
-      border-width: 2px;
-    }
-    .m3-field input.error {
-      border-color: var(--m3-error);
-    }
-    .m3-field input.error:focus {
-      border-color: var(--m3-error);
-      border-width: 2px;
-    }
-    .m3-field input:disabled {
-      background: #E1E2EC;
-      color: #91939F;
-      cursor: not-allowed;
-    }
-
-    /* Floating label */
-    .m3-field label {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-family: 'Google Sans Text', system-ui, sans-serif;
-      font-size: 16px;
-      color: var(--m3-on-surface-var);
-      pointer-events: none;
-      transition: top 150ms cubic-bezier(0.4,0,0.2,1),
-                  font-size 150ms cubic-bezier(0.4,0,0.2,1),
-                  color 150ms;
-      background: var(--m3-surface-card);
-      padding: 0 4px;
-      border-radius: 2px;
-    }
-    .m3-field input:focus ~ label,
-    .m3-field input:not(:placeholder-shown) ~ label {
-      top: 0;
-      font-size: 12px;
-      color: var(--m3-outline-focus);
-    }
-    .m3-field input.error ~ label,
-    .m3-field input.error:focus ~ label {
-      color: var(--m3-error);
-    }
-    .m3-field input:disabled ~ label {
-      color: #91939F;
-    }
-
-    /* Supporting text */
-    .m3-field .support {
-      font-size: 12px;
-      margin: 4px 16px 0;
-      color: var(--m3-on-surface-var);
-      min-height: 16px;
-      transition: color 150ms;
-    }
-    .m3-field .support.error { color: var(--m3-error); }
-
-    /* Filled button */
-    .m3-btn-filled {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      height: 40px;
-      padding: 0 24px;
-      font-family: 'Google Sans', system-ui, sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.1px;
-      color: var(--m3-on-primary);
-      background: var(--m3-primary);
-      border: none;
-      border-radius: 100px;
-      cursor: pointer;
-      transition: background 200ms, box-shadow 200ms, transform 100ms;
-    }
-    .m3-btn-filled:hover:not(:disabled) {
-      background: #1649C0;
-      box-shadow: 0 1px 2px rgba(26,86,219,0.3), 0 2px 6px rgba(26,86,219,0.15);
-    }
-    .m3-btn-filled:active:not(:disabled) {
-      background: var(--m3-primary-dark);
-      transform: scale(0.98);
-    }
-    .m3-btn-filled:disabled {
-      background: rgba(26,27,31,0.12);
-      color: rgba(26,27,31,0.38);
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    /* Error/Success banner */
-    .m3-error-banner, .m3-success-banner {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      animation: m3-slide-in 200ms ease;
-    }
-    .m3-error-banner { background: var(--m3-error-bg); border: 1px solid var(--m3-error-border); }
-    .m3-success-banner { background: var(--m3-success-bg); border: 1px solid #A7F3D0; }
-
-    @keyframes m3-slide-in {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Loading spinner */
-    .m3-spinner {
-      width: 20px; height: 20px;
-      border: 2.5px solid rgba(255,255,255,0.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 700ms linear infinite;
-    }
-    .m3-spinner-dark {
-      border-color: rgba(26,86,219,0.2);
-      border-top-color: var(--m3-primary);
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Icon buttons & Checkbox */
-    .m3-icon-btn {
-      display: flex; align-items: center; justify-content: center;
-      width: 36px; height: 36px; border: none; background: none;
-      border-radius: 50%; cursor: pointer; color: var(--m3-on-surface-var);
-      transition: background 150ms;
-    }
-    .m3-icon-btn:hover  { background: rgba(26,27,31,0.08); }
-    .m3-icon-btn:active { background: rgba(26,27,31,0.16); }
-
-    .m3-divider {
-      display: flex; align-items: center; gap: 12px;
-      color: var(--m3-on-surface-var); font-size: 12px; margin: 20px 0;
-    }
-    .m3-divider::before, .m3-divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--m3-outline);
-    }
-
-    .dot-bg {
-      background-image: radial-gradient(rgba(255,255,255,0.15) 1.5px, transparent 1.5px);
-      background-size: 28px 28px;
-    }
-    .m3-checkbox { width: 18px; height: 18px; accent-color: var(--m3-primary); cursor: pointer; }
-  `}</style>
-);
-
-/* ─── Outlined Text Field ───────────────────────────────── */
-const M3Field = ({ label, name, type = 'text', value, onChange, error, disabled, autoComplete, rightSlot }) => (
-  <div className="m3-field">
-    <input
-      id={name} name={name} type={type} value={value}
-      onChange={onChange} placeholder=" " autoComplete={autoComplete}
-      disabled={disabled} className={error ? 'error' : ''}
-      style={{ paddingRight: rightSlot ? 48 : 16 }}
-    />
-    <label htmlFor={name}>{label}</label>
-    {rightSlot && (
-      <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-        {rightSlot}
-      </div>
-    )}
-    <div className={`support${error ? ' error' : ''}`}>{error || ''}</div>
+/* ─── Input field 3D ── */
+const Field = ({ label, icon: Icon, error, right, ...props }) => (
+  <div>
+    <label className="block text-[10px] font-black uppercase tracking-[0.14em] mb-2 ml-0.5"
+           style={{ color: C.n400 }}>{label}</label>
+    <div className="relative">
+      <Icon size={15} strokeWidth={2.5} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+           style={{ color: error ? C.red : C.n400 }} />
+      <input
+        {...props}
+        className="w-full pl-11 pr-12 py-3.5 rounded-[16px] text-[14px] font-bold outline-none transition-all"
+        style={{
+          background: error ? C.redBg : C.n100,
+          border: `2px solid ${error ? C.redBorder : C.n200}`,
+          borderBottom: `4px solid ${error ? C.red : '#cbd5e1'}`,
+          color: C.n800,
+        }}
+        onFocus={e => {
+          if (!error) {
+            e.target.style.border = `2px solid ${C.blue}`;
+            e.target.style.borderBottom = `4px solid ${C.blueDark}`;
+            e.target.style.background = 'white';
+            e.target.style.boxShadow = `0 0 0 3px ${C.blueBg}`;
+          }
+        }}
+        onBlur={e => {
+          e.target.style.border = `2px solid ${error ? C.redBorder : C.n200}`;
+          e.target.style.borderBottom = `4px solid ${error ? C.red : '#cbd5e1'}`;
+          e.target.style.background = error ? C.redBg : C.n100;
+          e.target.style.boxShadow = 'none';
+        }}
+      />
+      {right && <div className="absolute right-4 top-1/2 -translate-y-1/2">{right}</div>}
+    </div>
+    <AnimatePresence>
+      {error && (
+        <Motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+          className="flex items-center gap-1 text-[11px] font-bold mt-1.5 ml-0.5"
+          style={{ color: C.red }}>
+          <AlertCircle size={11} /> {error}
+        </Motion.p>
+      )}
+    </AnimatePresence>
   </div>
 );
 
-/* ─── Main Component ────────────────────────────────────── */
-const AdminLogin = () => {
+/* ─── Google SVG ── */
+const GoogleSVG = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
+
+/* ════════════════════════════════════════════════════════════ */
+export default function AdminLogin() {
   const navigate = useNavigate();
-  // Lấy hàm signIn (Email) và trạng thái từ hook Admin
-  const { signIn, loading: adminLoading, isAdmin, error: adminRoleError } = useAdminAuth();
-  // Lấy hàm đăng nhập Google từ hook Firebase
+  const { signIn, loading, isAdmin, error: roleError } = useAdminAuth();
   const { signInWithGoogle } = useFirebaseAuth();
 
-  const [showPwd, setShowPwd]   = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [banner, setBanner]     = useState(null); 
-  const [fieldErr, setFieldErr] = useState({ email: '', password: '' });
-  const [form, setForm]         = useState({ email: '', password: '', remember: false });
-  const emailRef = useRef(null);
+  const [form,      setForm]      = useState({ email: '', password: '' });
+  const [showPwd,   setShowPwd]   = useState(false);
+  const [gLoading,  setGLoading]  = useState(false);
+  const [banner,    setBanner]    = useState(null); // { type: 'error'|'ok', text }
+  const [errors,    setErrors]    = useState({});
 
-  // Gộp loading state
-  const isAnyLoading = adminLoading || isGoogleLoading;
+  useEffect(() => { if (isAdmin) navigate('/admin/dashboard', { replace: true }); }, [isAdmin, navigate]);
+  useEffect(() => { if (roleError) setBanner({ type: 'error', text: roleError }); }, [roleError]);
 
-  // Xử lý chuyển hướng nếu đã là Admin
-  useEffect(() => {
-    if (isAdmin) {
-      navigate('/admin/dashboard', { replace: true });
-    }
-  }, [isAdmin, navigate]);
+  const busy = loading || gLoading;
 
-  // Hiển thị lỗi từ hook Admin (VD: "Bạn không có quyền Admin")
-  useEffect(() => {
-    if (adminRoleError) {
-      setBanner({ type: 'error', msg: adminRoleError });
-      setIsGoogleLoading(false); // Reset loading nếu check role thất bại
-    }
-  }, [adminRoleError]);
-
-  useEffect(() => { emailRef.current?.focus(); }, []);
-
-  const validate = () => {
-    const errs = { email: '', password: '' };
-    let ok = true;
-    if (!form.email.trim()) {
-      errs.email = 'Email không được để trống';
-      ok = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errs.email = 'Địa chỉ email không hợp lệ';
-      ok = false;
-    }
-    if (!form.password) {
-      errs.password = 'Mật khẩu không được để trống';
-      ok = false;
-    } else if (form.password.length < 6) {
-      errs.password = 'Mật khẩu tối thiểu 6 ký tự';
-      ok = false;
-    }
-    setFieldErr(errs);
-    return ok;
-  };
-
-  const handleChange = (e) => {
-    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm((f) => ({ ...f, [e.target.name]: val }));
-    if (e.target.name in fieldErr) setFieldErr((fe) => ({ ...fe, [e.target.name]: '' }));
-    setBanner(null);
-  };
-
-  // Đăng nhập bằng Email / Mật khẩu
-  const handleEmailSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-    setBanner(null);
-
+    const errs = {
+      email:    !form.email    ? 'Email là bắt buộc'    : '',
+      password: !form.password ? 'Mật khẩu là bắt buộc' : '',
+    };
+    if (errs.email || errs.password) return setErrors(errs);
+    setBanner(null); setErrors({});
     try {
-      await signIn(form.email.trim(), form.password);
-      // Nếu signIn thành công, useAdminAuth sẽ tự set isAdmin = true và trigger useEffect chuyển hướng
-    } catch (err) {
-      setBanner({ type: 'error', msg: 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.' });
+      await signIn(form.email, form.password);
+    } catch {
+      setBanner({ type: 'error', text: 'Email hoặc mật khẩu không chính xác.' });
     }
   };
 
-  // Đăng nhập bằng Google
-  const handleGoogleSubmit = async () => {
-    setIsGoogleLoading(true);
-    setBanner(null);
-    try {
-      const result = await signInWithGoogle();
-      if (result.success) {
-        setBanner({ type: 'success', msg: 'Xác thực Google thành công! Đang kiểm tra quyền...' });
-        // Sau khi Google Auth xong, onAuthStateChanged trong useAdminAuth sẽ tự chạy để check Supabase Role
-      } else {
-        setBanner({ type: 'error', msg: result.error || 'Đăng nhập Google thất bại.' });
-        setIsGoogleLoading(false);
-      }
-    } catch (error) {
-      setBanner({ type: 'error', msg: 'Có lỗi xảy ra khi gọi Google Login.' });
-      setIsGoogleLoading(false);
-    }
+  const handleGoogle = async () => {
+    setGLoading(true); setBanner(null);
+    const res = await signInWithGoogle();
+    if (!res.success) { setBanner({ type: 'error', text: res.error }); setGLoading(false); }
   };
 
   return (
-    <div className="al-root" style={{ minHeight: '100vh', display: 'flex', background: 'var(--m3-surface)' }}>
-      <M3Styles />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+         style={{ background: C.n100, fontFamily: '"Nunito","Baloo 2",sans-serif' }}>
 
-      {/* ── Cột trái (Form Đăng nhập) ── */}
-      <div className="lg-left" style={{
-        flex: '0 0 100%', maxWidth: '100%', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', padding: '40px 24px',
-      }}>
-        <div style={{
-          width: '100%', maxWidth: 420, background: 'var(--m3-surface-card)',
-          borderRadius: 28, padding: '40px 32px 36px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(26,86,219,0.06)',
-          border: '1px solid var(--m3-outline)',
-        }}>
+      {/* ── Ambient orbs ── */}
+      <Motion.div animate={{ y: [-20, 20, -20] }} transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }}
+        className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2"
+        style={{ background: 'rgba(28,176,246,0.12)', filter: 'blur(80px)' }} />
+      <Motion.div animate={{ y: [20, -20, 20] }} transition={{ repeat: Infinity, duration: 10, ease: 'easeInOut' }}
+        className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none translate-x-1/2 translate-y-1/2"
+        style={{ background: 'rgba(206,130,255,0.10)', filter: 'blur(80px)' }} />
 
-          {/* Logo & Brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-            <div style={{
-              width: 40, height: 40, background: 'var(--m3-primary)', borderRadius: 12,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(26,86,219,0.35)', flexShrink: 0,
-            }}>
-              <Shield size={20} color="#fff" strokeWidth={2.5} />
+      {/* ── Grid texture ── */}
+      <div className="absolute inset-0 pointer-events-none opacity-40"
+           style={{ backgroundImage: 'linear-gradient(to right,#e2e8f0 1px,transparent 1px),linear-gradient(to bottom,#e2e8f0 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
+
+      {/* ══ Card ══ */}
+      <Motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 24 }}
+        animate={{ opacity: 1, scale: 1,    y: 0  }}
+        transition={{ type: 'spring', damping: 22, stiffness: 260 }}
+        className="relative z-10 w-full max-w-[400px]"
+      >
+        <div className="bg-white rounded-[28px] p-8 space-y-6"
+             style={{ border: `2px solid ${C.n200}`, borderBottom: `6px solid #cbd5e1`,
+                      boxShadow: '0 12px 48px rgba(0,0,0,0.08)' }}>
+
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-[16px] flex items-center justify-center"
+                 style={{ background: C.blueBg, border: `2px solid ${C.blueBorder}`,
+                          borderBottom: `5px solid ${C.blue}`, boxShadow: `0 3px 0 ${C.blue}33` }}>
+              <Shield size={22} style={{ color: C.blue }} strokeWidth={2.5} />
             </div>
             <div>
-              <div style={{
-                fontFamily: "'Google Sans Display', system-ui", fontWeight: 700,
-                fontSize: 18, color: 'var(--m3-on-surface)', letterSpacing: '-0.3px',
-              }}>HubStudy Admin</div>
-              <div style={{ fontSize: 12, color: 'var(--m3-on-surface-var)', marginTop: 1 }}>
-                Cổng quản trị hệ thống
-              </div>
+              <p className="text-[17px] font-black text-slate-800 leading-tight tracking-tight">
+                HubStudy <span style={{ color: C.blue }}>Admin</span>
+              </p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: C.n400 }}>
+                Security Gateway
+              </p>
             </div>
           </div>
 
-          <div style={{ marginBottom: 28 }}>
-            <h1 style={{ fontFamily: "'Google Sans Display', system-ui", fontSize: 24, fontWeight: 600, color: 'var(--m3-on-surface)', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Đăng nhập
+          {/* Heading */}
+          <div>
+            <h1 className="text-[24px] font-black text-slate-800 tracking-tight leading-tight">
+              Chào mừng trở lại! 👋
             </h1>
-            <p style={{ fontSize: 14, color: 'var(--m3-on-surface-var)', margin: 0 }}>
-              Sử dụng tài khoản quản trị viên của bạn
+            <p className="text-[13px] font-bold mt-1" style={{ color: C.n400 }}>
+              Nhập thông tin quản trị viên để tiếp tục.
             </p>
           </div>
 
-          {/* Hiển thị lỗi / thành công */}
-          {banner && (
-            <div style={{ marginBottom: 20 }}>
-              {banner.type === 'error' ? (
-                <div className="m3-error-banner">
-                  <AlertCircle size={18} color="var(--m3-error)" style={{ flexShrink: 0, marginTop: 1 }} />
-                  <span style={{ fontSize: 14, color: '#410002', lineHeight: 1.4 }}>{banner.msg}</span>
+          {/* Banner */}
+          <AnimatePresence>
+            {banner && (
+              <Motion.div
+                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }} className="overflow-hidden"
+              >
+                <div className="flex items-start gap-2.5 px-4 py-3 rounded-[14px] text-[13px] font-bold"
+                     style={{ background: banner.type === 'error' ? C.redBg : '#F0FAE8',
+                              border: `2px solid ${banner.type === 'error' ? C.redBorder : '#b4e893'}`,
+                              color: banner.type === 'error' ? C.red : '#46A302' }}>
+                  <AlertCircle size={15} className="shrink-0 mt-0.5" />
+                  {banner.text}
                 </div>
-              ) : (
-                <div className="m3-success-banner">
-                  <CheckCircle size={18} color="var(--m3-success)" style={{ flexShrink: 0, marginTop: 1 }} />
-                  <span style={{ fontSize: 14, color: '#003829', lineHeight: 1.4 }}>{banner.msg}</span>
-                </div>
-              )}
-            </div>
-          )}
+              </Motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Form Email / Pass */}
-          <form onSubmit={handleEmailSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <M3Field
-              label="Địa chỉ email" name="email" type="email"
-              value={form.email} onChange={handleChange} error={fieldErr.email}
-              disabled={isAnyLoading} autoComplete="email"
-            />
-            <M3Field
-              label="Mật khẩu" name="password" type={showPwd ? 'text' : 'password'}
-              value={form.password} onChange={handleChange} error={fieldErr.password}
-              disabled={isAnyLoading} autoComplete="current-password"
-              rightSlot={
-                <button type="button" className="m3-icon-btn" onClick={() => setShowPwd((v) => !v)} tabIndex={-1}>
-                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Field label="Email" icon={Shield} type="email" placeholder="admin@hubstudy.edu"
+              value={form.email} error={errors.email}
+              onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+
+            <Field label="Mật khẩu" icon={Shield} type={showPwd ? 'text' : 'password'}
+              placeholder="••••••••" value={form.password} error={errors.password}
+              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+              right={
+                <button type="button" onClick={() => setShowPwd(v => !v)} className="outline-none"
+                        style={{ color: C.n400 }}>
+                  {showPwd ? <EyeOff size={17} strokeWidth={2.5} /> : <Eye size={17} strokeWidth={2.5} />}
                 </button>
               }
             />
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '4px 0 16px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: 'var(--m3-on-surface-var)' }}>
-                <input type="checkbox" name="remember" checked={form.remember} onChange={handleChange} className="m3-checkbox" disabled={isAnyLoading} />
-                Ghi nhớ đăng nhập
-              </label>
-            </div>
-
-            <button type="submit" disabled={isAnyLoading} className="m3-btn-filled" style={{ height: 48, fontSize: 15, borderRadius: 12 }}>
-              {adminLoading ? <><div className="m3-spinner" /> Đang xác thực...</> : 'Đăng nhập Email'}
+            {/* Submit */}
+            <button type="submit" disabled={busy}
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-[16px] text-[14px] font-black uppercase tracking-wider transition-all outline-none mt-1"
+              style={{
+                background: C.blue, color: 'white',
+                border: `2px solid ${C.blueDark}`, borderBottom: `5px solid ${C.blueDark}`,
+                boxShadow: `0 4px 18px rgba(28,176,246,0.28)`,
+                opacity: busy ? 0.7 : 1,
+              }}
+              onMouseEnter={e => { if (!busy) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ''; }}
+              onMouseDown={e  => { e.currentTarget.style.transform = 'translateY(2px)'; e.currentTarget.style.borderBottomWidth = '3px'; }}
+              onMouseUp={e    => { e.currentTarget.style.borderBottomWidth = '5px'; }}
+            >
+              {loading
+                ? <Loader2 size={18} className="animate-spin" />
+                : <><ArrowRight size={17} strokeWidth={2.5} /> Đăng nhập hệ thống</>}
             </button>
           </form>
 
-          {/* ── NÚT GOOGLE LOGIN ── */}
-          <div className="m3-divider">Hoặc đăng nhập bằng</div>
-          
-          <button
-            type="button"
-            onClick={handleGoogleSubmit}
-            disabled={isAnyLoading}
-            className="m3-ripple"
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px" style={{ background: C.n200 }} />
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: C.n400 }}>hoặc</span>
+            <div className="flex-1 h-px" style={{ background: C.n200 }} />
+          </div>
+
+          {/* Google */}
+          <button type="button" onClick={handleGoogle} disabled={busy}
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-[16px] text-[14px] font-black transition-all outline-none"
             style={{
-              width: '100%', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-              background: '#fff', border: '1.5px solid var(--m3-outline)', borderRadius: 12, cursor: isAnyLoading ? 'not-allowed' : 'pointer',
-              fontSize: 14, fontWeight: 600, color: 'var(--m3-on-surface)', fontFamily: "'Google Sans', system-ui",
-              opacity: isAnyLoading ? 0.7 : 1, transition: 'background 0.2s'
+              background: 'white', color: C.n800,
+              border: `2px solid ${C.n200}`, borderBottom: `5px solid #cbd5e1`,
+              opacity: busy ? 0.7 : 1,
             }}
+            onMouseEnter={e => { if (!busy) { e.currentTarget.style.borderColor = C.blueBorder; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.n200; e.currentTarget.style.transform = ''; }}
+            onMouseDown={e  => { e.currentTarget.style.transform = 'translateY(2px)'; e.currentTarget.style.borderBottomWidth = '3px'; }}
+            onMouseUp={e    => { e.currentTarget.style.borderBottomWidth = '5px'; }}
           >
-            {isGoogleLoading ? (
-               <><div className="m3-spinner m3-spinner-dark" /> Đang kết nối...</>
-            ) : (
-               <>
-                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google" />
-                 Tiếp tục với Google
-               </>
-            )}
+            {gLoading
+              ? <Loader2 size={18} className="animate-spin" style={{ color: C.blue }} />
+              : <><GoogleSVG /> Tiếp tục với Google</>}
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: 12, color: '#91939F', marginTop: 28, marginBottom: 0 }}>
-            © {new Date().getFullYear()} HubStudy · Hệ thống bảo mật
-          </p>
         </div>
-      </div>
 
-      <style>{`
-        @media (min-width: 1024px) {
-          .al-root { flex-direction: row; }
-          .lg-left { flex: 0 0 45% !important; max-width: 45% !important; }
-          .lg-right { display: flex !important; }
-        }
-      `}</style>
-
-      {/* ── Cột phải (Giữ nguyên) ── */}
-      <div className="lg-right" style={{
-        display: 'none', flex: '0 0 55%', background: 'linear-gradient(135deg, #1A56DB 0%, #0D47A1 60%, #1565C0 100%)',
-        flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 56, position: 'relative', overflow: 'hidden',
-      }}>
-        <div className="dot-bg" style={{ position: 'absolute', inset: 0 }} />
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 400 }}>
-          {[
-            { label: 'Học viên hoạt động', value: '10,000+', sub: 'Đang học hôm nay', color: '#ffffff' },
-            { label: 'Đề thi được tạo',    value: '240+',    sub: 'Cập nhật liên tục', color: '#BBD6FF' },
-            { label: 'Tỉ lệ hoàn thành',   value: '94.2%',   sub: 'Trung bình 30 ngày', color: '#A7F3D0' },
-          ].map((card, i) => (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20, padding: '20px 24px',
-              marginBottom: i < 2 ? 16 : 0, marginLeft: i === 1 ? 32 : 0,
-            }}>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                {card.label}
-              </div>
-              <div style={{ fontFamily: "'Google Sans Display', system-ui", fontSize: 32, fontWeight: 700, color: card.color, lineHeight: 1.1, marginBottom: 4 }}>
-                {card.value}
-              </div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{card.sub}</div>
-            </div>
-          ))}
-
-          <div style={{ marginTop: 36, textAlign: 'center' }}>
-            <h2 style={{ fontFamily: "'Google Sans Display', system-ui", fontSize: 28, fontWeight: 700, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.5px', lineHeight: 1.3 }}>
-              Quản lý toàn bộ<br />hệ thống từ một nơi
-            </h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.6 }}>
-              Theo dõi tiến trình học viên, cập nhật<br />đề thi và quản lý nội dung dễ dàng.
-            </p>
-          </div>
-        </div>
-      </div>
+        {/* Footer */}
+        <p className="text-center text-[11px] font-bold mt-4" style={{ color: C.n400 }}>
+          © {new Date().getFullYear()} HubStudy Pulse · Secure Environment
+        </p>
+      </Motion.div>
     </div>
   );
-};
-
-export default AdminLogin;
+}
