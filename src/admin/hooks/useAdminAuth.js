@@ -1,12 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../../config/firebase'; // Hãy điều chỉnh relative path nếu cần
+import { auth } from '../../config/firebase'; 
 import { supabase } from '../../config/supabaseClient'; 
 
-/**
- * 🛡️ HOOK: useAdminAuth
- * Mục đích: Đồng bộ trạng thái đăng nhập từ Firebase Auth và kiểm tra phân quyền (Role-Based Access Control) trên Supabase.
- */
 export const useAdminAuth = () => {
   const [admin, setAdmin] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -14,10 +10,10 @@ export const useAdminAuth = () => {
   const [error, setError] = useState(null);
 
   /**
-   * Truy vấn bảng `profiles` trên Supabase để xác minh quyền `admin`
-   * Tách biệt hàm này giúp logic rõ ràng, tuân thủ Single Responsibility Principle.
+   * 🛡️ Hàm kiểm tra quyền Admin với cơ chế Retry
+   * Mục đích: Nếu database chưa kịp cập nhật user mới, nó sẽ thử lại sau 1s.
    */
-  const checkAdminRole = async (uid) => {
+  const checkAdminRole = useCallback(async (uid, retryCount = 0) => {
     try {
       const { data, error: dbError } = await supabase
         .from('profiles')
@@ -25,27 +21,32 @@ export const useAdminAuth = () => {
         .eq('id', uid)
         .single();
 
+      // Nếu không thấy dữ liệu, thử lại tối đa 2 lần (đề phòng race condition)
+      if (!data && retryCount < 2) {
+        console.log(`⏳ [AdminCheck] Chưa thấy data, đang thử lại lần ${retryCount + 1}...`);
+        await new Promise(resolve => setTimeout(resolve, 1500)); 
+        return checkAdminRole(uid, retryCount + 1);
+      }
+
       if (dbError || !data) {
-        return { hasRole: false, error: 'Không tìm thấy thông tin quyền hạn.' };
+        return { hasRole: false, error: 'Không tìm thấy hồ sơ người dùng trong hệ thống.' };
       }
 
       if (data.role === 'admin') {
         return { hasRole: true, adminData: data };
       }
 
-      return { hasRole: false, error: 'Bạn không có quyền truy cập trang Admin.' };
+      return { hasRole: false, error: 'Bạn không có quyền truy cập trang Quản trị.' };
     } catch (err) {
       return { hasRole: false, error: err.message };
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // Subscribe vào luồng thay đổi trạng thái đăng nhập của Firebase
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       setError(null);
 
-      // Nếu không có user đăng nhập, reset toàn bộ state
       if (!user) {
         setAdmin(null);
         setIsAdmin(false);
@@ -53,31 +54,26 @@ export const useAdminAuth = () => {
         return;
       }
 
-      // Cross-check Firebase UID với Database Supabase để cấp quyền
-      const { hasRole, adminData, error: roleError } = await checkAdminRole(user.uid);
+      console.log("🔍 [AdminCheck] Bắt đầu kiểm tra quyền cho:", user.email);
+      const result = await checkAdminRole(user.uid);
 
-      if (hasRole) {
-        setAdmin(adminData);
+      if (result.hasRole) {
+        console.log("✅ [AdminCheck] Đã xác minh Admin thành công!");
+        setAdmin(result.adminData);
         setIsAdmin(true);
       } else {
+        console.warn("🚫 [AdminCheck] Thất bại:", result.error);
         setAdmin(null);
         setIsAdmin(false);
-        setError(roleError);
-        
-        // Tùy chọn (Optional): Tự động đăng xuất nếu user hợp lệ nhưng không phải là admin
-        // await signOut(auth); 
+        setError(result.error);
       }
 
       setLoading(false);
     });
 
-    // Luôn dọn dẹp (Cleanup) listener khi component unmount để tránh Memory Leak
     return () => unsubscribe();
-  }, []);
+  }, [checkAdminRole]);
 
-  /**
-   * Action Đăng xuất Admin
-   */
   const adminSignOut = async () => {
     try {
       await signOut(auth);
