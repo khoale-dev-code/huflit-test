@@ -5,7 +5,7 @@
 import React, { useState, useMemo, memo } from 'react';
 import {
   ChevronDown, ChevronUp, BookOpen, Lightbulb, Zap,
-  Mail, Globe, Clock, MessageCircle, FileText, User
+  Mail, Globe, Clock, MessageCircle, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -144,9 +144,9 @@ const Part7Content = memo(({ data }) => {
 
     const url   = webLines.find(l => l.startsWith('http')) || 'https://www.hubstudy.com/reading';
     const title = webLines.find(l => l.includes('**'))?.replace(/\*\*/g, '');
-    const body  = webLines.filter(l => l && !l.startsWith('http') && !l.includes('**'));
+    const bodyText  = webLines.filter(l => l && !l.startsWith('http') && !l.includes('**'));
 
-    return { url, title, body, email };
+    return { url, title, body: bodyText, email };
   }, [data]);
 
   const { url, title, body, email } = parsed;
@@ -258,16 +258,14 @@ const Part8Content = memo(({ data }) => {
     const lines = (data?.text || '').split('\n').filter(l => l.trim());
     
     const msgs  = lines.flatMap(line => {
-      // 🚀 BỘ LỌC THÔNG MINH MỚI: 
-      // Hỗ trợ Tên + (Chức vụ) + [09:00 AM] hoặc (09:00)
-      const m = line.match(/^(.+?)\s*[\[\(](\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?)[\]\)]:\s*(.+)$/);
+      // 🚀 ĐÃ SỬA LỖI REGEX NO-USELESS-ESCAPE
+      const m = line.match(/^(.+?)\s*[[(](\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?)[\])]:\s*(.+)$/);
       return m ? [{ sender: m[1].trim(), time: m[2].trim(), text: m[3].trim() }] : [];
     });
 
     const map = {};
     let idx = 0;
     msgs.forEach(({ sender }) => { 
-      // Gom nhóm theo Tên (Bao gồm cả chức vụ nếu có)
       if (!(sender in map)) map[sender] = idx++; 
     });
     return { messages: msgs, senderMap: map };
@@ -309,7 +307,6 @@ const Part8Content = memo(({ data }) => {
       <div className="px-4 sm:px-6 py-6 space-y-6 overflow-y-auto max-h-[500px] custom-scrollbar bg-slate-50/50">
         {groups.map((group, gi) => {
           const pal = SENDER_PALETTES[senderMap[group.sender] % SENDER_PALETTES.length];
-          // Lấy chữ cái đầu tiên của Tên làm Avatar
           const initial = group.sender.charAt(0).toUpperCase();
 
           return (
@@ -388,7 +385,6 @@ const PlainTextContent = memo(({ data }) => {
       <div className="px-5 sm:px-8 py-6 sm:py-8 bg-white">
         <div className="space-y-5">
           {paragraphs.map((para, i) => {
-            // Drop cap ở đoạn đầu tiên
             if (i === 0) {
               return (
                 <p key={i} className={C.prose}>
@@ -400,7 +396,6 @@ const PlainTextContent = memo(({ data }) => {
               );
             }
 
-            // Accent block xen kẽ
             if (i > 0 && i % 4 === 0) {
               return (
                 <div key={i} className="border-l-[4px] border-[#FFC200] pl-4 py-3 my-6 bg-[#FFFBEA] rounded-r-[16px]">
@@ -429,8 +424,8 @@ const ReadingDisplay = memo(({ data }) => {
     if (data.questions?.some(q => q.type === 'fill') && text.includes('(')) return 'part6';
     if (text.includes('---') || text.includes('To:') || text.includes('From:'))  return 'part7';
     
-    // 🚀 ĐÃ SỬA DÒNG NÀY: Nhận diện cả ngoặc vuông [], ngoặc tròn () và AM/PM
-    if (text.match(/[\[\(]\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?[\]\)]/)) return 'part8';
+    // 🚀 ĐÃ SỬA LỖI REGEX NO-USELESS-ESCAPE
+    if (text.match(/[[(]\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?[\])]/)) return 'part8';
     
     return 'plain';
   }, [data]);

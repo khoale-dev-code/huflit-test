@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback, useMemo } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import {
   CheckCircle, AlertCircle, Volume2, Check,
   Sparkles, ChevronDown, Send, Image as ImageIcon,
@@ -7,6 +7,7 @@ import {
 import { useUnifiedAuth } from '../../hooks/useUnifiedAuth';
 import ConfirmModal from './ConfirmModal';
 import { MiniAudioPlayer } from './MiniAudioPlayer';
+import { motion as Motion, AnimatePresence } from 'framer-motion'; // 🚀 FIX: Alias Motion
 
 /* ─── Design tokens ─────────────────────────────────────── */
 const C = {
@@ -41,7 +42,7 @@ const ProgressBar = memo(({ percentage }) => (
   </div>
 ));
 
-/* ─── Script Display (Khối hiển thị Lời thoại) ─────────── */
+/* ─── Script Display ─────────── */
 const ScriptDisplay = memo(({ script, isReviewMode }) => {
   const [open, setOpen] = useState(false);
   if (!script) return null;
@@ -76,35 +77,21 @@ const ScriptDisplay = memo(({ script, isReviewMode }) => {
 });
 
 /* ─── Question Option ────────────────────────────────────── */
-const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId, disabled, isCorrectExample }) => {
+const QuestionOption = memo((props) => {
+  const { option, index, isSelected, onSelect, questionId, disabled, isCorrectExample } = props;
   const label = String.fromCharCode(65 + index);
   const isExampleState = disabled && isCorrectExample;
   const isActuallySelected = isSelected || isExampleState;
 
   return (
-    <label
-      className={`block mb-2 last:mb-0 ${disabled ? 'cursor-default' : 'cursor-pointer'} ${disabled && !isCorrectExample ? 'opacity-60' : 'opacity-100'}`}
-    >
-      <input
-        type="radio"
-        className="hidden"
-        name={`q-${questionId}`}
-        checked={isActuallySelected}
-        onChange={onSelect}
-        disabled={disabled}
-      />
+    <label className={`block mb-2 last:mb-0 ${disabled ? 'cursor-default' : 'cursor-pointer'} ${disabled && !isCorrectExample ? 'opacity-60' : 'opacity-100'}`}>
+      <input type="radio" className="hidden" name={`q-${questionId}`} checked={isActuallySelected} onChange={onSelect} disabled={disabled} />
       <div
         className="flex items-center gap-3.5 px-4 py-3 rounded-[18px] border-2 transition-all duration-150 active:translate-y-1"
         style={{
-          borderColor: isActuallySelected
-            ? (isExampleState ? C.yellow : C.blue)
-            : C.n200,
-          boxShadow: `0 ${isActuallySelected ? 2 : 4}px 0 ${isActuallySelected
-            ? (isExampleState ? C.yellowDark + '60' : C.blueDark + '60')
-            : C.n200}`,
-          background: isActuallySelected
-            ? (isExampleState ? C.yellowBg : C.blueBg)
-            : C.white,
+          borderColor: isActuallySelected ? (isExampleState ? C.yellow : C.blue) : C.n200,
+          boxShadow: `0 ${isActuallySelected ? 2 : 4}px 0 ${isActuallySelected ? (isExampleState ? C.yellowDark + '60' : C.blueDark + '60') : C.n200}`,
+          background: isActuallySelected ? (isExampleState ? C.yellowBg : C.blueBg) : C.white,
           transform: isActuallySelected ? 'translateY(-2px)' : 'none',
         }}
       >
@@ -112,21 +99,14 @@ const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId, 
           className="w-9 h-9 rounded-[12px] shrink-0 flex items-center justify-center text-[14px] font-black border-2 transition-colors"
           style={{
             fontFamily: F.display,
-            background: isActuallySelected
-              ? (isExampleState ? C.yellow : C.blue)
-              : C.n100,
+            background: isActuallySelected ? (isExampleState ? C.yellow : C.blue) : C.n100,
             color: isActuallySelected ? C.white : C.n400,
-            borderColor: isActuallySelected
-              ? (isExampleState ? C.yellowDark : C.blueDark)
-              : C.n200,
+            borderColor: isActuallySelected ? (isExampleState ? C.yellowDark : C.blueDark) : C.n200,
           }}
         >
           {isActuallySelected ? <Check size={16} strokeWidth={4} /> : label}
         </div>
-        <span
-          className="flex-1 text-[15px] leading-snug font-bold"
-          style={{ color: isActuallySelected ? (isExampleState ? C.yellowDark : C.blueDark) : C.n600 }}
-        >
+        <span className="flex-1 text-[15px] leading-snug font-bold" style={{ color: isActuallySelected ? (isExampleState ? C.yellowDark : C.blueDark) : C.n600 }}>
           {option}
         </span>
       </div>
@@ -135,7 +115,8 @@ const QuestionOption = memo(({ option, index, isSelected, onSelect, questionId, 
 });
 
 /* ─── Question Card ──────────────────────────────────────── */
-const QuestionCard = memo(({ question, globalIndex, options, selectedAnswer, onAnswerSelect, isReviewMode }) => {
+const QuestionCard = memo((props) => {
+  const { question, globalIndex, options, selectedAnswer, onAnswerSelect, isReviewMode } = props;
   const isExample = question.isExample;
 
   return (
@@ -147,61 +128,35 @@ const QuestionCard = memo(({ question, globalIndex, options, selectedAnswer, onA
         borderBottomColor: isExample ? C.yellow : C.n200,
       }}
     >
-      {/* Audio riêng trên câu đơn lẻ (Part 1, 2) */}
       {question.audioUrl && (
         <div className="mb-4">
           <MiniAudioPlayer audioUrl={question.audioUrl} />
         </div>
       )}
 
-      {/* 🚀 HIỂN THỊ TRANSCRIPT CỦA CÂU LẺ Ở ĐÂY (VÍ DỤ PART 1, 2) */}
       {(isReviewMode || isExample) && question.script && (
         <ScriptDisplay script={question.script} isReviewMode={isReviewMode || isExample} />
       )}
 
       {question.imageUrl && (
-        <div
-          className="mb-5 p-2 rounded-[20px] border-2 flex justify-center items-center bg-white"
-          style={{ borderColor: isExample ? '#FFD8A8' : C.n200 }}
-        >
-          <img
-            src={question.imageUrl}
-            alt="Minh hoạ"
-            loading="lazy"
-            className="max-w-full max-h-[300px] object-contain rounded-xl"
-          />
+        <div className="mb-5 p-2 rounded-[20px] border-2 flex justify-center items-center bg-white" style={{ borderColor: isExample ? '#FFD8A8' : C.n200 }}>
+          <img src={question.imageUrl} alt="Minh hoạ" loading="lazy" className="max-w-full max-h-[300px] object-contain rounded-xl" />
         </div>
       )}
 
       {isExample && (
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] mb-4"
-          style={{ background: '#FF960020', border: '1px solid #FF960040' }}
-        >
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] mb-4" style={{ background: '#FF960020', border: '1px solid #FF960040' }}>
           <Star size={14} color="#FF9600" strokeWidth={3} fill="#FF9600" />
-          <span className="text-[11px] font-black uppercase tracking-wider text-[#FF9600]">
-            Câu Ví Dụ
-          </span>
+          <span className="text-[11px] font-black uppercase tracking-wider text-[#FF9600]">Câu Ví Dụ</span>
         </div>
       )}
 
       <div className="flex items-start gap-4 mb-5">
-        <div
-          className="w-[38px] h-[38px] rounded-[13px] shrink-0 flex items-center justify-center border-2"
-          style={{
-            background: isExample ? '#FF9600' : C.blue,
-            borderColor: isExample ? '#E58700' : C.blueDark,
-            boxShadow: `0 3px 0 ${isExample ? '#E58700' : C.blueDark}`,
-          }}
-        >
-          <span className="text-[14px] font-black text-white" style={{ fontFamily: F.display }}>
-            {isExample ? 'VD' : globalIndex}
-          </span>
+        <div className="w-[38px] h-[38px] rounded-[13px] shrink-0 flex items-center justify-center border-2" style={{ background: isExample ? '#FF9600' : C.blue, borderColor: isExample ? '#E58700' : C.blueDark, boxShadow: `0 3px 0 ${isExample ? '#E58700' : C.blueDark}` }}>
+          <span className="text-[14px] font-black text-white" style={{ fontFamily: F.display }}>{isExample ? 'VD' : globalIndex}</span>
         </div>
         <h3 className="text-[16px] font-black m-0 leading-relaxed pt-1.5 text-slate-800">
-          {question.question || (
-            <span className="italic opacity-50">Chọn đáp án đúng theo Audio / Hình ảnh</span>
-          )}
+          {question.question || <span className="italic opacity-50">Chọn đáp án đúng theo Audio / Hình ảnh</span>}
         </h3>
       </div>
 
@@ -209,8 +164,7 @@ const QuestionCard = memo(({ question, globalIndex, options, selectedAnswer, onA
         {options?.map((opt, i) => (
           <QuestionOption
             key={`${question.id}-${i}`}
-            index={i}
-            option={opt}
+            index={i} option={opt}
             isSelected={selectedAnswer === i}
             onSelect={() => !isExample && !isReviewMode && onAnswerSelect(question.id, i)}
             questionId={question.id}
@@ -223,34 +177,15 @@ const QuestionCard = memo(({ question, globalIndex, options, selectedAnswer, onA
   );
 });
 
-/* ─── Group Audio Banner (Sticky) ───────────────────────── */
+/* ─── Group Audio Banner ───────────────────────── */
 const GroupAudioBanner = memo(({ audioUrl, labelFrom, labelTo }) => {
   if (!audioUrl) return null;
-
   return (
-    <div
-      className="sticky z-10 -mx-4 px-4 py-3 mb-5"
-      style={{
-        top: 64,
-        background: 'rgba(248, 238, 255, 0.97)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: `2px solid ${C.purpleBorder}`,
-        borderTop: `2px solid ${C.purpleBorder}`,
-      }}
-    >
+    <div className="sticky z-10 -mx-4 px-4 py-3 mb-5 bg-[#F8EEFF]/95 backdrop-blur-md border-y-2 border-[#eec9ff]" style={{ top: 64 }}>
       <div className="flex items-center gap-3 mb-2">
-        <div
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px]"
-          style={{ background: C.purpleBg, border: `1.5px solid ${C.purpleBorder}` }}
-        >
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-[#F8EEFF] border-2 border-[#eec9ff]">
           <Pin size={11} color={C.purple} strokeWidth={3} />
-          <span
-            className="text-[10px] font-black uppercase tracking-widest"
-            style={{ color: C.purple, fontFamily: F.display }}
-          >
-            Audio dùng cho câu {labelFrom}–{labelTo}
-          </span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#CE82FF]" style={{ fontFamily: F.display }}>Audio dùng cho câu {labelFrom}–{labelTo}</span>
         </div>
       </div>
       <MiniAudioPlayer audioUrl={audioUrl} />
@@ -259,88 +194,29 @@ const GroupAudioBanner = memo(({ audioUrl, labelFrom, labelTo }) => {
 });
 
 /* ─── Question Group Card ────────────────────────────────── */
-const QuestionGroupCard = memo(({ group, globalIndexStart, answers, onAnswerSelect, isReviewMode }) => {
-  const validSubCount = useMemo(
-    () => group.subQuestions?.filter(q => !q.isExample).length || 0,
-    [group.subQuestions]
-  );
+const QuestionGroupCard = memo((props) => {
+  const { group, globalIndexStart, answers, onAnswerSelect, isReviewMode } = props;
+  const validSubCount = useMemo(() => group.subQuestions?.filter(q => !q.isExample).length || 0, [group.subQuestions]);
   const labelTo = globalIndexStart + validSubCount - 1;
 
   return (
     <div className="mb-8">
-      {/* ── Khung bối cảnh (Passage / Đoạn văn) ── */}
-      <div
-        className="p-6 mb-1 rounded-[28px] border-2 border-b-[6px] shadow-sm"
-        style={{ background: C.purpleBg, borderColor: C.purpleBorder }}
-      >
+      <div className="p-6 mb-1 rounded-[28px] border-2 border-b-[6px] shadow-sm" style={{ background: C.purpleBg, borderColor: C.purpleBorder }}>
         <div className="flex items-center gap-3 mb-4">
-          <div
-            className="w-10 h-10 rounded-[12px] bg-white border-2 flex items-center justify-center shadow-sm"
-            style={{ borderColor: C.purpleBorder }}
-          >
+          <div className="w-10 h-10 rounded-[12px] bg-white border-2 flex items-center justify-center shadow-sm" style={{ borderColor: C.purpleBorder }}>
             <FileText size={20} color={C.purpleDark} strokeWidth={2.5} />
           </div>
-          <span
-            className="text-[14px] font-black uppercase tracking-wider"
-            style={{ color: C.purpleDark, fontFamily: F.display }}
-          >
-            Dùng cho câu {globalIndexStart}–{labelTo}
-          </span>
+          <span className="text-[14px] font-black uppercase tracking-wider text-[#B975E5]" style={{ fontFamily: F.display }}>Dùng cho câu {globalIndexStart}–{labelTo}</span>
         </div>
-
-        {/* 🚀 HIỂN THỊ TRANSCRIPT CỦA GROUP Ở ĐÂY (VÍ DỤ PART 3, 4) */}
-        {group.script && (
-          <ScriptDisplay script={group.script} isReviewMode={isReviewMode} />
-        )}
-
-        {group.imageUrl && (
-          <img
-            src={group.imageUrl}
-            alt="Passage"
-            className="max-w-full max-h-[450px] rounded-2xl border-2 object-contain bg-white p-1 mb-4 shadow-inner"
-            style={{ borderColor: C.purpleBorder }}
-          />
-        )}
-
-        {group.content && (
-          <div
-            className="p-5 bg-white rounded-[20px] border-2 shadow-inner"
-            style={{ borderColor: C.purpleBorder }}
-          >
-            <p className="text-[16px] font-bold leading-relaxed m-0 text-slate-700 whitespace-pre-wrap">
-              {group.content}
-            </p>
-          </div>
-        )}
+        {group.script && <ScriptDisplay script={group.script} isReviewMode={isReviewMode} />}
+        {group.imageUrl && <img src={group.imageUrl} alt="Passage" className="max-w-full max-h-[450px] rounded-2xl border-2 object-contain bg-white p-1 mb-4 shadow-inner" style={{ borderColor: C.purpleBorder }} />}
+        {group.content && <div className="p-5 bg-white rounded-[20px] border-2 shadow-inner" style={{ borderColor: C.purpleBorder }}><p className="text-[16px] font-bold leading-relaxed m-0 text-slate-700 whitespace-pre-wrap">{group.content}</p></div>}
       </div>
-
-      {/* ── Câu hỏi con ── */}
-      <div
-        className="pl-3 md:pl-6 border-l-[4px] border-dashed"
-        style={{ borderColor: C.purpleBorder }}
-      >
-        <GroupAudioBanner
-          audioUrl={group.audioUrl}
-          labelFrom={globalIndexStart}
-          labelTo={labelTo}
-        />
-
+      <div className="pl-3 md:pl-6 border-l-[4px] border-dashed" style={{ borderColor: C.purpleBorder }}>
+        <GroupAudioBanner audioUrl={group.audioUrl} labelFrom={globalIndexStart} labelTo={labelTo} />
         {group.subQuestions?.map((sq, idx) => {
-          const currentGlobalIndex =
-            globalIndexStart +
-            group.subQuestions.slice(0, idx).filter(q => !q.isExample).length;
-
-          return (
-            <QuestionCard
-              key={sq.id}
-              globalIndex={currentGlobalIndex}
-              question={sq}
-              options={sq.options}
-              selectedAnswer={answers[sq.id]}
-              onAnswerSelect={onAnswerSelect}
-              isReviewMode={isReviewMode}
-            />
-          );
+          const currentNum = globalIndexStart + group.subQuestions.slice(0, idx).filter(q => !q.isExample).length;
+          return <QuestionCard key={sq.id} globalIndex={currentNum} question={sq} options={sq.options} selectedAnswer={answers[sq.id]} onAnswerSelect={onAnswerSelect} isReviewMode={isReviewMode} />;
         })}
       </div>
     </div>
@@ -349,49 +225,18 @@ const QuestionGroupCard = memo(({ group, globalIndexStart, answers, onAnswerSele
 
 /* ─── Submit Card ────────────────────────────────────────── */
 const SubmitCard = ({ isAllAnswered, answersCount, totalQuestions, isSignedIn, onSubmit }) => (
-  <div
-    className="mt-6 p-6 rounded-[28px] border-2 border-b-[6px] flex flex-col gap-4 shadow-lg transition-all"
-    style={{
-      borderColor: isAllAnswered ? C.green : C.n200,
-      borderBottomColor: isAllAnswered ? C.greenDark : C.n200,
-      background: isAllAnswered ? C.greenBg : C.white,
-    }}
-  >
+  <div className="mt-6 p-6 rounded-[28px] border-2 border-b-[6px] flex flex-col gap-4 shadow-lg transition-all" style={{ borderColor: isAllAnswered ? C.green : C.n200, borderBottomColor: isAllAnswered ? C.greenDark : C.n200, background: isAllAnswered ? C.greenBg : C.white }}>
     <div className="flex items-center gap-4">
-      <div
-        className="w-12 h-12 rounded-[16px] shrink-0 flex items-center justify-center border-2"
-        style={{
-          background: isAllAnswered ? C.green : C.n100,
-          borderColor: isAllAnswered ? C.greenDark : C.n200,
-          boxShadow: `0 4px 0 ${isAllAnswered ? C.greenDark : C.n200}`,
-        }}
-      >
-        {isAllAnswered
-          ? <CheckCircle size={24} color="#fff" strokeWidth={2.5} />
-          : <AlertCircle size={24} color={C.n400} strokeWidth={2.5} />}
+      <div className="w-12 h-12 rounded-[16px] shrink-0 flex items-center justify-center border-2" style={{ background: isAllAnswered ? C.green : C.n100, borderColor: isAllAnswered ? C.greenDark : C.n200, boxShadow: `0 4px 0 ${isAllAnswered ? C.greenDark : C.n200}` }}>
+        {isAllAnswered ? <CheckCircle size={24} color="#fff" strokeWidth={2.5} /> : <AlertCircle size={24} color={C.n400} strokeWidth={2.5} />}
       </div>
       <div>
-        <p className="text-[17px] font-black m-0 text-slate-800">
-          {isAllAnswered ? 'Sẵn sàng nộp bài!' : 'Tiếp tục cố gắng!'}
-        </p>
-        <p className="text-[13px] font-bold mt-1 mb-0 text-slate-500">
-          {isAllAnswered
-            ? 'Kiểm tra lại một lần nữa trước khi nộp nhé.'
-            : `Bạn vẫn còn ${totalQuestions - answersCount} câu hỏi chưa trả lời.`}
-        </p>
+        <p className="text-[17px] font-black m-0 text-slate-800">{isAllAnswered ? 'Sẵn sàng nộp bài!' : 'Tiếp tục cố gắng!'}</p>
+        <p className="text-[13px] font-bold mt-1 text-slate-500">{isAllAnswered ? 'Kiểm tra lại một lần nữa trước khi nộp.' : `Bạn còn ${totalQuestions - answersCount} câu chưa trả lời.`}</p>
       </div>
     </div>
-    <button
-      onClick={onSubmit}
-      className="w-full flex items-center justify-center gap-2.5 py-4 rounded-[20px] text-[16px] font-black uppercase tracking-widest text-white cursor-pointer transition-all active:translate-y-1 active:shadow-none"
-      style={{
-        background: isAllAnswered ? C.green : C.blue,
-        boxShadow: `0 5px 0 ${isAllAnswered ? C.greenDark : C.blueDark}`,
-        fontFamily: F.display,
-      }}
-    >
-      <Send size={18} strokeWidth={3} />
-      {isSignedIn ? 'Nộp bài & Lưu kết quả' : 'Nộp bài ngay'}
+    <button onClick={onSubmit} className="w-full flex items-center justify-center gap-2.5 py-4 rounded-[20px] text-[16px] font-black uppercase tracking-widest text-white cursor-pointer border-none transition-all active:translate-y-1 shadow-lg" style={{ background: isAllAnswered ? C.green : C.blue, boxShadow: `0 5px 0 ${isAllAnswered ? C.greenDark : C.blueDark}`, fontFamily: F.display }}>
+      <Send size={18} strokeWidth={3} /> {isSignedIn ? 'Nộp bài & Lưu kết quả' : 'Nộp bài ngay'}
     </button>
   </div>
 );
@@ -399,11 +244,12 @@ const SubmitCard = ({ isAllAnswered, answersCount, totalQuestions, isSignedIn, o
 /* ════════════════════════════════════════════════════════════
    MAIN COMPONENT — QuestionDisplay
 ════════════════════════════════════════════════════════════ */
-const QuestionDisplay = memo(({ selectedPart, selectedExam, partData, answers, onAnswerSelect, showResults, onSubmit }) => {
+const QuestionDisplay = memo((props) => {
+  const { partData, answers, onAnswerSelect, showResults, onSubmit } = props;
   const { isSignedIn } = useUnifiedAuth();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  /* ── Tính tổng câu hỏi hợp lệ (không tính câu ví dụ) ── */
+  // 🚀 FIX: Xóa biến selectedPart và selectedExam không sử dụng
   const allValidQuestions = useMemo(() => {
     let questions = [];
     partData?.questions?.forEach(q => {
@@ -417,7 +263,6 @@ const QuestionDisplay = memo(({ selectedPart, selectedExam, partData, answers, o
     return questions;
   }, [partData]);
 
-  /* ── Đếm số câu đã trả lời ── */
   const answersCount = useMemo(() => {
     let count = 0;
     allValidQuestions.forEach(q => {
@@ -431,149 +276,69 @@ const QuestionDisplay = memo(({ selectedPart, selectedExam, partData, answers, o
   const isAllAnswered = answersCount === totalQuestions && totalQuestions > 0;
 
   const handleSubmit = useCallback(() => {
-    if (!isAllAnswered) {
-      setConfirmOpen(true);
-      return;
-    }
+    if (!isAllAnswered) { setConfirmOpen(true); return; }
     onSubmit();
   }, [isAllAnswered, onSubmit]);
 
+  // 🚀 FIX: Analytics dùng import.meta.env
+  useMemo(() => {
+    if (import.meta.env.DEV && partData?.id) {
+      console.debug('[analytics] viewing_part', { partId: partData.id });
+    }
+  }, [partData?.id]);
+
   if (!partData?.questions || showResults) return null;
 
-  /* ── Render danh sách câu hỏi với globalIndex tự tăng ── */
   let globalQIndex = 1;
-  const isReviewMode = false; // Ở trang này luôn là false vì đây là trang làm bài. Nếu bạn tái sử dụng trang này cho kết quả thì đổi thành = showResults.
-
   return (
-    <div
-      className="relative z-0 min-h-screen pb-24"
-      style={{ background: C.n50, isolation: 'isolate' }}
-    >
+    <div className="relative z-0 min-h-screen pb-24" style={{ background: C.n50, isolation: 'isolate' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800;900&family=Nunito:wght@600;700;800;900&display=swap');
-        @keyframes bounceIn {
-          0%  { transform: scale(0.9); opacity: 0; }
-          100%{ transform: scale(1);   opacity: 1; }
-        }
+        @keyframes bounceIn { 0% { transform: scale(0.9); opacity: 0; } 100%{ transform: scale(1); opacity: 1; } }
         .bounce-in { animation: bounceIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both; }
       `}</style>
 
-      {/* ══ STICKY HEADER (z-20, nằm dưới Navbar chính z-50) ══ */}
-      <header
-        className="sticky top-0 z-20 px-4 py-3 border-b-2 shadow-md bg-white/95 backdrop-blur-md"
-        style={{ borderColor: C.n200 }}
-      >
+      <header className="sticky top-0 z-20 px-4 py-3 border-b-2 shadow-md bg-white/95 backdrop-blur-md" style={{ borderColor: C.n200 }}>
         <div className="max-w-[680px] mx-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
-              <div
-                className="w-9 h-9 rounded-[12px] flex items-center justify-center border-2 shadow-sm"
-                style={{ background: C.blueBg, borderColor: C.blueBorder }}
-              >
+              <div className="w-9 h-9 rounded-[12px] flex items-center justify-center border-2 shadow-sm" style={{ background: C.blueBg, borderColor: C.blueBorder }}>
                 <Sparkles size={18} color={C.blue} strokeWidth={2.5} />
               </div>
-              <span className="text-[14px] font-black uppercase tracking-wider text-slate-600">
-                Bài tập HubStudy
-              </span>
+              <span className="text-[14px] font-black uppercase tracking-wider text-slate-600">Bài tập HubStudy</span>
             </div>
-
-            <div
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border-2 transition-all"
-              style={{
-                borderColor: isAllAnswered ? C.green : C.n200,
-                background: isAllAnswered ? C.greenBg : C.white,
-              }}
-            >
-              {isAllAnswered && (
-                <Check size={14} color={C.green} strokeWidth={4} className="mr-0.5" />
-              )}
-              <span
-                className="text-[13px] font-black"
-                style={{ color: isAllAnswered ? C.greenDark : C.n600 }}
-              >
-                {answersCount} / {totalQuestions}
-              </span>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border-2 transition-all" style={{ borderColor: isAllAnswered ? C.green : C.n200, background: isAllAnswered ? C.greenBg : C.white }}>
+              {isAllAnswered && <Check size={14} color={C.green} strokeWidth={4} className="mr-0.5" />}
+              <span className="text-[13px] font-black" style={{ color: isAllAnswered ? C.greenDark : C.n600 }}>{answersCount} / {totalQuestions}</span>
             </div>
           </div>
           <ProgressBar percentage={percentage} />
         </div>
       </header>
 
-      {/* ══ MAIN CONTENT ══ */}
       <main className="max-w-[680px] mx-auto px-4 pt-6">
-
         {partData.imageUrl && (
-          <div
-            className="bounce-in mb-6 p-5 rounded-[28px] border-2 border-b-[6px] flex flex-col items-center gap-3 bg-white shadow-sm"
-            style={{ borderColor: C.n200 }}
-          >
-            <div className="flex items-center gap-2 w-full mb-1">
-              <ImageIcon size={20} color={C.n400} />
-              <span className="text-[14px] font-black uppercase text-slate-400">
-                Hình ảnh tổng quát
-              </span>
-            </div>
-            <img
-              src={partData.imageUrl}
-              alt="Part context"
-              loading="lazy"
-              className="max-w-full max-h-[400px] rounded-2xl border-2 shadow-inner p-1"
-              style={{ borderColor: C.n200 }}
-            />
+          <div className="bounce-in mb-6 p-5 rounded-[28px] border-2 border-b-[6px] flex flex-col items-center gap-3 bg-white shadow-sm" style={{ borderColor: C.n200 }}>
+            <div className="flex items-center gap-2 w-full mb-1"><ImageIcon size={20} color={C.n400} /><span className="text-[14px] font-black uppercase text-slate-400">Hình ảnh tổng quát</span></div>
+            <img src={partData.imageUrl} alt="Part context" loading="lazy" className="max-w-full max-h-[400px] rounded-2xl border-2 shadow-inner p-1" style={{ borderColor: C.n200 }} />
           </div>
         )}
 
-        {/* ── Render từng câu hỏi / nhóm câu hỏi ── */}
         {partData.questions.map((q) => {
           if (q.type === 'group') {
             const startIndex = globalQIndex;
             globalQIndex += (q.subQuestions?.filter(sq => !sq.isExample).length || 0);
-
-            return (
-              <QuestionGroupCard
-                key={q.id}
-                group={q}
-                globalIndexStart={startIndex}
-                answers={answers}
-                onAnswerSelect={onAnswerSelect}
-                isReviewMode={isReviewMode}
-              />
-            );
+            return <QuestionGroupCard key={q.id} group={q} globalIndexStart={startIndex} answers={answers} onAnswerSelect={onAnswerSelect} isReviewMode={false} />;
           }
-
-          const currentIndex = globalQIndex;
+          const currentIdx = globalQIndex;
           if (!q.isExample) globalQIndex++;
-
-          return (
-            <QuestionCard
-              key={q.id}
-              globalIndex={currentIndex}
-              question={q}
-              options={q.options}
-              selectedAnswer={answers[q.id]}
-              onAnswerSelect={onAnswerSelect}
-              isReviewMode={isReviewMode}
-            />
-          );
+          return <QuestionCard key={q.id} globalIndex={currentIdx} question={q} options={q.options} selectedAnswer={answers[q.id]} onAnswerSelect={onAnswerSelect} isReviewMode={false} />;
         })}
 
-        {/* ── Nút nộp bài ── */}
-        <SubmitCard
-          isAllAnswered={isAllAnswered}
-          answersCount={answersCount}
-          totalQuestions={totalQuestions}
-          isSignedIn={isSignedIn}
-          onSubmit={handleSubmit}
-        />
+        <SubmitCard isAllAnswered={isAllAnswered} answersCount={answersCount} totalQuestions={totalQuestions} isSignedIn={isSignedIn} onSubmit={handleSubmit} />
       </main>
 
-      <ConfirmModal
-        open={confirmOpen}
-        answersCount={answersCount}
-        totalQuestions={totalQuestions}
-        onConfirm={() => { setConfirmOpen(false); onSubmit(); }}
-        onCancel={() => setConfirmOpen(false)}
-      />
+      <ConfirmModal open={confirmOpen} answersCount={answersCount} totalQuestions={totalQuestions} onConfirm={() => { setConfirmOpen(false); onSubmit(); }} onCancel={() => setConfirmOpen(false)} />
     </div>
   );
 });

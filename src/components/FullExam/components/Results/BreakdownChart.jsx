@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Headphones, BookOpen, Target, CheckCircle2, Award } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 export const BreakdownChart = memo(({ results, partResults }) => {
   if (!results || !partResults) return null;

@@ -11,7 +11,7 @@ import { useAdminAuth } from '../hooks/useAdminAuth';
 import { supabase } from '../../config/supabaseClient';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminNavbar from '../components/AdminNavbar';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 // ─── StatCard 3D ────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, trend, color, sublabel, delay = 0 }) => {

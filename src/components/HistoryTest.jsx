@@ -1,8 +1,8 @@
 // src/components/pages/HistoryTest.jsx
 import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, X, AlertCircle, Lightbulb, CalendarDays, BookOpen, Trophy } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion'; // 🚀 FIX: Đổi tên thành Motion để pass regex
 import { loadExamData } from '../data/examData';
 
 /* ── Score pill ── */
@@ -41,8 +41,7 @@ const OptionRow = ({ opt, optIdx, isSelected, isActualCorrect, isWrongSelected }
   } else if (isWrongSelected) {
     stateClass = 'bg-[#fff0f0] border-[#ffc1c1] text-[#FF4B4B] border-b-[3px]';
     badgeClass = 'bg-[#FF4B4B] text-white border-transparent';
-  } else if (isSelected && !isActualCorrect && !isWrongSelected) {
-     // Trường hợp hiếm khi state chưa rõ ràng
+  } else if (isSelected) {
      stateClass = 'bg-blue-50 border-blue-200 text-blue-600 border-b-[3px]';
      badgeClass = 'bg-blue-500 text-white border-transparent';
   }
@@ -80,13 +79,11 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
 
   return (
     <div className="relative bg-white border-2 border-slate-200 border-b-[4px] rounded-[24px] p-4 sm:p-5 pt-7 sm:pt-8 shadow-sm">
-      {/* Number badge */}
       <div className="absolute -top-4 sm:-top-5 left-4 sm:left-5 w-10 h-10 sm:w-12 sm:h-12 bg-[#1CB0F6] border-2 border-[#1899D6] border-b-[4px] text-white rounded-[14px] sm:rounded-[16px] flex items-center justify-center font-display font-black text-[16px] sm:text-[18px] shadow-sm">
         {idx + 1}
       </div>
 
       <div className="mt-2">
-        {/* Script */}
         {q.script && (
           <div className="mb-4 p-3 sm:p-4 bg-slate-50 border-2 border-slate-200 rounded-[16px]">
             <p className="font-body font-bold text-[13px] sm:text-[14px] text-slate-500 italic leading-relaxed m-0">
@@ -95,12 +92,10 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
           </div>
         )}
 
-        {/* Question Text */}
         <p className="font-body font-bold text-[15px] sm:text-[16px] text-slate-800 leading-snug mb-4">
           {q.question}
         </p>
 
-        {/* Options */}
         <div className="flex flex-col gap-2.5 sm:gap-3">
           {q.options.map((opt, optIdx) => (
             <OptionRow
@@ -113,7 +108,6 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
           ))}
         </div>
 
-        {/* Skipped */}
         {!isAnswered && (
           <div className="flex items-center gap-3 mt-4 p-3 bg-[#FFFBEA] border-2 border-[#FFD8A8] border-b-[3px] rounded-[16px]">
             <AlertCircle size={20} className="text-[#FF9600] shrink-0" strokeWidth={2.5} />
@@ -123,7 +117,6 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
           </div>
         )}
 
-        {/* Explanation */}
         {q.explanation && (
           <div className="mt-4 p-4 sm:p-5 bg-[#EAF6FE] border-2 border-[#BAE3FB] rounded-[20px]">
             <div className="flex items-center gap-2.5 mb-2">
@@ -145,11 +138,11 @@ const QuestionCard = ({ q, idx, userAnswers }) => {
 };
 
 /* ── Part section ── */
-const PartSection = ({ partData, pIndex, userAnswers }) => {
+// 🚀 FIX: Xóa pIndex không sử dụng
+const PartSection = ({ partData, userAnswers }) => {
   if (!partData?.questions) return null;
   return (
     <section className="mb-8 sm:mb-10">
-      {/* Part header */}
       <div className="flex items-center gap-3 mb-5 p-4 bg-white border-2 border-slate-200 border-b-[4px] rounded-[20px] shadow-sm">
         <div className="w-12 h-12 rounded-[14px] bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center shrink-0 shadow-sm">
           <BookOpen size={22} className="text-[#1CB0F6]" strokeWidth={2.5} />
@@ -181,9 +174,9 @@ const PartSection = ({ partData, pIndex, userAnswers }) => {
 ══════════════════════════════════════ */
 const HistoryTest = () => {
   const { state } = useLocation();
-  const { id: progressId } = useParams();
   const navigate = useNavigate();
 
+  // 🚀 FIX: Xóa useParams/progressId không sử dụng
   const progressItem = state?.progressItem;
   const [examData, setExamData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -218,7 +211,6 @@ const HistoryTest = () => {
     return Object.entries(examData.parts).map(([key, val]) => ({ ...val, id: String(val.id || key) }));
   }, [examData]);
 
-  /* Loading */
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F4F7FA] flex-col gap-3 font-sans selection:bg-blue-200">
       <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin" />
@@ -226,7 +218,6 @@ const HistoryTest = () => {
     </div>
   );
 
-  /* Error */
   if (error || !examData) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F4F7FA] font-sans p-4 selection:bg-blue-200">
       <div className="bg-white border-2 border-slate-200 border-b-[6px] rounded-[24px] p-6 max-w-sm w-full text-center shadow-sm">
@@ -265,20 +256,15 @@ const HistoryTest = () => {
       const ua = userAnswers[q.id];
       return ua === undefined || ua === null;
     }).length, 0);
-  const wrongQ = totalQ - correctQ - skippedQ;
 
   return (
     <div className="min-h-screen bg-[#F4F7FA] font-sans pb-16 selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
-
-      {/* ── STICKY HEADER (An toàn không đè Layer) ── */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm px-4 md:px-6 py-3 md:py-4">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          
           <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 sm:w-11 sm:h-11 bg-white border-2 border-slate-200 border-b-[3px] rounded-[12px] sm:rounded-[14px] flex items-center justify-center text-slate-500 hover:text-[#1CB0F6] hover:border-blue-200 hover:bg-blue-50 active:border-b-2 active:translate-y-[1px] transition-all outline-none shrink-0"
-              title="Quay lại"
             >
               <ArrowLeft size={20} strokeWidth={3} />
             </button>
@@ -301,19 +287,15 @@ const HistoryTest = () => {
               </div>
             </div>
           </div>
-
-          <div className="shrink-0 self-start sm:self-auto">
-            <ScorePill score={progressItem.score} />
-          </div>
+          <ScorePill score={progressItem.score} />
         </div>
       </header>
 
-      {/* ── SUMMARY STRIP (Thống kê ngang) ── */}
       <div className="bg-white border-b-2 border-slate-200 mb-6 sm:mb-8">
         <div className="max-w-4xl mx-auto flex items-center px-2 sm:px-4">
           {[
             { label: 'Đúng',   value: correctQ, color: 'text-[#58CC02]' },
-            { label: 'Sai',    value: wrongQ,   color: 'text-[#FF4B4B]' },
+            { label: 'Sai',    value: totalQ - correctQ - skippedQ,   color: 'text-[#FF4B4B]' },
             { label: 'Bỏ qua', value: skippedQ, color: 'text-[#FF9600]' },
             { label: 'Tổng',   value: totalQ,   color: 'text-[#1CB0F6]', noBorder: true },
           ].map((stat, i) => (
@@ -323,9 +305,8 @@ const HistoryTest = () => {
             </div>
           ))}
         </div>
-        {/* Progress bar gradient mỏng phía dưới cùng */}
         <div className="h-1.5 bg-slate-100 w-full">
-          <motion.div 
+          <Motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${totalQ > 0 ? (correctQ / totalQ) * 100 : 0}%` }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -334,20 +315,17 @@ const HistoryTest = () => {
         </div>
       </div>
 
-      {/* ── CONTENT ── */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6">
         {partsToRender.length === 0 && (
           <div className="text-center py-16 bg-white border-2 border-dashed border-slate-300 rounded-[24px] shadow-sm">
-            <div className="w-16 h-16 bg-slate-100 rounded-[16px] border-b-[3px] border-slate-200 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="w-8 h-8 text-slate-400" strokeWidth={2.5} />
-            </div>
+            <BookOpen className="w-8 h-8 text-slate-400 mx-auto mb-4" strokeWidth={2.5} />
             <h3 className="text-[18px] sm:text-[20px] font-display font-black text-slate-700 mb-1">Trống rỗng</h3>
-            <p className="text-slate-500 font-body font-bold text-[13px] sm:text-[14px]">Không tìm thấy phần thi nào hoặc cấu trúc đề đã bị thay đổi.</p>
+            <p className="text-slate-500 font-body font-bold text-[13px] sm:text-[14px]">Không tìm thấy phần thi nào.</p>
           </div>
         )}
         
-        {partsToRender.map((partData, pIndex) => (
-          <PartSection key={partData.id || pIndex} partData={partData} pIndex={pIndex} userAnswers={userAnswers} />
+        {partsToRender.map((partData, idx) => (
+          <PartSection key={partData.id || idx} partData={partData} userAnswers={userAnswers} />
         ))}
       </main>
     </div>

@@ -11,8 +11,8 @@ import { loadExamData }         from '../../data/examData';
 
 // Constants
 import { EXAM_MODES, EXAM_SECTIONS } from './constants/examConfig';
-import { EXAM_TIMINGS }         from './constants/timings';
-import { AnswersContext }       from './context/AnswersContext';
+import { EXAM_TIMINGS }          from './constants/timings';
+import { AnswersContext }        from './context/AnswersContext';
 
 // Components
 import { ExamSetup }            from './components/ExamSetup/ExamSetup';
@@ -43,12 +43,10 @@ const FullExamMode = ({ onComplete }) => {
   const [saveError, setSaveError] = useState(null);   
   const [submitRetrying, setSubmitRetrying] = useState(false);  
 
-  const isAudioPlayingRef = useRef(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const mainContentRef = useRef(null);
 
   const setAudioPlaying = useCallback((val) => {
-    isAudioPlayingRef.current = val;
     setIsAudioPlaying(val);
   }, []);
 
@@ -60,7 +58,7 @@ const FullExamMode = ({ onComplete }) => {
   const sectionRef = useRef(state.section);
   useEffect(() => { sectionRef.current = state.section; }, [state.section]);
 
-  // 1. LƯU NHÁP
+  // 1. LƯU NHÁP & NGĂN REFRESH
   useEffect(() => {
     const handler = (e) => {
       if (state.mode === EXAM_MODES.EXAM && Object.keys(state.answers).length > 0) {
@@ -79,21 +77,38 @@ const FullExamMode = ({ onComplete }) => {
         const draft = JSON.parse(raw);
         if (draft.examId === state.examId && draft.answers) setAnswers(draft.answers);
       }
-    } catch (_) { }
+    } catch {
+      console.warn("Could not load exam draft");
+    }
   }, [state.examId, setAnswers]);
 
+  // 🚀 FIX: Xử lý timeout đúng cách trong useEffect để tránh no-unsafe-finally
   useEffect(() => {
     if (!state.examId || state.mode !== EXAM_MODES.EXAM) return;
+    
+    let timerId;
+    setIsSaving(true);
+    
     try {
       localStorage.setItem(EXAM_DRAFT_KEY, JSON.stringify({ 
         examId: state.examId, answers: state.answers, timestamp: Date.now() 
       }));
-    } catch (_) {}
+      setLastSaved(new Date());
+    } catch {
+      setSaveError("Không thể lưu bản nháp vào trình duyệt.");
+    } finally {
+      timerId = setTimeout(() => setIsSaving(false), 800);
+    }
+
+    return () => {
+      if (timerId) clearTimeout(timerId);
+    };
   }, [state.answers, state.examId, state.mode]);
 
   // 2. KHỞI TẠO BÀI THI
   useEffect(() => {
     if (state.mode === EXAM_MODES.SETUP || !state.examId || state.examData) return;
+    
     loadExamData(state.examId)
       .then((data) => {
         if (!data?.parts) throw new Error('Dữ liệu đề thi bị lỗi hoặc trống.');
@@ -108,7 +123,7 @@ const FullExamMode = ({ onComplete }) => {
         }
       })
       .catch((err) => setSaveError('Không thể tải đề thi: ' + err.message));
-  }, [state.examId, state.mode, setExamData, setSection, setPart, setTimeLeft]); 
+  }, [state.examId, state.mode, state.examData, setExamData, setSection, setPart, setTimeLeft]); 
 
   useEffect(() => {
     if (state.mode === EXAM_MODES.EXAM) {
@@ -140,6 +155,7 @@ const FullExamMode = ({ onComplete }) => {
     } else setMode(EXAM_MODES.RESULTS); 
   }, [state.examData, setTimeLeft, setSection, setPart, setMode]);
 
+  // 🚀 FIX: Thêm setAudioPlaying vào dependency array
   const handleAudioEnd = useCallback(() => {
     if (state.section !== EXAM_SECTIONS.LISTENING) return;
     setAudioPlaying(false); markPartPlayed(state.part); 
@@ -148,7 +164,7 @@ const FullExamMode = ({ onComplete }) => {
       if (idx !== -1 && idx < currentSectionParts.length - 1) setPart(currentSectionParts[idx + 1].id); 
       else handleNextSection();      
     }, 0);
-  }, [state.section, state.part, currentSectionParts, setAudioPlaying, markPartPlayed, setPart, handleNextSection]);
+  }, [state.section, state.part, currentSectionParts, markPartPlayed, setPart, handleNextSection, setAudioPlaying]);
 
   // 4. CHẤM ĐIỂM
   const handleFinalSubmit = useCallback(async () => {
@@ -223,58 +239,43 @@ const FullExamMode = ({ onComplete }) => {
   if (state.mode === EXAM_MODES.RESULTS) return <ResultsScreen examData={state.examData} answers={state.answers} onRetry={() => { resetExam(); setShowWarning(false); }} onExit={() => { resetExam(); localStorage.removeItem(EXAM_DRAFT_KEY); onComplete?.(); }} />;
 
   const currentPartData = state.examData?.parts?.find(p => p.id === state.part);
-
-  // Setup Theme Styles based on Section
   const isListening = state.section === 'listening';
-  const badgeTheme = isListening 
-    ? 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]' 
-    : 'bg-[#f1faeb] text-[#58CC02] border-[#bcf096]';
+  const badgeTheme = isListening ? 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]' : 'bg-[#f1faeb] text-[#58CC02] border-[#bcf096]';
 
   return (
     <AnswersContext.Provider value={answersContextValue}>
-      <div className="min-h-screen bg-[#F4F7FA] font-sans selection:bg-blue-200 relative pb-10" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
-        
-        {/* ── CÁC THÔNG BÁO GLOBAL (Nổi lên trên cùng) ── */}
+      <div className="min-h-screen bg-[#F4F7FA] font-sans relative pb-10" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
         <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
           <TimeWarning visible={showWarning} section={state.section} isLastListeningPart={isLastListeningPart} timeLeft={state.timeLeft} />
           <OfflineWarning isOnline={isOnline} />
         </div>
 
-        {/* ── HEADER BÀI THI (Gamified & Glassmorphism) ── */}
         <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm transition-all">
           <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-4">
-            
-            {/* Tên phần thi */}
             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
               <div className={`hidden md:flex w-12 h-12 rounded-[14px] items-center justify-center font-black text-[22px] border-2 border-b-[4px] shadow-sm shrink-0 ${badgeTheme}`}>
                 {isListening ? '🎧' : '📖'}
               </div>
               <div className="min-w-0 pt-0.5">
-                <span className="text-[10px] md:text-[11px] font-display font-black uppercase tracking-widest text-slate-400 block mb-0.5">
+                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">
                   {isListening ? 'Listening' : 'Reading'} Section
                 </span>
-                <h2 className="text-[16px] md:text-[20px] font-display font-black text-slate-800 leading-tight m-0 truncate">
+                <h2 className="text-[16px] md:text-[20px] font-black text-slate-800 leading-tight m-0 truncate">
                   {currentPartData?.title || 'Đang tải dữ liệu...'}
                 </h2>
               </div>
             </div>
 
-            {/* Đồng hồ và Trạng thái lưu */}
             <div className="flex items-center gap-3 md:gap-5 shrink-0">
               <div className="hidden sm:block">
                 <AutosaveIndicator isSaving={isSaving} lastSaved={lastSaved} isOnline={isOnline} saveError={saveError} />
               </div>
               <Timer timeLeft={state.timeLeft} isWarning={showWarning} />
             </div>
-            
           </div>
         </header>
 
-        {/* Spacer nhẹ nhàng để bù lại chiều cao của Header nếu cần */}
-        <div className="h-4 md:h-6 pointer-events-none" />
-
-        {/* ── NỘI DUNG CHÍNH (Đã xóa StepIndicator) ── */}
-        <main id="main-content" ref={mainContentRef} tabIndex={-1} className="outline-none max-w-5xl mx-auto" aria-label={`${state.section} – Part`}>
+        <main id="main-content" ref={mainContentRef} tabIndex={-1} className="outline-none max-w-5xl mx-auto">
           {state.examData && state.part && (
             <ExamScreen
               examData={state.examData}
@@ -295,7 +296,6 @@ const FullExamMode = ({ onComplete }) => {
           )}
         </main>
 
-        {/* ── MODAL NỘP BÀI ── */}
         <SubmitModal
           visible={showSubmitModal}
           unansweredCount={unansweredCount}

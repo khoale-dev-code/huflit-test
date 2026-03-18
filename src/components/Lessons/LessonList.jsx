@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Search, PlayCircle, BookA, Hash, Lightbulb, Compass, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 // Import API của bạn (Bạn cần tạo hàm getPublishedLessons trong file lessonApi.js)
 import { getPublishedLessons } from '../../data/lessonApi'; 
 

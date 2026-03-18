@@ -30,14 +30,16 @@ export const rtdb = getDatabase(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Emulator
-if (process.env.NODE_ENV === 'development' && import.meta.env.VITE_USE_EMULATOR === 'true') {
+// 🚀 FIX LỖI: Dùng import.meta.env.DEV thay cho process.env.NODE_ENV
+if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
   try {
     connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectStorageEmulator(storage, 'localhost', 9199);
     console.log('Connected to Firebase Emulators');
   } catch (error) {
-    console.log('Firebase Emulators not available');
+    // 🚀 FIX LỖI: In biến error ra để phục vụ debug, giúp ESLint không báo thừa nữa
+    console.warn('Firebase Emulators not available:', error);
   }
 }
 

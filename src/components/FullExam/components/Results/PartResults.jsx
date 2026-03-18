@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Headphones, BookOpen } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 // partResults shape (từ ResultsScreen mới):
 // {

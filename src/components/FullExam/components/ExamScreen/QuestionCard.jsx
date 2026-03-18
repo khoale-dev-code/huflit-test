@@ -3,7 +3,7 @@
 
 import React, { memo, useCallback, useId } from 'react';
 import { Check, Lightbulb, Image as ImageIcon, Star } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 // 👇 ĐÃ THÊM: Import MiniAudioPlayer vào QuestionCard
 import { MiniAudioPlayer } from '../../../Display/MiniAudioPlayer';

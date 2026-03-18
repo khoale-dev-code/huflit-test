@@ -3,7 +3,7 @@ import {
   CheckCircle, TrendingUp, Flame, Award,
   Headphones, BookOpen, GraduationCap, Target
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import {
   getGrade, getLevelLabel,
   getToeicGradeLabel,

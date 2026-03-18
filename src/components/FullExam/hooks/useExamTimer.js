@@ -74,7 +74,7 @@ export const useExamTimer = ({
     }, 1000);
 
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [isActive, section]);
   // ↑ section là dependency quan trọng:
   //   khi Listening → Reading, section thay đổi → interval restart

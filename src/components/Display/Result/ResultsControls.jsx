@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { RotateCcw, Target } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 /**
  * Nút "Làm lại" và "Xem lại câu hỏi" (Gamified 3D Buttons)
