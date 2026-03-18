@@ -10,7 +10,8 @@ const initialState = {
   showInstructions: true,
   showVoiceControls: true,
   showAuthModal: false,
-  selectedExam: 'exam1',
+  // 🚀 FIX: Không để 'exam1' làm mặc định vì sẽ gây lỗi UUID trên Supabase
+  selectedExam: null, 
   testType: 'listening',
   practiceType: '',
   selectedPart: 'part1',
@@ -100,14 +101,14 @@ const reducer = (state, action) => {
 const cancelSpeech = () => {
   try {
     if (window.speechSynthesis) window.speechSynthesis.cancel();
-  } catch (err) {
-    /* ignore error */
-  }
+  } catch (err) { /* ignore */ }
 };
 
 function flattenValidQuestions(partData) {
   const result = [];
-  (partData?.questions ?? []).forEach((q) => {
+  if (!partData?.questions) return result;
+
+  partData.questions.forEach((q) => {
     if (q.type === 'group') {
       (q.subQuestions ?? []).forEach((sq) => {
         if (!sq.isExample) result.push(sq);
@@ -128,6 +129,7 @@ function computeScore(partData, answers) {
   const scoreResult = { correct, total, percentage };
   const category = (partData?.examCategory ?? '').toLowerCase();
 
+  // Logic tính điểm TOEIC
   if (category.includes('toeic')) {
     const section = (partData?.toeicSection ?? '').toLowerCase();
     let listeningCorrect = 0;
@@ -156,6 +158,7 @@ export const useAppState = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { saveProgress, currentUser } = useUserProgress();
 
+  // Dùng Ref để handleSubmit luôn có state mới nhất mà không bị re-render vô ích
   const stateRef = useRef(state);
   const saveProgressRef = useRef(saveProgress);
 
@@ -200,9 +203,8 @@ export const useAppState = () => {
   const setCurrentQuestionIndex = useCallback((idx) => dispatch({ type: T.SET_QUESTION_INDEX, payload: idx }), []);
 
   const handleSubmit = useCallback((partData) => {
-    const currentState = stateRef.current;
+    const { answers, selectedExam, selectedPart, testType } = stateRef.current;
     const save = saveProgressRef.current;
-    const { answers, selectedExam, selectedPart, testType } = currentState;
 
     if (!partData || !partData.questions || partData.questions.length === 0) {
       dispatch({ type: T.SET_SHOW_RESULTS, payload: true });
@@ -217,8 +219,9 @@ export const useAppState = () => {
       payload: { scoreResult, convertedScore, examCategory },
     });
 
-    if (!save) return;
+    if (!save || !currentUser) return;
 
+    // Lưu kết quả vào DB
     save({
       exam: selectedExam,
       part: selectedPart,
@@ -229,19 +232,20 @@ export const useAppState = () => {
       examCategory,
       testType: testType || 'practice',
       isDraft: false,
+      timestamp: new Date().toISOString(), // 🚀 Thêm timestamp chuẩn ISO
       ...(convertedScore && {
         toeicListening: convertedScore.listening,
         toeicReading: convertedScore.reading,
         toeicTotal: convertedScore.total,
       }),
-    }).then((ok) => {
-      if (ok) {
-        console.log('✅ Progress saved');
-      }
-    }).catch((err) => {
+    })
+    .then((ok) => {
+      if (ok && import.meta.env.DEV) console.log('✅ Progress saved to Supabase');
+    })
+    .catch((err) => {
       console.error('❌ Save error:', err);
     });
-  }, []);
+  }, [currentUser]); // currentUser thay đổi thì cần khởi tạo lại hàm này
 
   return {
     ...state,
