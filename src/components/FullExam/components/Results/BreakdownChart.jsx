@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Headphones, BookOpen, Target, CheckCircle2, Award } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 export const BreakdownChart = memo(({ results, partResults }) => {
   if (!results || !partResults) return null;
@@ -51,14 +51,14 @@ export const BreakdownChart = memo(({ results, partResults }) => {
             </span>
           </div>
           <div className="w-full h-4 bg-blue-200/50 rounded-full overflow-hidden border border-blue-200 relative">
-            <motion.div
+            <Motion.div
               initial={{ width: 0 }}
               animate={{ width: `${listeningPercentage}%` }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
               className="h-full bg-[#1CB0F6] rounded-full relative"
             >
               <div className="absolute top-1 left-2 right-2 h-1.5 bg-white/30 rounded-full" />
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
 
@@ -83,14 +83,14 @@ export const BreakdownChart = memo(({ results, partResults }) => {
             </span>
           </div>
           <div className="w-full h-4 bg-emerald-200/50 rounded-full overflow-hidden border border-emerald-200 relative">
-            <motion.div
+            <Motion.div
               initial={{ width: 0 }}
               animate={{ width: `${readingPercentage}%` }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
               className="h-full bg-[#58CC02] rounded-full relative"
             >
               <div className="absolute top-1 left-2 right-2 h-1.5 bg-white/30 rounded-full" />
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
       </div>

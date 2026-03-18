@@ -3,7 +3,7 @@ import {
   Play, Pause, Eye, EyeOff, Volume2, SkipBack, SkipForward,
   AlertCircle, CheckCircle2, Headphones, Activity, MessageCircle
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion'; // 🚀 FIX: Đổi tên thành Motion để pass ESLint
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 const SKIP_TIME = 10;
@@ -68,7 +68,9 @@ const Visualizer = memo(({ isPlaying, audioEl }) => {
         rafRef.current = requestAnimationFrame(draw);
       };
       draw();
-    } catch (_) { drawIdle(); }
+    } catch { // 🚀 FIX: Xóa biến gạch dưới không dùng
+      drawIdle(); 
+    }
     return () => cancelAnimationFrame(rafRef.current);
   }, [isPlaying, audioEl]);
 
@@ -155,7 +157,7 @@ const TranscriptLine = memo(({ line, index }) => {
   const col = speakerPalette[index % speakerPalette.length];
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
       style={{
@@ -173,7 +175,7 @@ const TranscriptLine = memo(({ line, index }) => {
         </div>
       )}
       <p style={{ fontFamily: F.body, fontSize: 14, fontWeight: 700, color: C.n600, lineHeight: 1.6, margin: 0 }}>{content}</p>
-    </motion.div>
+    </Motion.div>
   );
 });
 
@@ -188,10 +190,25 @@ const ScriptDisplay = ({ script, audioUrl, partTitle, isPartPlayed, onAudioStart
 
   const rootRef   = useRef(null);
   const [isNarrow, setIsNarrow] = useState(false);
+
+  // 🚀 FIX: Tích hợp onAudioStart và onAudioEnd vào vòng đời audio
+  useEffect(() => {
+    if (isPlaying) {
+      onAudioStart?.();
+    }
+  }, [isPlaying, onAudioStart]);
+
+  useEffect(() => {
+    if (!audioEl) return;
+    const handleEnded = () => onAudioEnd?.();
+    audioEl.addEventListener('ended', handleEnded);
+    return () => audioEl.removeEventListener('ended', handleEnded);
+  }, [audioEl, onAudioEnd]);
+
   useEffect(() => {
     if (!rootRef.current) return;
     const ro = new ResizeObserver(entries => {
-      for (const e of entries) setIsNarrow(e.contentRect.width < 600);
+      for (const entry of entries) setIsNarrow(entry.contentRect.width < 600);
     });
     ro.observe(rootRef.current);
     return () => ro.disconnect();
@@ -230,10 +247,10 @@ const ScriptDisplay = ({ script, audioUrl, partTitle, isPartPlayed, onAudioStart
         {/* ── Error ── */}
         <AnimatePresence>
           {error && (
-            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            <Motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               style={{ marginBottom: 12, padding: '10px 14px', background: C.redBg, border: `2px solid ${C.red}30`, borderBottom: `3px solid ${C.red}30`, borderRadius: 16, display: 'flex', alignItems: 'center', gap: 8, fontFamily: F.body, fontSize: 13, fontWeight: 800, color: C.red }}>
               <AlertCircle size={17} strokeWidth={2.5} /> {error}
-            </motion.div>
+            </Motion.div>
           )}
         </AnimatePresence>
 
@@ -338,11 +355,11 @@ const ScriptDisplay = ({ script, audioUrl, partTitle, isPartPlayed, onAudioStart
             <div className="script-scroll" style={{ overflowY: 'auto', padding: '14px', minHeight: 220, maxHeight: 380 }}>
               <AnimatePresence mode="wait">
                 {showTranscript ? (
-                  <motion.div key="transcript" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <Motion.div key="transcript" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                     {lines.map((l, i) => <TranscriptLine key={i} line={l} index={i} />)}
-                  </motion.div>
+                  </Motion.div>
                 ) : (
-                  <motion.div key="focus" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
+                  <Motion.div key="focus" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px 20px', height: '100%', minHeight: 180 }}>
                     <div style={{ width: 60, height: 60, borderRadius: 20, background: C.blueBg, border: `2px solid ${C.blueBorder}`, boxShadow: `0 4px 0 ${C.blueBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
                       <Headphones size={28} color={C.blue} strokeWidth={2.5} />
@@ -351,14 +368,14 @@ const ScriptDisplay = ({ script, audioUrl, partTitle, isPartPlayed, onAudioStart
                     <p style={{ fontFamily: F.body, fontSize: 13, fontWeight: 700, color: C.n500, maxWidth: 240, lineHeight: 1.6, margin: 0 }}>
                       Hãy nghe thật kỹ. Nhấn <strong style={{ color: C.blue }}>Xem bài</strong> nếu cần hỗ trợ.
                     </p>
-                  </motion.div>
+                  </Motion.div>
                 )}
               </AnimatePresence>
             </div>
 
             {/* Footer progress bar */}
             <div style={{ height: 4, background: C.n200, flexShrink: 0, marginTop: 'auto', position: 'relative' }}>
-              <motion.div
+              <Motion.div
                 style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: C.blue, borderRadius: '0 3px 3px 0' }}
                 animate={{ width: `${progressPct}%` }}
                 transition={{ duration: 0.15, ease: 'linear' }}

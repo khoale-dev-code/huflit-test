@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { RotateCcw, Target } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 /**
  * Nút "Làm lại" và "Xem lại câu hỏi" (Gamified 3D Buttons)
@@ -10,7 +10,7 @@ const ResultsControls = memo(({ onReset }) => {
   const handleScrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <motion.div 
+    <Motion.div 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
@@ -34,7 +34,7 @@ const ResultsControls = memo(({ onReset }) => {
         <Target size={20} strokeWidth={3} />
         Xem lại đáp án
       </button>
-    </motion.div>
+    </Motion.div>
   );
 });
 

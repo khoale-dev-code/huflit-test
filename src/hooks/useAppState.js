@@ -1,3 +1,4 @@
+// src/hooks/useAppState.js
 import { useReducer, useRef, useCallback, useEffect } from 'react';
 import { useUserProgress } from './useUserProgress';
 import { calculateToeicScore } from '../utils/gradeUtils';
@@ -6,48 +7,43 @@ import { calculateToeicScore } from '../utils/gradeUtils';
    STATE SHAPE
 ══════════════════════════════════════════════════════════ */
 const initialState = {
-  showInstructions:    true,
-  showVoiceControls:   true,
-  showAuthModal:       false,
-  selectedExam:        'exam1',
-  testType:            'listening',
-  practiceType:        '',
-  selectedPart:        'part1',
+  showInstructions: true,
+  showVoiceControls: true,
+  showAuthModal: false,
+  // 🚀 FIX: Không để 'exam1' làm mặc định vì sẽ gây lỗi UUID trên Supabase
+  selectedExam: null, 
+  testType: 'listening',
+  practiceType: '',
+  selectedPart: 'part1',
   currentQuestionIndex: 0,
-  rate:                1.0,
-  answers:             {},
-  showResults:         false,
-
-  // Kết quả sau khi nộp bài
-  scoreResult:    null,   // { correct, total, percentage }
-  convertedScore: null,   // { listening, reading, total } | null
-  examCategory:   null,   // string 
+  rate: 1.0,
+  answers: {},
+  showResults: false,
+  scoreResult: null,
+  convertedScore: null,
+  examCategory: null,
 };
 
 /* ══════════════════════════════════════════════════════════
    ACTION TYPES
 ══════════════════════════════════════════════════════════ */
 const T = {
-  SET_SHOW_INSTRUCTIONS:   'SET_SHOW_INSTRUCTIONS',
+  SET_SHOW_INSTRUCTIONS: 'SET_SHOW_INSTRUCTIONS',
   SET_SHOW_VOICE_CONTROLS: 'SET_SHOW_VOICE_CONTROLS',
-  SET_SHOW_AUTH_MODAL:     'SET_SHOW_AUTH_MODAL',
-  SET_EXAM:                'SET_EXAM',
-  SET_TEST_TYPE:           'SET_TEST_TYPE',
-  SET_PRACTICE_TYPE:       'SET_PRACTICE_TYPE',
-  SET_PART:                'SET_PART',
-  SET_QUESTION_INDEX:      'SET_QUESTION_INDEX',
-  SET_RATE:                'SET_RATE',
-  SET_ANSWER:              'SET_ANSWER',
-  RESET_ANSWERS:           'RESET_ANSWERS',
-  SET_SHOW_RESULTS:        'SET_SHOW_RESULTS',
-  SET_RESULTS:             'SET_RESULTS',
-  RESET_TEST:              'RESET_TEST',
+  SET_SHOW_AUTH_MODAL: 'SET_SHOW_AUTH_MODAL',
+  SET_EXAM: 'SET_EXAM',
+  SET_TEST_TYPE: 'SET_TEST_TYPE',
+  SET_PRACTICE_TYPE: 'SET_PRACTICE_TYPE',
+  SET_PART: 'SET_PART',
+  SET_QUESTION_INDEX: 'SET_QUESTION_INDEX',
+  SET_RATE: 'SET_RATE',
+  SET_ANSWER: 'SET_ANSWER',
+  RESET_ANSWERS: 'RESET_ANSWERS',
+  SET_SHOW_RESULTS: 'SET_SHOW_RESULTS',
+  SET_RESULTS: 'SET_RESULTS',
+  RESET_TEST: 'RESET_TEST',
 };
 
-/* ══════════════════════════════════════════════════════════
-   REDUCER
-══════════════════════════════════════════════════════════ */
-// Helper gộp logic reset chung cho các action thay đổi bài thi
 const resetTestState = {
   currentQuestionIndex: 0,
   answers: {},
@@ -57,18 +53,19 @@ const resetTestState = {
   examCategory: null,
 };
 
+/* ══════════════════════════════════════════════════════════
+   REDUCER
+══════════════════════════════════════════════════════════ */
 const reducer = (state, action) => {
   switch (action.type) {
-    case T.SET_SHOW_INSTRUCTIONS:   return { ...state, showInstructions: action.payload };
+    case T.SET_SHOW_INSTRUCTIONS: return { ...state, showInstructions: action.payload };
     case T.SET_SHOW_VOICE_CONTROLS: return { ...state, showVoiceControls: action.payload };
-    case T.SET_SHOW_AUTH_MODAL:     return { ...state, showAuthModal: action.payload };
-    case T.SET_QUESTION_INDEX:      return { ...state, currentQuestionIndex: action.payload };
-    case T.SET_RATE:                return { ...state, rate: action.payload };
-    case T.SET_SHOW_RESULTS:        return { ...state, showResults: action.payload };
-
+    case T.SET_SHOW_AUTH_MODAL: return { ...state, showAuthModal: action.payload };
+    case T.SET_QUESTION_INDEX: return { ...state, currentQuestionIndex: action.payload };
+    case T.SET_RATE: return { ...state, rate: action.payload };
+    case T.SET_SHOW_RESULTS: return { ...state, showResults: action.payload };
     case T.SET_EXAM:
       return { ...state, ...resetTestState, selectedExam: action.payload, selectedPart: 'part1' };
-      
     case T.SET_TEST_TYPE:
       return { 
         ...state, ...resetTestState, 
@@ -76,19 +73,14 @@ const reducer = (state, action) => {
         practiceType: '', 
         selectedPart: action.payload === 'listening' ? 'part1' : 'part5' 
       };
-      
     case T.SET_PRACTICE_TYPE:
       return { ...state, ...resetTestState, practiceType: action.payload, testType: '', selectedPart: '' };
-      
     case T.SET_PART:
       return { ...state, ...resetTestState, selectedPart: action.payload };
-
     case T.SET_ANSWER:
       return { ...state, answers: { ...state.answers, [action.payload.questionId]: action.payload.answer } };
-
     case T.RESET_ANSWERS:
       return { ...state, ...resetTestState };
-
     case T.SET_RESULTS:
       return {
         ...state,
@@ -97,10 +89,8 @@ const reducer = (state, action) => {
         convertedScore: action.payload.convertedScore,
         examCategory: action.payload.examCategory,
       };
-
     case T.RESET_TEST:
       return { ...state, ...resetTestState, selectedPart: 'part1', rate: 1.0 };
-      
     default: return state;
   }
 };
@@ -109,14 +99,20 @@ const reducer = (state, action) => {
    HELPERS
 ══════════════════════════════════════════════════════════ */
 const cancelSpeech = () => {
-  try { window.speechSynthesis?.cancel(); } catch (_) {}
+  try {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  } catch (err) { /* ignore */ }
 };
 
 function flattenValidQuestions(partData) {
   const result = [];
-  (partData?.questions ?? []).forEach((q) => {
+  if (!partData?.questions) return result;
+
+  partData.questions.forEach((q) => {
     if (q.type === 'group') {
-      (q.subQuestions ?? []).forEach((sq) => { if (!sq.isExample) result.push(sq); });
+      (q.subQuestions ?? []).forEach((sq) => {
+        if (!sq.isExample) result.push(sq);
+      });
     } else {
       if (!q.isExample) result.push(q);
     }
@@ -131,16 +127,19 @@ function computeScore(partData, answers) {
   const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   const scoreResult = { correct, total, percentage };
-
   const category = (partData?.examCategory ?? '').toLowerCase();
+
+  // Logic tính điểm TOEIC
   if (category.includes('toeic')) {
     const section = (partData?.toeicSection ?? '').toLowerCase();
     let listeningCorrect = 0;
     let readingCorrect = 0;
 
-    if (section === 'listening') listeningCorrect = correct;
-    else if (section === 'reading') readingCorrect = correct;
-    else {
+    if (section === 'listening') {
+      listeningCorrect = correct;
+    } else if (section === 'reading') {
+      readingCorrect = correct;
+    } else {
       listeningCorrect = partData?.listeningCorrect ?? Math.round(correct / 2);
       readingCorrect = partData?.readingCorrect ?? (correct - listeningCorrect);
     }
@@ -153,22 +152,21 @@ function computeScore(partData, answers) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   HOOK
+   HOOK EXPORT
 ══════════════════════════════════════════════════════════ */
 export const useAppState = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { saveProgress, currentUser } = useUserProgress();
 
-  // "Latest Ref Pattern" - Giữ tham chiếu mới nhất để dùng trong các callback 
-  // mà không cần đưa vào dependency array của useCallback, tránh gây render lại ở các component con.
+  // Dùng Ref để handleSubmit luôn có state mới nhất mà không bị re-render vô ích
   const stateRef = useRef(state);
   const saveProgressRef = useRef(saveProgress);
 
-  // Cập nhật ref ở mỗi lần render (Hoàn toàn an toàn và là best practice cho pattern này)
-  stateRef.current = state;
-  saveProgressRef.current = saveProgress;
+  useEffect(() => {
+    stateRef.current = state;
+    saveProgressRef.current = saveProgress;
+  }, [state, saveProgress]);
 
-  // ── Các Handlers sử dụng useCallback để có stable reference ──
   const handleExamChange = useCallback((e) => {
     cancelSpeech();
     dispatch({ type: T.SET_EXAM, payload: e.target.value });
@@ -204,16 +202,11 @@ export const useAppState = () => {
   const setRate = useCallback((rate) => dispatch({ type: T.SET_RATE, payload: rate }), []);
   const setCurrentQuestionIndex = useCallback((idx) => dispatch({ type: T.SET_QUESTION_INDEX, payload: idx }), []);
 
-  /**
-   * handleSubmit: Đọc State thông qua stateRef.current để tránh đưa state vào dependencies.
-   */
   const handleSubmit = useCallback((partData) => {
-    const currentState = stateRef.current;
+    const { answers, selectedExam, selectedPart, testType } = stateRef.current;
     const save = saveProgressRef.current;
-    const { answers, selectedExam, selectedPart, testType } = currentState;
 
     if (!partData || !partData.questions || partData.questions.length === 0) {
-      // Fallback an toàn nếu partData bị lỗi/trống
       dispatch({ type: T.SET_SHOW_RESULTS, payload: true });
       return;
     }
@@ -226,8 +219,9 @@ export const useAppState = () => {
       payload: { scoreResult, convertedScore, examCategory },
     });
 
-    if (!save) return;
+    if (!save || !currentUser) return;
 
+    // Lưu kết quả vào DB
     save({
       exam: selectedExam,
       part: selectedPart,
@@ -238,22 +232,25 @@ export const useAppState = () => {
       examCategory,
       testType: testType || 'practice',
       isDraft: false,
+      timestamp: new Date().toISOString(), // 🚀 Thêm timestamp chuẩn ISO
       ...(convertedScore && {
         toeicListening: convertedScore.listening,
         toeicReading: convertedScore.reading,
         toeicTotal: convertedScore.total,
       }),
-    }).then((ok) => {
-      if (ok) console.log('✅ Progress saved:', { exam: selectedExam, part: selectedPart, score: scoreResult.percentage });
-      else console.warn('⚠️ saveProgress returned false — user not logged in?');
+    })
+    .then((ok) => {
+      if (ok && import.meta.env.DEV) console.log('✅ Progress saved to Supabase');
+    })
+    .catch((err) => {
+      console.error('❌ Save error:', err);
     });
-  }, []);
+  }, [currentUser]); // currentUser thay đổi thì cần khởi tạo lại hàm này
 
   return {
     ...state,
     isSignedIn: !!currentUser,
     user: currentUser,
-
     handleExamChange,
     handleTestTypeChange,
     handlePracticeTypeChange,

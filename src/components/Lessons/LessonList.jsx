@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Search, PlayCircle, BookA, Hash, Lightbulb, Compass, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 // Import API của bạn (Bạn cần tạo hàm getPublishedLessons trong file lessonApi.js)
 import { getPublishedLessons } from '../../data/lessonApi'; 
 
@@ -105,7 +105,7 @@ const LessonList = () => {
             {filteredLessons.map((lesson, idx) => {
               const catConfig = CATEGORIES.find(c => c.id === lesson.category) || CATEGORIES[1];
               return (
-                <motion.div 
+                <Motion.div 
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
                   key={lesson.id}
                   onClick={() => navigate(`/learn/${lesson.slug}`)} // Điều hướng bằng Slug
@@ -146,7 +146,7 @@ const LessonList = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </Motion.div>
               );
             })}
           </div>

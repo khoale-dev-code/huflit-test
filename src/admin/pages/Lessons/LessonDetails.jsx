@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Clock, BookOpen, Sparkles, Lock, Play, Share2, PenTool, BookMarked, Zap, Target, Eye, MonitorPlay } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { getLessonById } from '../../../data/lessonApi';
 
 /* ──────────────────────────────────────
@@ -129,11 +129,11 @@ const LessonDetails = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F4F7FA] flex flex-col items-center justify-center">
-        <motion.div animate={{ rotateY: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
+        <Motion.div animate={{ rotateY: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
           <div className="w-16 h-16 bg-[#1CB0F6] rounded-2xl border-b-[6px] border-[#1899D6] shadow-[inset_0_4px_0_rgba(255,255,255,0.4)] flex items-center justify-center">
             <Sparkles className="text-white" size={32} />
           </div>
-        </motion.div>
+        </Motion.div>
       </div>
     );
   }
@@ -149,8 +149,8 @@ const LessonDetails = () => {
       
       {/* ── FLOATING 3D BACKGROUND DECORATIONS ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div animate={{ y: [-20, 20, -20], rotate: [0, 10, 0] }} transition={{ duration: 6, repeat: Infinity }} className="absolute top-[10%] left-[5%] w-32 h-32 bg-[#1CB0F6]/10 rounded-3xl blur-2xl" />
-        <motion.div animate={{ y: [20, -20, 20], rotate: [0, -10, 0] }} transition={{ duration: 8, repeat: Infinity }} className="absolute top-[40%] right-[5%] w-48 h-48 bg-[#FFC800]/10 rounded-full blur-3xl" />
+        <Motion.div animate={{ y: [-20, 20, -20], rotate: [0, 10, 0] }} transition={{ duration: 6, repeat: Infinity }} className="absolute top-[10%] left-[5%] w-32 h-32 bg-[#1CB0F6]/10 rounded-3xl blur-2xl" />
+        <Motion.div animate={{ y: [20, -20, 20], rotate: [0, -10, 0] }} transition={{ duration: 8, repeat: Infinity }} className="absolute top-[40%] right-[5%] w-48 h-48 bg-[#FFC800]/10 rounded-full blur-3xl" />
       </div>
 
       {/* ── STICKY NAV (Glassmorphism + 3D Buttons) ── */}
@@ -181,7 +181,7 @@ const LessonDetails = () => {
         </div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto px-4 md:px-6 mt-8 md:mt-12 relative z-10">
+      <Motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto px-4 md:px-6 mt-8 md:mt-12 relative z-10">
         
         {/* ── HEADER BÀI HỌC ── */}
         <div className="text-center mb-12">
@@ -270,14 +270,14 @@ const LessonDetails = () => {
           <Edit2 size={20} strokeWidth={3} /> Chỉnh sửa bài này
         </button>
 
-      </motion.div>
+      </Motion.div>
 
       {/* ── SHARE MODAL (Gamified Pop-up) ── */}
       <AnimatePresence>
         {showShare && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowShare(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-            <motion.div
+            <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowShare(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <Motion.div
               initial={{ scale: 0.8, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
               className="bg-white rounded-[36px] p-8 w-full max-w-sm border-4 border-slate-200 border-b-[12px] relative z-10 shadow-2xl"
@@ -297,7 +297,7 @@ const LessonDetails = () => {
               <button onClick={() => setShowShare(false)} className="w-full mt-6 py-3 text-slate-400 font-body font-black uppercase tracking-widest text-[13px] hover:text-slate-600 transition-colors outline-none">
                 Đóng lại
               </button>
-            </motion.div>
+            </Motion.div>
           </div>
         )}
       </AnimatePresence>

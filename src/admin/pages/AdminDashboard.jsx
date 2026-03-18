@@ -2,29 +2,38 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, BookOpen, CheckCircle2, Loader2,
+  Users, BookOpen, CheckCircle2,
   ArrowUpRight, ArrowDownRight,
-  Calendar, Zap, Bell, ChevronRight,
-  Activity, PlusCircle, Trash2, Edit3, ShieldAlert, LayoutDashboard
+  Zap, Bell, Activity, PlusCircle, 
+  Trash2, Edit3, ShieldAlert, LayoutDashboard
 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { supabase } from '../../config/supabaseClient';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminNavbar from '../components/AdminNavbar';
-import { motion } from 'framer-motion';
+// 🚀 FIX 1: Đảm bảo Alias Motion đã sẵn sàng
+import { motion as Motion } from 'framer-motion';
 
 // ─── StatCard 3D ────────────────────────────────────────────────────
-const StatCard = ({ icon: Icon, label, value, trend, color, sublabel, delay = 0 }) => {
+const StatCard = (props) => {
+  const { icon: Icon, label, value, trend, color, sublabel, delay = 0 } = props;
+  
   const themes = {
     blue:   { bg: 'bg-white', icon: 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]', trendUp: 'bg-[#EAF6FE] text-[#1CB0F6]' },
     purple: { bg: 'bg-white', icon: 'bg-[#faefff] text-[#CE82FF] border-[#eec9ff]', trendUp: 'bg-[#faefff] text-[#CE82FF]' },
     green:  { bg: 'bg-white', icon: 'bg-[#f1faeb] text-[#58CC02] border-[#bcf096]', trendUp: 'bg-[#f1faeb] text-[#58CC02]' },
   };
-  const t = themes[color];
+  const t = themes[color] || themes.blue;
   const isUp = trend >= 0;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }} className={`${t.bg} rounded-[24px] border-2 border-slate-200 border-b-[4px] p-5 flex flex-col gap-4 shadow-sm hover:-translate-y-1 transition-transform`}>
+    // 🚀 FIX 2: Đổi Motion.div thành Motion.div
+    <Motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ delay }} 
+      className={`${t.bg} rounded-[24px] border-2 border-slate-200 border-b-[4px] p-5 flex flex-col gap-4 shadow-sm hover:-translate-y-1 transition-transform`}
+    >
       <div className="flex items-start justify-between">
         <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center border-2 border-b-[4px] flex-shrink-0 shadow-sm ${t.icon}`}>
           <Icon size={22} strokeWidth={2.5} />
@@ -40,7 +49,7 @@ const StatCard = ({ icon: Icon, label, value, trend, color, sublabel, delay = 0 
         <h3 className="text-[28px] font-display font-black text-slate-800 leading-none">{value.toLocaleString()}</h3>
         {sublabel && <p className="text-[12px] font-body font-bold text-slate-400 mt-1.5">{sublabel}</p>}
       </div>
-    </motion.div>
+    </Motion.div>
   );
 };
 
@@ -99,7 +108,7 @@ const DonutChart = ({ segments, size = 140, thickness = 24 }) => {
     const fraction = seg.value / total;
     const offset   = circumference * (1 - cumulative);
     const dash     = Math.max(circumference * fraction - GAP, 0);
-    cumulative    += fraction;
+    cumulative     += fraction;
     return { ...seg, offset, dash, fraction };
   });
 
@@ -124,23 +133,18 @@ const DonutChart = ({ segments, size = 140, thickness = 24 }) => {
         ))}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none pt-1">
-        {hoveredSeg ? (
-          <>
-            <span className="text-[24px] font-display font-black text-slate-800 leading-none">{hoveredSeg.value.toLocaleString()}</span>
-            <span className="text-[10px] font-display font-black mt-1 uppercase tracking-widest" style={{ color: hoveredSeg.color }}>{hoveredSeg.label}</span>
-          </>
-        ) : (
-          <>
-            <span className="text-[24px] font-display font-black text-slate-800 leading-none">{total.toLocaleString()}</span>
-            <span className="text-[10px] font-display font-black text-slate-400 mt-1 uppercase tracking-widest">Tổng</span>
-          </>
-        )}
+        <span className="text-[24px] font-display font-black text-slate-800 leading-none">
+          {(hoveredSeg ? hoveredSeg.value : total).toLocaleString()}
+        </span>
+        <span className="text-[10px] font-display font-black mt-1 uppercase tracking-widest text-slate-400">
+          {hoveredSeg ? hoveredSeg.label : 'Tổng'}
+        </span>
       </div>
     </div>
   );
 };
 
-// ─── RoleDistributionCard (ĐÃ SỬA LỖI LOGIC) ──────────────────────
+// ─── RoleDistributionCard ──────────────────────
 const RoleDistributionCard = ({ totalStudents, totalAdmins }) => {
   const segments = [
     { label: 'Học viên', value: totalStudents, color: '#1CB0F6', dotClass: 'bg-[#1CB0F6]' },
@@ -171,7 +175,7 @@ const RoleDistributionCard = ({ totalStudents, totalAdmins }) => {
   );
 };
 
-// ─── QuickInfoCard (Gamified) ────────────────────────────────────
+// ─── QuickInfoCard ────────────────────────────────────
 const QuickInfoCard = ({ weeklyData, activeRate, navigate }) => {
   const sorted    = [...weeklyData].sort((a, b) => b.count - a.count);
   const bestDay   = sorted[0]?.label ?? '—';
@@ -216,7 +220,7 @@ const QuickInfoCard = ({ weeklyData, activeRate, navigate }) => {
   );
 };
 
-// ─── AdminActivityLog (Bảng Gamified) ────────────────────────────
+// ─── AdminActivityLog ────────────────────────────
 const AdminActivityLog = ({ logs }) => {
   const getActionConfig = (action) => {
     switch (action) {
@@ -236,7 +240,7 @@ const AdminActivityLog = ({ logs }) => {
         </div>
         <div className="pt-0.5">
           <h2 className="text-[16px] font-display font-black text-slate-800 leading-tight">Nhật ký hoạt động</h2>
-          <p className="text-[12px] font-body font-bold text-slate-400">Các thao tác quản trị gần đây</p>
+          <p className="text-[12px] font-body font-bold text-slate-400">Thao tác quản trị gần đây</p>
         </div>
       </div>
       
@@ -244,7 +248,7 @@ const AdminActivityLog = ({ logs }) => {
         <div className="space-y-2">
           {logs.length === 0 ? (
             <div className="py-10 text-center text-[14px] font-body font-bold text-slate-400">
-              Chưa có hoạt động nào gần đây.
+              Chưa có hoạt động nào.
             </div>
           ) : (
             logs.map((log) => {
@@ -263,7 +267,7 @@ const AdminActivityLog = ({ logs }) => {
                   </div>
                   <div className="flex flex-col sm:items-end pl-12 sm:pl-0">
                     <span className="text-[13px] font-body font-bold text-slate-600 truncate max-w-[200px]">{log.target_name || '—'}</span>
-                    <span className="text-[11px] font-display font-bold text-slate-400 mt-0.5 tracking-wider">
+                    <span className="text-[11px] font-display font-bold text-slate-400 mt-0.5">
                       {new Date(log.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} • {new Date(log.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
                     </span>
                   </div>
@@ -300,41 +304,34 @@ const AdminDashboard = () => {
       if (!admin) return;
       setDataLoading(true);
       try {
-        // 1. Users & Exams
         const { data: users } = await supabase.from('profiles').select('id, created_at, full_name, email, role');
         const { count: exams } = await supabase.from('exams').select('*', { count: 'exact', head: true });
 
-        // TÍNH TOÁN CHÍNH XÁC ROLE NGƯỜI DÙNG
         const adminsCount = users?.filter(u => u.role === 'admin').length || 0;
         const studentsCount = (users?.length || 0) - adminsCount;
 
-        // 2. Exam Results (7 days)
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 6);
         startDate.setHours(0, 0, 0, 0);
 
         const { data: results } = await supabase.from('exam_results').select('created_at, user_id').gte('created_at', startDate.toISOString());
 
-        // Process Weekly Data
         const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
         const last7Days = [];
         for (let i = 6; i >= 0; i--) {
           const d = new Date();
           d.setDate(d.getDate() - i);
           const targetDateStr = d.toLocaleDateString('en-CA');
-          
           const count = results?.filter(r => new Date(r.created_at).toLocaleDateString('en-CA') === targetDateStr).length || 0;
           last7Days.push({ label: days[d.getDay()], count });
         }
 
-        // 3. Active Rate
         let activeRateVal = 0;
         if (users && users.length > 0 && results) {
           const uniqueActiveUsers = new Set(results.filter(r => r.user_id).map(r => r.user_id)).size;
           activeRateVal = ((uniqueActiveUsers / users.length) * 100).toFixed(1);
         }
 
-        // 4. Admin Logs
         const { data: adminLogsData } = await supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(5);
 
         setStats({
@@ -349,7 +346,7 @@ const AdminDashboard = () => {
         });
 
       } catch (err) {
-        console.error('Lỗi tải Dashboard:', err.message);
+        console.error('Lỗi Dashboard:', err.message);
       } finally {
         setDataLoading(false);
       }
@@ -358,52 +355,44 @@ const AdminDashboard = () => {
   }, [admin]);
 
   if (loading || dataLoading) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F4F7FA] gap-3 selection:bg-blue-200">
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F4F7FA] gap-3">
       <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin" />
-      <p className="font-display font-bold text-slate-500 text-[15px]">Đang tải dữ liệu...</p>
+      <p className="font-display font-bold text-slate-500 text-[15px]">Đang tải Pulse...</p>
     </div>
   );
 
   const totalInteractions = stats.weeklyData.reduce((a, b) => a + b.count, 0);
 
   return (
-    <div className="flex h-screen bg-[#F4F7FA] overflow-hidden font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+    <div className="flex h-screen bg-[#F4F7FA] overflow-hidden" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} admin={admin} onSignOut={signOut} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => navigate('/admin/exams/create')} />
 
         <main className="flex-1 overflow-y-auto custom-scrollbar">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-            {/* ── Page Header ── */}
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-[14px] bg-[#1CB0F6] text-white flex items-center justify-center border-b-[4px] border-[#1899D6] shadow-sm">
                 <LayoutDashboard size={24} strokeWidth={2.5} />
               </div>
-              <div className="pt-0.5">
-                <h1 className="text-[24px] sm:text-[28px] font-display font-black text-slate-800 tracking-tight leading-none">
+              <div>
+                <h1 className="text-[28px] font-display font-black text-slate-800 tracking-tight leading-none">
                   HubStudy <span className="text-[#1CB0F6]">Pulse</span>
                 </h1>
-                <p className="text-slate-500 text-[13px] font-body font-bold mt-1">Theo dõi nhịp độ hệ thống thời gian thực.</p>
+                <p className="text-slate-500 text-[13px] font-body font-bold mt-1">Quản trị hệ thống thời gian thực.</p>
               </div>
             </div>
 
-            {/* ── Stat Cards ── */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard icon={Users}        label="Cộng đồng"     value={stats.totalUsers}  trend={+12} color="blue"   sublabel="Người dùng đã đăng ký" delay={0.1} />
-              <StatCard icon={BookOpen}     label="Kho đề thi"    value={stats.totalExams}  trend={+4}  color="purple" sublabel="Đề thi đang hoạt động"  delay={0.2} />
-              <StatCard icon={CheckCircle2} label="Lượt tương tác" value={totalInteractions} trend={+22} color="green"  sublabel="Trong 7 ngày gần nhất"  delay={0.3} />
+              <StatCard icon={Users} label="Cộng đồng" value={stats.totalUsers} trend={+12} color="blue" delay={0.1} />
+              <StatCard icon={BookOpen} label="Kho đề thi" value={stats.totalExams} trend={+4} color="purple" delay={0.2} />
+              <StatCard icon={CheckCircle2} label="Lượt thi" value={totalInteractions} trend={+22} color="green" delay={0.3} />
             </div>
 
-            {/* ── Bar Chart + Quick Info ── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               <div className="lg:col-span-7 bg-white rounded-[24px] border-2 border-slate-200 border-b-[4px] p-5 shadow-sm">
-                <div className="flex items-start justify-between mb-2 gap-4">
-                  <div className="min-w-0">
-                    <h2 className="text-[16px] font-display font-black text-slate-800">Lượt thi theo ngày</h2>
-                    <p className="text-[12px] font-body font-bold text-slate-400 mt-0.5">Số bài nộp 7 ngày gần nhất</p>
-                  </div>
-                </div>
+                <h2 className="text-[16px] font-display font-black text-slate-800">Lượt thi 7 ngày qua</h2>
                 <WeeklyBarChart data={stats.weeklyData} />
               </div>
               <div className="lg:col-span-5">
@@ -411,46 +400,29 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* ── Donut Chart + Activity/Users ── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
               <div className="lg:col-span-4 h-full">
                 <RoleDistributionCard totalStudents={stats.totalStudents} totalAdmins={stats.totalAdmins} />
               </div>
-              
               <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-                {/* Thành viên mới (List dọc thay vì Table) */}
-                <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[4px] shadow-sm overflow-hidden flex flex-col h-full">
-                  <div className="px-5 py-4 border-b-2 border-slate-100 flex items-center gap-3 bg-slate-50">
-                    <div className="w-10 h-10 rounded-[12px] bg-white border-2 border-slate-200 flex items-center justify-center shadow-sm">
-                      <Users size={20} strokeWidth={2.5} className="text-slate-600" />
-                    </div>
-                    <div className="pt-0.5">
-                      <h2 className="text-[16px] font-display font-black text-slate-800 leading-tight">Thành viên mới</h2>
-                      <p className="text-[12px] font-body font-bold text-slate-400">Đăng ký gần đây</p>
-                    </div>
+                <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[4px] shadow-sm flex flex-col h-full">
+                  <div className="px-5 py-4 border-b-2 border-slate-100 bg-slate-50">
+                    <h2 className="text-[16px] font-display font-black text-slate-800">Thành viên mới</h2>
                   </div>
                   <div className="p-2 space-y-2 overflow-y-auto">
-                    {stats.recentUsers.map(user => (
-                      <div key={user.id} className="flex items-center gap-3 p-3 rounded-[16px] hover:bg-slate-50 transition-colors border-2 border-transparent hover:border-slate-100">
-                        <div className="w-10 h-10 rounded-[12px] bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center font-display font-black text-[#1CB0F6] text-[16px] shrink-0 shadow-sm uppercase">
-                          {user.full_name?.charAt(0) || '?'}
+                    {stats.recentUsers.map(u => (
+                      <div key={u.id} className="flex items-center gap-3 p-3 rounded-[16px] hover:bg-slate-50 border-2 border-transparent hover:border-slate-100 transition-colors">
+                        <div className="w-10 h-10 rounded-[12px] bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center font-display font-black text-[#1CB0F6] shrink-0">
+                          {u.full_name?.charAt(0) || '?'}
                         </div>
-                        <div className="min-w-0 flex-1 pt-0.5">
-                          <p className="text-[14px] font-display font-bold text-slate-800 truncate leading-snug">{user.full_name || 'Chưa đặt tên'}</p>
-                          <p className="text-[11px] font-body font-bold text-slate-400 truncate">{user.email}</p>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <span className={`inline-block px-2 py-0.5 rounded-[6px] text-[9px] font-display font-black uppercase tracking-widest mb-1 ${user.role === 'admin' ? 'bg-[#faefff] text-[#CE82FF]' : 'bg-slate-100 text-slate-500'}`}>
-                            {user.role || 'user'}
-                          </span>
-                          <p className="text-[10px] font-body font-bold text-slate-400">{new Date(user.created_at).toLocaleDateString('vi-VN')}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-display font-bold text-slate-800 truncate">{u.full_name || 'Anonymous'}</p>
+                          <p className="text-[11px] font-body font-bold text-slate-400 truncate">{u.email}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-
-                {/* Nhật ký quản trị */}
                 <div className="h-full">
                   <AdminActivityLog logs={stats.adminLogs} />
                 </div>
@@ -464,4 +436,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;  
+export default AdminDashboard;

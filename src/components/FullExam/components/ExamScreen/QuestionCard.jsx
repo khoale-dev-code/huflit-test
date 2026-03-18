@@ -3,7 +3,7 @@
 
 import React, { memo, useCallback, useId } from 'react';
 import { Check, Lightbulb, Image as ImageIcon, Star } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 // 👇 ĐÃ THÊM: Import MiniAudioPlayer vào QuestionCard
 import { MiniAudioPlayer } from '../../../Display/MiniAudioPlayer';
@@ -89,7 +89,7 @@ export const QuestionCard = memo(({
   const options = question.options || [];
 
   return (
-    <motion.article
+    <Motion.article
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "0px 0px -40px 0px" }}
@@ -200,7 +200,7 @@ export const QuestionCard = memo(({
         )}
       </fieldset>
 
-    </motion.article>
+    </Motion.article>
   );
 });
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check, Star, Zap, AlertCircle, X, Volume2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { QuestionImageUploader, QuestionAudioUploader } from './Uploaders';
 
 // ✅ Đã thêm prop hideMedia
@@ -152,12 +152,12 @@ export const AddQuestionForm = ({ onAdd, onCancel, hideMedia = false }) => {
       <AnimatePresence>
         {showCancelConfirm && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
-            <motion.div initial={{ scale: 0.9, opacity: 0, y: 15 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 15 }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative w-full max-w-[360px] bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-2xl p-6 text-center">
+            <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
+            <Motion.div initial={{ scale: 0.9, opacity: 0, y: 15 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 15 }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative w-full max-w-[360px] bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-2xl p-6 text-center">
               <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-[#FF4B4B] rounded-[16px] border-b-[4px] border-[#E54343] flex items-center justify-center shadow-sm"><AlertCircle size={32} strokeWidth={2.5} className="text-white" /></div>
               <div className="mt-8 mb-6"><h2 className="text-[20px] font-display font-black text-slate-800 mb-2">Hủy bỏ thao tác?</h2><p className="text-[14px] font-body font-bold text-slate-500 leading-snug">Dữ liệu vừa nhập sẽ bị mất. Bạn có chắc không?</p></div>
               <div className="flex gap-3"><button onClick={() => { setShowCancelConfirm(false); onCancel(); }} className="flex-1 py-3 bg-[#fff0f0] text-[#FF4B4B] border-2 border-[#ffc1c1] border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider transition-all">Vẫn hủy</button><button onClick={() => setShowCancelConfirm(false)} className="flex-1 py-3 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider transition-all">Tiếp tục</button></div>
-            </motion.div>
+            </Motion.div>
           </div>
         )}
       </AnimatePresence>

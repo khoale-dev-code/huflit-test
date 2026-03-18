@@ -2,7 +2,7 @@
 /* Gamified Floating Pill · Tailwind CSS · Framer Motion */
 
 import React, { memo, useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Clock, AlertTriangle, X } from 'lucide-react';
 
 // ── Color tokens theo Gamification style ───────────────
@@ -73,7 +73,7 @@ export const TimeWarning = memo(({
   return (
     <AnimatePresence>
       {mounted && (
-        <motion.div
+        <Motion.div
           role="alert"
           aria-live="assertive"
           initial={{ opacity: 0, y: -40, scale: 0.9, x: '-50%' }}
@@ -90,7 +90,7 @@ export const TimeWarning = memo(({
             
             {/* Auto-dismiss Progress Bar ở viền dưới */}
             <div className={`absolute bottom-0 left-0 right-0 h-1 md:h-1.5 ${t.progressBg}`}>
-              <motion.div
+              <Motion.div
                 initial={{ width: '100%' }}
                 animate={{ width: '0%' }}
                 transition={{ duration: 8, ease: "linear" }}
@@ -129,7 +129,7 @@ export const TimeWarning = memo(({
             </button>
 
           </div>
-        </motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );

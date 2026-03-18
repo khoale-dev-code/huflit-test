@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Sparkles, ArrowRight, ShieldCheck, Globe, ChevronDown, Rocket } from 'lucide-react';
 
 // ─────────────────────────────────────────────
@@ -67,14 +67,14 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
           `}</style>
 
           {/* Backdrop */}
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={canClose ? onClose : undefined}
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           />
 
           {/* Gamified Sheet / Modal */}
-          <motion.div
+          <Motion.div
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
@@ -97,13 +97,13 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
 
               <AnimatePresence>
                 {canClose && (
-                  <motion.button
+                  <Motion.button
                     initial={{ opacity: 0, scale: 0.5, rotate: -90 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
                     onClick={onClose}
                     className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors outline-none"
                   >
                     <X size={20} strokeWidth={3} />
-                  </motion.button>
+                  </Motion.button>
                 )}
               </AnimatePresence>
             </div>
@@ -120,12 +120,12 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl" />
                 <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-900/20 rounded-full blur-2xl" />
 
-                <motion.div 
+                <Motion.div 
                   animate={{ y: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
                   className="inline-flex p-4 rounded-[20px] bg-white shadow-lg border-b-[4px] border-slate-200 mb-6 relative z-10"
                 >
                   <Sparkles size={36} className="text-[#FFC800] fill-[#FFC800]" strokeWidth={1.5} />
-                </motion.div>
+                </Motion.div>
 
                 <h2 className="font-quick font-black text-[26px] md:text-[32px] text-white leading-tight mb-3 drop-shadow-sm relative z-10">
                   Nâng tầm tri thức <br /> cùng HubStudy!
@@ -190,17 +190,17 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
               
               <AnimatePresence mode="wait">
                 {!canClose ? (
-                  <motion.div 
+                  <Motion.div 
                     key="scrolldown"
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                     className="flex items-center justify-center gap-2 mb-4"
                   >
-                    <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}><ChevronDown size={16} className="text-slate-400" strokeWidth={3} /></motion.div>
+                    <Motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}><ChevronDown size={16} className="text-slate-400" strokeWidth={3} /></Motion.div>
                     <span className="font-quick font-bold text-[13px] text-slate-400 uppercase tracking-widest">Cuộn xuống để tiếp tục</span>
-                    <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}><ChevronDown size={16} className="text-slate-400" strokeWidth={3} /></motion.div>
-                  </motion.div>
+                    <Motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}><ChevronDown size={16} className="text-slate-400" strokeWidth={3} /></Motion.div>
+                  </Motion.div>
                 ) : (
-                  <motion.div key="spacer" className="h-2" />
+                  <Motion.div key="spacer" className="h-2" />
                 )}
               </AnimatePresence>
 
@@ -225,7 +225,7 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
               </p>
             </div>
 
-          </motion.div>
+          </Motion.div>
         </div>
       )}
     </AnimatePresence>

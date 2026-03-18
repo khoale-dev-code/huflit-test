@@ -1,16 +1,19 @@
 import React, { useState, memo, useMemo, useCallback, useRef, useEffect, useId } from 'react';
 import { getAllExamMetadataAsync } from '../../../../data/examData';
-import { Search, ChevronRight, Check, FileText, Clock, LayoutGrid, Target, AlertCircle, Headphones, BookOpen } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Search, ChevronRight, Check, FileText, Clock, 
+  LayoutGrid, Target, Headphones, BookOpen, Sparkles 
+} from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion'; // 🚀 FIX: Alias Motion
 
-/* ─── Analytics ──────────────────────────────────────────── */
+/* ─── Analytics (Fix Vite Env) ──────────────────────────── */
 const analytics = {
   track: (event, props) => {
-    if (process.env.NODE_ENV === 'development') console.debug('[analytics]', event, props);
+    if (import.meta.env.DEV) console.debug('[analytics]', event, props);
   },
 };
 
-/* ─── Difficulty config (Gamified Colors) ────────────────── */
+/* ─── Difficulty config ────────────────── */
 const DIFFICULTY_CONFIG = {
   beginner:     { label: 'Cơ bản',   bg: 'bg-[#f1faeb]', text: 'text-[#58CC02]', border: 'border-[#bcf096]' },
   intermediate: { label: 'Trung cấp', bg: 'bg-[#FFF4E5]', text: 'text-[#FF9600]', border: 'border-[#FFD8A8]' },
@@ -34,30 +37,35 @@ const SkeletonList = memo(() => (
 SkeletonList.displayName = 'SkeletonList';
 
 /* ─── Empty State ────────────────────────────────────────── */
-const EmptyState = memo(({ searchQuery, onClear }) => (
-  <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-    <div className="w-16 h-16 rounded-[16px] bg-slate-100 border-2 border-slate-200 border-b-[4px] flex items-center justify-center mb-4 shadow-sm">
-      <Search className="w-8 h-8 text-slate-400" strokeWidth={2.5} />
+const EmptyState = memo((props) => {
+  const { searchQuery, onClear } = props;
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <div className="w-16 h-16 rounded-[16px] bg-slate-100 border-2 border-slate-200 border-b-[4px] flex items-center justify-center mb-4 shadow-sm">
+        <Search className="w-8 h-8 text-slate-400" strokeWidth={2.5} />
+      </div>
+      <p className="text-[18px] font-display font-black text-slate-700 mb-1">Không tìm thấy đề thi</p>
+      <p className="text-[14px] font-body font-bold text-slate-500 mb-5 max-w-xs">
+        {searchQuery ? <>Không có kết quả cho "<strong>{searchQuery}</strong>"</> : 'Chưa có đề thi nào.'}
+      </p>
+      {searchQuery && (
+        <button 
+          onClick={onClear} 
+          className="px-5 py-2.5 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider hover:bg-[#1CB0F6] hover:text-white hover:border-[#1899D6] active:border-b-2 active:translate-y-[2px] transition-all outline-none"
+        >
+          Xóa tìm kiếm
+        </button>
+      )}
     </div>
-    <p className="text-[18px] font-display font-black text-slate-700 mb-1">Không tìm thấy đề thi</p>
-    <p className="text-[14px] font-body font-bold text-slate-500 mb-5 max-w-xs">
-      {searchQuery ? <>Không có kết quả cho "<strong>{searchQuery}</strong>"</> : 'Chưa có đề thi nào.'}
-    </p>
-    {searchQuery && (
-      <button 
-        onClick={onClear} 
-        className="px-5 py-2.5 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[4px] rounded-[14px] text-[13px] font-display font-black uppercase tracking-wider hover:bg-[#1CB0F6] hover:text-white hover:border-[#1899D6] active:border-b-2 active:translate-y-[2px] transition-all outline-none"
-      >
-        Xóa tìm kiếm
-      </button>
-    )}
-  </div>
-));
+  );
+});
 EmptyState.displayName = 'EmptyState';
 
-/* ─── Exam List Item (Gamified 3D Card) ──────────────────── */
-const ExamListItem = memo(({ exam, isSelected, onSelect, id, itemHeight }) => {
+/* ─── Exam List Item ──────────────────── */
+const ExamListItem = memo((props) => {
+  const { exam, isSelected, onSelect, id, itemHeight } = props;
   const itemRef = useRef(null);
+  
   useEffect(() => { 
     if (isSelected) itemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); 
   }, [isSelected]);
@@ -77,14 +85,12 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id, itemHeight }) => {
             : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300'
         }`}
       >
-        {/* Radio Checkbox 3D */}
         <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-[8px] sm:rounded-[10px] shrink-0 flex items-center justify-center border-2 transition-all ${
           isSelected ? 'bg-[#1CB0F6] border-[#1899D6] border-b-[3px]' : 'bg-slate-100 border-slate-300 border-b-[3px]'
         }`}>
           {isSelected && <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={4} />}
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0 pt-0.5">
           <div className="flex items-center justify-between gap-2 mb-1">
             <h3 className={`text-[15px] sm:text-[16px] font-display font-black truncate ${isSelected ? 'text-[#1CB0F6]' : 'text-slate-800'}`}>
@@ -120,11 +126,12 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id, itemHeight }) => {
 ExamListItem.displayName = 'ExamListItem';
 
 /* ─── Virtual List Box ───────────────────────────────────── */
-const ITEM_H  = 104; // Chiều cao = 92px thẻ + 12px margin bottom
+const ITEM_H  = 104; 
 const VISIBLE = 4;
 const BUFFER  = 2;
 
-const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
+const ExamListBox = memo((props) => {
+  const { exams, selectedExam, onSelectExam, listboxId } = props;
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef(null);
 
@@ -179,28 +186,35 @@ const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
 });
 ExamListBox.displayName = 'ExamListBox';
 
-/* ─── Category Tab Bar (Gamified Pills) ──────────────────── */
-const CategoryTabs = memo(({ categories, activeCategory, onChange }) => (
-  <div className="flex gap-2 overflow-x-auto pb-3 pt-1 custom-scrollbar snap-x px-1">
-    {categories.map(cat => {
-      const active = activeCategory === cat.id;
-      return (
-        <button 
-          key={cat.id} 
-          onClick={() => onChange(cat.id)}
-          className={`
-            snap-start shrink-0 px-4 py-2 rounded-[14px] text-[12px] font-display font-black uppercase tracking-wider transition-all outline-none border-2
-            ${active 
-              ? 'bg-[#1CB0F6] text-white border-[#1899D6] border-b-[4px] -translate-y-[1px] shadow-sm' 
-              : 'bg-white text-slate-500 border-slate-200 border-b-[4px] hover:bg-slate-50 active:border-b-2 active:translate-y-[2px]'}
-          `}
-        >
-          {cat.label} {cat.count > 0 && <span className={`ml-1 px-1.5 py-0.5 rounded-[6px] text-[10px] ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'}`}>{cat.count}</span>}
-        </button>
-      );
-    })}
-  </div>
-));
+/* ─── Category Tab Bar ──────────────────── */
+const CategoryTabs = memo((props) => {
+  const { categories, activeCategory, onChange } = props;
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-3 pt-1 custom-scrollbar snap-x px-1">
+      {categories.map(cat => {
+        const active = activeCategory === cat.id;
+        // 🚀 FIX: Dùng icon cho từng category để tránh lỗi unused-vars
+        const Icon = cat.id === 'toeic' ? Headphones : cat.id === 'ielts' ? BookOpen : Sparkles;
+        
+        return (
+          <button 
+            key={cat.id} 
+            onClick={() => onChange(cat.id)}
+            className={`
+              snap-start shrink-0 px-4 py-2 rounded-[14px] text-[12px] font-display font-black uppercase tracking-wider transition-all outline-none border-2 flex items-center gap-2
+              ${active 
+                ? 'bg-[#1CB0F6] text-white border-[#1899D6] border-b-[4px] -translate-y-[1px] shadow-sm' 
+                : 'bg-white text-slate-500 border-slate-200 border-b-[4px] hover:bg-slate-50 active:border-b-2 active:translate-y-[2px]'}
+            `}
+          >
+            <Icon size={14} strokeWidth={3} />
+            {cat.label} {cat.count > 0 && <span className={`ml-1 px-1.5 py-0.5 rounded-[6px] text-[10px] ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'}`}>{cat.count}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+});
 CategoryTabs.displayName = 'CategoryTabs';
 
 /* ══════════════════════════════════════════════════════
@@ -290,21 +304,16 @@ export const ExamSetup = memo(({ onStartExam }) => {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-[#F4F7FA] font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
-      
-      {/* ── Main Content ── */}
+    <div className="min-h-[calc(100vh-80px)] bg-[#F4F7FA] font-sans">
       <main className="max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-32 lg:pb-12">
         
-        {/* Header nhẹ nhàng (Không đè layer) */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-[28px] md:text-[34px] font-display font-black text-slate-800 tracking-tight leading-tight flex items-center gap-2.5">
               HubStudy <span className="text-[#1CB0F6]">Assessment</span>
               <Target size={28} className="text-[#FF9600] shrink-0" strokeWidth={2.5} />
             </h1>
-            <p className="text-slate-500 text-[14px] font-body font-bold mt-1">
-              Đánh giá năng lực ngoại ngữ chuẩn đầu ra.
-            </p>
+            <p className="text-slate-500 text-[14px] font-body font-bold mt-1">Đánh giá năng lực chuẩn quốc tế.</p>
           </div>
           <div className="inline-flex items-center gap-2 w-fit px-3 py-2 bg-white text-[#1CB0F6] border-2 border-slate-200 border-b-[3px] rounded-[12px] text-[11px] font-display font-black uppercase tracking-widest shrink-0 shadow-sm">
             <div className="w-2.5 h-2.5 rounded-full bg-[#1CB0F6] animate-pulse" />
@@ -313,161 +322,102 @@ export const ExamSetup = memo(({ onStartExam }) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
-
-          {/* ── Left: Exam Selection ── */}
           <div className="lg:col-span-7 flex flex-col gap-5">
-
-            {/* Search & Categories Box */}
             <div className="bg-white p-5 rounded-[24px] border-2 border-slate-200 border-b-[4px] shadow-sm">
-              <label htmlFor="exam-search" className="block text-[12px] font-display font-black text-slate-400 uppercase tracking-widest mb-3">
-                Chọn đề thi
-              </label>
-              
+              <label htmlFor="exam-search" className="block text-[12px] font-display font-black text-slate-400 uppercase tracking-widest mb-3 pl-1">Chọn đề thi</label>
               <div className="relative mb-5">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Search size={20} strokeWidth={2.5} />
-                </div>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Search size={20} strokeWidth={2.5} /></div>
                 <input
-                  id="exam-search" type="search" autoComplete="off"
-                  placeholder="Nhập mã đề, tên..."
-                  value={searchQuery} onChange={handleSearch}
-                  aria-controls={listboxId}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-[16px] text-[15px] font-body font-bold text-slate-800 outline-none focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 placeholder:font-medium"
+                  id="exam-search" type="search" autoComplete="off" placeholder="Nhập mã đề, tên..."
+                  value={searchQuery} onChange={handleSearch} aria-controls={listboxId}
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-[16px] text-[15px] font-body font-bold text-slate-800 outline-none focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-500/10 transition-all"
                 />
               </div>
-
               <CategoryTabs categories={categories} activeCategory={activeCategory} onChange={cat => { setActiveCategory(cat); setSearchQuery(''); }} />
             </div>
 
-            {/* Exam List Box */}
             <div className="bg-white rounded-[24px] border-2 border-slate-200 shadow-sm overflow-hidden flex flex-col">
-              <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b-2 border-slate-100 shrink-0">
+              <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b-2 border-slate-100">
                 <p className="text-[12px] font-display font-black text-slate-500 uppercase tracking-widest">
                   <span className="text-[#1CB0F6] text-[14px]">{filteredExams.length}</span> đề thi
                 </p>
                 <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-display font-bold text-slate-400 uppercase tracking-widest">
-                  <LayoutGrid size={14} strokeWidth={2.5} /> Phím mũi tên để chọn
+                  <LayoutGrid size={14} strokeWidth={2.5} /> Dùng phím mũi tên
                 </div>
               </div>
-
               <div className="flex-1 min-h-[300px]">
-                {isLoading ? (
-                  <SkeletonList />
-                ) : filteredExams.length > 0 ? (
+                {isLoading ? <SkeletonList /> : filteredExams.length > 0 ? (
                   <ExamListBox exams={filteredExams} selectedExam={selectedExam} onSelectExam={handleSelectExam} listboxId={listboxId} />
-                ) : (
-                  <EmptyState searchQuery={searchQuery} onClear={clearSearch} />
-                )}
+                ) : <EmptyState searchQuery={searchQuery} onClear={clearSearch} />}
               </div>
             </div>
           </div>
 
-          {/* ── Right: Info & CTA ── */}
           <aside className="lg:col-span-5 lg:sticky lg:top-24">
             <div className="bg-white border-2 border-slate-200 rounded-[24px] border-b-[6px] p-5 md:p-6 shadow-sm flex flex-col gap-5">
-
-              {/* Selected Preview */}
               <AnimatePresence mode="wait">
                 {selectedExamData && (
-                  <motion.div 
+                  <Motion.div 
                     key={selectedExamData.id}
                     initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
                     className="p-5 bg-[#EAF6FE] border-2 border-[#BAE3FB] rounded-[20px]"
                   >
                     <p className="text-[10px] font-display font-black text-[#1CB0F6] uppercase tracking-widest mb-1.5">Mục tiêu hiện tại</p>
                     <p className="text-[18px] md:text-[20px] font-display font-black text-slate-800 leading-tight mb-3">{selectedExamData.title}</p>
-                    {selectedExamData.category && (
-                      <span className="inline-block px-3 py-1 bg-white text-[#1CB0F6] rounded-[8px] text-[10px] font-display font-black uppercase tracking-widest border-2 border-[#BAE3FB]">
-                        {selectedExamData.category === 'toeic' ? 'TOEIC' : selectedExamData.category === 'ielts' ? 'IELTS' : selectedExamData.category === 'huflit' ? 'HUFLIT' : selectedExamData.category.toUpperCase()}
-                      </span>
-                    )}
-                  </motion.div>
+                    <span className="inline-block px-3 py-1 bg-white text-[#1CB0F6] rounded-[8px] text-[10px] font-display font-black uppercase tracking-widest border-2 border-[#BAE3FB]">
+                      {selectedExamData.category?.toUpperCase() || 'GENERAL'}
+                    </span>
+                  </Motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Test Structure (Gộp Chung 1 Layout Gọn Nhẹ) */}
-              <div>
-                <h2 className="text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Cấu trúc bài thi</h2>
-                <div className="flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-100 rounded-[16px] hover:border-slate-200 transition-colors">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-slate-50 border-2 border-slate-100 rounded-[16px]">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-[14px] flex items-center justify-center border-2 border-b-[3px] shadow-sm bg-[#FFF4E5] text-[#FF9600] border-[#FFD8A8]">
-                      <Clock size={22} strokeWidth={2.5} />
-                    </div>
-                    <div className="pt-0.5">
-                      <p className="text-[15px] font-display font-black text-slate-800 m-0 leading-none">Tổng thời gian</p>
-                      <p className="text-[12px] font-body font-bold text-slate-500 mt-1.5">Làm bài liên tục</p>
+                    <div className="w-12 h-12 rounded-[14px] flex items-center justify-center border-2 border-b-[3px] bg-[#FFF4E5] text-[#FF9600] border-[#FFD8A8]"><Clock size={22} strokeWidth={2.5} /></div>
+                    <div>
+                      <p className="text-[15px] font-display font-black text-slate-800 m-0">Tổng thời gian</p>
+                      <p className="text-[12px] font-body font-bold text-slate-500">Làm bài liên tục</p>
                     </div>
                   </div>
-                  <span className="px-3.5 py-2 bg-white border-2 border-slate-200 rounded-[12px] text-[13px] font-display font-black text-slate-600 uppercase tracking-wider shrink-0 shadow-sm">
-                    {selectedExamData?.duration || 90} phút
-                  </span>
+                  <span className="px-3.5 py-2 bg-white border-2 border-slate-200 rounded-[12px] text-[13px] font-display font-black text-slate-600 uppercase tracking-wider">{selectedExamData?.duration || 90} phút</span>
+                </div>
+
+                <div className="pt-4 border-t-2 border-slate-100">
+                  <h2 className="text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-3">Lưu ý trước khi thi</h2>
+                  <ul className="flex flex-col gap-3 m-0 p-0 list-none">
+                    {REQUIREMENTS.map(item => (
+                      <li key={item} className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-[6px] bg-[#f1faeb] border-2 border-[#bcf096] flex items-center justify-center shrink-0 mt-0.5"><Check size={12} className="text-[#58CC02]" strokeWidth={4} /></div>
+                        <span className="text-[14px] font-body font-bold text-slate-600 leading-snug">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="hidden lg:block pt-4">
+                  <Motion.button
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    onClick={handleStart} disabled={isStarting || !selectedExam || isLoading}
+                    className="w-full py-4 bg-[#58CC02] border-[#46A302] border-b-[6px] rounded-[20px] font-display font-black text-[16px] uppercase tracking-wider text-white shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400"
+                  >
+                    {isStarting ? 'Đang chuẩn bị...' : <>Bắt đầu thi <ChevronRight size={20} strokeWidth={3} /></>}
+                  </Motion.button>
                 </div>
               </div>
-
-              {/* Requirements */}
-              <div className="pt-5 border-t-2 border-slate-100">
-                <h2 className="text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Lưu ý trước khi thi</h2>
-                <ul className="flex flex-col gap-3 m-0 p-0 list-none">
-                  {REQUIREMENTS.map(item => (
-                    <li key={item} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-[6px] bg-[#f1faeb] border-2 border-[#bcf096] flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={12} className="text-[#58CC02]" strokeWidth={4} />
-                      </div>
-                      <span className="text-[14px] font-body font-bold text-slate-600 leading-snug pt-0.5">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* CTA Button (Desktop) */}
-              <div className="hidden lg:block pt-2">
-                <button
-                  onClick={handleStart}
-                  disabled={isStarting || !selectedExam || isLoading}
-                  className={`
-                    w-full py-4 rounded-[20px] font-display font-black text-[16px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all outline-none border-2
-                    ${(isStarting || !selectedExam || isLoading)
-                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-[#58CC02] border-[#46A302] border-b-[6px] text-white hover:bg-[#46A302] hover:-translate-y-1 active:border-b-[2px] active:translate-y-[4px] shadow-sm'}
-                  `}
-                >
-                  {isStarting ? (
-                    <><div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Đang chuẩn bị...</>
-                  ) : (
-                    <>Bắt đầu thi <ChevronRight size={20} strokeWidth={3} /></>
-                  )}
-                </button>
-              </div>
-
             </div>
           </aside>
-
         </div>
-
-        {/* Spacer chống đè Mobile Button */}
-        <div className="h-24 lg:hidden" />
       </main>
 
-      {/* ── CTA Button (Mobile - Nổi, không đè) ── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t-2 border-slate-200 p-4 pb-safe z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t-2 border-slate-200 p-4 z-50">
         <button
-          onClick={handleStart}
-          disabled={isStarting || !selectedExam || isLoading}
-          className={`
-            w-full py-3.5 rounded-[18px] font-display font-black text-[15px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all outline-none border-2
-            ${(isStarting || !selectedExam || isLoading)
-              ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-              : 'bg-[#58CC02] border-[#46A302] border-b-[5px] text-white hover:bg-[#46A302] hover:-translate-y-0.5 active:border-b-[2px] active:translate-y-[3px] shadow-sm'}
-          `}
+          onClick={handleStart} disabled={isStarting || !selectedExam || isLoading}
+          className="w-full py-3.5 bg-[#58CC02] border-[#46A302] border-b-[5px] rounded-[18px] font-display font-black text-[15px] uppercase tracking-wider text-white flex items-center justify-center gap-2 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400"
         >
-          {isStarting ? (
-            <><div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin" /> Đang chuẩn bị...</>
-          ) : (
-            <>Bắt đầu thi ngay <ChevronRight size={20} strokeWidth={3} /></>
-          )}
+          {isStarting ? 'Đang chuẩn bị...' : 'Bắt đầu thi ngay'}
         </button>
       </div>
-
     </div>
   );
 });

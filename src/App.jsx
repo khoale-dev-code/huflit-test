@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
+// 🚀 FIX 1: Import Motion để tránh lỗi ReferenceError trong toàn bộ hệ thống App
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+
 // Data & Hooks
 import { loadExamData } from './data/examData';
 import { useAppState } from './hooks/useAppState';
@@ -9,6 +12,7 @@ import { useExamResult } from './hooks/useExamResult';
 import { useSplashScreen } from './hooks/useSplashScreen.js';
 import { useWelcomeModal } from './hooks/useWelcomeModal.js';
 import { useTranslationProtection } from './hooks/useTranslationProtection.jsx';
+
 // Components (Common)
 import MainLayout from './components/layout/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
@@ -27,7 +31,7 @@ import { ROUTES } from './config/routes';
 // Icons
 import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
 
-// 🚀 TỐI ƯU 1: Đưa TOÀN BỘ Admin Components vào Lazy Load để giảm Bundle Size cho User
+// Lazy load Components
 const AdminApp = lazy(() => import('./admin/AdminApp'));
 const ExamManagement = lazy(() => import('./admin/pages/Exams/ExamManagement.jsx'));
 const CreateExam = lazy(() => import('./admin/pages/Exams/CreateExam.jsx'));
@@ -39,7 +43,6 @@ const LessonManagement = lazy(() => import('./admin/pages/Lessons/LessonManageme
 const LessonForm = lazy(() => import('./admin/pages/Lessons/LessonForm.jsx'));
 const AdminLessonDetails = lazy(() => import('./admin/pages/Lessons/LessonDetails.jsx'));
 
-// Lazy load User Components
 const LessonList = lazy(() => import('./components/Lessons/LessonList.jsx'));
 const NotFoundPage = lazy(() => import('./components/pages/NotFoundPage.jsx'));
 const FullExamMode = lazy(() => import('./components/FullExam/FullExamMode.jsx'));
@@ -47,8 +50,7 @@ const HistoryTest = lazy(() => import('./components/HistoryTest.jsx'));
 const LessonDetailUser = lazy(() => import('./components/Lessons/LessonDetail.jsx'));
 
 // ─────────────────────────────────────────────
-// InfoBadge & StatsGrid
-// (💡 Tip: Tương lai bạn nên tách 2 component này ra file riêng ở thư mục /components)
+// Sub-components (Dùng Motion để mượt hơn)
 // ─────────────────────────────────────────────
 const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
   const colorMap = {
@@ -67,12 +69,15 @@ const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
     </div>
   );
 });
-InfoBadge.displayName = 'InfoBadge';
 
 const StatsGrid = memo(({ scoreResult, isSignedIn }) => {
   if (!isSignedIn || !scoreResult || scoreResult.total === 0) return null;
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm mt-6">
+    <Motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm mt-6"
+    >
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 rounded-lg bg-indigo-100">
           <BarChart3 className="w-5 h-5 text-indigo-700" strokeWidth={2} />
@@ -80,26 +85,23 @@ const StatsGrid = memo(({ scoreResult, isSignedIn }) => {
         <h3 className="text-lg font-bold text-slate-900">Kết quả bài làm</h3>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <InfoBadge icon={FileText} label="Tổng câu"  value={scoreResult.total}                              color="indigo"  />
-        <InfoBadge icon={Trophy}   label="Câu đúng"  value={scoreResult.correct}                            color="emerald" />
-        <InfoBadge icon={FileText} label="Câu sai"   value={scoreResult.total - scoreResult.correct}        color="amber"   />
-        <InfoBadge icon={Zap}      label="Tỉ lệ"     value={`${scoreResult.percentage.toFixed(0)}%`}        color="purple"  />
+        <InfoBadge icon={FileText} label="Tổng câu"  value={scoreResult.total} color="indigo"  />
+        <InfoBadge icon={Trophy}   label="Câu đúng"  value={scoreResult.correct} color="emerald" />
+        <InfoBadge icon={FileText} label="Câu sai"   value={scoreResult.total - scoreResult.correct} color="amber"   />
+        <InfoBadge icon={Zap}      label="Tỉ lệ"     value={`${scoreResult.percentage.toFixed(0)}%`} color="purple"  />
       </div>
-    </div>
+    </Motion.div>
   );
 });
-StatsGrid.displayName = 'StatsGrid';
 
-// ─────────────────────────────────────────────
-// PartTestContent
-// ─────────────────────────────────────────────
-const PartTestContent = memo(({
-  isSignedIn, selectedExam, handleExamChange, testType, handleTestTypeChange,
-  selectedPart, handlePartChange, partData, currentExamData,
-  currentQuestionIndex, setCurrentQuestionIndex, answers, handleAnswerSelect,
-  showResults, handleSubmit, handleReset, scoreResult, convertedScore,
-  examCategory, isLoadingExam,
-}) => {
+const PartTestContent = memo((props) => {
+  const {
+    isSignedIn, selectedExam, handleExamChange, testType, handleTestTypeChange,
+    selectedPart, handlePartChange, partData, currentExamData,
+    currentQuestionIndex, setCurrentQuestionIndex, answers, handleAnswerSelect,
+    showResults, handleSubmit, handleReset, scoreResult, convertedScore,
+    examCategory, isLoadingExam,
+  } = props;
 
   useEffect(() => {
     if (!currentExamData?.parts) return;
@@ -118,14 +120,6 @@ const PartTestContent = memo(({
     if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [showResults]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const contentDisplay = document.querySelector('[data-testid="content-display"]');
-      if (contentDisplay) contentDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [selectedPart, testType]);
-
   const handleSelectPart = useCallback(() => {
     const selector = document.querySelector('[role="listbox"]');
     if (selector) selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -139,51 +133,60 @@ const PartTestContent = memo(({
         selectedPart={selectedPart}    onPartChange={handlePartChange}
       />
 
-      {showResults ? (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <ResultsDisplay
-            scoreResult={scoreResult}
-            convertedScore={convertedScore}
-            examCategory={examCategory}
-            partData={partData}
-            answers={answers}
-            onReset={handleReset}
-          />
-          <StatsGrid scoreResult={scoreResult} isSignedIn={isSignedIn} />
-        </div>
-      ) : (
-        <div className="w-full space-y-8 min-h-[100vh] relative transition-all duration-300">
-          <ContentDisplay
-            partData={partData}
-            selectedPart={selectedPart}
-            currentQuestionIndex={currentQuestionIndex}
-            testType={testType}
-            examId={selectedExam}
-            isLoading={isLoadingExam}
-            onSelectPart={handleSelectPart}
-            data-testid="content-display"
-          />
-          <QuestionDisplay
-            selectedPart={selectedPart}
-            selectedExam={selectedExam}
-            partData={partData}
-            currentQuestionIndex={currentQuestionIndex}
-            onQuestionChange={setCurrentQuestionIndex}
-            answers={answers}
-            onAnswerSelect={handleAnswerSelect}
-            showResults={showResults}
-            onSubmit={handleSubmit}
-            testType={testType}
-          />
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {showResults ? (
+          <Motion.div 
+            key="results"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="duration-500"
+          >
+            <ResultsDisplay
+              scoreResult={scoreResult}
+              convertedScore={convertedScore}
+              examCategory={examCategory}
+              partData={partData}
+              answers={answers}
+              onReset={handleReset}
+            />
+            <StatsGrid scoreResult={scoreResult} isSignedIn={isSignedIn} />
+          </Motion.div>
+        ) : (
+          <Motion.div 
+            key="content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-full space-y-8 min-h-[100vh] relative transition-all duration-300"
+          >
+            <ContentDisplay
+              partData={partData}
+              selectedPart={selectedPart}
+              currentQuestionIndex={currentQuestionIndex}
+              testType={testType}
+              examId={selectedExam}
+              isLoading={isLoadingExam}
+              onSelectPart={handleSelectPart}
+              data-testid="content-display"
+            />
+            <QuestionDisplay
+              selectedPart={selectedPart}
+              selectedExam={selectedExam}
+              partData={partData}
+              currentQuestionIndex={currentQuestionIndex}
+              onQuestionChange={setCurrentQuestionIndex}
+              answers={answers}
+              onAnswerSelect={handleAnswerSelect}
+              showResults={showResults}
+              onSubmit={handleSubmit}
+              testType={testType}
+            />
+          </Motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 });
-PartTestContent.displayName = 'PartTestContent';
-
-const FullExamContainer = memo(({ onComplete }) => <FullExamMode onComplete={onComplete} />);
-FullExamContainer.displayName = 'FullExamContainer';
 
 // ─────────────────────────────────────────────
 // AppContent
@@ -195,7 +198,7 @@ const AppContent = memo(() => {
   const [isLoadingExam, setIsLoadingExam]     = useState(false);
   const { isOpen: showWelcome, onClose: closeWelcome } = useWelcomeModal();
 
-  useTranslationProtection(); // Gọi Hook bảo vệ ở đây
+  useTranslationProtection();
 
   const {
     selectedExam, testType, handleTestTypeChange,
@@ -207,18 +210,15 @@ const AppContent = memo(() => {
     isSignedIn, user,
   } = useAppState();
 
-  // 🚀 TỐI ƯU 2: Vá lỗ hổng Đề Thi Ẩn (is_public)
   useEffect(() => {
     if (!selectedExam) return;
     setIsLoadingExam(true);
     
     loadExamData(selectedExam)
       .then((data) => {
-        // Nếu đề thi tồn tại nhưng bị đánh dấu ẩn (Bảo vệ từ phía User App)
         if (data && data.is_public === false) {
-          console.warn("Đề thi này đang được Admin bảo trì.");
           alert("Đề thi này tạm thời không khả dụng do đang bảo trì!");
-          handleExamChange({ target: { value: null } }); // Reset lựa chọn
+          handleExamChange({ target: { value: null } });
           setCurrentExamData(null);
           return;
         }
@@ -234,8 +234,9 @@ const AppContent = memo(() => {
 
     if (Array.isArray(currentExamData.parts)) {
       const found = currentExamData.parts.find((p) => String(p.id) === safeSelectedPart) || null;
-      if (process.env.NODE_ENV === 'development' && !found) {
-        console.warn(`[partData] Không tìm thấy part "${safeSelectedPart}".`, 'IDs hiện có:', currentExamData.parts.map((p) => p.id));
+      // 🚀 FIX 2: Sửa process.env thành import.meta.env.DEV cho môi trường Vite
+      if (import.meta.env.DEV && !found) {
+        console.warn(`[partData] Không tìm thấy part "${safeSelectedPart}".`);
       }
       return found;
     }
@@ -268,7 +269,7 @@ const AppContent = memo(() => {
               <PartTestContent
                 isSignedIn={isSignedIn}
                 selectedExam={selectedExam}          handleExamChange={handleExamChange}
-                testType={testType}                  handleTestTypeChange={handleTestTypeChange}
+                testType={testType}                   handleTestTypeChange={handleTestTypeChange}
                 selectedPart={selectedPart}          handlePartChange={handlePartChange}
                 partData={partData}
                 currentExamData={currentExamData}
@@ -284,8 +285,8 @@ const AppContent = memo(() => {
                 isLoadingExam={isLoadingExam}
               />
             } />
-            <Route path={ROUTES.FULL_EXAM} element={<FullExamContainer onComplete={() => handleTestTypeChange('')} />} />
-            <Route path="/learn"        element={<LessonList />} />
+            <Route path={ROUTES.FULL_EXAM} element={<FullExamMode onComplete={() => handleTestTypeChange('')} />} />
+            <Route path="/learn"         element={<LessonList />} />
             <Route path="/learn/:slug"  element={<LessonDetailUser />} />
             <Route path={ROUTES.PROFILE} element={<UserProfile />} />
             <Route path={ROUTES.ANSWERS} element={<ExamAnswersPage />} />
@@ -299,7 +300,6 @@ const AppContent = memo(() => {
     </>
   );
 });
-AppContent.displayName = 'AppContent';
 
 // ─────────────────────────────────────────────
 // Main App
@@ -312,19 +312,20 @@ export default function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<div className="flex h-screen items-center justify-center"><LoadingSpinner message="Đang tải hệ thống..." /></div>}>
         <Routes>
-          <Route path="/login"                   element={<AuthPage />} />
-          <Route path="/admin/*"                 element={<AdminApp />} />
-          <Route path="/admin/exams"             element={<ExamManagement />} />
-          <Route path="/admin/exams/create"      element={<CreateExam />} />
-          <Route path="/admin/exams/detail/:id"  element={<DetailsExam />} />
-          <Route path="/admin/exams/edit/:id"    element={<EditExam />} />
-          <Route path="/admin/users"             element={<UserManagement />} />
-          <Route path="/admin/lessons"           element={<LessonManagement />} />
-          <Route path="/admin/lessons/create"    element={<LessonForm />} />
-          <Route path="/admin/lessons/edit/:id"  element={<LessonForm />} />
+          <Route path="/login"                    element={<AuthPage />} />
+          <Route path="/admin/*"                  element={<AdminApp />} />
+          {/* Group Routes Admin để gọn hơn */}
+          <Route path="/admin/exams"              element={<ExamManagement />} />
+          <Route path="/admin/exams/create"       element={<CreateExam />} />
+          <Route path="/admin/exams/detail/:id"   element={<DetailsExam />} />
+          <Route path="/admin/exams/edit/:id"     element={<EditExam />} />
+          <Route path="/admin/users"              element={<UserManagement />} />
+          <Route path="/admin/lessons"            element={<LessonManagement />} />
+          <Route path="/admin/lessons/create"     element={<LessonForm />} />
+          <Route path="/admin/lessons/edit/:id"   element={<LessonForm />} />
           <Route path="/admin/lessons/detail/:id" element={<AdminLessonDetails />} />
-          <Route path="/migrate-data"            element={<MigrateData />} />
-          <Route path="/*"                       element={<AppContent />} />
+          <Route path="/migrate-data"             element={<MigrateData />} />
+          <Route path="/*"                        element={<AppContent />} />
         </Routes>
       </Suspense>
     </Router>

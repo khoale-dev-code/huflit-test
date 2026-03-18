@@ -1,594 +1,308 @@
-import React, { useState } from 'react';
+/**
+ * AuthPage — Trang đăng nhập / đăng ký
+ * Style: Gamification 3D (HubStudy & Duolingo Inspired)
+ * Màu chủ đạo: Xanh dương nhạt (Sky Blue)
+ */
 
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { 
-
-  createUserWithEmailAndPassword, 
-
-  signInWithEmailAndPassword, 
-
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signInWithPopup,
-  updateProfile  // ✅ THÊM IMPORT NÀY
-
+  updateProfile,
 } from 'firebase/auth';
+import { 
+  Mail, Lock, User, LogIn, ArrowRight, Loader2, 
+  Zap, Trophy, Star, BookOpen, Target, Users, ShieldCheck 
+} from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
-import { Mail, Lock, User, LogIn, Chrome, ArrowRight, Loader2, Sparkles } from 'lucide-react';
-
-
-
-// Đảm bảo bạn import đúng đường dẫn file config của Firebase và Supabase
-
-import { auth, googleProvider } from '../../config/firebase'; 
-
+import { auth, googleProvider } from '../../config/firebase';
 import { supabase } from '../../config/supabaseClient';
 
-
-
-const AuthPage = () => {
-
-  const navigate = useNavigate();
-
-  const [isLogin, setIsLogin] = useState(true);
-
-  const [loading, setLoading] = useState(false);
-
-  const [error, setError] = useState('');
-
-
-
-  // Form states
-
-  const [fullName, setFullName] = useState('');
-
-  const [email, setEmail] = useState('');
-
-  const [password, setPassword] = useState('');
-
-
-
-  // ─── HÀM ĐỒNG BỘ DỮ LIỆU SANG SUPABASE ───
-
-  const syncToSupabase = async (user, providedName = '') => {
-
-    try {
-
-      // 1. Kiểm tra xem user này đã có trong bảng profiles chưa
-
-      const { data: existingUser, error: checkError } = await supabase
-
-        .from('profiles')
-
-        .select('*')
-
-        .eq('id', user.uid)
-
-        .single();
-
-
-
-      if (checkError && checkError.code !== 'PGRST116') {
-
-        // PGRST116 là lỗi không tìm thấy dòng nào (bình thường đối với user mới)
-
-        throw checkError;
-
-      }
-
-
-
-      const currentIsoTime = new Date().toISOString();
-
-      // ✅ ĐỘ ƯU TIÊN TÊN: providedName > displayName > fallback
-
-      const finalName = providedName?.trim() || user.displayName || 'Học viên';
-
-
-
-      if (!existingUser) {
-
-        // 2. NẾU LÀ USER MỚI: Thêm vào database với role mặc định là 'student'
-
-        const { error: insertError } = await supabase.from('profiles').insert([{
-
-          id: user.uid,
-
-          email: user.email,
-
-          full_name: finalName,  // ✅ DỰA VÀO finalName ĐÃ XỬ LÝ
-
-          avatar_url: user.photoURL || '',
-
-          role: 'student',
-
-          created_at: currentIsoTime,
-
-          last_login: currentIsoTime,
-
-        }]);
-
-        if (insertError) throw insertError;
-
-      } else {
-
-        // 3. NẾU USER ĐÃ TỒN TẠI: Chỉ cập nhật thời gian đăng nhập lần cuối 
-
-        // (Tuyệt đối KHÔNG cập nhật lại role để tránh làm mất quyền Admin)
-
-        const updateData = { last_login: currentIsoTime };
-
-        
-
-        // Cập nhật thêm tên/avatar từ Google nếu DB đang bị trống
-
-        if (!existingUser.full_name && finalName !== 'Học viên') {
-
-          updateData.full_name = finalName;
-
-        }
-
-        if (!existingUser.avatar_url && user.photoURL) {
-
-          updateData.avatar_url = user.photoURL;
-
-        }
-
-
-
-        const { error: updateError } = await supabase
-
-          .from('profiles')
-
-          .update(updateData)
-
-          .eq('id', user.uid);
-
-        if (updateError) throw updateError;
-
-      }
-
-    } catch (err) {
-
-      console.error("Lỗi đồng bộ Supabase:", err.message);
-
-      // Không ném lỗi ra ngoài để luồng đăng nhập Firebase vẫn thành công
-
-    }
-
-  };
-
-
-
-  // ─── XỬ LÝ ĐĂNG NHẬP / ĐĂNG KÝ BẰNG EMAIL ───
-
-  const handleEmailAuth = async (e) => {
-
-    e.preventDefault();
-
-    setError('');
-
-    setLoading(true);
-
-
-
-    try {
-
-      let userCredential;
-
-      if (isLogin) {
-
-        // Luồng Đăng nhập
-
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-      } else {
-
-        // Luồng Đăng ký
-
-        if (!fullName.trim()) throw new Error("Vui lòng nhập họ và tên");
-
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-        
-
-        // ✅ BƯỚC QUAN TRỌNG: Cập nhật displayName trên Firebase Auth
-
-        // Điều này đảm bảo rằng user.displayName sẽ có giá trị cho các lần đăng nhập sau
-
-        await updateProfile(userCredential.user, {
-
-          displayName: fullName.trim(),
-
-        });
-
-        
-
-        // ✅ REFRESH user object để cập nhật displayName
-
-        userCredential.user.displayName = fullName.trim();
-
-      }
-
-      
-
-      // Đồng bộ thông tin qua Supabase
-
-      // Với đăng ký: fullName được truyền trực tiếp
-
-      // Với đăng nhập: fullName sẽ rỗng, nhưng displayName đã có từ DB
-
-      await syncToSupabase(userCredential.user, fullName);
-
-      
-
-      // Thành công -> Chuyển hướng vào trang chủ hoặc trang làm bài
-
-      navigate('/'); 
-
-    } catch (err) {
-
-      console.error(err);
-
-      if (err.code === 'auth/email-already-in-use') setError('Email này đã được sử dụng.');
-
-      else if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') setError('Email hoặc mật khẩu không chính xác.');
-
-      else if (err.code === 'auth/weak-password') setError('Mật khẩu quá yếu (tối thiểu 6 ký tự).');
-
-      else setError(err.message);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
-
-
-  // ─── XỬ LÝ ĐĂNG NHẬP BẰNG GOOGLE ───
-
-  const handleGoogleAuth = async () => {
-
-    setError('');
-
-    setLoading(true);
-
-    try {
-
-      const result = await signInWithPopup(auth, googleProvider);
-
-      // Đồng bộ thông tin qua Supabase
-
-      // Google tự động có displayName, nên không cần truyền providedName
-
-      await syncToSupabase(result.user);
-
-      navigate('/');
-
-    } catch (err) {
-
-      console.error(err);
-
-      if (err.code !== 'auth/popup-closed-by-user') {
-
-        setError('Đăng nhập Google thất bại. Vui lòng thử lại.');
-
-      }
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
-
-
-  // ─── GIAO DIỆN ───
-
-  return (
-
-    <div className="min-h-screen flex bg-[#F8FAFC]">
-
-      {/* Nửa bên trái: Banner trang trí (Ẩn trên Mobile) */}
-
-      <div className="hidden lg:flex lg:w-1/2 relative bg-blue-600 overflow-hidden items-center justify-center">
-
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
-
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/50 to-blue-900/80"></div>
-
-        
-
-        <div className="relative z-10 p-12 text-white max-w-xl">
-
-          <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20">
-
-            <Sparkles className="w-8 h-8 text-blue-100" />
-
-          </div>
-
-          <h1 className="text-4xl font-black mb-6 leading-tight">
-
-            Nền tảng luyện thi <br />
-
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-cyan-200">
-
-              Thông minh & Hiện đại
-
-            </span>
-
-          </h1>
-
-          <p className="text-blue-100 text-lg leading-relaxed mb-8">
-
-            Tham gia cùng hàng ngàn học viên khác để nâng cao kỹ năng và chinh phục điểm số mục tiêu của bạn.
-
-          </p>
-
-          <div className="flex items-center gap-4 text-sm font-medium text-blue-200">
-
-            <div className="flex -space-x-3">
-
-              {[1, 2, 3, 4].map(i => (
-
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-blue-600 bg-blue-200 flex items-center justify-center overflow-hidden">
-
-                  <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" />
-
-                </div>
-
-              ))}
-
-            </div>
-
-            <span>Hơn 24,000+ học viên đã tham gia</span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-
-      {/* Nửa bên phải: Form đăng nhập/đăng ký */}
-
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-
-        <div className="w-full max-w-md bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-
-          
-
-          <div className="text-center mb-8">
-
-            <h2 className="text-2xl font-black text-slate-900 mb-2">
-
-              {isLogin ? 'Chào mừng trở lại! 👋' : 'Tạo tài khoản mới 🚀'}
-
-            </h2>
-
-            <p className="text-slate-500 text-sm">
-
-              {isLogin ? 'Vui lòng đăng nhập để tiếp tục học tập.' : 'Điền thông tin bên dưới để bắt đầu.'}
-
-            </p>
-
-          </div>
-
-
-
-          {error && (
-
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-semibold rounded-2xl text-center">
-
-              {error}
-
-            </div>
-
-          )}
-
-
-
-          <form onSubmit={handleEmailAuth} className="space-y-4">
-
-            {/* Trường Họ Tên (Chỉ hiện khi Đăng ký) */}
-
-            {!isLogin && (
-
-              <div>
-
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 ml-1">Họ và tên</label>
-
-                <div className="relative">
-
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-
-                    <User className="h-5 w-5 text-slate-400" />
-
-                  </div>
-
-                  <input
-
-                    type="text"
-
-                    required
-
-                    value={fullName}
-
-                    onChange={(e) => setFullName(e.target.value)}
-
-                    className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-0 transition-colors outline-none"
-
-                    placeholder="Nguyễn Văn A"
-
-                  />
-
-                </div>
-
-              </div>
-
-            )}
-
-
-
-            <div>
-
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 ml-1">Email</label>
-
-              <div className="relative">
-
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-
-                  <Mail className="h-5 w-5 text-slate-400" />
-
-                </div>
-
-                <input
-
-                  type="email"
-
-                  required
-
-                  value={email}
-
-                  onChange={(e) => setEmail(e.target.value)}
-
-                  className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-0 transition-colors outline-none"
-
-                  placeholder="bạn@email.com"
-
-                />
-
-              </div>
-
-            </div>
-
-
-
-            <div>
-
-              <div className="flex items-center justify-between mb-2 ml-1 pr-1">
-
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Mật khẩu</label>
-
-                {isLogin && <a href="#" className="text-xs font-bold text-blue-600 hover:text-blue-700">Quên mật khẩu?</a>}
-
-              </div>
-
-              <div className="relative">
-
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-
-                  <Lock className="h-5 w-5 text-slate-400" />
-
-                </div>
-
-                <input
-
-                  type="password"
-
-                  required
-
-                  value={password}
-
-                  onChange={(e) => setPassword(e.target.value)}
-
-                  className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-medium focus:bg-white focus:border-blue-500 focus:ring-0 transition-colors outline-none"
-
-                  placeholder="••••••••"
-
-                />
-
-              </div>
-
-            </div>
-
-
-
-            <button
-
-              type="submit"
-
-              disabled={loading}
-
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 mt-6 bg-[#00358E] hover:bg-blue-800 text-white rounded-2xl text-sm font-bold transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] disabled:opacity-70"
-
-            >
-
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? <LogIn className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />)}
-
-              {isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}
-
-            </button>
-
-          </form>
-
-
-
-          <div className="my-8 flex items-center">
-
-            <div className="flex-1 border-t border-slate-200"></div>
-
-            <span className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Hoặc tiếp tục với</span>
-
-            <div className="flex-1 border-t border-slate-200"></div>
-
-          </div>
-
-
-
-          <button
-
-            onClick={handleGoogleAuth}
-
-            disabled={loading}
-
-            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white border-2 border-slate-100 hover:border-blue-100 hover:bg-slate-50 text-slate-700 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] disabled:opacity-70"
-
-          >
-
-            <Chrome className="w-5 h-5 text-red-500" />
-
-            Đăng nhập bằng Google
-
-          </button>
-
-
-
-          <p className="mt-8 text-center text-sm font-medium text-slate-600">
-
-            {isLogin ? "Chưa có tài khoản? " : "Đã có tài khoản? "}
-
-            <button 
-
-              onClick={() => { setIsLogin(!isLogin); setError(''); }} 
-
-              className="font-bold text-blue-600 hover:text-blue-800 transition-colors"
-
-            >
-
-              {isLogin ? "Đăng ký ngay" : "Đăng nhập"}
-
-            </button>
-
-          </p>
-
-          
-
-        </div>
-
-      </div>
-
-    </div>
-
-  );
-
+/* ─── DESIGN TOKENS (Xanh dương nhạt chủ đạo) ────────────────── */
+const THEME = {
+  primary: '#1CB0F6',
+  primaryDark: '#1899D6',
+  primaryLight: '#EAF6FE',
+  primaryBorder: '#BAE3FB',
+  success: '#58CC02',
+  successDark: '#46A302',
+  error: '#FF4B4B',
+  errorBg: '#FFF0F0',
+  textMain: '#4B4B4B',
+  textMuted: '#AFB3B8',
+  white: '#FFFFFF',
+  bgGray: '#F7F7F7'
 };
 
+/* ─── SUB-COMPONENT: STAT CARD ──────────────────────────────── */
+const StatCard = ({ icon: Icon, value, label, delay }) => (
+  <Motion.div
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay, type: 'spring' }}
+    className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg"
+  >
+    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+      <Icon className="text-white" size={20} strokeWidth={2.5} />
+    </div>
+    <div>
+      <div className="text-white font-black text-lg leading-none">{value}</div>
+      <div className="text-blue-100 text-xs font-bold mt-1 uppercase tracking-wider">{label}</div>
+    </div>
+  </Motion.div>
+);
 
+/* ─── SUB-COMPONENT: INPUT FIELD ────────────────────────────── */
+const InputField = ({ icon: Icon, label, ...props }) => (
+  <div className="space-y-2">
+    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+      {label}
+    </label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1CB0F6] transition-colors">
+        <Icon size={18} strokeWidth={2.5} />
+      </div>
+      <input
+        {...props}
+        className="w-full pl-12 pr-4 py-3.5 bg-[#F7F7F7] border-2 border-slate-200 border-b-4 rounded-2xl font-bold text-slate-700 outline-none transition-all focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-[#1CB0F6]/10"
+      />
+    </div>
+  </div>
+);
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN PAGE COMPONENT
+════════════════════════════════════════════════════════════════ */
+const AuthPage = () => {
+  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
+
+  // Sync profile to Supabase (Optimized)
+  const syncToSupabase = useCallback(async (user, providedName = '') => {
+    try {
+      const finalName = providedName?.trim() || user.displayName || 'Học viên';
+      const now = new Date().toISOString();
+
+      const profileData = {
+        id: user.uid,
+        email: user.email,
+        full_name: finalName,
+        avatar_url: user.photoURL || '',
+        role: 'student',
+        last_login: now
+      };
+
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert([profileData], { onConflict: 'id' });
+
+      if (upsertError) throw upsertError;
+    } catch (err) {
+      console.error('Supabase Sync Error:', err.message);
+    }
+  }, []);
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      let cred;
+      if (isLogin) {
+        cred = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      } else {
+        if (!formData.fullName.trim()) throw new Error('Vui lòng nhập họ và tên');
+        cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        await updateProfile(cred.user, { displayName: formData.fullName.trim() });
+      }
+      
+      await syncToSupabase(cred.user, formData.fullName);
+      navigate('/');
+    } catch (err) {
+      const errorMap = {
+        'auth/email-already-in-use': 'Email này đã được đăng ký.',
+        'auth/wrong-password': 'Mật khẩu không chính xác.',
+        'auth/user-not-found': 'Tài khoản không tồn tại.',
+        'auth/weak-password': 'Mật khẩu cần ít nhất 6 ký tự.'
+      };
+      setError(errorMap[err.code] || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      await syncToSupabase(result.user);
+      navigate('/');
+    } catch (err) {
+      if (err.code !== 'auth/popup-closed-by-user') setError('Đăng nhập Google thất bại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex font-sans bg-[#F4F7FA]" style={{ fontFamily: '"Nunito", "Baloo 2", sans-serif' }}>
+      
+      {/* ── LEFT PANEL (Desktop Showcase) ── */}
+      <div className="hidden lg:flex lg:w-[50%] relative overflow-hidden flex-col justify-center px-20 bg-gradient-to-br from-[#1CB0F6] via-[#1582D8] to-[#0D5EB9]">
+        
+        {/* Background Decorations */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        <Motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 8, repeat: Infinity }} className="absolute -top-20 -right-20 w-80 h-80 bg-sky-300 rounded-full blur-[100px]" />
+
+        <div className="relative z-10">
+          <Motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-xl border-b-4 border-slate-200">
+              <BookOpen className="text-[#1CB0F6]" size={28} strokeWidth={3} />
+            </div>
+            <span className="text-3xl font-black text-white tracking-tight">HUB<span className="text-yellow-300">STUDY</span></span>
+          </Motion.div>
+
+          <h1 className="text-5xl font-black text-white leading-tight mb-6 tracking-tight">
+            Chinh phục đề thi<br />theo cách <span className="text-yellow-300 underline decoration-8 decoration-yellow-300/30">thông minh</span>.
+          </h1>
+          
+          <p className="text-blue-100 text-lg font-bold mb-12 max-w-md">
+            Hệ thống luyện thi chuẩn 2026 với giải thích chi tiết và lộ trình cá nhân hóa.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <StatCard icon={Users} value="24,000+" label="Học viên" delay={0.1} />
+            <StatCard icon={Trophy} value="98%" label="Đỗ mục tiêu" delay={0.2} />
+            <StatCard icon={Zap} value="5,000+" label="Đề thi" delay={0.3} />
+            <StatCard icon={ShieldCheck} value="Verified" label="Chất lượng" delay={0.4} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL (Auth Form) ── */}
+      <div className="w-full lg:w-[50%] flex items-center justify-center p-6 bg-white lg:bg-transparent">
+        <Motion.div 
+          initial={{ opacity: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-[420px]"
+        >
+          {/* Form Container */}
+          <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-2xl lg:shadow-xl border-2 border-slate-100 border-b-8">
+            
+            {/* Tab Toggle */}
+            <div className="flex p-1 bg-slate-100 rounded-2xl mb-8 border-2 border-slate-200">
+              {['Đăng nhập', 'Đăng ký'].map((label, idx) => {
+                const active = (idx === 0) === isLogin;
+                return (
+                  <button
+                    key={label}
+                    onClick={() => { setIsLogin(idx === 0); setError(''); }}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                      active ? 'bg-white text-[#1CB0F6] shadow-sm border-b-2 border-[#1CB0F6]' : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <h2 className="text-2xl font-black text-slate-800 mb-2">
+              {isLogin ? 'Chào mừng trở lại! 👋' : 'Bắt đầu hành trình 🚀'}
+            </h2>
+            <p className="text-sm font-bold text-slate-400 mb-8">
+              {isLogin ? 'Tiếp tục rèn luyện để giữ vững phong độ.' : 'Tạo tài khoản để lưu lại tiến trình học tập.'}
+            </p>
+
+            <AnimatePresence mode="wait">
+              {error && (
+                <Motion.div 
+                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                  className="mb-6 p-4 rounded-2xl bg-red-50 border-2 border-red-100 text-red-500 text-xs font-bold flex items-center gap-2"
+                >
+                  <Target size={14} className="rotate-45" /> {error}
+                </Motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleAuth} className="space-y-5">
+              {!isLogin && (
+                <InputField 
+                  label="Họ và tên" icon={User} type="text" placeholder="Nguyễn Văn A" required
+                  value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})}
+                />
+              )}
+              
+              <InputField 
+                label="Email" icon={Mail} type="email" placeholder="email@vi-du.com" required
+                value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+              />
+
+              <InputField 
+                label="Mật khẩu" icon={Lock} type="password" placeholder="••••••••" required
+                value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
+              />
+
+              {isLogin && (
+                <div className="text-right">
+                  <button type="button" className="text-xs font-black text-[#1CB0F6] hover:text-[#1899D6] uppercase tracking-wider">
+                    Quên mật khẩu?
+                  </button>
+                </div>
+              )}
+
+              <Motion.button
+                whileHover={{ translateY: -2 }}
+                whileTap={{ translateY: 2 }}
+                disabled={loading}
+                className="w-full py-4 bg-[#1CB0F6] text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-[0_4px_0_#1899D6] border-b-4 border-[#1899D6] active:border-b-0 flex items-center justify-center gap-3 transition-all disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : isLogin ? <LogIn size={18} /> : <ArrowRight size={18} />}
+                {isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}
+              </Motion.button>
+            </form>
+
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">hoặc</span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+
+            <button
+              onClick={handleGoogleAuth}
+              type="button"
+              className="w-full py-4 bg-white border-2 border-slate-200 border-b-4 rounded-2xl font-black text-slate-600 text-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:border-b-0 transition-all"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Tiếp tục với Google
+            </button>
+          </div>
+
+          <p className="mt-8 text-center text-slate-400 text-sm font-bold">
+            {isLogin ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
+            <button 
+              onClick={() => setIsLogin(!isLogin)} 
+              className="ml-2 text-[#1CB0F6] font-black hover:underline underline-offset-4"
+            >
+              {isLogin ? 'Đăng ký ngay →' : 'Đăng nhập →'}
+            </button>
+          </p>
+        </Motion.div>
+      </div>
+    </div>
+  );
+};
 
 export default AuthPage;

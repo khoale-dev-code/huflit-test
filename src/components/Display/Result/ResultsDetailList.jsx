@@ -1,156 +1,144 @@
-import { memo, useState, useCallback } from 'react';
+// src/components/Display/Result/ResultsDetailList.jsx
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import {
   BarChart3, SearchX, Layers, Volume2, BookOpen,
-  CheckCircle2, XCircle, ChevronDown, ChevronRight,
-  Music, Headphones
+  ChevronDown, Music, Headphones, Award
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion'; // 🚀 FIX: Alias Motion
 import AnswerReviewCard from './AnswerReviewCard';
 import { FILTER_TYPES } from '../../../hooks/Result/useFilteredQuestions';
 
-/* ─── Design tokens ─────────────────────────────────────── */
-const C = {
-  blue: '#1CB0F6', blueDark: '#1899D6', blueBg: '#EAF6FE', blueBorder: '#BAE3FB',
-  green: '#58CC02', greenDark: '#46A302', greenBg: '#F0FAE8',
-  purple: '#CE82FF', purpleDark: '#B975E5', purpleBg: '#F8EEFF', purpleBorder: '#eec9ff',
-  n100: '#F1F5F9', n200: '#E2E8F0', n400: '#94A3B8', n500: '#64748B', n800: '#1E293B',
-  white: '#FFFFFF', red: '#FF4B4B',
+/* ─── ANIMATION VARIANTS ────────────────────────────────────────── */
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 }
+  }
 };
-const F = { body: '"Nunito", "Baloo 2", sans-serif', display: '"Baloo 2", "Nunito", sans-serif' };
 
-/* ─── Empty States ───────────────────────────────────────── */
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: 'spring', stiffness: 300, damping: 24 } 
+  }
+};
+
+/* ─── EMPTY STATES (Gamified 3D) ─────────────────────── */
+
 const EmptyAllQuestions = () => (
-  <div className="text-center py-12 bg-white border-2 border-dashed border-slate-300 rounded-[20px]">
-    <div className="w-12 h-12 bg-slate-100 rounded-[12px] flex items-center justify-center mx-auto mb-3 border-b-[3px] border-slate-200">
-      <SearchX className="w-6 h-6 text-slate-400" strokeWidth={2.5} />
+  <Motion.div 
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="text-center py-16 md:py-24 bg-white border-2 border-dashed border-slate-300 rounded-[32px] shadow-sm flex flex-col items-center"
+  >
+    <div className="w-16 h-16 bg-slate-100 rounded-[20px] flex items-center justify-center mb-6 border-b-[4px] border-slate-200">
+      <SearchX className="w-8 h-8 text-slate-400" strokeWidth={2.5} />
     </div>
-    <p className="text-[15px] font-display font-bold text-slate-600">Không có câu hỏi nào</p>
-  </div>
+    <p className="text-[20px] font-display font-black text-slate-600 uppercase tracking-wider">Không có dữ liệu</p>
+    <p className="text-[15px] font-body font-bold text-slate-400 mt-2">Bài thi này chưa có câu hỏi nào được ghi nhận.</p>
+  </Motion.div>
 );
 
 const EmptyWrongQuestions = () => (
-  <motion.div
-    initial={{ scale: 0.95, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1 }}
-    transition={{ type: 'spring', bounce: 0.4 }}
-    className="text-center py-10 px-4 rounded-[24px] border-2 border-b-[4px]"
-    style={{ background: C.greenBg, borderColor: C.green }}
+  <Motion.div 
+    initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+    animate={{ scale: 1, opacity: 1, y: 0 }} 
+    transition={{ type: "spring", bounce: 0.5, damping: 15 }}
+    className="text-center py-12 md:py-20 px-6 md:px-12 bg-hub-green-bg border-2 border-hub-green-border border-b-[10px] rounded-[40px] shadow-sm flex flex-col items-center relative overflow-hidden"
   >
-    <p className="text-[40px] leading-none mb-3">🎉</p>
-    <p className="font-display font-black text-[20px]" style={{ color: C.green }}>
-      Tuyệt vời! Không có câu sai
+    <div className="absolute -top-10 -right-10 opacity-10 transform rotate-12">
+      <Award className="w-[180px] h-[180px] text-hub-green" strokeWidth={3} />
+    </div>
+    
+    <Motion.div 
+      initial={{ y: -20 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 10 }}
+      className="text-[70px] leading-none mb-6 drop-shadow-md relative z-10"
+    >
+      🎉
+    </Motion.div>
+    <p className="text-hub-green font-display font-black text-[32px] leading-tight uppercase tracking-widest relative z-10">
+      Tuyệt đỉnh!
     </p>
-    <p className="font-body font-bold text-[14px] mt-1.5" style={{ color: C.greenDark + 'CC' }}>
-      Bạn đã trả lời đúng tất cả câu hỏi. Thật xuất sắc!
-    </p>
-  </motion.div>
+    <div className="bg-white/60 backdrop-blur-sm px-8 py-4 rounded-[20px] border-2 border-hub-green-border/50 mt-5 inline-block relative z-10 shadow-sm">
+      <p className="text-hub-green-dark font-body font-bold text-[16px] md:text-[18px] m-0">
+        Bạn không làm sai bất kỳ câu nào. Chúc mừng nhé!
+      </p>
+    </div>
+  </Motion.div>
 );
 
-/* ─── FilterTabs ─────────────────────────────────────────── */
+/* ─── FILTER TABS ────────────────────────────── */
+
 const FilterTabs = memo(({ activeFilter, onFilterChange }) => (
-  <div className="flex p-1 rounded-[12px] border-2 border-slate-200/50" style={{ background: 'rgba(226,232,240,0.6)' }}>
-    {[
-      { key: FILTER_TYPES.ALL,   label: 'TẤT CẢ' },
-      { key: FILTER_TYPES.WRONG, label: 'CÂU SAI' },
-    ].map(({ key, label }) => (
-      <button
-        key={key}
-        onClick={() => onFilterChange(key)}
-        className="px-4 py-1.5 text-[11px] sm:text-[12px] font-display font-bold rounded-[8px] transition-all outline-none border-2"
-        style={
-          activeFilter === key
-            ? {
-                background: C.white,
-                color: key === FILTER_TYPES.WRONG ? C.red : C.blue,
-                borderColor: C.n200,
-                borderBottomWidth: 3,
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                transform: 'translateY(-1px)',
-              }
-            : {
-                borderColor: 'transparent',
-                color: C.n500,
-              }
-        }
-      >
-        {label}
-      </button>
-    ))}
+  <div className="flex gap-2 p-1.5 bg-slate-100 rounded-[22px] border-2 border-slate-200/60 shadow-inner">
+    <button
+      onClick={() => onFilterChange(FILTER_TYPES.ALL)}
+      className={`px-6 py-2.5 text-[14px] font-display font-black uppercase tracking-wider rounded-[16px] transition-all outline-none border-2 border-b-[4px] ${
+        activeFilter === FILTER_TYPES.ALL
+          ? 'bg-hub-blue text-white border-hub-blue-dark shadow-sm -translate-y-0.5'
+          : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 active:border-b-2 active:translate-y-1'
+      }`}
+    >
+      Tất cả
+    </button>
+    <button
+      onClick={() => onFilterChange(FILTER_TYPES.WRONG)}
+      className={`px-6 py-2.5 text-[14px] font-display font-black uppercase tracking-wider rounded-[16px] transition-all outline-none border-2 border-b-[4px] ${
+        activeFilter === FILTER_TYPES.WRONG
+          ? 'bg-hub-red text-white border-hub-red-dark shadow-sm -translate-y-0.5'
+          : 'bg-white border-slate-200 text-slate-500 hover:bg-hub-red-bg hover:text-hub-red active:border-b-2 active:translate-y-1'
+      }`}
+    >
+      Câu sai
+    </button>
   </div>
 ));
 FilterTabs.displayName = 'FilterTabs';
 
-/* ─── TranscriptBlock ────────────────────────────────────── */
-/**
- * Hiển thị transcript sau khi nộp bài.
- * Dùng cho cả group (Part 3/4) lẫn câu đơn lẻ (Part 1/2).
- * Có thể collapse để tiết kiệm không gian.
- */
+/* ─── TRANSCRIPT BLOCK ──────────────────────────────────────────── */
 const TranscriptBlock = memo(({ script, defaultOpen = false }) => {
   const [open, setOpen] = useState(defaultOpen);
   if (!script) return null;
 
   return (
-    <div
-      className="rounded-[16px] border-2 overflow-hidden transition-all"
-      style={{ background: C.blueBg, borderColor: C.blueBorder }}
-    >
-      {/* Toggle header */}
+    <div className="rounded-[20px] border-2 border-hub-blue-border bg-hub-blue-bg overflow-hidden shadow-sm">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 outline-none transition-colors hover:bg-white/40"
+        className="w-full flex items-center justify-between px-5 py-4 outline-none transition-colors hover:bg-white/40"
       >
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-[10px] flex items-center justify-center border-2 shrink-0"
-            style={{
-              background: '#DAEEFB',
-              borderColor: C.blueBorder,
-              boxShadow: `0 2px 0 ${C.blueBorder}`,
-            }}
-          >
-            <Volume2 size={15} color={C.blue} strokeWidth={2.5} />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[12px] bg-[#DAEEFB] border-2 border-hub-blue-border border-b-[3px] flex items-center justify-center shrink-0 shadow-sm">
+            <Volume2 className="w-5 h-5 text-hub-blue" strokeWidth={2.5} />
           </div>
-          <span
-            className="text-[11px] font-black uppercase tracking-wider pt-0.5"
-            style={{ fontFamily: F.display, color: C.blue }}
-          >
+          <span className="text-[13px] font-display font-black uppercase tracking-wider pt-1 text-hub-blue">
             Nội dung bài nghe
           </span>
         </div>
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center transition-transform duration-200"
-          style={{
-            background: '#DAEEFB',
-            transform: open ? 'rotate(180deg)' : 'none',
-          }}
-        >
-          <ChevronDown size={15} color={C.blue} strokeWidth={3} />
+        <div className={`w-9 h-9 rounded-full bg-[#DAEEFB] flex items-center justify-center transition-transform duration-300 shadow-sm border border-hub-blue-border/50 ${open ? 'rotate-180' : ''}`}>
+          <ChevronDown className="w-5 h-5 text-hub-blue" strokeWidth={3} />
         </div>
       </button>
 
-      {/* Transcript content */}
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <Motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeInOut' }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <div
-              className="px-5 pb-4 pt-3 border-t-2 border-dashed"
-              style={{ borderColor: C.blueBorder }}
-            >
-              <p
-                className="text-[14px] font-bold italic leading-relaxed m-0"
-                style={{ color: C.n500 }}
-              >
+            <div className="px-6 pb-6 pt-2 border-t-2 border-dashed border-hub-blue-border/80">
+              <p className="text-[15px] md:text-[16px] font-body font-bold italic leading-relaxed text-slate-600 m-0 bg-white/50 p-4 rounded-xl">
                 "{script}"
               </p>
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -158,51 +146,34 @@ const TranscriptBlock = memo(({ script, defaultOpen = false }) => {
 });
 TranscriptBlock.displayName = 'TranscriptBlock';
 
-/* ─── PassageBlock ───────────────────────────────────────── */
-/**
- * Hiển thị đoạn văn bài đọc (Part 6/7) trong kết quả.
- * Luôn hiển thị (không cần collapse vì đây là ngữ liệu tham khảo).
- */
+/* ─── PASSAGE BLOCK ─────────────────────────────────────────────── */
 const PassageBlock = memo(({ content, imageUrl, audioUrl }) => {
   if (!content && !imageUrl && !audioUrl) return null;
 
   return (
-    <div
-      className="rounded-[16px] border-2 overflow-hidden mb-3"
-      style={{ background: C.purpleBg, borderColor: C.purpleBorder }}
-    >
-      <div className="px-4 py-3 border-b-2 flex items-center gap-2" style={{ borderColor: C.purpleBorder }}>
-        <BookOpen size={15} color={C.purpleDark} strokeWidth={2.5} />
-        <span
-          className="text-[11px] font-black uppercase tracking-wider"
-          style={{ fontFamily: F.display, color: C.purpleDark }}
-        >
-          Nội dung đoạn văn / bài đọc
+    <div className="rounded-[24px] border-2 border-hub-purple-border bg-hub-purple-bg overflow-hidden mb-6 shadow-sm">
+      <div className="px-6 py-4 border-b-2 border-hub-purple-border/60 bg-white flex items-center gap-3">
+        <BookOpen className="w-5 h-5 text-hub-purple-dark" strokeWidth={2.5} />
+        <span className="text-[13px] font-display font-black uppercase tracking-wider text-hub-purple-dark pt-1">
+          Nội dung ngữ cảnh
         </span>
       </div>
-      <div className="p-4">
+      <div className="p-5 space-y-5">
         {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="Passage"
-            className="max-w-full max-h-[300px] rounded-[12px] border-2 object-contain bg-white p-1 mb-3"
-            style={{ borderColor: C.purpleBorder }}
-          />
+          <div className="bg-white p-2 rounded-[18px] border-2 border-hub-purple-border/50 inline-block shadow-sm">
+            <img src={imageUrl} alt="Context" className="max-w-full max-h-[400px] object-contain rounded-[12px]" />
+          </div>
         )}
         {audioUrl && (
-          <div
-            className="flex items-center gap-3 p-3 rounded-[12px] border-2 mb-3"
-            style={{ background: C.blueBg, borderColor: C.blueBorder }}
-          >
-            <Music size={16} color={C.blue} />
-            <audio src={audioUrl} controls className="h-8 flex-1" />
+          <div className="flex items-center gap-4 p-3 rounded-[18px] border-2 border-hub-blue-border bg-hub-blue-bg shadow-sm">
+            <div className="w-12 h-12 bg-white rounded-[14px] flex items-center justify-center border-2 border-hub-blue-border border-b-[4px] text-hub-blue shrink-0">
+              <Music className="w-5 h-5" strokeWidth={2.5} />
+            </div>
+            <audio src={audioUrl} controls className="h-10 flex-1 outline-none" />
           </div>
         )}
         {content && (
-          <p
-            className="text-[14px] font-bold leading-relaxed m-0 whitespace-pre-wrap"
-            style={{ color: C.n800 }}
-          >
+          <p className="text-[16px] font-body font-bold leading-relaxed text-slate-700 m-0 whitespace-pre-wrap bg-white/70 p-5 rounded-[20px] border border-hub-purple-border/30">
             {content}
           </p>
         )}
@@ -212,96 +183,59 @@ const PassageBlock = memo(({ content, imageUrl, audioUrl }) => {
 });
 PassageBlock.displayName = 'PassageBlock';
 
-/* ─── GroupResultBlock ───────────────────────────────────── */
-/**
- * Render một group trong trang kết quả:
- * 1. Nhãn "Nhóm câu X–Y"
- * 2. Audio player + TranscriptBlock (nếu có script)
- * 3. PassageBlock (nếu có content / bài đọc)
- * 4. Danh sách AnswerReviewCard cho từng subQuestion
- */
-const GroupResultBlock = memo(({ group, globalIndexStart, answers, expandedId, onToggle }) => {
-  const validSubs = (group.subQuestions ?? []).filter((sq) => !sq.isExample);
+/* ─── GROUP RESULT BLOCK ────────────────────────────────────────── */
+const GroupResultBlock = memo((props) => {
+  const { group, globalIndexStart, answers, expandedId, onToggle } = props;
+  const validSubs = useMemo(() => (group.subQuestions ?? []).filter((sq) => !sq.isExample), [group.subQuestions]);
   const labelTo = globalIndexStart + validSubs.length - 1;
 
   return (
-    <div
-      className="rounded-[24px] border-2 border-b-[4px] overflow-hidden"
-      style={{ background: C.purpleBg, borderColor: C.purpleBorder }}
-    >
-      {/* ── Group header ── */}
-      <div
-        className="px-4 py-3 flex items-center gap-3 border-b-2"
-        style={{ background: C.white, borderColor: C.purpleBorder }}
-      >
-        <div
-          className="w-9 h-9 rounded-[10px] flex items-center justify-center border-2 shrink-0"
-          style={{
-            background: C.purpleBg,
-            borderColor: C.purpleBorder,
-            boxShadow: `0 2px 0 ${C.purpleBorder}`,
-          }}
-        >
-          <Layers size={16} color={C.purpleDark} strokeWidth={2.5} />
+    <Motion.div variants={itemVariants} className="rounded-[32px] border-2 border-hub-purple-border border-b-[8px] bg-hub-purple-bg overflow-hidden shadow-sm">
+      <div className="px-6 py-5 flex items-center gap-4 border-b-2 border-hub-purple-border bg-white">
+        <div className="w-12 h-12 rounded-[14px] bg-hub-purple-bg border-2 border-hub-purple-border border-b-[4px] flex items-center justify-center shrink-0 shadow-sm">
+          <Layers className="w-6 h-6 text-hub-purple-dark" strokeWidth={2.5} />
         </div>
         <div>
-          <span
-            className="text-[13px] font-black uppercase tracking-wider block"
-            style={{ fontFamily: F.display, color: C.purpleDark }}
-          >
+          <span className="text-[16px] font-display font-black uppercase tracking-wider text-hub-purple-dark block leading-none mb-1">
             Nhóm câu hỏi
           </span>
-          <span
-            className="text-[11px] font-bold"
-            style={{ color: C.purpleDark + '99' }}
-          >
-            Câu {globalIndexStart}–{labelTo}
+          <span className="text-[13px] font-body font-bold text-slate-500">
+            Câu {globalIndexStart} – {labelTo}
           </span>
         </div>
       </div>
 
-      {/* ── Nội dung group ── */}
-      <div className="p-4 space-y-3">
-        {/* Audio chung của group (Part 3/4) + Transcript */}
+      <div className="p-5 md:p-8 space-y-6 bg-white/40">
         {group.audioUrl && (
-          <div
-            className="flex items-center gap-3 p-3 rounded-[14px] border-2"
-            style={{ background: C.blueBg, borderColor: C.blueBorder }}
-          >
-            <div
-              className="w-8 h-8 rounded-[10px] flex items-center justify-center border-2 shrink-0"
-              style={{ background: '#DAEEFB', borderColor: C.blueBorder, boxShadow: `0 2px 0 ${C.blueBorder}` }}
-            >
-              <Headphones size={15} color={C.blue} strokeWidth={2.5} />
+          <div className="flex items-center gap-4 p-3 rounded-[20px] border-2 border-hub-blue-border bg-hub-blue-bg shadow-sm">
+            <div className="w-12 h-12 rounded-[14px] bg-[#DAEEFB] border-2 border-hub-blue-border border-b-[4px] flex items-center justify-center shrink-0">
+              <Headphones className="w-6 h-6 text-hub-blue" strokeWidth={2.5} />
             </div>
-            <audio src={group.audioUrl} controls className="h-8 flex-1" />
+            <audio src={group.audioUrl} controls className="h-10 flex-1 outline-none" />
           </div>
         )}
 
-        {/* Transcript của group — ẩn mặc định, click để xem */}
-        <TranscriptBlock script={group.script} defaultOpen={false} />
+        <TranscriptBlock script={group.script} />
 
-        {/* Đoạn văn / bài đọc (Part 6/7) */}
         <PassageBlock
           content={group.content}
           imageUrl={group.imageUrl && !group.audioUrl ? group.imageUrl : null}
-          audioUrl={null}
         />
 
-        {/* Danh sách câu hỏi con */}
-        <div className="space-y-2">
-          {group.subQuestions?.map((sq, idx) => {
+        <div className="space-y-6 pt-4 border-t-2 border-hub-purple-border/30">
+          {group.subQuestions?.map((sq) => {
             if (sq.isExample) return null;
-            const num = globalIndexStart + validSubs.slice(0, validSubs.indexOf(sq)).length;
+            // 🚀 FIX: Tính số thứ tự chuẩn cho Group Question
+            const relativeIdx = validSubs.indexOf(sq);
+            const num = globalIndexStart + relativeIdx;
             const ua = answers[sq.id];
-            const isCorrect = ua === sq.correct;
 
             return (
               <AnswerReviewCard
                 key={sq.id}
                 question={sq}
                 questionNum={num}
-                isCorrect={isCorrect}
+                isCorrect={ua === sq.correct}
                 userAnswer={ua}
                 correctAnswer={sq.correct}
                 options={sq.options}
@@ -312,35 +246,29 @@ const GroupResultBlock = memo(({ group, globalIndexStart, answers, expandedId, o
           })}
         </div>
       </div>
-    </div>
+    </Motion.div>
   );
 });
 GroupResultBlock.displayName = 'GroupResultBlock';
 
-/* ─── StandaloneQuestionBlock ────────────────────────────── */
-/**
- * Render câu hỏi đơn lẻ trong trang kết quả.
- * Nếu câu có script (Part 1/2), hiện TranscriptBlock bên dưới card.
- */
+/* ─── STANDALONE QUESTION BLOCK ─────────────────────────────────── */
 const StandaloneQuestionBlock = memo(({ question, globalNum, answers, expandedId, onToggle }) => {
   const ua = answers[question.id];
-  const isCorrect = ua === question.correct;
 
   return (
-    <div className="space-y-2">
+    <Motion.div variants={itemVariants} className="space-y-4">
       <AnswerReviewCard
         question={question}
         questionNum={globalNum}
-        isCorrect={isCorrect}
+        isCorrect={ua === question.correct}
         userAnswer={ua}
         correctAnswer={question.correct}
         options={question.options}
         isExpanded={expandedId === question.id}
         onToggle={onToggle}
       />
-      {/* Transcript Part 1/2 — hiện sau card, ẩn mặc định */}
-      <TranscriptBlock script={question.script} defaultOpen={false} />
-    </div>
+      <TranscriptBlock script={question.script} />
+    </Motion.div>
   );
 });
 StandaloneQuestionBlock.displayName = 'StandaloneQuestionBlock';
@@ -348,7 +276,8 @@ StandaloneQuestionBlock.displayName = 'StandaloneQuestionBlock';
 /* ════════════════════════════════════════════════════════════
    MAIN — ResultsDetailList
 ════════════════════════════════════════════════════════════ */
-const ResultsDetailList = memo(({ filteredQuestions, answers, activeFilter, onFilterChange }) => {
+const ResultsDetailList = memo((props) => {
+  const { filteredQuestions, answers, activeFilter, onFilterChange } = props;
   const [expandedId, setExpandedId] = useState(null);
 
   const handleToggle = useCallback((id) => {
@@ -357,35 +286,26 @@ const ResultsDetailList = memo(({ filteredQuestions, answers, activeFilter, onFi
 
   const isEmpty = filteredQuestions.length === 0;
 
-  /* ── Tính globalNum bắt đầu từ 1, đếm đúng qua group ── */
+  // Biến đếm số câu hỏi gốc (globalIndex)
   let globalNum = 1;
 
   return (
-    <div className="space-y-4 font-sans" style={{ fontFamily: F.body }}>
+    <div className="w-full max-w-5xl mx-auto space-y-8">
 
-      {/* ── Sticky Header ── */}
-      <div
-        className="sticky top-0 z-30 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-slate-200/50 mb-2"
-        style={{ background: 'rgba(244,247,250,0.92)', backdropFilter: 'blur(12px)' }}
-      >
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-[8px] flex items-center justify-center border-2 border-b-[3px] shrink-0"
-            style={{ background: C.blueBg, borderColor: C.blueBorder }}
-          >
-            <BarChart3 size={18} color={C.blue} strokeWidth={2.5} />
+      {/* STICKY HEADER & TABS */}
+      <div className="sticky top-0 z-30 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 border-b-2 border-slate-200/50 bg-white/90 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 transition-all">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 rounded-[16px] md:rounded-[22px] bg-hub-blue-bg border-2 border-hub-blue-border border-b-[5px] flex items-center justify-center shrink-0 shadow-sm">
+            <BarChart3 className="w-6 h-6 md:w-8 md:h-8 text-hub-blue" strokeWidth={2.5} />
           </div>
-          <h3
-            className="font-display font-black text-[16px] sm:text-[18px] text-slate-800 uppercase tracking-wide pt-0.5"
-            style={{ fontFamily: F.display }}
-          >
+          <h3 className="font-display font-black text-[20px] md:text-[28px] text-slate-800 uppercase tracking-wider pt-1">
             Chi tiết đáp án
           </h3>
         </div>
         <FilterTabs activeFilter={activeFilter} onFilterChange={onFilterChange} />
       </div>
 
-      {/* ── Empty States ── */}
+      {/* CONTENT LIST */}
       {isEmpty ? (
         activeFilter === FILTER_TYPES.WRONG ? (
           <EmptyWrongQuestions />
@@ -393,9 +313,14 @@ const ResultsDetailList = memo(({ filteredQuestions, answers, activeFilter, onFi
           <EmptyAllQuestions />
         )
       ) : (
-        <div className="space-y-4">
+        <Motion.div 
+          className="space-y-8 md:space-y-12 pb-24"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
           {filteredQuestions.map((item) => {
-            /* ── Group ── */
+            
             if (item.type === 'group') {
               const validSubs = (item.subQuestions ?? []).filter((sq) => !sq.isExample);
               const startIndex = globalNum;
@@ -413,7 +338,6 @@ const ResultsDetailList = memo(({ filteredQuestions, answers, activeFilter, onFi
               );
             }
 
-            /* ── Câu đơn lẻ ── */
             if (item.isExample) return null;
             const num = globalNum++;
 
@@ -428,11 +352,12 @@ const ResultsDetailList = memo(({ filteredQuestions, answers, activeFilter, onFi
               />
             );
           })}
-        </div>
+        </Motion.div>
       )}
     </div>
   );
 });
 
 ResultsDetailList.displayName = 'ResultsDetailList';
+
 export default ResultsDetailList;

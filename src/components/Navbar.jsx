@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   Headphones, BookOpen, GraduationCap, Sparkles,
   LogOut, User, X, Home, FileText, ChevronRight, Star,
@@ -84,7 +84,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
   <AnimatePresence>
     {open && (
       <>
-        <motion.div
+        <Motion.div
           key="backdrop"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
@@ -93,7 +93,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden"
         />
 
-        <motion.div
+        <Motion.div
           key="drawer"
           variants={drawerVariants}
           initial="hidden" animate="visible" exit="exit"
@@ -147,7 +147,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
                 const Icon = item.icon;
                 const active = isItemActive(item);
                 return (
-                  <motion.button
+                  <Motion.button
                     key={item.id} custom={i} variants={itemVariants} initial="hidden" animate="visible"
                     onClick={() => { onNav(item); onClose(); }}
                     className={`flex flex-col items-start gap-3 p-4 rounded-[20px] border-2 border-b-[4px] transition-all outline-none text-left ${
@@ -160,7 +160,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
                       <Icon size={22} strokeWidth={2.5} />
                     </div>
                     <span className="font-display font-black text-[14px] leading-tight">{item.label}</span>
-                  </motion.button>
+                  </Motion.button>
                 );
               })}
             </div>
@@ -193,7 +193,7 @@ const MoreDrawer = ({ open, onClose, allItems, isItemActive, onNav, user, isSign
               </>
             )}
           </div>
-        </motion.div>
+        </Motion.div>
       </>
     )}
   </AnimatePresence>
@@ -213,7 +213,7 @@ const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick
   return (
     <AnimatePresence>
       {showMenu && (
-        <motion.div
+        <Motion.div
           ref={ref}
           initial={{ opacity: 0, y: 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -235,7 +235,7 @@ const ProfileDropdown = ({ showMenu, setShowMenu, onProfileClick, onAnswersClick
             <LogOut size={18} strokeWidth={2.5} />
             Đăng xuất
           </button>
-        </motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );

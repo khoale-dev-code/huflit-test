@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer
@@ -147,7 +147,7 @@ export default function DetailedDashboard() {
       {/* ── LEVEL UP TOAST ── */}
       <AnimatePresence>
         {showLevelUp && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: -32, scale: 0.92, x: '-50%' }}
             animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
             exit={{ opacity: 0, scale: 0.92, y: -20, x: '-50%' }}
@@ -161,7 +161,7 @@ export default function DetailedDashboard() {
                 Bạn vừa đạt <strong className="text-[#FF9600]">Level {analytics.level}</strong>
               </p>
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
 
@@ -222,14 +222,14 @@ export default function DetailedDashboard() {
               </span>
             </div>
             <div className="h-6 md:h-7 bg-slate-100 border-2 border-slate-200 rounded-full overflow-hidden shadow-inner p-[3px]">
-              <motion.div
+              <Motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${analytics.levelProgressPercent}%` }}
                 transition={{ duration: 1, ease: 'easeOut', type: "spring", bounce: 0.2 }}
                 className="h-full bg-gradient-to-r from-[#FFC200] to-[#FF9600] rounded-full relative"
               >
                 <div className="absolute top-0 left-0 right-0 h-1/3 bg-white/30 rounded-full" />
-              </motion.div>
+              </Motion.div>
             </div>
           </div>
         </div>
@@ -310,7 +310,7 @@ export default function DetailedDashboard() {
             {/* List */}
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
               <AnimatePresence mode="wait">
-                <motion.div
+                <Motion.div
                   key={activeTab}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
@@ -327,7 +327,7 @@ export default function DetailedDashboard() {
                         <p className="font-body text-[15px] font-bold text-slate-400 m-0 mt-1">Chưa có bài tập nào</p>
                       </div>
                     )}
-                </motion.div>
+                </Motion.div>
               </AnimatePresence>
             </div>
           </div>

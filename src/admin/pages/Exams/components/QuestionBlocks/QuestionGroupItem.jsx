@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, Layers, Check, Edit2, Music, Plus, Zap, Volume2, BookOpen, ChevronUp, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { QuestionItem } from './QuestionItem';
 import { AddQuestionForm } from './AddQuestionForm';
 import { QuestionImageUploader, QuestionAudioUploader } from './Uploaders';
@@ -89,7 +89,7 @@ export const QuestionGroupItem = ({ group, groupIndex, partId, onRemoveGroup, on
       {/* ── NỘI DUNG (AnimatePresence) ── */}
       <AnimatePresence initial={false}>
         {isExpanded && (
-          <motion.div
+          <Motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -245,13 +245,13 @@ export const QuestionGroupItem = ({ group, groupIndex, partId, onRemoveGroup, on
 
               {/* Form thêm câu hỏi mới */}
               {showAddSubQ && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <Motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                   <AddQuestionForm
                     onAdd={handleAddSubQuestion}
                     onCancel={() => setShowAddSubQ(false)}
                     hideMedia={true}
                   />
-                </motion.div>
+                </Motion.div>
               )}
 
               {/* Nút thêm câu hỏi */}
@@ -274,7 +274,7 @@ export const QuestionGroupItem = ({ group, groupIndex, partId, onRemoveGroup, on
 
               {/* ── NÚT LƯU & THU GỌN ── chỉ hiện khi có câu hỏi và không đang mở form thêm */}
               {!showAddSubQ && subQuestionsCount > 0 && (
-                <motion.button
+                <Motion.button
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => setIsExpanded(false)}
@@ -282,11 +282,11 @@ export const QuestionGroupItem = ({ group, groupIndex, partId, onRemoveGroup, on
                 >
                   <Check size={20} strokeWidth={3} />
                   Lưu & Thu gọn nhóm ({subQuestionsCount} câu)
-                </motion.button>
+                </Motion.button>
               )}
             </div>
 
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>
