@@ -16,7 +16,7 @@ import {
   Mail, Lock, User, LogIn, ArrowRight, Loader2, 
   Zap, Trophy, Star, BookOpen, Target, Users, ShieldCheck 
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 import { auth, googleProvider } from '../../config/firebase';
 import { supabase } from '../../config/supabaseClient';
@@ -39,7 +39,7 @@ const THEME = {
 
 /* ─── SUB-COMPONENT: STAT CARD ──────────────────────────────── */
 const StatCard = ({ icon: Icon, value, label, delay }) => (
-  <motion.div
+  <Motion.div
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay, type: 'spring' }}
@@ -52,7 +52,7 @@ const StatCard = ({ icon: Icon, value, label, delay }) => (
       <div className="text-white font-black text-lg leading-none">{value}</div>
       <div className="text-blue-100 text-xs font-bold mt-1 uppercase tracking-wider">{label}</div>
     </div>
-  </motion.div>
+  </Motion.div>
 );
 
 /* ─── SUB-COMPONENT: INPUT FIELD ────────────────────────────── */
@@ -159,15 +159,15 @@ const AuthPage = () => {
         
         {/* Background Decorations */}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 8, repeat: Infinity }} className="absolute -top-20 -right-20 w-80 h-80 bg-sky-300 rounded-full blur-[100px]" />
+        <Motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 8, repeat: Infinity }} className="absolute -top-20 -right-20 w-80 h-80 bg-sky-300 rounded-full blur-[100px]" />
 
         <div className="relative z-10">
-          <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center gap-3 mb-10">
+          <Motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center gap-3 mb-10">
             <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-xl border-b-4 border-slate-200">
               <BookOpen className="text-[#1CB0F6]" size={28} strokeWidth={3} />
             </div>
             <span className="text-3xl font-black text-white tracking-tight">HUB<span className="text-yellow-300">STUDY</span></span>
-          </motion.div>
+          </Motion.div>
 
           <h1 className="text-5xl font-black text-white leading-tight mb-6 tracking-tight">
             Chinh phục đề thi<br />theo cách <span className="text-yellow-300 underline decoration-8 decoration-yellow-300/30">thông minh</span>.
@@ -188,7 +188,7 @@ const AuthPage = () => {
 
       {/* ── RIGHT PANEL (Auth Form) ── */}
       <div className="w-full lg:w-[50%] flex items-center justify-center p-6 bg-white lg:bg-transparent">
-        <motion.div 
+        <Motion.div 
           initial={{ opacity: 0, scale: 0.95 }} 
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-[420px]"
@@ -223,12 +223,12 @@ const AuthPage = () => {
 
             <AnimatePresence mode="wait">
               {error && (
-                <motion.div 
+                <Motion.div 
                   initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                   className="mb-6 p-4 rounded-2xl bg-red-50 border-2 border-red-100 text-red-500 text-xs font-bold flex items-center gap-2"
                 >
                   <Target size={14} className="rotate-45" /> {error}
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
 
@@ -258,7 +258,7 @@ const AuthPage = () => {
                 </div>
               )}
 
-              <motion.button
+              <Motion.button
                 whileHover={{ translateY: -2 }}
                 whileTap={{ translateY: 2 }}
                 disabled={loading}
@@ -266,7 +266,7 @@ const AuthPage = () => {
               >
                 {loading ? <Loader2 className="animate-spin" /> : isLogin ? <LogIn size={18} /> : <ArrowRight size={18} />}
                 {isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}
-              </motion.button>
+              </Motion.button>
             </form>
 
             <div className="flex items-center gap-4 my-8">
@@ -299,7 +299,7 @@ const AuthPage = () => {
               {isLogin ? 'Đăng ký ngay →' : 'Đăng nhập →'}
             </button>
           </p>
-        </motion.div>
+        </Motion.div>
       </div>
     </div>
   );
