@@ -78,7 +78,7 @@ const HeaderSection = ({ isSignedIn, user, onStartClick }) => {
       <div className="relative z-10 text-center max-w-5xl mx-auto px-4">
         
         {/* Cá nhân hóa Tagline bằng isSignedIn và user */}
-        <motion.div 
+        <Motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white border-2 border-blue-200 border-b-[4px] text-blue-700 text-[13px] sm:text-[14px] font-quick font-bold mb-8 shadow-sm"
@@ -89,9 +89,9 @@ const HeaderSection = ({ isSignedIn, user, onStartClick }) => {
               ? `Chào mừng trở lại, ${user.full_name}! 👋` 
               : 'Nền tảng luyện thi thông minh 2026'}
           </span>
-        </motion.div>
+        </Motion.div>
 
-        <motion.h1 
+        <Motion.h1 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
@@ -104,18 +104,18 @@ const HeaderSection = ({ isSignedIn, user, onStartClick }) => {
               <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="4" fill="transparent" strokeLinecap="round"/>
             </svg>
           </span>
-        </motion.h1>
+        </Motion.h1>
 
-        <motion.p 
+        <Motion.p 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="text-[16px] sm:text-[18px] md:text-[20px] text-slate-500 font-nunito font-bold max-w-2xl mx-auto mb-12 leading-relaxed"
         >
           Học như chơi, thi như thật! Trải nghiệm phòng thi ảo với ngân hàng đề cực khủng và AI phân tích điểm yếu thông minh.
-        </motion.p>
+        </Motion.p>
 
-        <motion.div 
+        <Motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -129,9 +129,9 @@ const HeaderSection = ({ isSignedIn, user, onStartClick }) => {
             {isSignedIn ? 'Tiếp tục luyện tập' : 'Bắt đầu ngay'}
             <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform hidden sm:block" strokeWidth={4} />
           </button>
-        </motion.div>
+        </Motion.div>
 
-        <motion.div 
+        <Motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -148,7 +148,7 @@ const HeaderSection = ({ isSignedIn, user, onStartClick }) => {
               </div>
             </div>
           ))}
-        </motion.div>
+        </Motion.div>
       </div>
     </div>
   );

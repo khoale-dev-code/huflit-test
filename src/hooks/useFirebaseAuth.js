@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
+  onAuthStateChanged, 
   signInWithPopup, 
   signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider, 
   signOut, 
-  onAuthStateChanged, 
-  GoogleAuthProvider,
-  setPersistence,
-  browserLocalPersistence
+  setPersistence, 
+  browserLocalPersistence 
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth } from '../config/firebase'; 
 import { supabase } from '../config/supabaseClient';
 
+/**
+ * 🛡️ HOOK: useFirebaseAuth
+ * Quản lý xác thực Firebase & Đồng bộ hồ sơ Supabase
+ */
 export const useFirebaseAuth = () => {
   const [user, setUser] = useState(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -18,54 +23,67 @@ export const useFirebaseAuth = () => {
   const [error, setError] = useState(null);
 
   /**
-   * 🔄 HÀM ĐỒNG BỘ DỮ LIỆU SANG SUPABASE
-   * Được gọi mỗi khi trạng thái đăng nhập thay đổi
+   * 🔄 ĐỒNG BỘ DỮ LIỆU SANG SUPABASE
+   * Giải quyết lỗi 400 bằng cách chỉ gửi các cột chắc chắn tồn tại.
    */
-  const syncUserToSupabase = async (fbUser) => {
+  const syncUserToSupabase = useCallback(async (fbUser) => {
     if (!fbUser) return;
-
-    console.log("🔄 [Sync] Đang thử đồng bộ user:", fbUser.email);
-
+    
     try {
-      // Thực hiện UPSERT: Nếu chưa có ID thì Insert, có rồi thì Update
-      const { data, error: syncError, status } = await supabase
-        .from('profiles')
-        .upsert({
-          id: fbUser.uid,         // ĐẢM BẢO cột 'id' trong SQL là kiểu TEXT
-          email: fbUser.email,
-          full_name: fbUser.displayName || 'Người dùng mới',
-          avatar_url: fbUser.photoURL || '',
-          last_login: new Date().toISOString(),
-        }, { onConflict: 'id' });
+      const profileData = {
+        id: fbUser.uid,
+        email: fbUser.email,
+        full_name: fbUser.displayName || fbUser.email.split('@')[0],
+        avatar_url: fbUser.photoURL || '',
+        last_login: new Date().toISOString(), // Theo dõi lần cuối đăng nhập
+      };
 
-      if (syncError) {
-        console.error('❌ [Sync] Lỗi Supabase:', syncError.message);
-        console.error('📊 [Sync] Mã trạng thái HTTP:', status);
-        setError(`Lỗi đồng bộ: ${syncError.message}`);
-      } else {
-        console.log('✅ [Sync] Đồng bộ Supabase thành công! Status:', status);
+      // 🚀 LƯU Ý: Chỉ thêm dòng này nếu bạn ĐÃ chạy lệnh SQL thêm cột updated_at
+      // profileData.updated_at = new Date().toISOString();
+
+      const { error: _syncError } = await supabase
+        .from('profiles')
+        .upsert(profileData, { onConflict: 'id' });
+
+      if (_syncError) {
+        if (import.meta.env.DEV) console.warn("⚠️ [Supabase Sync]:", _syncError.message);
       }
     } catch (err) {
-      console.error('🚨 [Sync] Lỗi hệ thống:', err);
+      if (import.meta.env.DEV) console.error("🚨 [Sync Critical Error]:", err);
     }
-  };
+  }, []);
 
   /**
-   * 📡 LẮNG NGHE TRẠNG THÁI AUTH
+   * 📡 LẮNG NGHE TRẠNG THÁI & XỬ LÝ REDIRECT
    */
   useEffect(() => {
-    // Thiết lập ghi nhớ đăng nhập trên trình duyệt
-    setPersistence(auth, browserLocalPersistence);
+    // Thiết lập Persistence một lần duy nhất
+    setPersistence(auth, browserLocalPersistence).catch((err) => {
+      console.warn("⚠️ [Auth Persistence]:", err.message);
+    });
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    // Xử lý kết quả trả về từ Redirect (Tránh lỗi cửa sổ không đóng của Popup)
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user && import.meta.env.DEV) {
+          console.log("✅ [Auth] Đăng nhập Redirect thành công");
+        }
+      })
+      .catch((err) => {
+        if (err.message.includes('Cross-Origin-Opener-Policy')) {
+          // Lỗi COOP thường không chặn được Redirect, chỉ hiện cảnh báo
+          console.info("ℹ️ [COOP Info]: Redirect handled security policy.");
+        } else {
+          setError(err.message);
+        }
+      });
+
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setLoading(true);
-      if (firebaseUser) {
-        console.log("👤 [Firebase] Đã nhận diện User:", firebaseUser.email);
-        setUser(firebaseUser);
+      if (currentUser) {
+        setUser(currentUser);
         setIsSignedIn(true);
-        
-        // Kích hoạt đồng bộ sang "nhà mới" Supabase
-        await syncUserToSupabase(firebaseUser);
+        await syncUserToSupabase(currentUser);
       } else {
         setUser(null);
         setIsSignedIn(false);
@@ -73,37 +91,38 @@ export const useFirebaseAuth = () => {
       setLoading(false);
     });
 
-    return unsubscribe;
-  }, []);
+    return () => unsubscribe();
+  }, [syncUserToSupabase]);
 
   /**
-   * 🔑 ĐĂNG NHẬP GOOGLE
-   * Kết hợp Popup và Redirect để tránh lỗi COOP
+   * 🔑 ĐĂNG NHẬP GOOGLE (Hybrid)
    */
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
     setLoading(true);
     setError(null);
-
+    
     try {
-      console.log("🔑 [Auth] Khởi động đăng nhập Google...");
-      
-      // Thử dùng Popup trước
+      // 1. Thử dùng Popup trước cho trải nghiệm nhanh
       const result = await signInWithPopup(auth, provider);
-      console.log("✅ [Auth] Đăng nhập Popup thành công");
       return { success: true, user: result.user };
-
     } catch (err) {
-      console.warn("⚠️ [Auth] Lỗi Popup (có thể do COOP):", err.code);
-      
-      // Nếu lỗi COOP hoặc Popup bị chặn, tự động chuyển sang Redirect
-      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.message.includes('Cross-Origin-Opener-Policy')) {
-        console.log("🔄 [Auth] Đang chuyển sang phương thức Redirect...");
+      // 2. Nếu bị chặn bởi COOP hoặc Popup Blocked -> Chuyển sang Redirect
+      const shouldRedirect = 
+        err.code === 'auth/popup-blocked' || 
+        err.code === 'auth/popup-closed-by-user' ||
+        err.message.includes('Cross-Origin-Opener-Policy');
+
+      if (shouldRedirect) {
+        if (import.meta.env.DEV) console.log("🔄 [Auth] Đang chuyển hướng sang Redirect...");
         await signInWithRedirect(auth, provider);
-      } else {
-        setError(err.message);
-        return { success: false, error: err.message };
+        return { success: true, method: 'redirect' };
       }
+      
+      setError(err.message);
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
@@ -113,22 +132,27 @@ export const useFirebaseAuth = () => {
    * 🚪 ĐĂNG XUẤT
    */
   const handleSignOut = async () => {
+    setLoading(true);
     try {
       await signOut(auth);
-      console.log("👋 [Auth] Đã đăng xuất");
+      // Xóa nháp lưu cục bộ nếu cần
+      localStorage.removeItem('exam-progress-draft');
       return { success: true };
     } catch (err) {
+      setError(err.message);
       return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
     }
   };
 
-  return {
-    user,
-    isSignedIn,
-    loading,
-    error,
-    signInWithGoogle,
-    signOut: handleSignOut,
+  return { 
+    user, 
+    isSignedIn, 
+    loading, 
+    error, 
+    signInWithGoogle, 
+    signOut: handleSignOut 
   };
 };
 

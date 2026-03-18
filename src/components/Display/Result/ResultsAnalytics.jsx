@@ -19,7 +19,7 @@ const SkillBar = memo(({ label, correct, total, index }) => {
   }
 
   return (
-    <motion.div 
+    <Motion.div 
       initial={{ opacity: 0, y: 15 }} 
       animate={{ opacity: 1, y: 0 }} 
       transition={{ delay: index * 0.1, type: "spring", stiffness: 300, damping: 24 }}
@@ -41,7 +41,7 @@ const SkillBar = memo(({ label, correct, total, index }) => {
       
       {/* Khung thanh tiến độ 3D */}
       <div className="h-5 md:h-6 bg-slate-100 border-2 border-slate-200/80 rounded-full overflow-hidden shadow-inner p-[3px] flex items-center">
-        <motion.div
+        <Motion.div
           initial={{ width: 0 }}
           whileInView={{ width: `${percent}%` }}
           viewport={{ once: true }}
@@ -51,9 +51,9 @@ const SkillBar = memo(({ label, correct, total, index }) => {
         >
           {/* Hiệu ứng bóng lóa (Glossy) ở viền trên tạo cảm giác nhựa 3D */}
           <div className="absolute top-0.5 left-1.5 right-1.5 h-[35%] bg-white/40 rounded-full" />
-        </motion.div>
+        </Motion.div>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 });
 

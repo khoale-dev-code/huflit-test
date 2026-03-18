@@ -7,7 +7,7 @@ import {
   Trash2, PenTool, Mic, ArrowLeft, GripVertical,
   ChevronUp, ChevronDown, LayoutTemplate, Settings, Info, ImageIcon, Music
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { createExam, uploadAudio, deleteAudio } from '../../services/examService';
@@ -238,10 +238,10 @@ const CreateExam = () => {
             
             <AnimatePresence>
               {error && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-5 flex items-start gap-2.5 p-3.5 bg-[#fff0f0] border-2 border-[#ffc1c1] border-b-[3px] rounded-[16px] text-[#FF4B4B] shadow-sm">
+                <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-5 flex items-start gap-2.5 p-3.5 bg-[#fff0f0] border-2 border-[#ffc1c1] border-b-[3px] rounded-[16px] text-[#FF4B4B] shadow-sm">
                   <AlertTriangle size={18} strokeWidth={3} className="shrink-0 mt-0.5" />
                   <span className="font-body font-bold text-[14px] leading-snug">{error}</span>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
 
@@ -267,7 +267,7 @@ const CreateExam = () => {
 
             {/* ── TAB 1: THÔNG TIN CHUNG ── */}
             {activeTab === 'info' && (
-              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+              <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
                 <div className="bg-white p-5 sm:p-6 rounded-[24px] border-2 border-slate-200 border-b-[4px] shadow-sm">
                   <h3 className="text-[17px] sm:text-[18px] font-display font-black text-slate-800 mb-5 flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-[10px] bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center shadow-sm">
@@ -361,7 +361,7 @@ const CreateExam = () => {
                     </label>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             )}
 
             {/* ── TAB 2: BUILDER (XÂY DỰNG CẤU TRÚC) ── */}
@@ -385,7 +385,7 @@ const CreateExam = () => {
                   </div>
                 </div>
 
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mt-4 space-y-6">
+                <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mt-4 space-y-6">
                   {form.parts.length === 0 ? (
                     <div className="text-center py-16 bg-white border-2 border-dashed border-slate-300 rounded-[24px] shadow-sm">
                       <div className="w-16 h-16 bg-slate-100 rounded-[16px] border-b-[3px] border-slate-200 flex items-center justify-center mx-auto mb-4">
@@ -485,7 +485,7 @@ const CreateExam = () => {
                       );
                     })
                   )}
-                </motion.div>
+                </Motion.div>
               </div>
             )}
           </div>

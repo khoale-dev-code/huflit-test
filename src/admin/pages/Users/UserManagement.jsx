@@ -8,7 +8,7 @@ import {
   ShieldCheck, Info, ChevronRight,
   UserCheck, UserX, Zap, Crown
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion , AnimatePresence } from 'framer-motion';
 import { getUsers, updateUserRole, deleteUser } from '../../services/userService';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminNavbar from '../../components/AdminNavbar';
@@ -32,11 +32,11 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, user, isDeleting }) =>
     {isOpen && user && (
       <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
            style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           onClick={!isDeleting ? onClose : undefined} />
 
-        <motion.div
+        <Motion.div
           initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
@@ -76,7 +76,7 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, user, isDeleting }) =>
               </button>
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       </div>
     )}
   </AnimatePresence>
@@ -90,11 +90,11 @@ const RoleChangeModal = ({ isOpen, onClose, onConfirm, user, isUpdating }) => {
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
            style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           onClick={!isUpdating ? onClose : undefined} />
 
-        <motion.div
+        <Motion.div
           initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
@@ -147,7 +147,7 @@ const RoleChangeModal = ({ isOpen, onClose, onConfirm, user, isUpdating }) => {
               </button>
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       </div>
     </AnimatePresence>
   );
@@ -174,7 +174,7 @@ const UserCard = ({ user, onRoleChange, onDelete }) => {
   const status = getStatus(user.last_login);
 
   return (
-    <motion.div
+    <Motion.div
       layout
       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}
       className="bg-white border-2 border-slate-200 border-b-[4px] rounded-[22px] hover:border-slate-300 hover:-translate-y-0.5 transition-all shadow-sm group"
@@ -239,7 +239,7 @@ const UserCard = ({ user, onRoleChange, onDelete }) => {
         <span className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5"><Clock size={11} strokeWidth={2.5} /> Lần cuối truy cập</span>
         <span className={`text-[12px] font-black ${status.color}`}>{status.label}</span>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 };
 

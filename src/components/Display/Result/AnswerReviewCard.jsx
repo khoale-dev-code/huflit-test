@@ -102,7 +102,7 @@ const AnswerReviewCard = memo(
         {/* ─── Khu vực Giải thích (Mở rộng với Animation) ─── */}
         <AnimatePresence initial={false}>
           {isExpanded && (
-            <motion.div
+            <Motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -120,7 +120,7 @@ const AnswerReviewCard = memo(
                   questionId={question.id}
                 />
               </div>
-            </motion.div>
+            </Motion.div>
           )}
         </AnimatePresence>
       </div>

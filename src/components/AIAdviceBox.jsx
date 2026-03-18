@@ -121,7 +121,7 @@ const AIAdviceBox = memo(({ advice, loading, error }) => {
 
   /* ── Loading State (Gamified) ── */
   if (loading) return (
-    <motion.div 
+    <Motion.div 
       initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
       className="flex items-center gap-4 p-4 sm:p-5 bg-hub-purple-bg border-2 border-hub-purple-border border-b-[6px] rounded-[24px] mb-6 shadow-sm"
     >
@@ -132,12 +132,12 @@ const AIAdviceBox = memo(({ advice, loading, error }) => {
         <p className="font-display font-black text-[16px] text-hub-purple-dark leading-none mb-1">Đang phân tích...</p>
         <p className="font-body font-bold text-[13px] text-hub-purple-dark/80">AI Mentor đang tìm hiểu lỗi sai của bạn</p>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 
   /* ── Error State (Gamified) ── */
   if (error) return (
-    <motion.div 
+    <Motion.div 
       initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
       className="flex items-start gap-4 p-4 sm:p-5 bg-hub-red-bg border-2 border-hub-red-border border-b-[6px] rounded-[24px] mb-6 shadow-sm"
     >
@@ -150,14 +150,14 @@ const AIAdviceBox = memo(({ advice, loading, error }) => {
           Vui lòng đọc giải thích mặc định bên dưới hoặc thử lại sau nhé!
         </p>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 
   if (!advice?.message) return null;
 
   /* ── Success State (Main AI Box) ── */
   return (
-    <motion.div 
+    <Motion.div 
       initial={{ opacity: 0, y: 15, scale: 0.98 }} 
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
@@ -221,7 +221,7 @@ const AIAdviceBox = memo(({ advice, loading, error }) => {
           </div>
         )}
       </div>
-    </motion.div>
+    </Motion.div>
   );
 });
 

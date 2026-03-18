@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../../config/firebase';
-import { supabase } from '../../config/supabaseClient';
+import { auth } from '../../config/firebase'; // Hãy điều chỉnh relative path nếu cần
+import { supabase } from '../../config/supabaseClient'; 
 
+/**
+ * 🛡️ HOOK: useAdminAuth
+ * Mục đích: Đồng bộ trạng thái đăng nhập từ Firebase Auth và kiểm tra phân quyền (Role-Based Access Control) trên Supabase.
+ */
 export const useAdminAuth = () => {
   const [admin, setAdmin] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -10,7 +14,8 @@ export const useAdminAuth = () => {
   const [error, setError] = useState(null);
 
   /**
-   * 🛡️ KIỂM TRA QUYỀN: Truy vấn bảng profiles trên Supabase
+   * Truy vấn bảng `profiles` trên Supabase để xác minh quyền `admin`
+   * Tách biệt hàm này giúp logic rõ ràng, tuân thủ Single Responsibility Principle.
    */
   const checkAdminRole = async (uid) => {
     try {
@@ -35,8 +40,12 @@ export const useAdminAuth = () => {
   };
 
   useEffect(() => {
+    // Subscribe vào luồng thay đổi trạng thái đăng nhập của Firebase
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
+      setError(null);
+
+      // Nếu không có user đăng nhập, reset toàn bộ state
       if (!user) {
         setAdmin(null);
         setIsAdmin(false);
@@ -44,40 +53,43 @@ export const useAdminAuth = () => {
         return;
       }
 
-      // Bước ngoặt: Thay vì tin Firebase hoàn toàn, ta hỏi Supabase về Role
-      const result = await checkAdminRole(user.uid);
+      // Cross-check Firebase UID với Database Supabase để cấp quyền
+      const { hasRole, adminData, error: roleError } = await checkAdminRole(user.uid);
 
-      if (result.hasRole) {
-        setAdmin(result.adminData);
+      if (hasRole) {
+        setAdmin(adminData);
         setIsAdmin(true);
-        setError(null);
       } else {
         setAdmin(null);
         setIsAdmin(false);
-        setError(result.error);
-        // Nếu không phải admin, có thể lựa chọn đẩy họ ra khỏi trang admin
+        setError(roleError);
+        
+        // Tùy chọn (Optional): Tự động đăng xuất nếu user hợp lệ nhưng không phải là admin
         // await signOut(auth); 
       }
+
       setLoading(false);
     });
 
-    return unsubscribe;
+    // Luôn dọn dẹp (Cleanup) listener khi component unmount để tránh Memory Leak
+    return () => unsubscribe();
   }, []);
 
+  /**
+   * Action Đăng xuất Admin
+   */
   const adminSignOut = async () => {
-    await signOut(auth);
-    setAdmin(null);
-    setIsAdmin(false);
-    return { success: true };
+    try {
+      await signOut(auth);
+      setAdmin(null);
+      setIsAdmin(false);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   };
 
-  return {
-    admin,
-    isAdmin,
-    loading,
-    error,
-    signOut: adminSignOut
-  };
+  return { admin, isAdmin, loading, error, signOut: adminSignOut };
 };
 
 export default useAdminAuth;

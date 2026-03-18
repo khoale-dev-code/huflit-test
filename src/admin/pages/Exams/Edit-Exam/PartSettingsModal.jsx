@@ -73,7 +73,7 @@ const PartSettingsModal = ({ part, onClose, onUpdatePart, onAudioUpload, onAudio
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 font-sans" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
       {/* Lớp nền mờ */}
-      <motion.div 
+      <Motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }} 
@@ -82,7 +82,7 @@ const PartSettingsModal = ({ part, onClose, onUpdatePart, onAudioUpload, onAudio
       />
       
       {/* Khối Modal chính */}
-      <motion.div
+      <Motion.div
         initial={{ scale: 0.95, opacity: 0, y: 20 }} 
         animate={{ scale: 1, opacity: 1, y: 0 }} 
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -192,11 +192,11 @@ const PartSettingsModal = ({ part, onClose, onUpdatePart, onAudioUpload, onAudio
                 
                 {/* Image Preview */}
                 {localData.imageUrl && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3">
+                  <Motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3">
                     <div className="p-2 bg-slate-50 rounded-[16px] border-2 border-dashed border-slate-200 w-max max-w-full inline-block">
                       <img src={localData.imageUrl} alt="Preview" className="max-h-40 object-contain rounded-[10px] bg-white border border-slate-100 shadow-sm" onError={(e) => e.target.style.display = 'none'} />
                     </div>
-                  </motion.div>
+                  </Motion.div>
                 )}
               </div>
 
@@ -282,7 +282,7 @@ const PartSettingsModal = ({ part, onClose, onUpdatePart, onAudioUpload, onAudio
             <Save size={18} strokeWidth={2.5} /> Lưu Cài Đặt
           </button>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   );
 };

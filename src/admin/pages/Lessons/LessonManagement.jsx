@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Search, BookOpen, Zap, Target, BookMarked, Sparkles, Loader2, PenTool } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 // Component Layout chung của Admin
 import AdminSidebar from '../../components/AdminSidebar';
@@ -216,7 +216,7 @@ const LessonManagement = () => {
                     const formattedDate = new Date(lesson.created_at).toLocaleDateString('vi-VN');
 
                     return (
-                      <motion.div 
+                      <Motion.div 
                         initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ delay: index * 0.05 }}
                         key={lesson.id} 
@@ -279,7 +279,7 @@ const LessonManagement = () => {
                           </div>
                         </div>
 
-                      </motion.div>
+                      </Motion.div>
                     );
                   })}
                 </AnimatePresence>

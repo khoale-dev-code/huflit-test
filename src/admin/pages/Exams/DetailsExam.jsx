@@ -8,7 +8,7 @@ import {
   LayoutTemplate, FileText, ChevronDown, ChevronUp, Image as ImageIcon, Music, Star, Layers,
   Eye, EyeOff // 🔒 Thêm 2 Icon này để dùng cho Badge trạng thái
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { getExamById } from '../../services/examService';
 import AdminSidebar from '../../components/AdminSidebar';
@@ -270,7 +270,7 @@ const DetailsExam = () => {
 
         {/* ── SCROLLABLE BODY ── */}
         <main className="flex-1 overflow-y-auto custom-scrollbar">
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-6 sm:space-y-8">
+          <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-6 sm:space-y-8">
 
             {/* ── HERO BANNER ── */}
             <div className="bg-white p-6 sm:p-8 rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -378,7 +378,7 @@ const DetailsExam = () => {
                         {/* ── NỘI DUNG CHI TIẾT CỦA PART ── */}
                         <AnimatePresence>
                           {isExpanded && (
-                            <motion.div 
+                            <Motion.div 
                               initial={{ height: 0, opacity: 0 }} 
                               animate={{ height: 'auto', opacity: 1 }} 
                               exit={{ height: 0, opacity: 0 }}
@@ -425,7 +425,7 @@ const DetailsExam = () => {
                                   return <PreviewQuestionCard key={q.id} question={q} />;
                                 })}
                               </div>
-                            </motion.div>
+                            </Motion.div>
                           )}
                         </AnimatePresence>
 
@@ -446,7 +446,7 @@ const DetailsExam = () => {
               </div>
             </div>
 
-          </motion.div>
+          </Motion.div>
         </main>
       </div>
     </div>

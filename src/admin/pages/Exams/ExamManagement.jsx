@@ -7,7 +7,7 @@ import {
   Loader2, AlertTriangle, RefreshCw, LayoutGrid, CheckCircle2, Trophy,
   ChevronDown, Eye, EyeOff, UploadCloud
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 
 // ⚠️ LƯU Ý: Hãy đảm bảo bạn đã export 'updateExamStatus' và 'importExam' từ examService.js
@@ -28,8 +28,8 @@ const EXAM_CATEGORIES = [
 // ─── Modal Xóa Đề Thi (Compact Gamified Pop-up) ───
 const DeleteModal = ({ exam, onConfirm, onCancel, saving }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onCancel} />
-    <motion.div
+    <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onCancel} />
+    <Motion.div
       initial={{ scale: 0.9, opacity: 0, y: 15 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 15 }}
       transition={{ type: "spring", damping: 25, stiffness: 300 }}
       className="bg-white rounded-[24px] p-6 sm:p-8 w-full max-w-md border-2 border-slate-200 border-b-[8px] relative z-10 shadow-xl"
@@ -64,7 +64,7 @@ const DeleteModal = ({ exam, onConfirm, onCancel, saving }) => (
           </button>
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   </div>
 );
 
@@ -309,10 +309,10 @@ const ExamManagement = () => {
             {/* ── ERROR BANNER ── */}
             <AnimatePresence>
               {error && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="p-3 sm:p-4 bg-[#fff0f0] border-2 border-[#ffc1c1] border-b-[3px] rounded-[16px] flex items-start gap-2.5 text-[13px] sm:text-[14px] font-body font-bold text-[#FF4B4B] shadow-sm">
+                <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="p-3 sm:p-4 bg-[#fff0f0] border-2 border-[#ffc1c1] border-b-[3px] rounded-[16px] flex items-start gap-2.5 text-[13px] sm:text-[14px] font-body font-bold text-[#FF4B4B] shadow-sm">
                   <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5" strokeWidth={2.5} />
                   <span>{error}</span>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
 
@@ -366,7 +366,7 @@ const ExamManagement = () => {
                     const isDraft = !exam.is_public;
 
                     return (
-                      <motion.div 
+                      <Motion.div 
                         initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
                         key={exam.id} 
                         onClick={() => navigate(`/admin/exams/detail/${exam.id}`)}
@@ -470,7 +470,7 @@ const ExamManagement = () => {
                           </div>
                         </div>
 
-                      </motion.div>
+                      </Motion.div>
                     );
                   })}
                 </div>

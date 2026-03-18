@@ -35,9 +35,9 @@ export const PartResults = memo(({ partResults }) => {
             {listeningKeys.map((p, index) => {
               const { score, max } = partResults.listeningByPart[p];
               return (
-                <motion.div key={`listening-${p}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+                <Motion.div key={`listening-${p}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
                   <PartResultCard label={`Part ${p}`} score={score} maxScore={max} />
-                </motion.div>
+                </Motion.div>
               );
             })}
           </div>
@@ -56,9 +56,9 @@ export const PartResults = memo(({ partResults }) => {
             {readingKeys.map((p, index) => {
               const { score, max } = partResults.readingByPart[p];
               return (
-                <motion.div key={`reading-${p}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + index * 0.1 }}>
+                <Motion.div key={`reading-${p}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + index * 0.1 }}>
                   <PartResultCard label={`Part ${p}`} score={score} maxScore={max} />
-                </motion.div>
+                </Motion.div>
               );
             })}
           </div>
@@ -85,9 +85,9 @@ const PartResultCard = memo(({ label, score, maxScore }) => {
         <span className="text-[14px] font-bold text-slate-400">/{maxScore}</span>
       </div>
       <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-3 border border-slate-200 relative">
-        <motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} transition={{ duration: 1, ease: "easeOut" }} className={`h-full rounded-full relative ${theme.bar}`}>
+        <Motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} transition={{ duration: 1, ease: "easeOut" }} className={`h-full rounded-full relative ${theme.bar}`}>
           <div className="absolute top-0.5 left-1 right-1 h-1 bg-white/30 rounded-full" />
-        </motion.div>
+        </Motion.div>
       </div>
       <div className={`px-3 py-1 rounded-[10px] text-[11px] font-extrabold text-white uppercase tracking-widest ${theme.badgeBg}`}>{theme.text}</div>
     </div>

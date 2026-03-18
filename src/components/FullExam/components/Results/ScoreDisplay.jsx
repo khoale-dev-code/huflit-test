@@ -59,7 +59,7 @@ export const ScoreDisplay = memo(({ results, convertedScore, examCategory }) => 
         <div className="relative w-40 h-40 mb-6 flex items-center justify-center">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 144 144">
             <circle cx="72" cy="72" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="12" />
-            <motion.circle
+            <Motion.circle
               cx="72" cy="72" r={radius} fill="none" stroke={themeData.color} strokeWidth="12" strokeLinecap="round"
               strokeDasharray={circumference}
               initial={{ strokeDashoffset: circumference }}
@@ -77,14 +77,14 @@ export const ScoreDisplay = memo(({ results, convertedScore, examCategory }) => 
           </div>
         </div>
 
-        <motion.div 
+        <Motion.div 
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="px-5 py-2 rounded-[14px] mb-4 border-b-[3px] text-white font-display font-black uppercase"
           style={{ backgroundColor: themeData.color, borderColor: themeData.border }}
         >
           {themeData.level}
-        </motion.div>
+        </Motion.div>
 
         <div className="w-full bg-slate-50 border-2 border-slate-100 rounded-[16px] p-4 relative mt-4">
           <p className="text-[13px] font-body font-bold text-slate-500 italic">

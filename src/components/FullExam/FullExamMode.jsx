@@ -19,7 +19,7 @@ import { ExamSetup }            from './components/ExamSetup/ExamSetup';
 import { ExamScreen }           from './components/ExamScreen/ExamScreen';
 import { ResultsScreen }        from './components/Results/ResultsScreen';
 import { Timer }                from './components/Header/Timer';
-import { AutosaveIndicator }    from './components/Header/AutosaveIndicator';
+// 🚀 Đã xóa AutosaveIndicator ở đây
 import { TimeWarning }          from './components/Warnings/TimeWarning'; 
 import { OfflineWarning }       from './components/Warnings/OfflineWarning';
 import { SubmitModal }          from './components/Modals/SubmitModal';
@@ -38,8 +38,6 @@ const FullExamMode = ({ onComplete }) => {
 
   const [showWarning, setShowWarning] = useState(false);  
   const [showSubmitModal, setShowSubmitModal] = useState(false);  
-  const [isSaving, setIsSaving] = useState(false);  
-  const [lastSaved, setLastSaved] = useState(null);   
   const [saveError, setSaveError] = useState(null);   
   const [submitRetrying, setSubmitRetrying] = useState(false);  
 
@@ -58,7 +56,7 @@ const FullExamMode = ({ onComplete }) => {
   const sectionRef = useRef(state.section);
   useEffect(() => { sectionRef.current = state.section; }, [state.section]);
 
-  // 1. LƯU NHÁP & NGĂN REFRESH
+  // 1. NGĂN REFRESH KHI ĐANG THI
   useEffect(() => {
     const handler = (e) => {
       if (state.mode === EXAM_MODES.EXAM && Object.keys(state.answers).length > 0) {
@@ -69,6 +67,7 @@ const FullExamMode = ({ onComplete }) => {
     return () => window.removeEventListener('beforeunload', handler);
   }, [state.mode, state.answers]);
 
+  // 2. TẢI BẢN NHÁP TỪ LOCALSTORAGE (NẾU CÓ)
   useEffect(() => {
     if (!state.examId) return;
     try {
@@ -82,36 +81,26 @@ const FullExamMode = ({ onComplete }) => {
     }
   }, [state.examId, setAnswers]);
 
-  // 🚀 FIX: Xử lý timeout đúng cách trong useEffect để tránh no-unsafe-finally
+  // 3. TỰ ĐỘNG LƯU NHÁP (Chỉ lưu ngầm, không hiện Indicator)
   useEffect(() => {
     if (!state.examId || state.mode !== EXAM_MODES.EXAM) return;
-    
-    let timerId;
-    setIsSaving(true);
     
     try {
       localStorage.setItem(EXAM_DRAFT_KEY, JSON.stringify({ 
         examId: state.examId, answers: state.answers, timestamp: Date.now() 
       }));
-      setLastSaved(new Date());
-    } catch {
-      setSaveError("Không thể lưu bản nháp vào trình duyệt.");
-    } finally {
-      timerId = setTimeout(() => setIsSaving(false), 800);
+    } catch (e) {
+      console.error("Autosave background failed", e);
     }
-
-    return () => {
-      if (timerId) clearTimeout(timerId);
-    };
   }, [state.answers, state.examId, state.mode]);
 
-  // 2. KHỞI TẠO BÀI THI
+  // 4. KHỞI TẠO DỮ LIỆU ĐỀ THI
   useEffect(() => {
     if (state.mode === EXAM_MODES.SETUP || !state.examId || state.examData) return;
     
     loadExamData(state.examId)
       .then((data) => {
-        if (!data?.parts) throw new Error('Dữ liệu đề thi bị lỗi hoặc trống.');
+        if (!data?.parts) throw new Error('Dữ liệu đề thi bị lỗi.');
         const partsArr = Array.isArray(data.parts) ? data.parts : Object.entries(data.parts).map(([k, v]) => ({ ...v, id: k }));
         setExamData({ ...data, parts: partsArr });
         const startPart = partsArr.find(p => p.type === EXAM_SECTIONS.LISTENING) || partsArr.find(p => p.type === EXAM_SECTIONS.READING) || partsArr[0];
@@ -122,17 +111,9 @@ const FullExamMode = ({ onComplete }) => {
           setTimeLeft(startPart.type === EXAM_SECTIONS.LISTENING ? EXAM_TIMINGS.LISTENING : EXAM_TIMINGS.READING);
         }
       })
-      .catch((err) => setSaveError('Không thể tải đề thi: ' + err.message));
+      .catch((err) => setSaveError('Lỗi: ' + err.message));
   }, [state.examId, state.mode, state.examData, setExamData, setSection, setPart, setTimeLeft]); 
 
-  useEffect(() => {
-    if (state.mode === EXAM_MODES.EXAM) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      mainContentRef.current?.focus({ preventScroll: true });
-    }
-  }, [state.part, state.section, state.mode]);
-
-  // 3. ĐIỀU HƯỚNG
   const currentSectionParts = useMemo(() => state.examData?.parts?.filter(p => p.type === state.section) || [], [state.examData, state.section]);
 
   const handleStartExam = useCallback((examId) => {
@@ -155,7 +136,6 @@ const FullExamMode = ({ onComplete }) => {
     } else setMode(EXAM_MODES.RESULTS); 
   }, [state.examData, setTimeLeft, setSection, setPart, setMode]);
 
-  // 🚀 FIX: Thêm setAudioPlaying vào dependency array
   const handleAudioEnd = useCallback(() => {
     if (state.section !== EXAM_SECTIONS.LISTENING) return;
     setAudioPlaying(false); markPartPlayed(state.part); 
@@ -166,7 +146,6 @@ const FullExamMode = ({ onComplete }) => {
     }, 0);
   }, [state.section, state.part, currentSectionParts, markPartPlayed, setPart, handleNextSection, setAudioPlaying]);
 
-  // 4. CHẤM ĐIỂM
   const handleFinalSubmit = useCallback(async () => {
     if (submitRetrying || !state.examData) return;
     setSubmitRetrying(true); setSaveError(null);
@@ -194,7 +173,7 @@ const FullExamMode = ({ onComplete }) => {
     finally { setSubmitRetrying(false); }
   }, [state.examData, state.answers, state.examId, isOnline, currentUser, setMode, saveProgress, submitRetrying]);
 
-  // 5. TIMERS
+  // 5. TIMERS & SHORTCUTS
   useExamTimer({
     isActive: state.mode === EXAM_MODES.EXAM && !state.isPaused && !!state.examData,
     section: state.section, timeLeft: state.timeLeft, onTick: tickTimer,        
@@ -250,7 +229,7 @@ const FullExamMode = ({ onComplete }) => {
           <OfflineWarning isOnline={isOnline} />
         </div>
 
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm transition-all">
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm">
           <div className="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
               <div className={`hidden md:flex w-12 h-12 rounded-[14px] items-center justify-center font-black text-[22px] border-2 border-b-[4px] shadow-sm shrink-0 ${badgeTheme}`}>
@@ -261,21 +240,19 @@ const FullExamMode = ({ onComplete }) => {
                   {isListening ? 'Listening' : 'Reading'} Section
                 </span>
                 <h2 className="text-[16px] md:text-[20px] font-black text-slate-800 leading-tight m-0 truncate">
-                  {currentPartData?.title || 'Đang tải dữ liệu...'}
+                  {currentPartData?.title || 'Đang tải...'}
                 </h2>
               </div>
             </div>
 
             <div className="flex items-center gap-3 md:gap-5 shrink-0">
-              <div className="hidden sm:block">
-                <AutosaveIndicator isSaving={isSaving} lastSaved={lastSaved} isOnline={isOnline} saveError={saveError} />
-              </div>
+              {/* 🚀 Đã xóa AutosaveIndicator khỏi đây */}
               <Timer timeLeft={state.timeLeft} isWarning={showWarning} />
             </div>
           </div>
         </header>
 
-        <main id="main-content" ref={mainContentRef} tabIndex={-1} className="outline-none max-w-5xl mx-auto">
+        <main id="main-content" ref={mainContentRef} tabIndex={-1} className="outline-none max-w-5xl mx-auto px-4 md:px-6">
           {state.examData && state.part && (
             <ExamScreen
               examData={state.examData}

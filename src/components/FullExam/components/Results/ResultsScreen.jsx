@@ -135,7 +135,7 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8 space-y-6 md:space-y-8">
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: "spring", bounce: 0.4 }}
@@ -148,7 +148,7 @@ export const ResultsScreen = memo(({ examData, answers, onRetry, onExit }) => {
           </div>
           <h2 className="text-[28px] md:text-[34px] font-display font-black text-[#D9A600] mb-1 leading-tight">Xuất sắc!</h2>
           <p className="text-[14px] md:text-[16px] font-body font-bold text-[#B38800]">Bạn đã nỗ lực hết mình. Cùng xem thành quả nhé!</p>
-        </motion.div>
+        </Motion.div>
 
         <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-5 md:p-8 shadow-sm relative z-10 -mt-10 sm:-mt-12 mx-2 sm:mx-8">
           <div className="max-w-sm mx-auto">
