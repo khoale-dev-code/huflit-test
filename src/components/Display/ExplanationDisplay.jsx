@@ -4,7 +4,7 @@ import {
   Copy, Check, Target, Zap, Volume2, VolumeX,
   MessageCircleHeart
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import useVoiceExpression from '../../hooks/useVoiceExpression';
 import AIAdviceBox from '../../components/AIAdviceBox';
 import useGroqAdvisor from '../../hooks/useGroqAdvisor';
@@ -56,7 +56,7 @@ MentorVoiceButton.displayName = 'MentorVoiceButton';
 const SandwichFeedback = memo(({ encourage, closing, isVisible }) => {
   if (!isVisible) return null;
   return (
-    <motion.div 
+    <Motion.div 
       initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
       className="space-y-2 mb-5 font-sans"
     >
@@ -69,16 +69,16 @@ const SandwichFeedback = memo(({ encourage, closing, isVisible }) => {
       
       <AnimatePresence>
         {closing && (
-          <motion.div 
+          <Motion.div 
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="flex items-start gap-3 px-4 py-3 rounded-lg rounded-tr-none bg-amber-100 border border-amber-200 ml-6"
           >
             <span className="text-lg shrink-0 mt-0.5">💪</span>
             <p className="text-sm font-medium text-amber-900 leading-snug">{closing}</p>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </Motion.div>
   );
 });
 SandwichFeedback.displayName = 'SandwichFeedback';

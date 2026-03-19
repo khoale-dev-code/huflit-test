@@ -1,7 +1,7 @@
 // src/components/Display/Result/AnswerReviewCard.jsx
 import { memo } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import ExplanationSection from '../ExplanationDisplay';
 
 /**
