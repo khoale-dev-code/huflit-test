@@ -5,7 +5,7 @@
  */
 
 import { memo, useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Brain, Zap, Target, BookOpen, Rocket, Star } from 'lucide-react';
 
 /* ─── Dữ liệu ───────────────────────────────────────────────────── */
@@ -81,19 +81,19 @@ const LoadingSpinner = memo(({ message }) => {
       />
 
       {/* ── Ambient orbs ── */}
-      <motion.div
+      <Motion.div
         animate={{ y: [-24, 24, -24], x: [-16, 16, -16] }}
         transition={{ repeat: Infinity, duration: 9, ease: 'easeInOut' }}
         className="absolute top-1/4 left-1/5 w-72 h-72 rounded-full pointer-events-none"
         style={{ background: 'rgba(28,176,246,0.15)', filter: 'blur(64px)' }}
       />
-      <motion.div
+      <Motion.div
         animate={{ y: [24, -24, 24], x: [16, -16, 16] }}
         transition={{ repeat: Infinity, duration: 7, ease: 'easeInOut' }}
         className="absolute bottom-1/4 right-1/5 w-80 h-80 rounded-full pointer-events-none"
         style={{ background: 'rgba(88,204,2,0.15)', filter: 'blur(72px)' }}
       />
-      <motion.div
+      <Motion.div
         animate={{ y: [-12, 12, -12] }}
         transition={{ repeat: Infinity, duration: 11, ease: 'easeInOut', delay: 2 }}
         className="absolute top-1/3 right-1/3 w-56 h-56 rounded-full pointer-events-none"
@@ -102,7 +102,7 @@ const LoadingSpinner = memo(({ message }) => {
 
       {/* ── Floating confetti dots ── */}
       {DOTS.map(dot => (
-        <motion.div
+        <Motion.div
           key={dot.id}
           className="absolute rounded-full pointer-events-none"
           style={{ left: `${dot.x}%`, bottom: '-20px', width: dot.size, height: dot.size, background: dot.color, opacity: 0.7 }}
@@ -112,7 +112,7 @@ const LoadingSpinner = memo(({ message }) => {
       ))}
 
       {/* ══ Main Card ══ */}
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, scale: 0.75, y: 32 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 320, damping: 22 }}
@@ -133,14 +133,14 @@ const LoadingSpinner = memo(({ message }) => {
           <div className="flex justify-center mb-6">
             <div className="relative">
               {/* Outer ring — spinning dashed */}
-              <motion.div
+              <Motion.div
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 5, ease: 'linear' }}
                 className="absolute -inset-3 rounded-[32px]"
                 style={{ border: '3px dashed #BAE3FB', borderRadius: 36 }}
               />
               {/* Inner ring — counter-spin */}
-              <motion.div
+              <Motion.div
                 animate={{ rotate: -360 }}
                 transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
                 className="absolute -inset-1.5 rounded-[28px]"
@@ -148,7 +148,7 @@ const LoadingSpinner = memo(({ message }) => {
               />
 
               {/* Icon box — bob up/down */}
-              <motion.div
+              <Motion.div
                 animate={{ y: [-8, 6, -8] }}
                 transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
                 className="relative w-24 h-24 rounded-[24px] flex items-center justify-center"
@@ -160,7 +160,7 @@ const LoadingSpinner = memo(({ message }) => {
                 }}
               >
                 {/* Shimmer sweep */}
-                <motion.div
+                <Motion.div
                   animate={{ x: ['-120%', '220%'] }}
                   transition={{ repeat: Infinity, duration: 2, ease: 'linear', delay: 0.5 }}
                   className="absolute inset-0 rounded-[22px] overflow-hidden pointer-events-none"
@@ -169,7 +169,7 @@ const LoadingSpinner = memo(({ message }) => {
                 <BookOpen size={44} className="text-white relative z-10" strokeWidth={2.5} />
 
                 {/* Star badge top-right */}
-                <motion.div
+                <Motion.div
                   animate={{ scale: [1, 1.3, 1], rotate: [0, 15, 0] }}
                   transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut', delay: 1 }}
                   className="absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center"
@@ -180,15 +180,15 @@ const LoadingSpinner = memo(({ message }) => {
                   }}
                 >
                   <Star size={14} fill="white" className="text-white" strokeWidth={0} />
-                </motion.div>
-              </motion.div>
+                </Motion.div>
+              </Motion.div>
             </div>
           </div>
 
           {/* ── Rotating message ── */}
           <div className="h-8 relative w-full mb-2 flex items-center justify-center">
             <AnimatePresence mode="wait">
-              <motion.p
+              <Motion.p
                 key={mIdx}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -197,7 +197,7 @@ const LoadingSpinner = memo(({ message }) => {
                 className="absolute text-[16px] font-black text-slate-800 tracking-tight leading-tight"
               >
                 {message || MESSAGES[mIdx]}
-              </motion.p>
+              </Motion.p>
             </AnimatePresence>
           </div>
 
@@ -209,7 +209,7 @@ const LoadingSpinner = memo(({ message }) => {
               className="w-full h-5 rounded-full overflow-hidden relative"
               style={{ background: '#f1f5f9', border: '2px solid #e2e8f0' }}
             >
-              <motion.div
+              <Motion.div
                 initial={{ width: '4%' }}
                 animate={{ width: '92%' }}
                 transition={{ duration: 14, ease: 'easeOut' }}
@@ -217,7 +217,7 @@ const LoadingSpinner = memo(({ message }) => {
                 style={{ background: '#58CC02' }}
               >
                 {/* Animated stripe */}
-                <motion.div
+                <Motion.div
                   animate={{ x: ['-100%', '300%'] }}
                   transition={{ repeat: Infinity, duration: 1.6, ease: 'linear' }}
                   className="absolute inset-0"
@@ -227,14 +227,14 @@ const LoadingSpinner = memo(({ message }) => {
                     transform: 'skewX(-12deg)',
                   }}
                 />
-              </motion.div>
+              </Motion.div>
             </div>
           </div>
 
           {/* ── Step dots ── */}
           <div className="flex items-center justify-center gap-2 mb-7">
             {Array.from({ length: STEPS }).map((_, i) => (
-              <motion.div
+              <Motion.div
                 key={i}
                 animate={i <= step
                   ? { background: '#58CC02', scale: i === step ? 1.3 : 1 }
@@ -277,7 +277,7 @@ const LoadingSpinner = memo(({ message }) => {
             {/* Vocab content */}
             <div className="px-4 py-3.5 bg-white" style={{ minHeight: 64 }}>
               <AnimatePresence mode="wait">
-                <motion.div
+                <Motion.div
                   key={vIdx}
                   initial={{ opacity: 0, x: -14 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -317,7 +317,7 @@ const LoadingSpinner = memo(({ message }) => {
                   >
                     {vIdx + 1}/{VOCAB_PAIRS.length}
                   </div>
-                </motion.div>
+                </Motion.div>
               </AnimatePresence>
             </div>
           </div>
@@ -325,21 +325,21 @@ const LoadingSpinner = memo(({ message }) => {
         </div>
 
         {/* ── Bottom tagline ── */}
-        <motion.p
+        <Motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
           className="mt-5 text-[12px] font-bold text-slate-400 flex items-center gap-2"
         >
-          <motion.span
+          <Motion.span
             animate={{ rotate: [0, 20, -20, 0] }}
             transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
           >
             🚀
-          </motion.span>
+          </Motion.span>
           Biến quá trình chờ thành niềm vui học tập
-        </motion.p>
-      </motion.div>
+        </Motion.p>
+      </Motion.div>
     </div>
   );
 });

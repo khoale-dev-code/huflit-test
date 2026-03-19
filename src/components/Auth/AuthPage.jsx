@@ -1,9 +1,4 @@
-/**
- * AuthPage — Trang đăng nhập / đăng ký
- * Style: Gamification 3D (HubStudy & Duolingo Inspired)
- * Màu chủ đạo: Xanh dương nhạt (Sky Blue)
- */
-
+ 
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,7 +9,7 @@ import {
 } from 'firebase/auth';
 import { 
   Mail, Lock, User, LogIn, ArrowRight, Loader2, 
-  Zap, Trophy, Star, BookOpen, Target, Users, ShieldCheck 
+  Zap, Trophy, BookOpen, Target, Users, ShieldCheck 
 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
@@ -38,41 +33,48 @@ const THEME = {
 };
 
 /* ─── SUB-COMPONENT: STAT CARD ──────────────────────────────── */
-const StatCard = ({ icon: Icon, value, label, delay }) => (
-  <Motion.div
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay, type: 'spring' }}
-    className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg"
-  >
-    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-      <Icon className="text-white" size={20} strokeWidth={2.5} />
-    </div>
-    <div>
-      <div className="text-white font-black text-lg leading-none">{value}</div>
-      <div className="text-blue-100 text-xs font-bold mt-1 uppercase tracking-wider">{label}</div>
-    </div>
-  </Motion.div>
-);
+const StatCard = ({ icon: Icon, value, label, delay }) => {
+  if (!Icon) return null; // ✅ Thêm kiểm tra an toàn cho Linter
+  
+  return (
+    <Motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, type: 'spring' }}
+      className="flex items-center gap-4 p-4 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md shadow-lg"
+    >
+      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+        <Icon className="text-white" size={20} strokeWidth={2.5} />
+      </div>
+      <div>
+        <div className="text-white font-black text-lg leading-none">{value}</div>
+        <div className="text-blue-100 text-xs font-bold mt-1 uppercase tracking-wider">{label}</div>
+      </div>
+    </Motion.div>
+  );
+};
 
 /* ─── SUB-COMPONENT: INPUT FIELD ────────────────────────────── */
-const InputField = ({ icon: Icon, label, ...props }) => (
-  <div className="space-y-2">
-    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
-      {label}
-    </label>
-    <div className="relative group">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1CB0F6] transition-colors">
-        <Icon size={18} strokeWidth={2.5} />
-      </div>
-      <input
-        {...props}
-        className="w-full pl-12 pr-4 py-3.5 bg-[#F7F7F7] border-2 border-slate-200 border-b-4 rounded-2xl font-bold text-slate-700 outline-none transition-all focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-[#1CB0F6]/10"
-      />
-    </div>
-  </div>
-);
+const InputField = ({ icon: Icon, label, ...props }) => {
+  if (!Icon) return null; // ✅ Thêm kiểm tra an toàn cho Linter
 
+  return (
+    <div className="space-y-2">
+      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1CB0F6] transition-colors">
+          <Icon size={18} strokeWidth={2.5} />
+        </div>
+        <input
+          {...props}
+          className="w-full pl-12 pr-4 py-3.5 bg-[#F7F7F7] border-2 border-slate-200 border-b-4 rounded-2xl font-bold text-slate-700 outline-none transition-all focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-[#1CB0F6]/10"
+        />
+      </div>
+    </div>
+  );
+};  
 /* ════════════════════════════════════════════════════════════════
    MAIN PAGE COMPONENT
 ════════════════════════════════════════════════════════════════ */

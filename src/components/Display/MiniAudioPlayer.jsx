@@ -45,13 +45,13 @@ export const MiniAudioPlayer = memo(({ audioUrl }) => {
         
         {/* Thanh Progress dày 3D */}
         <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-[1px] shadow-inner border border-slate-200/50">
-          <motion.div 
+          <Motion.div 
             animate={{ width: `${progress}%` }}
             transition={{ type: "spring", bounce: 0, duration: 0.2 }}
             className="h-full bg-[#1CB0F6] rounded-full relative"
           >
             <div className="absolute top-0 left-0 right-0 h-[35%] bg-white/30 rounded-full" />
-          </motion.div>
+          </Motion.div>
         </div>
       </div>
     </div>

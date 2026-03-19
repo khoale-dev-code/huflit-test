@@ -1,11 +1,9 @@
 // src/admin/hooks/useExams.js
 import { useState, useCallback, useEffect } from 'react';
 import {
-  getExams, getExamById, createExam,
-  updateExam, updateExamPart, deleteExam,
+  getExams, createExam, updateExam, deleteExam,
   uploadAudio, deleteAudio,
 } from '../services/examService';
-
 // ─── Blank part templates (HUFLIT format) ────────────────────────
 const blankListeningPart = (id, label) => ({
   id,

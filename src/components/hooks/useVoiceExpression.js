@@ -6,12 +6,10 @@ import {
   detectEmotionFromText,
   getFinalVoiceParams,
   cleanTextMarkers,
-  addPausesToText,
   extractEmotionMarker as extractEmotionMarkerConfig,
   extractStressWords,
   validateVoiceParams,
   debugEmotionDetection,
-  getCacheStats
 } from '../config/voiceExpression';
 
 /**
@@ -370,52 +368,3 @@ export const useVoiceExpression = (enableDebug = false) => {
   };
 };
 
-// ==================== USAGE EXAMPLES ====================
-
-/**
- * 📝 Basic Usage:
- * 
- * const { applyVoiceExpression, createExpressionUtterance } = useVoiceExpression();
- * 
- * const result = applyVoiceExpression("{EXCITED} Wow!", baseParams);
- * console.log(result); // { params, text, emotion, hasEmphasis, valid }
- * 
- * const utterance = createExpressionUtterance("{HAPPY} Great!", baseParams, voice);
- * window.speechSynthesis.speak(utterance);
- */
-
-/**
- * 📝 Debug Mode:
- * 
- * const { debugTextExpression, getCacheInfo } = useVoiceExpression(true);
- * 
- * console.log(debugTextExpression("{ANGRY} This is terrible!"));
- * console.log(getCacheInfo()); // { expressionCache: X, utteranceCache: Y, ... }
- */
-
-/**
- * 📝 Batch Processing:
- * 
- * const { batchApplyVoiceExpression } = useVoiceExpression();
- * 
- * const texts = ["{HAPPY} Great!", "{SAD} Oh no...", "Normal text"];
- * const results = batchApplyVoiceExpression(texts, baseParams);
- * results.forEach(({ originalText, result }) => {
- *   console.log(`${originalText} -> ${result.emotion}`);
- * });
- */
-
-/**
- * 📝 Advanced: Multiple utterances with cleanup:
- * 
- * const { createExpressionUtterance, clearAllCaches } = useVoiceExpression(true);
- * 
- * try {
- *   const u1 = createExpressionUtterance("First", baseParams, voice);
- *   const u2 = createExpressionUtterance("Second", baseParams, voice);
- *   window.speechSynthesis.speak(u1);
- *   // ...
- * } finally {
- *   clearAllCaches();
- * }
- */

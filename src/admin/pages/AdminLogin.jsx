@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
@@ -12,51 +11,91 @@ const C = {
   n100: '#F4F7FA', n200: '#e2e8f0', n400: '#94a3b8', n600: '#475569', n800: '#1e293b',
 };
 
-/* ─── Input field 3D ── */
-const Field = ({ label, icon: Icon, error, right, ...props }) => (
-  <div>
-    <label className="block text-[10px] font-black uppercase tracking-[0.14em] mb-2 ml-0.5"
-           style={{ color: C.n400 }}>{label}</label>
-    <div className="relative">
-      <Icon size={15} strokeWidth={2.5} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-           style={{ color: error ? C.red : C.n400 }} />
-      <input
-        {...props}
-        className="w-full pl-11 pr-12 py-3.5 rounded-[16px] text-[14px] font-bold outline-none transition-all"
-        style={{
-          background: error ? C.redBg : C.n100,
-          border: `2px solid ${error ? C.redBorder : C.n200}`,
-          borderBottom: `4px solid ${error ? C.red : '#cbd5e1'}`,
-          color: C.n800,
-        }}
-        onFocus={e => {
-          if (!error) {
-            e.target.style.border = `2px solid ${C.blue}`;
-            e.target.style.borderBottom = `4px solid ${C.blueDark}`;
-            e.target.style.background = 'white';
-            e.target.style.boxShadow = `0 0 0 3px ${C.blueBg}`;
-          }
-        }}
-        onBlur={e => {
-          e.target.style.border = `2px solid ${error ? C.redBorder : C.n200}`;
-          e.target.style.borderBottom = `4px solid ${error ? C.red : '#cbd5e1'}`;
-          e.target.style.background = error ? C.redBg : C.n100;
-          e.target.style.boxShadow = 'none';
-        }}
-      />
-      {right && <div className="absolute right-4 top-1/2 -translate-y-1/2">{right}</div>}
+/* ─── Input field 3D (Đã chuyển sang Declarative State) ── */
+const Field = ({ label, icon: Icon, error, right, ...props }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Tính toán styles dựa trên state của React thay vì can thiệp DOM trực tiếp
+  const currentBg = error ? C.redBg : (isFocused ? 'white' : C.n100);
+  const currentBorder = error ? C.redBorder : (isFocused ? C.blue : C.n200);
+  const currentBorderBottom = error ? C.red : (isFocused ? C.blueDark : '#cbd5e1');
+  const currentBoxShadow = isFocused && !error ? `0 0 0 3px ${C.blueBg}` : 'none';
+
+  return (
+    <div>
+      <label className="block text-[10px] font-black uppercase tracking-[0.14em] mb-2 ml-0.5"
+             style={{ color: C.n400 }}>{label}</label>
+      <div className="relative">
+        {Icon && (
+          <Icon size={15} strokeWidth={2.5} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors"
+                style={{ color: error ? C.red : (isFocused ? C.blue : C.n400) }} />
+        )}
+        <input
+          {...props}
+          onFocus={(e) => { setIsFocused(true); if (props.onFocus) props.onFocus(e); }}
+          onBlur={(e) => { setIsFocused(false); if (props.onBlur) props.onBlur(e); }}
+          className="w-full pl-11 pr-12 py-3.5 rounded-[16px] text-[14px] font-bold outline-none transition-all duration-200"
+          style={{
+            background: currentBg,
+            border: `2px solid ${currentBorder}`,
+            borderBottom: `4px solid ${currentBorderBottom}`,
+            color: C.n800,
+            boxShadow: currentBoxShadow,
+          }}
+        />
+        {right && <div className="absolute right-4 top-1/2 -translate-y-1/2">{right}</div>}
+      </div>
+      <AnimatePresence>
+        {error && (
+          <Motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="flex items-center gap-1 text-[11px] font-bold mt-1.5 ml-0.5"
+            style={{ color: C.red }}>
+            <AlertCircle size={11} /> {error}
+          </Motion.p>
+        )}
+      </AnimatePresence>
     </div>
-    <AnimatePresence>
-      {error && (
-        <Motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-          className="flex items-center gap-1 text-[11px] font-bold mt-1.5 ml-0.5"
-          style={{ color: C.red }}>
-          <AlertCircle size={11} /> {error}
-        </Motion.p>
-      )}
-    </AnimatePresence>
-  </div>
-);
+  );
+};
+
+/* ─── Button 3D Component (Tái sử dụng & Clean Events) ── */
+const Button3D = ({ children, busy, variant = 'primary', ...props }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+
+  const isPrimary = variant === 'primary';
+  const bg = isPrimary ? C.blue : 'white';
+  const color = isPrimary ? 'white' : C.n800;
+  const borderColor = isPrimary ? C.blueDark : (isHovered && !busy ? C.blueBorder : C.n200);
+  const borderBottomColor = isPrimary ? C.blueDark : '#cbd5e1';
+  const boxShadow = isPrimary ? `0 4px 18px rgba(28,176,246,0.28)` : 'none';
+
+  // Điều khiển animation qua state
+  const transform = !busy && isActive ? 'translateY(2px)' : (!busy && isHovered ? 'translateY(-2px)' : 'none');
+  const borderBottomWidth = !busy && isActive ? '3px' : '5px';
+
+  return (
+    <button
+      {...props}
+      disabled={busy}
+      onMouseEnter={(e) => { setIsHovered(true); if (props.onMouseEnter) props.onMouseEnter(e); }}
+      onMouseLeave={(e) => { setIsHovered(false); setIsActive(false); if (props.onMouseLeave) props.onMouseLeave(e); }}
+      onMouseDown={(e) => { setIsActive(true); if (props.onMouseDown) props.onMouseDown(e); }}
+      onMouseUp={(e) => { setIsActive(false); if (props.onMouseUp) props.onMouseUp(e); }}
+      className={`w-full flex items-center justify-center gap-2.5 py-3.5 rounded-[16px] text-[14px] font-black transition-all outline-none ${isPrimary ? 'uppercase tracking-wider mt-1' : ''}`}
+      style={{
+        background: bg, color,
+        border: `2px solid ${borderColor}`,
+        borderBottom: `${borderBottomWidth} solid ${borderBottomColor}`,
+        boxShadow,
+        opacity: busy ? 0.7 : 1,
+        transform,
+      }}
+    >
+      {children}
+    </button>
+  );
+};
 
 /* ─── Google SVG ── */
 const GoogleSVG = () => (
@@ -91,8 +130,12 @@ export default function AdminLogin() {
       email:    !form.email    ? 'Email là bắt buộc'    : '',
       password: !form.password ? 'Mật khẩu là bắt buộc' : '',
     };
+    
     if (errs.email || errs.password) return setErrors(errs);
-    setBanner(null); setErrors({});
+    
+    setBanner(null); 
+    setErrors({});
+    
     try {
       await signIn(form.email, form.password);
     } catch {
@@ -101,9 +144,13 @@ export default function AdminLogin() {
   };
 
   const handleGoogle = async () => {
-    setGLoading(true); setBanner(null);
+    setGLoading(true); 
+    setBanner(null);
     const res = await signInWithGoogle();
-    if (!res.success) { setBanner({ type: 'error', text: res.error }); setGLoading(false); }
+    if (!res.success) { 
+      setBanner({ type: 'error', text: res.error }); 
+      setGLoading(false); 
+    }
   };
 
   return (
@@ -195,24 +242,12 @@ export default function AdminLogin() {
               }
             />
 
-            {/* Submit */}
-            <button type="submit" disabled={busy}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-[16px] text-[14px] font-black uppercase tracking-wider transition-all outline-none mt-1"
-              style={{
-                background: C.blue, color: 'white',
-                border: `2px solid ${C.blueDark}`, borderBottom: `5px solid ${C.blueDark}`,
-                boxShadow: `0 4px 18px rgba(28,176,246,0.28)`,
-                opacity: busy ? 0.7 : 1,
-              }}
-              onMouseEnter={e => { if (!busy) e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ''; }}
-              onMouseDown={e  => { e.currentTarget.style.transform = 'translateY(2px)'; e.currentTarget.style.borderBottomWidth = '3px'; }}
-              onMouseUp={e    => { e.currentTarget.style.borderBottomWidth = '5px'; }}
-            >
+            {/* Sử dụng Component Button Declarative */}
+            <Button3D type="submit" busy={busy} variant="primary">
               {loading
                 ? <Loader2 size={18} className="animate-spin" />
                 : <><ArrowRight size={17} strokeWidth={2.5} /> Đăng nhập hệ thống</>}
-            </button>
+            </Button3D>
           </form>
 
           {/* Divider */}
@@ -222,23 +257,12 @@ export default function AdminLogin() {
             <div className="flex-1 h-px" style={{ background: C.n200 }} />
           </div>
 
-          {/* Google */}
-          <button type="button" onClick={handleGoogle} disabled={busy}
-            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-[16px] text-[14px] font-black transition-all outline-none"
-            style={{
-              background: 'white', color: C.n800,
-              border: `2px solid ${C.n200}`, borderBottom: `5px solid #cbd5e1`,
-              opacity: busy ? 0.7 : 1,
-            }}
-            onMouseEnter={e => { if (!busy) { e.currentTarget.style.borderColor = C.blueBorder; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = C.n200; e.currentTarget.style.transform = ''; }}
-            onMouseDown={e  => { e.currentTarget.style.transform = 'translateY(2px)'; e.currentTarget.style.borderBottomWidth = '3px'; }}
-            onMouseUp={e    => { e.currentTarget.style.borderBottomWidth = '5px'; }}
-          >
+          {/* Nút Google */}
+          <Button3D type="button" onClick={handleGoogle} busy={busy} variant="secondary">
             {gLoading
               ? <Loader2 size={18} className="animate-spin" style={{ color: C.blue }} />
               : <><GoogleSVG /> Tiếp tục với Google</>}
-          </button>
+          </Button3D>
 
         </div>
 

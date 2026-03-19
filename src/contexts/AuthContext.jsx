@@ -148,7 +148,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       await signOut(auth);
       setUser(null);
-    } catch (err) {
+    } catch {
       const errorMessage = 'Đăng xuất thất bại';
       setError(errorMessage);
       throw new Error(errorMessage);
