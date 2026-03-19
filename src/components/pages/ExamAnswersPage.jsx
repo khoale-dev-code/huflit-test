@@ -11,7 +11,7 @@ import {
   Sparkles, Filter, LayoutGrid, Target, Zap,
   Info, XCircle, Layers,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 /* ─── Design tokens ───────────────────────────────────────────── */
 const C = {
@@ -81,14 +81,14 @@ function SelectDropdown({ value, options, onChange, label, icon: Icon, disabled,
         }}
       >
         <span className="truncate">{selected?.label || 'Chọn...'}</span>
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+        <Motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
           <ChevronDown className="w-4 h-4 shrink-0" style={{ color: accentColor }} />
-        </motion.div>
+        </Motion.div>
       </button>
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
@@ -112,7 +112,7 @@ function SelectDropdown({ value, options, onChange, label, icon: Icon, disabled,
                 );
               })}
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -128,7 +128,7 @@ function QuestionCard({ question, partKey, index }) {
   const displayNum = parseQuestionNum(question.id);
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', damping: 22, stiffness: 260, delay: index * 0.035 }}
@@ -216,18 +216,18 @@ function QuestionCard({ question, partKey, index }) {
                 <p className="text-[13px] font-bold text-slate-600">Tại sao đáp án này đúng?</p>
               </div>
             </div>
-            <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.22 }}
+            <Motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.22 }}
               className="w-9 h-9 rounded-full flex items-center justify-center"
               style={{ background: expanded ? C.orange : 'white',
                        border: `2px solid ${expanded ? C.orange : C.n200}`,
                        borderBottom: `3px solid ${expanded ? C.orangeDark : '#cbd5e1'}` }}>
               <ChevronDown className="w-4 h-4" style={{ color: expanded ? 'white' : C.n400 }} />
-            </motion.div>
+            </Motion.div>
           </button>
 
           <AnimatePresence initial={false}>
             {expanded && (
-              <motion.div
+              <Motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -277,19 +277,19 @@ function QuestionCard({ question, partKey, index }) {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             )}
           </AnimatePresence>
         </>
       )}
-    </motion.div>
+    </Motion.div>
   );
 }
 
 /* ─── Empty State ──────────────────────────────────────────────── */
 function EmptyState({ selectedPart }) {
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+    <Motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
       className="text-center py-24 rounded-[28px]"
       style={{ background: 'white', border: `2px dashed ${C.n200}`, borderBottom: `4px dashed #cbd5e1` }}>
       <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-5"
@@ -302,7 +302,7 @@ function EmptyState({ selectedPart }) {
       <p className="text-[14px] font-bold text-slate-400 max-w-sm mx-auto leading-relaxed">
         {selectedPart ? 'Thử thay đổi từ khóa tìm kiếm.' : 'Chọn kỳ thi và phần thi phía trên để tải dữ liệu đáp án.'}
       </p>
-    </motion.div>
+    </Motion.div>
   );
 }
 

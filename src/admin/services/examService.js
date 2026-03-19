@@ -66,8 +66,9 @@ export const createExam = async (examData) => {
 // 4. CẬP NHẬT ĐỀ THI (Fix lỗi 406 và lỗi ID)
 export const updateExam = async (id, examData) => {
   try {
-    // Loại bỏ id ra khỏi payload để tránh lỗi của PostgreSQL
-    const { id: _, created_at, ...cleanData } = examData;
+    // Loại bỏ id và created_at ra khỏi payload để tránh lỗi ghi đè của PostgreSQL.
+    // Dùng cú pháp ": _tênBiến" để báo cho ESLint biết ta cố tình tạo biến này để loại trừ dữ liệu, không xài tới.
+    const { id: _id, created_at: _created_at, ...cleanData } = examData;
 
     // Tự động đếm lại câu hỏi để đảm bảo số liệu luôn chính xác
     const totalQuestions = Object.values(cleanData.parts || {}).reduce(

@@ -1,28 +1,20 @@
 import React, { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 import {
-  Play, Pause, Eye, EyeOff, Volume2, SkipBack, SkipForward,
+  Play, Pause, Eye, EyeOff, SkipBack, SkipForward,
   AlertCircle, CheckCircle2, Headphones, Activity, MessageCircle
 } from 'lucide-react';
-import { motion as Motion, AnimatePresence } from 'framer-motion'; // 🚀 FIX: Đổi tên thành Motion để pass ESLint
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 const SKIP_TIME = 10;
 const VIZ_BARS  = 28;
 
-/* ─── Design tokens ──────────────────────────────────────── */
-const C = {
-  blue: '#1CB0F6', blueDark: '#1899D6', blueBg: '#EAF6FE', blueBorder: '#BAE3FB',
-  green: '#58CC02', greenDark: '#46A302', greenBg: '#F0FAE8',
-  n50: '#F8FAFC', n100: '#F1F5F9', n200: '#E2E8F0',
-  n400: '#94A3B8', n500: '#64748B', n600: '#475569', n800: '#1E293B',
-  white: '#FFFFFF', red: '#FF4B4B', redBg: '#FFF0F0',
-};
-const F = { body: '"Nunito", "Baloo 2", sans-serif', display: '"Baloo 2", "Nunito", sans-serif' };
-
+/* ─── Design Tokens (Tailwind Arbitrary Values) ─── */
+// Đã chuyển phần lớn màu sắc thẳng vào class Tailwind để tối ưu render
 const speakerPalette = [
-  { bg: '#EFF6FF', text: '#2563EB', dot: '#3B82F6', border: '#BFDBFE' },
-  { bg: '#ECFDF5', text: '#059669', dot: '#10B981', border: '#A7F3D0' },
-  { bg: '#F5F3FF', text: '#7C3AED', dot: '#8B5CF6', border: '#DDD6FE' },
+  { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-500', border: 'border-blue-200' },
+  { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-500', border: 'border-emerald-200' },
+  { bg: 'bg-purple-50', text: 'text-purple-600', dot: 'bg-purple-500', border: 'border-purple-200' },
 ];
 
 /* ─── Visualizer ─────────────────────────────────────────── */
@@ -43,7 +35,9 @@ const Visualizer = memo(({ isPlaying, audioEl }) => {
         c.beginPath(); c.roundRect(i * (bw + 3), canvas.height - h, bw, h, [3, 3, 0, 0]); c.fill();
       }
     };
+    
     if (!audioEl || !isPlaying) { cancelAnimationFrame(rafRef.current); drawIdle(); return; }
+    
     try {
       if (!ctxRef.current) {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -68,32 +62,34 @@ const Visualizer = memo(({ isPlaying, audioEl }) => {
         rafRef.current = requestAnimationFrame(draw);
       };
       draw();
-    } catch { // 🚀 FIX: Xóa biến gạch dưới không dùng
+    } catch { 
       drawIdle(); 
     }
     return () => cancelAnimationFrame(rafRef.current);
   }, [isPlaying, audioEl]);
 
   return (
-    <div style={{ height: 52, background: 'rgba(255,255,255,0.1)', borderRadius: 16, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} width={260} height={52} />
+    <div className="h-[52px] bg-white/10 rounded-2xl overflow-hidden relative shrink-0">
+      <canvas ref={canvasRef} className="w-full h-full block" width={260} height={52} />
       {isPlaying && (
-        <div style={{ position: 'absolute', top: 6, right: 8, display: 'flex', alignItems: 'center', gap: 4, background: C.white, padding: '2px 8px', borderRadius: 99, boxShadow: '0 1px 6px rgba(0,0,0,0.1)' }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.blue, animation: 'pulse 1.2s ease-in-out infinite' }} />
-          <span style={{ fontFamily: F.display, fontSize: 9, fontWeight: 900, color: C.blue, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Live</span>
+        <div className="absolute top-1.5 right-2 flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-full shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#1CB0F6] animate-pulse" />
+          <span className="font-nunito text-[9px] font-black text-[#1CB0F6] uppercase tracking-widest">Live</span>
         </div>
       )}
     </div>
   );
 });
+Visualizer.displayName = 'Visualizer';
 
 /* ─── Metric Card ────────────────────────────────────────── */
 const MetricCard = memo(({ label, value }) => (
-  <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '8px 12px', flex: 1, borderBottom: '3px solid rgba(0,0,0,0.08)' }}>
-    <p style={{ fontFamily: F.body, fontSize: 10, fontWeight: 800, color: 'rgba(255,255,255,0.65)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 3px' }}>{label}</p>
-    <p style={{ fontFamily: F.display, fontSize: 15, fontWeight: 900, color: C.white, margin: 0, lineHeight: 1 }}>{value}</p>
+  <div className="bg-white/10 rounded-xl p-2.5 flex-1 border-b-[3px] border-black/10">
+    <p className="font-nunito text-[10px] font-extrabold text-white/65 uppercase tracking-widest mb-1">{label}</p>
+    <p className="font-nunito text-[15px] font-black text-white leading-none m-0">{value}</p>
   </div>
 ));
+MetricCard.displayName = 'MetricCard';
 
 /* ─── Progress Slider ────────────────────────────────────── */
 const ProgressSlider = memo(({ currentTime, duration, seek, formatTime }) => {
@@ -114,40 +110,35 @@ const ProgressSlider = memo(({ currentTime, duration, seek, formatTime }) => {
   }, [calc]);
 
   return (
-    <div style={{ marginTop: 4 }}>
+    <div className="mt-1">
       <div ref={ref} onPointerDown={onDown} role="slider" tabIndex={0}
-        style={{ height: 20, display: 'flex', alignItems: 'center', cursor: 'pointer', touchAction: 'none', outline: 'none' }}>
-        <div style={{ position: 'relative', height: 8, width: '100%', background: 'rgba(0,0,0,0.15)', borderRadius: 99, overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: C.white, borderRadius: 99, width: `${pct}%`, transition: 'none' }} />
+        className="h-5 flex items-center cursor-pointer touch-none outline-none group"
+      >
+        <div className="relative h-2 w-full bg-black/15 rounded-full overflow-hidden">
+          <div className="absolute top-0 left-0 h-full bg-white rounded-full transition-none group-hover:bg-blue-100" style={{ width: `${pct}%` }} />
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: F.body, fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.65)', marginTop: 2, padding: '0 2px' }}>
+      <div className="flex justify-between font-nunito text-[11px] font-extrabold text-white/65 mt-0.5 px-0.5">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>
     </div>
   );
 });
+ProgressSlider.displayName = 'ProgressSlider';
 
 /* ─── Icon Button ────────────────────────────────────────── */
 const IconBtn = memo(({ onClick, children, disabled = false }) => (
-  <button onClick={onClick} disabled={disabled}
-    style={{
-      width: 40, height: 40, borderRadius: 14,
-      background: 'rgba(255,255,255,0.12)', color: C.white,
-      border: 'none', borderBottom: '3px solid rgba(0,0,0,0.12)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      cursor: disabled ? 'not-allowed' : 'pointer', flexShrink: 0,
-      opacity: disabled ? 0.35 : 1, transition: 'all 0.12s', outline: 'none',
-    }}
-    onMouseEnter={e => { if (!disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.22)'; }}
-    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
-    onMouseDown={e => { e.currentTarget.style.transform = 'translateY(3px)'; e.currentTarget.style.borderBottomWidth = '0px'; }}
-    onMouseUp={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderBottomWidth = '3px'; }}
+  <button 
+    onClick={onClick} 
+    disabled={disabled}
+    className={`w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0 border-b-[3px] border-black/10 outline-none transition-all duration-100
+      ${disabled ? 'opacity-35 cursor-not-allowed' : 'cursor-pointer hover:bg-white/20 active:translate-y-[3px] active:border-b-0'}`}
   >
     {children}
   </button>
 ));
+IconBtn.displayName = 'IconBtn';
 
 /* ─── Transcript Line ────────────────────────────────────── */
 const TranscriptLine = memo(({ line, index }) => {
@@ -160,24 +151,19 @@ const TranscriptLine = memo(({ line, index }) => {
     <Motion.div
       initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-      style={{
-        background: C.white, border: `2px solid ${C.n200}`,
-        borderBottom: `3px solid ${C.n200}`, borderRadius: 18,
-        padding: '12px 14px', marginBottom: 10,
-        transition: 'border-color 0.15s, transform 0.15s',
-      }}
-      whileHover={{ y: -1, borderColor: C.blueBorder }}
+      className="bg-white border-2 border-slate-200 border-b-[3px] rounded-[18px] p-3 mb-3 hover:-translate-y-[1px] hover:border-[#BAE3FB] transition-all"
     >
       {speaker && (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: col.bg, border: `1.5px solid ${col.border}`, borderRadius: 9, padding: '3px 10px', marginBottom: 7 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: col.dot, flexShrink: 0 }} />
-          <span style={{ fontFamily: F.display, fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', color: col.text }}>{speaker.trim()}</span>
+        <div className={`inline-flex items-center gap-1.5 ${col.bg} border-2 ${col.border} rounded-xl px-2.5 py-1 mb-2`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${col.dot} shrink-0`} />
+          <span className={`font-nunito text-[11px] font-black uppercase tracking-widest ${col.text}`}>{speaker.trim()}</span>
         </div>
       )}
-      <p style={{ fontFamily: F.body, fontSize: 14, fontWeight: 700, color: C.n600, lineHeight: 1.6, margin: 0 }}>{content}</p>
+      <p className="font-nunito text-[14px] font-bold text-slate-600 leading-relaxed m-0">{content}</p>
     </Motion.div>
   );
 });
+TranscriptLine.displayName = 'TranscriptLine';
 
 /* ══════════════════════════════════════════════════════
    MAIN
@@ -188,10 +174,6 @@ const ScriptDisplay = ({ script, audioUrl, partTitle, isPartPlayed, onAudioStart
   const lines = useMemo(() => script.split('\n').filter(l => l.trim()), [script]);
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  const rootRef   = useRef(null);
-  const [isNarrow, setIsNarrow] = useState(false);
-
-  // 🚀 FIX: Tích hợp onAudioStart và onAudioEnd vào vòng đời audio
   useEffect(() => {
     if (isPlaying) {
       onAudioStart?.();
@@ -205,188 +187,132 @@ const ScriptDisplay = ({ script, audioUrl, partTitle, isPartPlayed, onAudioStart
     return () => audioEl.removeEventListener('ended', handleEnded);
   }, [audioEl, onAudioEnd]);
 
-  useEffect(() => {
-    if (!rootRef.current) return;
-    const ro = new ResizeObserver(entries => {
-      for (const entry of entries) setIsNarrow(entry.contentRect.width < 600);
-    });
-    ro.observe(rootRef.current);
-    return () => ro.disconnect();
-  }, []);
-
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800;900&family=Nunito:wght@600;700;800;900&display=swap');
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .script-scroll::-webkit-scrollbar { width: 5px; }
-        .script-scroll::-webkit-scrollbar-track { background: transparent; }
-        .script-scroll::-webkit-scrollbar-thumb { background: ${C.n200}; border-radius: 8px; }
-      `}</style>
+    <div className="w-full font-nunito">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center shrink-0">
+            <Headphones size={18} className="text-[#1CB0F6]" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="font-nunito text-[15px] font-black text-slate-800 m-0 leading-tight">{partTitle}</p>
+            <p className="font-nunito text-[12px] font-bold text-slate-400 m-0 mt-0.5">Bài luyện nghe</p>
+          </div>
+        </div>
+        {isPartPlayed && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F0FAE8] border-2 border-[#58CC02]/40 rounded-xl font-nunito text-[12px] font-black text-[#46A302]">
+            <CheckCircle2 size={14} strokeWidth={3} /> Hoàn thành
+          </div>
+        )}
+      </div>
 
-      <div ref={rootRef} style={{ width: '100%', fontFamily: F.body }}>
+      {/* ── Error ── */}
+      <AnimatePresence>
+        {error && (
+          <Motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="mb-3 px-4 py-2.5 bg-[#FFF0F0] border-2 border-[#FF4B4B]/30 border-b-[3px] rounded-2xl flex items-center gap-2 font-nunito text-[13px] font-extrabold text-[#FF4B4B]"
+          >
+            <AlertCircle size={17} strokeWidth={2.5} /> {error}
+          </Motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* ── Header ── */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 13, background: C.blueBg, border: `2px solid ${C.blueBorder}`, boxShadow: `0 3px 0 ${C.blueBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Headphones size={18} color={C.blue} strokeWidth={2.5} />
+      {/* ── Main Card ── */}
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] rounded-3xl overflow-hidden bg-white border-2 border-slate-200 border-b-[4px] shadow-sm">
+
+        {/* LEFT: Player */}
+        <div className="bg-[#1CB0F6] p-4 flex flex-col gap-4 border-b-4 md:border-b-0 md:border-r-4 border-[#1899D6]">
+          {/* Status + Metrics */}
+          <div className="flex flex-col gap-3">
+            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border-[1.5px] border-b-[3px] font-nunito text-[11px] font-black uppercase tracking-widest w-fit
+              ${isPlaying ? 'bg-white border-[#BAE3FB] text-[#1CB0F6]' : 'bg-white/10 border-white/10 border-b-black/10 text-white/85'}`}
+            >
+              <Activity size={13} strokeWidth={3} className={isPlaying ? 'animate-pulse' : ''} />
+              {isPlaying ? 'Đang phát' : 'Sẵn sàng'}
             </div>
-            <div>
-              <p style={{ fontFamily: F.display, fontSize: 15, fontWeight: 900, color: C.n800, margin: 0, lineHeight: 1.2 }}>{partTitle}</p>
-              <p style={{ fontFamily: F.body, fontSize: 12, fontWeight: 700, color: C.n400, margin: '2px 0 0' }}>Bài luyện nghe</p>
+            <div className="flex gap-2">
+              <MetricCard label="Thời gian" value={formatTime(duration)} />
+              <MetricCard label="Đoạn thoại" value={lines.length} />
             </div>
           </div>
-          {isPartPlayed && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', background: C.greenBg, border: `2px solid ${C.green}40`, borderRadius: 11, fontFamily: F.display, fontSize: 12, fontWeight: 900, color: C.greenDark }}>
-              <CheckCircle2 size={14} strokeWidth={3} /> Hoàn thành
-            </div>
-          )}
+
+          <Visualizer isPlaying={isPlaying} audioEl={audioEl} />
+          <ProgressSlider currentTime={currentTime} duration={duration} seek={seek} formatTime={formatTime} />
+
+          {/* Controls */}
+          <div className="flex items-center justify-center gap-3 mt-1">
+            <IconBtn onClick={() => seek(currentTime - SKIP_TIME)}><SkipBack size={18} strokeWidth={3} /></IconBtn>
+
+            <button
+              onClick={() => isPlaying ? pause() : play()} disabled={isLoading}
+              className={`w-14 h-14 rounded-[18px] bg-white text-[#1CB0F6] flex items-center justify-center outline-none transition-all duration-100 border-b-4 border-[#1899D6] shadow-sm
+                ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-50 active:translate-y-[4px] active:border-b-0'}`}
+            >
+              {isLoading
+                ? <div className="w-6 h-6 border-[3px] border-[#EAF6FE] border-t-[#1CB0F6] rounded-full animate-spin" />
+                : isPlaying
+                  ? <Pause fill="currentColor" size={24} />
+                  : <Play fill="currentColor" size={24} className="ml-1" />}
+            </button>
+
+            <IconBtn onClick={() => seek(currentTime + SKIP_TIME)}><SkipForward size={18} strokeWidth={3} /></IconBtn>
+          </div>
         </div>
 
-        {/* ── Error ── */}
-        <AnimatePresence>
-          {error && (
-            <Motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              style={{ marginBottom: 12, padding: '10px 14px', background: C.redBg, border: `2px solid ${C.red}30`, borderBottom: `3px solid ${C.red}30`, borderRadius: 16, display: 'flex', alignItems: 'center', gap: 8, fontFamily: F.body, fontSize: 13, fontWeight: 800, color: C.red }}>
-              <AlertCircle size={17} strokeWidth={2.5} /> {error}
-            </Motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── Main Card ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isNarrow ? '1fr' : '260px 1fr',
-          borderRadius: 24, overflow: 'hidden',
-          background: C.white, border: `2px solid ${C.n200}`,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-        }}>
-
-          {/* LEFT: Player */}
-          <div style={{
-            background: C.blue, padding: '18px 16px',
-            display: 'flex', flexDirection: 'column', gap: 14,
-            borderRight: isNarrow ? 'none' : `3px solid ${C.blueDark}`,
-            borderBottom: isNarrow ? `3px solid ${C.blueDark}` : 'none',
-          }}>
-            {/* Status + Metrics */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '5px 10px', borderRadius: 10,
-                background: isPlaying ? C.white : 'rgba(255,255,255,0.12)',
-                border: `1.5px solid ${isPlaying ? C.blueBorder : 'rgba(255,255,255,0.1)'}`,
-                borderBottom: `3px solid ${isPlaying ? C.blueBorder : 'rgba(0,0,0,0.1)'}`,
-                fontFamily: F.display, fontSize: 11, fontWeight: 900,
-                color: isPlaying ? C.blue : 'rgba(255,255,255,0.85)',
-                textTransform: 'uppercase', letterSpacing: '0.07em',
-                width: 'fit-content',
-              }}>
-                <Activity size={13} strokeWidth={3} style={{ animation: isPlaying ? 'pulse 1.2s ease-in-out infinite' : 'none' }} />
-                {isPlaying ? 'Đang phát' : 'Sẵn sàng'}
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <MetricCard label="Thời gian" value={formatTime(duration)} />
-                <MetricCard label="Đoạn thoại" value={lines.length} />
-              </div>
+        {/* RIGHT: Transcript */}
+        <div className="flex flex-col bg-slate-50 h-full">
+          {/* Panel header */}
+          <div className="px-4 py-3 border-b-2 border-slate-200 flex items-center justify-between bg-white shrink-0">
+            <div className="flex items-center gap-2">
+              <MessageCircle size={18} className="text-slate-400" strokeWidth={2.5} />
+              <span className="font-nunito text-[14px] font-black text-slate-800">Nội dung bài nghe</span>
             </div>
-
-            <Visualizer isPlaying={isPlaying} audioEl={audioEl} />
-            <ProgressSlider currentTime={currentTime} duration={duration} seek={seek} formatTime={formatTime} />
-
-            {/* Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 2 }}>
-              <IconBtn onClick={() => seek(currentTime - SKIP_TIME)}><SkipBack size={18} strokeWidth={3} /></IconBtn>
-
-              <button
-                onClick={() => isPlaying ? pause() : play()} disabled={isLoading}
-                style={{
-                  width: 56, height: 56, borderRadius: 18,
-                  background: C.white, color: C.blue,
-                  border: 'none', borderBottom: `4px solid ${C.blueDark}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  opacity: isLoading ? 0.7 : 1, outline: 'none',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.12s',
-                }}
-                onMouseDown={e => { e.currentTarget.style.transform = 'translateY(4px)'; e.currentTarget.style.borderBottomWidth = '0px'; }}
-                onMouseUp={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderBottomWidth = '4px'; }}
-              >
-                {isLoading
-                  ? <div style={{ width: 22, height: 22, border: `3px solid ${C.blueBg}`, borderTop: `3px solid ${C.blue}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  : isPlaying
-                    ? <Pause fill={C.blue} size={22} />
-                    : <Play fill={C.blue} size={22} style={{ marginLeft: 2 }} />}
-              </button>
-
-              <IconBtn onClick={() => seek(currentTime + SKIP_TIME)}><SkipForward size={18} strokeWidth={3} /></IconBtn>
-            </div>
+            <button
+              onClick={() => setShowTranscript(s => !s)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl outline-none font-nunito text-[12px] font-extrabold transition-all border-2 active:border-b-0 active:translate-y-[3px]
+                ${showTranscript 
+                  ? 'bg-[#EAF6FE] border-[#BAE3FB] border-b-[3px] text-[#1CB0F6]' 
+                  : 'bg-white border-slate-200 border-b-[3px] text-slate-500 hover:bg-slate-50'}`}
+            >
+              {showTranscript ? <><EyeOff size={14} strokeWidth={3} /> Đóng</> : <><Eye size={14} strokeWidth={3} /> Xem bài</>}
+            </button>
           </div>
 
-          {/* RIGHT: Transcript */}
-          <div style={{ display: 'flex', flexDirection: 'column', background: C.n50 }}>
-            {/* Panel header */}
-            <div style={{ padding: '12px 16px', borderBottom: `2px solid ${C.n200}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.white, flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <MessageCircle size={17} color={C.n400} strokeWidth={2.5} />
-                <span style={{ fontFamily: F.display, fontSize: 14, fontWeight: 900, color: C.n800 }}>Nội dung bài nghe</span>
-              </div>
-              <button
-                onClick={() => setShowTranscript(s => !s)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '6px 12px', borderRadius: 11, cursor: 'pointer', outline: 'none',
-                  fontFamily: F.body, fontSize: 12, fontWeight: 800,
-                  background: showTranscript ? C.blueBg : C.white,
-                  border: `2px solid ${showTranscript ? C.blueBorder : C.n200}`,
-                  borderBottom: `3px solid ${showTranscript ? C.blueBorder : C.n200}`,
-                  color: showTranscript ? C.blue : C.n500,
-                  transition: 'all 0.15s',
-                }}
-                onMouseDown={e => { e.currentTarget.style.transform = 'translateY(3px)'; e.currentTarget.style.borderBottomWidth = '0px'; }}
-                onMouseUp={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderBottomWidth = '3px'; }}
-              >
-                {showTranscript ? <><EyeOff size={13} strokeWidth={3} /> Đóng</> : <><Eye size={13} strokeWidth={3} /> Xem bài</>}
-              </button>
-            </div>
+          {/* Scroll area */}
+          <div className="overflow-y-auto p-4 min-h-[220px] max-h-[380px] custom-scrollbar">
+            <AnimatePresence mode="wait">
+              {showTranscript ? (
+                <Motion.div key="transcript" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  {lines.map((l, i) => <TranscriptLine key={i} line={l} index={i} />)}
+                </Motion.div>
+              ) : (
+                <Motion.div key="focus" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
+                  className="flex flex-col items-center justify-center text-center py-8 h-full min-h-[180px]"
+                >
+                  <div className="w-16 h-16 rounded-[20px] bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[4px] flex items-center justify-center mb-4">
+                    <Headphones size={28} className="text-[#1CB0F6]" strokeWidth={2.5} />
+                  </div>
+                  <p className="font-nunito text-[16px] font-black text-slate-800 m-0 mb-2">Chế độ tập trung</p>
+                  <p className="font-nunito text-[14px] font-bold text-slate-500 max-w-[240px] leading-relaxed m-0">
+                    Hãy nghe thật kỹ. Nhấn <strong className="text-[#1CB0F6]">Xem bài</strong> nếu cần hỗ trợ.
+                  </p>
+                </Motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-            {/* Scroll area */}
-            <div className="script-scroll" style={{ overflowY: 'auto', padding: '14px', minHeight: 220, maxHeight: 380 }}>
-              <AnimatePresence mode="wait">
-                {showTranscript ? (
-                  <Motion.div key="transcript" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                    {lines.map((l, i) => <TranscriptLine key={i} line={l} index={i} />)}
-                  </Motion.div>
-                ) : (
-                  <Motion.div key="focus" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px 20px', height: '100%', minHeight: 180 }}>
-                    <div style={{ width: 60, height: 60, borderRadius: 20, background: C.blueBg, border: `2px solid ${C.blueBorder}`, boxShadow: `0 4px 0 ${C.blueBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-                      <Headphones size={28} color={C.blue} strokeWidth={2.5} />
-                    </div>
-                    <p style={{ fontFamily: F.display, fontSize: 15, fontWeight: 900, color: C.n800, margin: '0 0 8px' }}>Chế độ tập trung</p>
-                    <p style={{ fontFamily: F.body, fontSize: 13, fontWeight: 700, color: C.n500, maxWidth: 240, lineHeight: 1.6, margin: 0 }}>
-                      Hãy nghe thật kỹ. Nhấn <strong style={{ color: C.blue }}>Xem bài</strong> nếu cần hỗ trợ.
-                    </p>
-                  </Motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Footer progress bar */}
-            <div style={{ height: 4, background: C.n200, flexShrink: 0, marginTop: 'auto', position: 'relative' }}>
-              <Motion.div
-                style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: C.blue, borderRadius: '0 3px 3px 0' }}
-                animate={{ width: `${progressPct}%` }}
-                transition={{ duration: 0.15, ease: 'linear' }}
-              />
-            </div>
+          {/* Footer progress bar */}
+          <div className="h-1.5 bg-slate-200 shrink-0 mt-auto relative">
+            <Motion.div
+              className="absolute top-0 left-0 h-full bg-[#1CB0F6] rounded-r-md"
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.15, ease: 'linear' }}
+            />
           </div>
         </div>
       </div>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </>
+    </div>
   );
 };
 

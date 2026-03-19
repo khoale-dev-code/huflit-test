@@ -111,9 +111,9 @@ const LessonDetails = () => {
       try {
         const data = await getLessonById(id);
         setLesson(data);
-      } catch (error) {
-        navigate('/admin/lessons');
-      } finally {
+      } catch {
+      navigate('/admin/lessons');
+    } finally {
         setIsLoading(false);
       }
     };

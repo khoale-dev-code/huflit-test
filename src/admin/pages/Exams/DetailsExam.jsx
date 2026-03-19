@@ -2,11 +2,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Edit3, ArrowLeft, Loader2, AlertTriangle,
-  Clock, HelpCircle, Headphones, BookOpen,
+  Edit3, ArrowLeft, AlertTriangle, Clock, HelpCircle, Headphones, BookOpen,
   Users, CheckCircle, Target, Check, PenTool, Mic, 
   LayoutTemplate, FileText, ChevronDown, ChevronUp, Image as ImageIcon, Music, Star, Layers,
-  Eye, EyeOff // 🔒 Thêm 2 Icon này để dùng cho Badge trạng thái
+  Eye, EyeOff
 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
@@ -31,6 +30,7 @@ const TYPE_CONFIG = {
 };
 
 // ─── Stat Card 3D ─────────────────────────────────────────────────────
+// ─── Stat Card 3D ─────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, accent = 'blue' }) => {
   const themes = {
     blue:   'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]',
@@ -38,9 +38,13 @@ const StatCard = ({ icon: Icon, label, value, accent = 'blue' }) => {
     amber:  'bg-[#FFC800]/10 text-[#FF9600] border-[#FFC800]/30',
     purple: 'bg-[#faefff] text-[#CE82FF] border-[#eec9ff]',
   };
+
+  // ✅ Thêm dòng này: Vừa chống crash app, vừa fix lỗi ESLint ngầm
+  if (!Icon) return null; 
+
   return (
     <div className="bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] p-4 shadow-sm flex flex-col gap-3 hover:-translate-y-1 transition-transform">
-      <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${themes[accent]}`}>
+      <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${themes[accent] || themes.blue}`}>
         <Icon size={22} strokeWidth={2.5} />
       </div>
       <div>
@@ -52,17 +56,22 @@ const StatCard = ({ icon: Icon, label, value, accent = 'blue' }) => {
 };
 
 // ─── Usage Stat (Thống kê thực tế) ──────────────────────────────────
-const UsageStat = ({ icon: Icon, label, value }) => (
-  <div className="bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] p-4 shadow-sm flex items-center gap-4">
-    <div className="w-12 h-12 rounded-[14px] bg-slate-100 border-b-[3px] border-slate-200 flex items-center justify-center shrink-0">
-      <Icon size={22} strokeWidth={2.5} className="text-slate-500" />
+const UsageStat = ({ icon: Icon, label, value }) => {
+  // ✅ Tương tự, kiểm tra an toàn
+  if (!Icon) return null;
+
+  return (
+    <div className="bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] p-4 shadow-sm flex items-center gap-4">
+      <div className="w-12 h-12 rounded-[14px] bg-slate-100 border-b-[3px] border-slate-200 flex items-center justify-center shrink-0">
+        <Icon size={22} strokeWidth={2.5} className="text-slate-500" />
+      </div>
+      <div className="min-w-0 pt-0.5">
+        <p className="text-[10px] sm:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
+        <p className="text-[20px] sm:text-[24px] font-display font-black text-slate-800 leading-none">{value}</p>
+      </div>
     </div>
-    <div className="min-w-0 pt-0.5">
-      <p className="text-[10px] sm:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-      <p className="text-[20px] sm:text-[24px] font-display font-black text-slate-800 leading-none">{value}</p>
-    </div>
-  </div>
-);
+  );
+};
 
 // ─── Question Preview Card (Câu hỏi đơn) ────────────────────────────
 const PreviewQuestionCard = ({ question }) => {

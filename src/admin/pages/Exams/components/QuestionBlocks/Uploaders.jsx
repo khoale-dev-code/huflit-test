@@ -14,7 +14,8 @@ export const QuestionImageUploader = ({ imageUrl, imageStoragePath, onUpdate }) 
       const result = await uploadImage(file, 'new', 'question');
       onUpdate({ imageUrl: result.url, imageStoragePath: result.path });
     } catch (err) {
-      alert("Lỗi tải ảnh!");
+      console.error("Image upload failed:", err);
+      alert(`Lỗi tải ảnh: ${err.message || "Đã xảy ra lỗi"}`);
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -59,7 +60,8 @@ export const QuestionAudioUploader = ({ audioUrl, audioStoragePath, onUpdate }) 
       const result = await uploadAudio(file, 'new', 'question_audio');
       onUpdate({ audioUrl: result.url, audioStoragePath: result.path, audioName: file.name });
     } catch (err) {
-      alert("Lỗi tải audio!");
+      console.error("Audio upload failed:", err);
+      alert(`Lỗi tải audio: ${err.message || "Đã xảy ra lỗi"}`);
     } finally {
       setUploading(false);
       e.target.value = '';
