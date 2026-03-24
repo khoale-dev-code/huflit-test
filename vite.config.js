@@ -71,15 +71,17 @@ export default defineConfig({
       output: {
         // CHUNKING: Chia nhỏ các thư viện bên thứ 3 để trình duyệt lưu Cache tốt hơn
         manualChunks(id) {
+          // Firebase - vẫn bundle vì cần thiết cho app
+          if (id.includes('node_modules/firebase') && !id.includes('firebase-admin')) {
+            return 'vendor-firebase';
+          }
+          
           // Tiptap Editor - Nặng, chỉ dùng trong Admin
           if (id.includes('node_modules/@tiptap')) {
             return 'vendor-editor';
           }
           
           // Database & Backend Services
-          if (id.includes('node_modules/firebase') && !id.includes('firebase-admin')) {
-            return 'vendor-firebase';
-          }
           if (id.includes('node_modules/@supabase')) {
             return 'vendor-supabase';
           }
