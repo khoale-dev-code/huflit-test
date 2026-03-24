@@ -44,7 +44,7 @@ const NAVIGATION_CONFIG = [
       { id: 'ai-professor', label: 'Gia sư AI', icon: GraduationCap, path: '/ai-lab/professor', desc: 'Giảng bài & ra bài tập', isMaintenance: false },
       { id: 'ai-grammar', label: 'Trợ giảng Ngữ Pháp', icon: Sparkles, path: '/ai-lab/grammar', desc: 'Phân tích câu khó', isMaintenance: false },
       { id: 'ai-roleplay', label: 'Luyện giao tiếp', icon: MessageCircle, path: '/ai-lab/roleplay', desc: 'Chat thực tế với Bot', isMaintenance: true },
-      { id: 'ai-writing', label: 'Chấm điểm Writing', icon: PenTool, path: '/ai-lab/writing', desc: 'Sửa lỗi & gợi ý từ vựng', isMaintenance: true },
+      { id: 'ai-writing', label: 'Chấm điểm Writing', icon: PenTool, path: '/ai-lab/writing', desc: 'Sửa lỗi & gợi ý từ vựng', isMaintenance: false },
     ]
   },
   { 

@@ -32,6 +32,7 @@ const WelcomeModal       = lazy(() => import('./components/modals/WelcomeModal')
 const HomePage           = lazy(() => import('./pages/HomePage'));
 const GrammarTutor = lazy(() => import('./components/AILab/GrammarTutor'));
 const GrammarProfessor = lazy(() => import('./components/AILab/GrammarProfessor'));
+const WritingGrading = lazy(() => import('./components/AILab/Writing/WritingGrading'));
 const ExamSetup          = lazy(() => import('./components/FullExam/components/ExamSetup/ExamSetup'));
 const PartSelector       = lazy(() => import('./components/Display/PartSelector'));
 const ContentDisplay     = lazy(() => import('./components/Display/ContentDisplay'));
@@ -175,6 +176,7 @@ const AppContent = memo(() => {
               <Route path={ROUTES.TEST}      element={<Navigate to="/exams" replace />} />
               <Route path="/ai-lab/grammar" element={<GrammarTutor />} />
               <Route path="/ai-lab/professor" element={<GrammarProfessor />} />
+              <Route path="/ai-lab/writing" element={<WritingGrading />} />
               <Route path="*"                element={<NotFoundPage />} />  
             </Routes>
           </Suspense>
