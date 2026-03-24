@@ -1,24 +1,4 @@
-/* src/components/FullExam/hooks/useExamTimer.js
- *
- * FIX CHÍNH SO VỚI BẢN CŨ:
- * ─────────────────────────────────────────────────────────────
- * [BUG CŨ] useEffect([isActive]) → khi chuyển Listening → Reading:
- *   - isActive vẫn = true → effect KHÔNG re-run → interval cũ tiếp tục
- *   - warningFiredRef KHÔNG reset → warning không fire cho Reading
- *   - timeLeftRef đã được set về 3600 nhưng interval logic vẫn
- *     chạy đúng vì đọc từ ref → timer chạy đúng NHƯNG onComplete
- *     bị gọi với logic section cũ (listening) → chuyển sai màn hình
- *
- * [FIX] Thêm `section` vào dependency của interval effect:
- *   useEffect([isActive, section])
- *   → mỗi khi section thay đổi: clear interval cũ, tạo interval mới
- *   → warningFiredRef reset đồng thời trong cùng effect
- *   → timeLeftRef lúc này đã được sync sang giá trị mới (3600)
- *     vì setTimeLeft() được gọi TRƯỚC setSection() trong handler
- */
-
 import { useEffect, useRef } from 'react';
-import { EXAM_TIMINGS } from '../constants/timings';
 
 export const useExamTimer = ({
   isActive = false,
@@ -42,13 +22,8 @@ export const useExamTimer = ({
   onCompleteRef.current = onComplete;
 
   // ── Interval chính ───────────────────────────────────────────
-  // Dependency: [isActive, section]
-  //   - isActive thay đổi  → start/stop timer
-  //   - section thay đổi   → restart timer + reset warningFired
-  //     (setTimeLeft đã được gọi TRƯỚC setSection trong handler,
-  //      nên timeLeftRef.current đã = 3600 khi effect này chạy)
   useEffect(() => {
-    // Reset warning flag cho section mới
+    // Reset warning flag khi đổi section
     warningFired.current = false;
 
     if (!isActive) return;
@@ -56,8 +31,8 @@ export const useExamTimer = ({
     const id = setInterval(() => {
       const t = timeLeftRef.current;
 
-      // 1. Warning khi còn <= 5 phút (1 lần / section)
-      if (t <= EXAM_TIMINGS.WARNING && !warningFired.current) {
+      // 1. Warning khi còn <= 5 phút (300s)
+      if (t <= 300 && !warningFired.current) {
         warningFired.current = true;
         onWarningRef.current?.();
       }
@@ -74,11 +49,7 @@ export const useExamTimer = ({
     }, 1000);
 
     return () => clearInterval(id);
-   
   }, [isActive, section]);
-  // ↑ section là dependency quan trọng:
-  //   khi Listening → Reading, section thay đổi → interval restart
-  //   → đọc timeLeftRef.current = 3600 → đếm đúng 60 phút
 };
 
 /* ── Helpers ─────────────────────────────────────────────── */
@@ -89,5 +60,27 @@ export const formatTimerDisplay = (seconds) => {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
-export const getMaxTimeForSection = (section) =>
-  section === 'listening' ? EXAM_TIMINGS.LISTENING : EXAM_TIMINGS.READING;
+/**
+ * 🚀 MỚI: Hàm lấy thời gian linh hoạt dựa trên thể loại đề (category)
+ */
+export const getMaxTimeForSection = (category, section) => {
+  const cat = (category || 'other').toLowerCase();
+  
+  if (cat === 'huflit') {
+    return section === 'listening' ? 30 * 60 : 60 * 60; // 30p Nghe, 60p Đọc
+  }
+  if (cat === 'toeic') {
+    return section === 'listening' ? 45 * 60 : 75 * 60; // 45p Nghe, 75p Đọc
+  }
+  if (cat === 'ielts') {
+    // IELTS thường tính tổng 60p Đọc. Nghe 30p.
+    return section === 'listening' ? 30 * 60 : 60 * 60; 
+  }
+  if (cat === 'thpt') {
+    // THPTQG chỉ có 1 bài thi 50 phút
+    return 50 * 60;
+  }
+  
+  // Default (Dự phòng)
+  return section === 'listening' ? 30 * 60 : 60 * 60;
+};

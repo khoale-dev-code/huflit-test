@@ -1,5 +1,5 @@
 // src/admin/pages/Exams/DetailsExam.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Edit3, ArrowLeft, AlertTriangle, Clock, HelpCircle, Headphones, BookOpen,
@@ -12,8 +12,8 @@ import { useAdminAuth } from '../../hooks/useAdminAuth';
 import { getExamById } from '../../services/examService';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminNavbar from '../../components/AdminNavbar';
- 
-// ─── Cấu hình Danh mục ──────────────────────────────────────────
+
+// ─── CONFIGURATION ──────────────────────────────────────────
 const EXAM_CATEGORIES = [
   { value: 'toeic',  label: 'Luyện thi TOEIC' },
   { value: 'ielts',  label: 'Luyện thi IELTS' },
@@ -21,107 +21,113 @@ const EXAM_CATEGORIES = [
   { value: 'thpt',   label: 'Đề thi THPT Quốc Gia' },
   { value: 'other',  label: 'Khác / Chưa phân loại' },
 ];
-// ─── Cấu hình Icon & Màu sắc Gamification ────────────────────────
+
 const TYPE_CONFIG = {
   listening: { icon: Headphones, color: 'text-[#1CB0F6]', bg: 'bg-[#EAF6FE]', border: 'border-[#BAE3FB]', label: 'LISTENING' },
-  reading:   { icon: BookOpen,   color: 'text-[#58CC02]', bg: 'bg-[#f1faeb]', border: 'border-[#bcf096]', label: 'READING' },
-  writing:   { icon: PenTool,    color: 'text-[#FF9600]', bg: 'bg-[#FFF4E5]', border: 'border-[#FFD8A8]', label: 'WRITING' },
-  speaking:  { icon: Mic,        color: 'text-[#CE82FF]', bg: 'bg-[#faefff]', border: 'border-[#eec9ff]', label: 'SPEAKING' },
+  reading:   { icon: BookOpen,   color: 'text-[#58CC02]', bg: 'bg-[#F0FAE8]', border: 'border-[#bcf096]', label: 'READING' },
+  writing:   { icon: PenTool,    color: 'text-[#FF9600]', bg: 'bg-[#FFFBEA]', border: 'border-[#FFD8A8]', label: 'WRITING' },
+  speaking:  { icon: Mic,        color: 'text-[#CE82FF]', bg: 'bg-[#F8EEFF]', border: 'border-[#eec9ff]', label: 'SPEAKING' },
 };
 
-// ─── Stat Card 3D ─────────────────────────────────────────────────────
-// ─── Stat Card 3D ─────────────────────────────────────────────────────
+/* ─── COMPONENT: 3D STAT CARD ───────────────────────────────────────────────────── */
 const StatCard = ({ icon: Icon, label, value, accent = 'blue' }) => {
   const themes = {
     blue:   'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]',
-    green:  'bg-[#f1faeb] text-[#58CC02] border-[#bcf096]',
-    amber:  'bg-[#FFC800]/10 text-[#FF9600] border-[#FFC800]/30',
-    purple: 'bg-[#faefff] text-[#CE82FF] border-[#eec9ff]',
+    green:  'bg-[#F0FAE8] text-[#58CC02] border-[#bcf096]',
+    amber:  'bg-[#FFFBEA] text-[#FF9600] border-[#FFD8A8]',
+    purple: 'bg-[#F8EEFF] text-[#CE82FF] border-[#eec9ff]',
   };
 
-  // ✅ Thêm dòng này: Vừa chống crash app, vừa fix lỗi ESLint ngầm
   if (!Icon) return null; 
 
   return (
-    <div className="bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] p-4 shadow-sm flex flex-col gap-3 hover:-translate-y-1 transition-transform">
-      <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${themes[accent] || themes.blue}`}>
-        <Icon size={22} strokeWidth={2.5} />
+    <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-5 shadow-sm flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-b-[4px] shadow-sm ${themes[accent] || themes.blue}`}>
+        <Icon size={26} strokeWidth={2.5} />
       </div>
       <div>
-        <p className="text-[10px] sm:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-        <p className="text-[18px] sm:text-[22px] font-display font-black text-slate-800 leading-none">{value}</p>
+        <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+        <p className="text-[20px] sm:text-[24px] font-black text-slate-800 leading-none">{value}</p>
       </div>
     </div>
   );
 };
 
-// ─── Usage Stat (Thống kê thực tế) ──────────────────────────────────
+/* ─── COMPONENT: USAGE STAT CARD ────────────────────────────────── */
 const UsageStat = ({ icon: Icon, label, value }) => {
-  // ✅ Tương tự, kiểm tra an toàn
   if (!Icon) return null;
 
   return (
-    <div className="bg-white rounded-[20px] border-2 border-slate-200 border-b-[4px] p-4 shadow-sm flex items-center gap-4">
-      <div className="w-12 h-12 rounded-[14px] bg-slate-100 border-b-[3px] border-slate-200 flex items-center justify-center shrink-0">
-        <Icon size={22} strokeWidth={2.5} className="text-slate-500" />
+    <div className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-5 shadow-sm flex items-center gap-5">
+      <div className="w-14 h-14 rounded-2xl bg-slate-50 border-2 border-slate-100 flex items-center justify-center shrink-0 shadow-inner">
+        <Icon size={26} strokeWidth={2.5} className="text-slate-400" />
       </div>
       <div className="min-w-0 pt-0.5">
-        <p className="text-[10px] sm:text-[11px] font-display font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-        <p className="text-[20px] sm:text-[24px] font-display font-black text-slate-800 leading-none">{value}</p>
+        <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+        <p className="text-[22px] sm:text-[28px] font-black text-slate-800 leading-none">{value}</p>
       </div>
     </div>
   );
 };
 
-// ─── Question Preview Card (Câu hỏi đơn) ────────────────────────────
+/* ─── COMPONENT: QUESTION PREVIEW CARD ──────────────────────────── */
 const PreviewQuestionCard = ({ question }) => {
   const isExample = question.isExample;
   return (
-    <div className={`p-4 rounded-[16px] border-2 border-b-[4px] mb-4 ${isExample ? 'bg-[#FFFBEA] border-[#FFD8A8]' : 'bg-white border-slate-200'}`}>
-      <div className="flex items-start gap-3 mb-3">
-        <div className={`w-8 h-8 rounded-[10px] shrink-0 flex items-center justify-center border-b-[3px] text-[12px] font-display font-black text-white ${isExample ? 'bg-[#FF9600] border-[#E58700]' : 'bg-[#1CB0F6] border-[#1899D6]'}`}>
+    <div className={`p-5 rounded-2xl border-2 mb-5 transition-colors ${
+      isExample ? 'bg-[#FFFBEA] border-[#FFD8A8] border-b-[4px]' : 'bg-white border-slate-200 shadow-sm'
+    }`}>
+      <div className="flex items-start gap-4 mb-4">
+        <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border-b-[3px] text-[14px] font-black text-white shadow-sm ${
+          isExample ? 'bg-[#FF9600] border-[#E58700]' : 'bg-[#1CB0F6] border-[#1899D6]'
+        }`}>
           {question.displayIndex}
         </div>
-        <div className="flex-1 min-w-0 pt-1">
-          {/* Các cờ Media & Trạng thái */}
-          <div className="flex flex-wrap gap-2 mb-2">
-            {isExample && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#FF9600]/20 text-[#FF9600] text-[10px] font-display font-black uppercase"><Star size={10} strokeWidth={3} /> Câu Ví Dụ</span>}
-            {question.imageUrl && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-display font-black uppercase"><ImageIcon size={10} strokeWidth={3} /> Có Ảnh</span>}
-            {question.audioUrl && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#EAF6FE] text-[#1CB0F6] text-[10px] font-display font-black uppercase"><Music size={10} strokeWidth={3} /> Có Audio riêng</span>}
+        
+        <div className="flex-1 min-w-0 pt-1.5">
+          <div className="flex flex-wrap gap-2.5 mb-3">
+            {isExample && <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#FF9600]/10 border border-[#FFD8A8] text-[#FF9600] text-[10px] font-black uppercase tracking-widest"><Star size={12} strokeWidth={3} /> Câu Ví Dụ</span>}
+            {question.imageUrl && <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-widest"><ImageIcon size={12} strokeWidth={3} /> Có Ảnh</span>}
+            {question.audioUrl && <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#EAF6FE] border border-[#BAE3FB] text-[#1CB0F6] text-[10px] font-black uppercase tracking-widest"><Music size={12} strokeWidth={3} /> Audio riêng</span>}
           </div>
           
-          <h4 className={`text-[14px] sm:text-[15px] font-body font-bold leading-snug whitespace-pre-wrap ${isExample ? 'text-[#D9A600]' : 'text-slate-800'}`}>
-            {question.question || <span className="italic text-slate-400">(Không có nội dung câu hỏi)</span>}
+          <h4 className={`text-[15px] sm:text-[16px] font-bold leading-relaxed whitespace-pre-wrap ${isExample ? 'text-[#D9A600]' : 'text-slate-800'}`}>
+            {question.question || <span className="italic text-slate-400 font-medium">(Không có nội dung câu hỏi)</span>}
           </h4>
         </div>
       </div>
 
-      {/* Hiển thị các Option đáp án */}
       {question.options && question.options.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-11">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-14">
           {question.options.map((opt, i) => {
             const isCorrect = question.correct === i;
             return (
-              <div key={i} className={`flex items-center gap-2 p-2 rounded-[12px] border-2 ${isCorrect ? 'bg-[#f1faeb] border-[#bcf096]' : 'bg-slate-50 border-slate-100'}`}>
-                <div className={`w-6 h-6 rounded-[6px] flex items-center justify-center text-[11px] font-display font-black shrink-0 ${isCorrect ? 'bg-[#58CC02] text-white' : 'bg-slate-200 text-slate-500'}`}>
+              <div key={i} className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-colors ${
+                isCorrect ? 'bg-[#F0FAE8] border-[#bcf096]' : 'bg-slate-50 border-slate-100'
+              }`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-black shrink-0 shadow-sm border-b-2 ${
+                  isCorrect ? 'bg-[#58CC02] text-white border-[#46A302]' : 'bg-white border-slate-200 text-slate-500'
+                }`}>
                   {String.fromCharCode(65 + i)}
                 </div>
-                <span className={`text-[13px] font-body font-bold truncate ${isCorrect ? 'text-[#46A302]' : 'text-slate-600'}`}>
-                  {opt || <span className="italic text-slate-400">Đáp án trong Audio</span>}
+                <span className={`text-[14px] font-bold truncate flex-1 ${isCorrect ? 'text-[#46A302]' : 'text-slate-600'}`}>
+                  {opt || <span className="italic text-slate-400 font-medium">Nghe trong Audio</span>}
                 </span>
-                {isCorrect && <Check size={14} className="text-[#58CC02] ml-auto shrink-0" strokeWidth={3} />}
+                {isCorrect && <Check size={18} className="text-[#58CC02] shrink-0" strokeWidth={3} />}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Hiển thị Giải thích */}
       {question.explanation && (
-        <div className="mt-3 pl-11">
-          <div className="bg-[#EAF6FE] border-2 border-[#BAE3FB] rounded-[12px] p-3 text-[13px] font-body font-bold text-slate-600">
-            <span className="text-[#1CB0F6] uppercase tracking-wider font-display font-black mr-2">💡 Giải thích:</span>
-            {question.explanation}
+        <div className="mt-5 pl-14">
+          <div className="bg-[#FFFBEA] border-2 border-[#FFD8A8] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-[#FF9600]" />
+            <p className="text-[14px] font-bold text-slate-700 leading-relaxed m-0 whitespace-pre-wrap pl-2">
+              <span className="font-black text-[#D9A600] uppercase tracking-widest mr-2 block mb-1">💡 Giải thích:</span>
+              {question.explanation}
+            </p>
           </div>
         </div>
       )}
@@ -129,7 +135,9 @@ const PreviewQuestionCard = ({ question }) => {
   );
 };
 
-// ─── MAIN COMPONENT ────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════════
+   MAIN PAGE: DETAILS EXAM
+════════════════════════════════════════════════════════════════ */
 const DetailsExam = () => {
   const { id }   = useParams();
   const navigate = useNavigate();
@@ -139,56 +147,54 @@ const DetailsExam = () => {
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  // Quản lý việc đóng mở từng Part để dễ xem
   const [expandedParts, setExpandedParts] = useState({});
 
   useEffect(() => {
-    if (window.innerWidth < 768) setSidebarOpen(false);
-    const handleResize = () => {
-      if (window.innerWidth < 768) setSidebarOpen(false);
-      else setSidebarOpen(true);
-    };
+    const handleResize = () => setSidebarOpen(window.innerWidth >= 768);
+    handleResize(); // Init on mount
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
     const load = async () => {
       setLoading(true);
       try {
         const data = await getExamById(id);
+        if (!isMounted) return;
+        
         if (data.parts && !Array.isArray(data.parts) && typeof data.parts === 'object') {
-          data.parts = Object.entries(data.parts).map(([key, val]) => {
-            let type = val.type || (['part1', 'part2', 'part3', 'part4'].includes(key) ? 'listening' : 'reading');
-            return { ...val, id: key, type };
-          });
+          data.parts = Object.entries(data.parts).map(([key, val]) => ({ 
+            ...val, 
+            id: key, 
+            type: val.type || (['part1', 'part2', 'part3', 'part4'].includes(key) ? 'listening' : 'reading') 
+          }));
         }
         setExam(data);
-        // Mặc định mở Part đầu tiên
-        if (data.parts && data.parts.length > 0) {
+        if (data.parts?.length > 0) {
           setExpandedParts({ [data.parts[0].id]: true });
         }
       } catch (err) {
-        setError(err.message);
+        if (isMounted) setError(err.message);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     load();
+    return () => { isMounted = false; };
   }, [id]);
 
-  // ── Tính toán thống kê & INDEX CHUẨN cho mảng parts ──
+  // ── Tính toán thống kê & INDEX CHUẨN ──
   const stats = useMemo(() => {
-    if (!exam) return null;
-    const partsArr = Array.isArray(exam.parts) ? exam.parts : [];
+    if (!exam) return { total: 0, counts: {}, partsCount: {}, partsArr: [] };
     
+    const partsArr = Array.isArray(exam.parts) ? exam.parts : [];
     let total = 0;
     let counts = { listening: 0, reading: 0, writing: 0, speaking: 0 };
     let partsCount = { listening: 0, reading: 0, writing: 0, speaking: 0 };
-
-    // Tính toán lại mảng để gán `displayIndex` (1 đến 200) cho từng câu
     let globalIndex = 1;
+
     const indexedParts = partsArr.map(part => {
       let partQCount = 0;
       const indexedQuestions = (part.questions || []).map(q => {
@@ -217,25 +223,27 @@ const DetailsExam = () => {
     return { total, counts, partsCount, partsArr: indexedParts };
   }, [exam]);
 
-  const togglePart = (partId) => {
+  const togglePart = useCallback((partId) => {
     setExpandedParts(prev => ({ ...prev, [partId]: !prev[partId] }));
-  };
+  }, []);
 
-  // ── Loading / Error ──
+  // ── Renders (Loading/Error) ──
   if (loading) return (
-    <div className="flex h-screen w-screen items-center justify-center bg-[#F4F7FA] flex-col gap-3 selection:bg-blue-200">
-      <div className="w-12 h-12 border-[4px] border-blue-100 border-t-[#1CB0F6] rounded-full animate-spin" />
-      <p className="font-display font-bold text-slate-500 text-[15px]">Đang tải dữ liệu...</p>
+    <div className="flex h-screen w-screen items-center justify-center bg-[#F4F7FA] flex-col gap-4 font-nunito selection:bg-blue-200">
+      <div className="w-16 h-16 border-[6px] border-slate-200 border-t-[#1CB0F6] rounded-full animate-spin shadow-inner" />
+      <p className="font-black text-slate-400 text-[18px] uppercase tracking-widest">Đang tải dữ liệu...</p>
     </div>
   );
 
   if (error || !exam) return (
-    <div className="flex h-screen w-screen items-center justify-center bg-[#F4F7FA] selection:bg-blue-200">
-      <div className="text-center bg-white p-6 rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm max-w-sm">
-        <AlertTriangle className="w-12 h-12 text-[#FF4B4B] mx-auto mb-3" strokeWidth={2.5} />
-        <h3 className="text-[18px] font-display font-black text-slate-800 mb-1">Lỗi tải dữ liệu!</h3>
-        <p className="text-[14px] font-body text-slate-500 mb-5">{error ?? 'Không tìm thấy bộ đề'}</p>
-        <button onClick={() => navigate('/admin/exams')} className="w-full py-2.5 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[4px] rounded-[14px] font-display font-black uppercase tracking-wider active:translate-y-[2px] transition-all">
+    <div className="flex h-screen w-screen items-center justify-center bg-[#F4F7FA] font-nunito selection:bg-blue-200 p-4">
+      <div className="text-center bg-white p-10 rounded-[32px] border-2 border-slate-200 border-b-[8px] shadow-sm max-w-md w-full">
+        <div className="w-24 h-24 bg-[#FFF0F0] rounded-3xl border-2 border-[#ffc1c1] border-b-[6px] flex items-center justify-center mx-auto mb-6">
+           <AlertTriangle className="w-12 h-12 text-[#FF4B4B]" strokeWidth={3} />
+        </div>
+        <h3 className="text-[24px] font-black text-slate-800 mb-2">Lỗi tải dữ liệu!</h3>
+        <p className="text-[15px] font-bold text-slate-500 mb-8 leading-relaxed">{error ?? 'Không tìm thấy bộ đề này trong hệ thống.'}</p>
+        <button onClick={() => navigate('/admin/exams')} className="w-full py-4 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[6px] rounded-2xl font-black text-[15px] uppercase tracking-widest active:translate-y-[4px] active:border-b-2 transition-all outline-none shadow-sm">
           Quay lại danh sách
         </button>
       </div>
@@ -245,24 +253,25 @@ const DetailsExam = () => {
   const catInfo = EXAM_CATEGORIES.find(c => c.value === exam.category) || EXAM_CATEGORIES[4];
 
   return (
-    <div className="flex h-screen bg-[#F4F7FA] font-sans overflow-hidden selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
+    <div className="flex h-screen bg-[#F4F7FA] font-nunito overflow-hidden selection:bg-[#1CB0F6] selection:text-white">
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} admin={admin} onSignOut={signOut} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => navigate('/admin/exams/create')} />
 
-        {/* ── STICKY HEADER ── */}
-        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b-2 border-slate-200 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4 shrink-0 shadow-sm">
-          <nav className="flex items-center gap-2 min-w-0 overflow-hidden">
+        {/* ── STICKY HEADER (To & Rõ ràng hơn) ── */}
+        <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4 shrink-0 shadow-sm">
+          <nav className="flex items-center gap-4 min-w-0 overflow-hidden">
             <button 
               onClick={() => navigate('/admin/exams')} 
-              className="w-10 h-10 bg-white rounded-[12px] border-2 border-slate-200 border-b-[3px] flex items-center justify-center text-slate-500 hover:text-[#1CB0F6] hover:border-blue-200 active:border-b-2 active:translate-y-[1px] transition-all outline-none shrink-0"
+              className="w-12 h-12 bg-white rounded-2xl border-2 border-slate-200 border-b-[4px] flex items-center justify-center text-slate-400 hover:text-[#1CB0F6] hover:border-[#BAE3FB] hover:bg-[#EAF6FE] active:border-b-2 active:translate-y-[2px] transition-all outline-none shrink-0"
+              title="Quay lại"
             >
-              <ArrowLeft size={20} strokeWidth={3} />
+              <ArrowLeft size={24} strokeWidth={3} />
             </button>
-            <div className="flex flex-col min-w-0 ml-1">
-              <p className="text-[10px] font-display font-black text-slate-400 uppercase tracking-widest hidden sm:block">Chi tiết bộ đề</p>
-              <p className="text-[14px] sm:text-[16px] font-display font-black text-slate-800 truncate max-w-[150px] sm:max-w-[300px]">
+            <div className="flex flex-col min-w-0">
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] hidden sm:block mb-0.5">Chi tiết bộ đề</p>
+              <p className="text-[16px] sm:text-[20px] font-black text-slate-800 truncate leading-tight">
                 {exam.title}
               </p>
             </div>
@@ -270,46 +279,45 @@ const DetailsExam = () => {
 
           <button 
             onClick={() => navigate(`/admin/exams/edit/${id}`)} 
-            className="flex items-center gap-1.5 px-4 sm:px-6 py-2 sm:py-2.5 bg-[#1CB0F6] text-white rounded-[14px] border-2 border-[#1899D6] border-b-[4px] hover:bg-[#18A0E0] active:border-b-2 active:translate-y-[2px] font-display font-black text-[13px] sm:text-[14px] uppercase tracking-wider transition-all outline-none shadow-sm shrink-0"
+            className="flex items-center gap-2 px-5 sm:px-8 py-3 bg-[#1CB0F6] text-white rounded-2xl border-2 border-[#1899D6] border-b-[4px] hover:bg-[#18A0E0] hover:border-[#1582BE] active:border-b-2 active:translate-y-[2px] font-black text-[13px] sm:text-[15px] uppercase tracking-widest transition-all outline-none shadow-sm shrink-0"
           >
-            <Edit3 size={18} strokeWidth={2.5} />
-            <span className="hidden sm:inline pt-0.5">Vào Chỉnh sửa</span>
+            <Edit3 size={20} strokeWidth={3} />
+            <span className="hidden sm:inline pt-0.5">Chỉnh sửa đề</span>
           </button>
         </div>
 
         {/* ── SCROLLABLE BODY ── */}
         <main className="flex-1 overflow-y-auto custom-scrollbar">
-          <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 space-y-6 sm:space-y-8">
+          <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 space-y-8">
 
             {/* ── HERO BANNER ── */}
-            <div className="bg-white p-6 sm:p-8 rounded-[24px] border-2 border-slate-200 border-b-[6px] shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-start justify-between gap-6">
+            <div className="bg-white p-8 sm:p-10 rounded-[32px] border-2 border-slate-200 border-b-[8px] shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-start justify-between gap-8">
               <div className="absolute -top-4 -right-4 p-6 opacity-[0.03] pointer-events-none">
-                <FileText className="w-40 h-40" />
+                <FileText className="w-64 h-64" />
               </div>
               
               <div className="relative z-10 flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="inline-block px-3 py-1 bg-slate-100 border border-slate-200 text-slate-500 font-display font-black text-[10px] uppercase tracking-widest rounded-[8px]">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <span className="inline-block px-4 py-1.5 bg-slate-50 border-2 border-slate-200 text-slate-500 font-black text-[11px] uppercase tracking-widest rounded-xl shadow-sm">
                     {catInfo.label}
                   </span>
                   
-                  {/* 🔒 FIX: Thêm Badge Trạng thái Public / Draft */}
                   {exam.is_public ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f1faeb] border border-[#bcf096] text-[#58CC02] font-display font-black text-[10px] uppercase tracking-widest rounded-[8px]">
-                      <CheckCircle size={12} strokeWidth={3} /> Đã xuất bản
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#F0FAE8] border-2 border-[#bcf096] text-[#58CC02] font-black text-[11px] uppercase tracking-widest rounded-xl shadow-sm">
+                      <CheckCircle size={14} strokeWidth={3} /> Đã xuất bản
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#fff8e6] border border-[#FFC800]/40 text-[#e5b400] font-display font-black text-[10px] uppercase tracking-widest rounded-[8px]">
-                      <EyeOff size={12} strokeWidth={3} /> Bản nháp (Đang ẩn)
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#FFFBEA] border-2 border-[#FFD8A8] text-[#FF9600] font-black text-[11px] uppercase tracking-widest rounded-xl shadow-sm">
+                      <EyeOff size={14} strokeWidth={3} /> Bản nháp (Đang ẩn)
                     </span>
                   )}
                 </div>
 
-                <h1 className="text-[24px] sm:text-[32px] font-display font-black text-slate-800 tracking-tight leading-tight mb-2">
+                <h1 className="text-[32px] sm:text-[42px] font-black text-slate-800 tracking-tight leading-[1.2] mb-4">
                   {exam.title}
                 </h1>
                 {exam.description && (
-                  <p className="text-[14px] sm:text-[15px] font-body font-medium text-slate-500 leading-relaxed max-w-3xl">
+                  <p className="text-[16px] font-bold text-slate-500 leading-relaxed max-w-3xl">
                     {exam.description}
                   </p>
                 )}
@@ -317,34 +325,38 @@ const DetailsExam = () => {
             </div>
 
             {/* ── META STATS ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <StatCard icon={Clock}      label="Thời lượng" value={`${exam.duration || 90} phút`} accent="amber" />
-              <StatCard icon={HelpCircle} label="Tổng câu"   value={`${stats.total} câu`} accent="green" />
-              
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <StatCard icon={Clock}      label="Thời gian" value={`${exam.duration || 90} phút`} accent="amber" />
+              <StatCard icon={HelpCircle} label="Tổng câu"  value={`${stats.total} câu`} accent="green" />
               {stats.partsCount.listening > 0 && <StatCard icon={Headphones} label="Listening" value={`${stats.partsCount.listening} Parts`} accent="blue" />}
               {stats.partsCount.reading > 0 && <StatCard icon={BookOpen} label="Reading" value={`${stats.partsCount.reading} Parts`} accent="purple" />}
             </div>
 
-            {/* ── HIỂN THỊ CHI TIẾT TỪNG PHẦN THI (FULL PREVIEW) ── */}
-            <div className="bg-white rounded-[24px] border-2 border-slate-200 shadow-sm overflow-hidden">
+            {/* ── HIỂN THỊ CẤU TRÚC ĐỀ (ACCORDION MƯỢT MÀ) ── */}
+            <div className="bg-white rounded-[32px] border-2 border-slate-200 border-b-[8px] shadow-sm overflow-hidden flex flex-col">
               
-              <div className="px-5 py-4 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[12px] flex items-center justify-center shadow-sm shrink-0">
-                    <LayoutTemplate size={20} strokeWidth={2.5} />
+              <div className="px-6 py-5 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[4px] rounded-2xl flex items-center justify-center shadow-sm shrink-0">
+                    <LayoutTemplate size={24} strokeWidth={3} />
                   </div>
                   <div>
-                    <h3 className="text-[16px] font-display font-black text-slate-800">Cấu trúc đề thi</h3>
-                    <p className="text-[12px] font-body font-bold text-slate-500 mt-0.5">
-                      Bấm vào từng phần để xem chi tiết câu hỏi
+                    <h3 className="text-[18px] font-black text-slate-800">Cấu trúc đề thi</h3>
+                    <p className="text-[13px] font-bold text-slate-500 mt-0.5">
+                      Gồm {stats.partsArr.length} phần thi khác nhau.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="divide-y-2 divide-slate-100">
+              <div className="divide-y-2 divide-slate-100 bg-white">
                 {stats.partsArr.length === 0 ? (
-                  <div className="p-10 text-center font-display font-bold text-[14px] text-slate-400">Đề thi chưa có cấu trúc.</div>
+                  <div className="p-16 flex flex-col items-center justify-center text-center gap-4">
+                    <div className="w-16 h-16 bg-slate-50 rounded-2xl border-2 border-slate-200 flex items-center justify-center">
+                      <LayoutTemplate className="text-slate-300" size={32} />
+                    </div>
+                    <p className="font-black text-[15px] text-slate-400 uppercase tracking-widest">Đề thi chưa có cấu trúc câu hỏi.</p>
+                  </div>
                 ) : (
                   stats.partsArr.map((part, index) => {
                     const config = TYPE_CONFIG[part.type] || TYPE_CONFIG.reading;
@@ -352,54 +364,52 @@ const DetailsExam = () => {
                     const isExpanded = !!expandedParts[part.id];
 
                     return (
-                      <div key={part.id} className="transition-colors">
+                      <div key={part.id} className="transition-colors group">
                         
-                        {/* ── HEADER CỦA TỪNG PART (Accordion) ── */}
+                        {/* HEADER ACCORDION (To, Dễ bấm) */}
                         <button 
                           onClick={() => togglePart(part.id)}
-                          className={`w-full p-5 sm:p-6 flex items-center justify-between gap-4 outline-none transition-colors ${isExpanded ? 'bg-slate-50/80' : 'hover:bg-slate-50'}`}
+                          className={`w-full p-6 sm:p-8 flex items-center justify-between gap-6 outline-none transition-all ${isExpanded ? 'bg-slate-50' : 'hover:bg-[#F8FAFC]'}`}
                         >
-                          <div className="flex items-center gap-4 min-w-0">
-                            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-2 border-b-[4px] shadow-sm ${config.bg} ${config.border}`}>
-                              <Icon size={22} strokeWidth={2.5} className={config.color} />
+                          <div className="flex items-center gap-5 min-w-0">
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border-2 border-b-[4px] shadow-sm transition-transform group-hover:scale-105 ${config.bg} ${config.border}`}>
+                              <Icon size={26} strokeWidth={2.5} className={config.color} />
                             </div>
                             <div className="text-left min-w-0 pt-0.5">
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className={`text-[10px] font-display font-black px-2 py-0.5 rounded-[6px] uppercase tracking-widest ${config.bg} ${config.color}`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className={`text-[11px] font-black px-2.5 py-1 rounded-lg uppercase tracking-[0.15em] shadow-sm ${config.bg} ${config.color}`}>
                                   Phần {index + 1}
                                 </span>
-                                {part.audioUrl && <span className="bg-[#EAF6FE] text-[#1CB0F6] px-2 py-0.5 rounded-[6px] text-[10px] font-display font-black flex items-center gap-1 uppercase"><Headphones size={10} /> Có Audio tổng</span>}
+                                {part.audioUrl && <span className="bg-[#EAF6FE] text-[#1CB0F6] px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center gap-1.5 uppercase tracking-widest shadow-sm"><Headphones size={12} strokeWidth={3} /> Audio Tổng</span>}
                               </div>
-                              <h4 className="text-[16px] font-display font-black text-slate-800 leading-snug">{part.title}</h4>
+                              <h4 className="text-[18px] sm:text-[20px] font-black text-slate-800 leading-snug truncate">{part.title}</h4>
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-4 shrink-0">
-                            <span className="hidden sm:inline-block text-[13px] font-display font-black text-slate-500 bg-white border-2 border-slate-200 px-3 py-1 rounded-[10px]">
+                          <div className="flex items-center gap-5 shrink-0">
+                            <span className="hidden sm:inline-flex items-center text-[13px] font-black text-slate-500 bg-white border-2 border-slate-200 px-4 py-1.5 rounded-xl shadow-sm">
                               {part.qCount} Câu
                             </span>
-                            <div className="w-8 h-8 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center text-slate-400">
-                              {isExpanded ? <ChevronUp size={18} strokeWidth={3} /> : <ChevronDown size={18} strokeWidth={3} />}
+                            <div className={`w-10 h-10 rounded-[14px] border-2 flex items-center justify-center transition-all ${isExpanded ? 'bg-[#1CB0F6] border-[#1899D6] border-b-[3px] text-white shadow-sm' : 'bg-white border-slate-200 border-b-[3px] text-slate-400'}`}>
+                              {isExpanded ? <ChevronUp size={20} strokeWidth={3} /> : <ChevronDown size={20} strokeWidth={3} />}
                             </div>
                           </div>
                         </button>
 
-                        {/* ── NỘI DUNG CHI TIẾT CỦA PART ── */}
+                        {/* NỘI DUNG CÂU HỎI */}
                         <AnimatePresence>
                           {isExpanded && (
                             <Motion.div 
-                              initial={{ height: 0, opacity: 0 }} 
-                              animate={{ height: 'auto', opacity: 1 }} 
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden bg-slate-50/50"
+                              initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden bg-slate-50 border-t-2 border-slate-100"
                             >
-                              <div className="px-5 sm:px-20 pb-6 space-y-4 pt-2">
+                              <div className="px-6 sm:px-16 pb-8 space-y-6 pt-6">
                                 
                                 {/* Hướng dẫn làm bài */}
                                 {(part.description || part.instruction) && (
-                                  <div className="bg-white border-2 border-slate-200 rounded-[14px] p-4 shadow-sm mb-6">
-                                    <p className="text-[13px] font-body font-bold text-slate-600 italic">
-                                      <span className="text-slate-400 uppercase font-display font-black tracking-widest mr-2 not-italic">Hướng dẫn:</span>
+                                  <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm">
+                                    <p className="text-[15px] font-bold text-slate-600 italic leading-relaxed">
+                                      <span className="text-[#1CB0F6] uppercase font-black tracking-widest mr-2 not-italic">Hướng dẫn:</span>
                                       {part.description || part.instruction}
                                     </p>
                                   </div>
@@ -407,22 +417,23 @@ const DetailsExam = () => {
 
                                 {/* Lặp các câu hỏi */}
                                 {(part.questions || []).map(q => {
-                                  
                                   if (q.type === 'group') {
                                     return (
-                                      <div key={q.id} className="bg-[#F8EEFF] border-2 border-[#eec9ff] rounded-[24px] p-5 shadow-sm mb-6">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <Layers size={16} strokeWidth={3} className="text-[#CE82FF]" />
-                                          <span className="text-[11px] font-display font-black text-[#CE82FF] uppercase tracking-widest">Nhóm câu hỏi (Đoạn văn/Hội thoại)</span>
+                                      <div key={q.id} className="bg-[#F8EEFF] border-2 border-[#eec9ff] border-b-[6px] rounded-[28px] p-6 sm:p-8 shadow-sm mb-8">
+                                        <div className="flex items-center gap-2 mb-4">
+                                          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border-2 border-[#eec9ff] text-[#CE82FF]">
+                                            <Layers size={18} strokeWidth={3} />
+                                          </div>
+                                          <span className="text-[12px] font-black text-[#CE82FF] uppercase tracking-widest">Nhóm câu hỏi (Đoạn văn/Hội thoại)</span>
                                         </div>
                                         
-                                        <div className="bg-white border-2 border-[#eec9ff] rounded-[16px] p-4 mb-5 whitespace-pre-wrap text-[14px] font-body font-bold text-slate-700">
-                                          {q.imageUrl && <img src={q.imageUrl} alt="Group" className="max-h-40 rounded-xl mb-3 border border-slate-100 object-contain" />}
-                                          {q.audioUrl && <div className="flex items-center gap-2 text-[#1CB0F6] bg-[#EAF6FE] p-2 rounded-xl mb-3 w-fit font-display font-black text-[12px]"><Music size={14} /> Có Audio kèm theo</div>}
-                                          {q.content || <span className="italic text-slate-400">Chưa có nội dung đoạn văn</span>}
+                                        <div className="bg-white border-2 border-[#eec9ff] rounded-[20px] p-5 mb-6 whitespace-pre-wrap text-[15px] font-bold text-slate-700 shadow-sm leading-relaxed">
+                                          {q.imageUrl && <img src={q.imageUrl} alt="Group" className="max-h-56 rounded-xl mb-4 border-2 border-slate-100 object-contain shadow-sm" />}
+                                          {q.audioUrl && <div className="flex items-center gap-2 text-[#1CB0F6] bg-[#EAF6FE] px-4 py-2 rounded-xl mb-4 w-fit font-black text-[13px] border border-[#BAE3FB]"><Music size={16} strokeWidth={3} /> Audio Kèm theo</div>}
+                                          {q.content || <span className="italic text-slate-400 font-medium">Chưa có nội dung đoạn văn</span>}
                                         </div>
 
-                                        <div className="pl-4 border-l-4 border-[#eec9ff] space-y-3">
+                                        <div className="sm:pl-6 sm:border-l-4 sm:border-[#eec9ff] space-y-4">
                                           {q.subQuestions?.map(sq => (
                                             <PreviewQuestionCard key={sq.id} question={sq} />
                                           ))}
@@ -430,7 +441,6 @@ const DetailsExam = () => {
                                       </div>
                                     );
                                   }
-
                                   return <PreviewQuestionCard key={q.id} question={q} />;
                                 })}
                               </div>
@@ -446,12 +456,14 @@ const DetailsExam = () => {
             </div>
 
             {/* ── USAGE STATS ── */}
-            <div>
-              <h3 className="text-[16px] font-display font-black text-slate-800 mb-4 pl-1">Hiệu suất Đề thi</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="pt-4">
+              <h3 className="text-[18px] font-black text-slate-800 mb-5 flex items-center gap-2">
+                <Target size={24} className="text-[#FF9600]" strokeWidth={3} /> Thống kê hiệu suất
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <UsageStat icon={Users}       label="Lượt tham gia" value={exam.stats?.participants ?? 0} />
-                <UsageStat icon={CheckCircle} label="Đã nộp bài"  value={exam.stats?.completed    ?? 0} />
-                <UsageStat icon={Target}      label="Điểm TB"     value={`${exam.stats?.avgScore ?? 0}%`} />
+                <UsageStat icon={CheckCircle} label="Đã hoàn thành" value={exam.stats?.completed    ?? 0} />
+                <UsageStat icon={Target}      label="Điểm Trung Bình" value={`${exam.stats?.avgScore ?? 0}%`} />
               </div>
             </div>
 
