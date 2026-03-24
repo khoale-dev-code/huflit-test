@@ -1,12 +1,13 @@
 // FullExamMode.jsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ArrowLeft, Loader2, AlertTriangle, BookOpen, Headphones, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, BookOpen, Headphones, CheckCircle } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; // 🚀 Thêm useNavigate
 
 // Hooks & Context
 import { useUserProgress } from '../../hooks/useUserProgress';
 import { useExamState } from './hooks/useExamState';
-import { useExamTimer } from './hooks/useExamTimer';      
+import { useExamTimer, getMaxTimeForSection } from './hooks/useExamTimer';      
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
 import { AnswersContext } from './context/AnswersContext';
@@ -15,10 +16,9 @@ import { AnswersContext } from './context/AnswersContext';
 import { generateAnswerKey } from './utils/answerKey';
 import { loadExamData } from '../../data/examData';
 import { EXAM_MODES, EXAM_SECTIONS } from './constants/examConfig';
-import { EXAM_TIMINGS } from './constants/timings';
 
 // Components
-import { ExamSetup } from './components/ExamSetup/ExamSetup';
+// 🚀 ĐÃ XÓA IMPORT ExamSetup DƯ THỪA Ở ĐÂY
 import { ExamScreen } from './components/ExamScreen/ExamScreen';
 import { ResultsScreen } from './components/Results/ResultsScreen';
 import { Timer } from './components/Header/Timer';
@@ -28,7 +28,8 @@ import { SubmitModal } from './components/Modals/SubmitModal';
 
 const EXAM_DRAFT_KEY = 'exam-progress-draft';
 
-const FullExamMode = ({ onComplete }) => {
+const FullExamMode = ({ initialExamId, onComplete }) => {
+  const navigate = useNavigate();
   const { saveProgress, currentUser } = useUserProgress();
   const { isOnline } = useNetworkStatus();
 
@@ -44,7 +45,6 @@ const FullExamMode = ({ onComplete }) => {
   const [submitRetrying, setSubmitRetrying] = useState(false);  
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
-  // ─── Refs ───
   const playedPartsRef = useRef(new Set());
   const sectionRef = useRef(state.section);
 
@@ -63,7 +63,7 @@ const FullExamMode = ({ onComplete }) => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.mode, state.answers]);
 
-  // 2. LOAD & AUTO-SAVE DRAFT (GOM NHÓM LOGIC)
+  // 2. LOAD & AUTO-SAVE DRAFT
   useEffect(() => {
     if (!state.examId) return;
     const raw = localStorage.getItem(EXAM_DRAFT_KEY);
@@ -83,7 +83,24 @@ const FullExamMode = ({ onComplete }) => {
     }
   }, [state.answers, state.examId, state.mode]);
 
-  // 3. KHỞI TẠO DỮ LIỆU ĐỀ THI
+  // 🚀 3. TỰ ĐỘNG VÀO THI KHÔNG CẦN BẤM 2 LẦN
+  const handleStartExam = useCallback((examId) => {
+    setExamId(examId); 
+    setMode(EXAM_MODES.EXAM); 
+    setShowWarning(false);
+  }, [setExamId, setMode]);
+
+  useEffect(() => {
+    if (!initialExamId) {
+      // Nếu user tự gõ /full-exam lên thanh URL mà chưa chọn đề -> Đá về trang chọn đề
+      navigate('/exams', { replace: true });
+    } else if (state.mode === EXAM_MODES.SETUP) {
+      // Nếu đã có đề -> Vào thẳng phòng thi ngay lập tức
+      handleStartExam(initialExamId);
+    }
+  }, [initialExamId, state.mode, handleStartExam, navigate]);
+
+  // 4. KHỞI TẠO DỮ LIỆU ĐỀ THI
   useEffect(() => {
     if (state.mode === EXAM_MODES.SETUP || !state.examId || state.examData) return;
     
@@ -97,7 +114,9 @@ const FullExamMode = ({ onComplete }) => {
         if (startPart) {
           setSection(startPart.type);
           setPart(startPart.id);
-          setTimeLeft(startPart.type === EXAM_SECTIONS.LISTENING ? EXAM_TIMINGS.LISTENING : EXAM_TIMINGS.READING);
+          
+          const startTime = getMaxTimeForSection(data.category, startPart.type);
+          setTimeLeft(startTime);
         }
       })
       .catch((err) => setSaveError(err.message));
@@ -108,24 +127,16 @@ const FullExamMode = ({ onComplete }) => {
   [state.examData, state.section]);
 
   // ─── Handlers ───
-  const handleStartExam = useCallback((examId) => {
-    setExamId(examId); 
-    setMode(EXAM_MODES.EXAM); 
-    setTimeLeft(EXAM_TIMINGS.LISTENING); 
-    setShowWarning(false);
-  }, [setExamId, setMode, setTimeLeft]);
-
   const handleNavigatePart = useCallback((newPartId) => {
-    if (sectionRef.current === EXAM_SECTIONS.LISTENING && playedPartsRef.current.has(newPartId)) {
-      return; // Không alert ở đây để tránh gián đoạn flow nghe
-    }
+    if (sectionRef.current === EXAM_SECTIONS.LISTENING && playedPartsRef.current.has(newPartId)) return; 
     setPart(newPartId);
   }, [setPart]);
 
   const handleNextSection = useCallback(() => {
     const readingParts = state.examData?.parts?.filter(p => p.type === EXAM_SECTIONS.READING) || [];
     if (readingParts.length > 0) {
-      setTimeLeft(EXAM_TIMINGS.READING); 
+      const readingTime = getMaxTimeForSection(state.examData.category, EXAM_SECTIONS.READING);
+      setTimeLeft(readingTime); 
       setSection(EXAM_SECTIONS.READING); 
       setPart(readingParts[0].id); 
       setShowWarning(false);                
@@ -147,16 +158,31 @@ const FullExamMode = ({ onComplete }) => {
     }
   }, [state.section, state.part, currentSectionParts, markPartPlayed, setPart, handleNextSection]);
 
-  const handleFinalSubmit = useCallback(async () => {
+ const handleFinalSubmit = useCallback(async () => {
     if (submitRetrying || !state.examData) return;
     setSubmitRetrying(true);
     try {
       let totalCorrect = 0, totalQuestions = 0;
-      state.examData.parts.forEach(p => {
-        p.questions?.forEach((q, idx) => {
-          totalQuestions++;
-          const qKey = generateAnswerKey({ section: p.type, part: p.id, question: idx + 1 });
-          if (String(state.answers[qKey]) === String(q.correct)) totalCorrect++;
+      
+      // 🚀 QUÉT ĐIỂM CHUẨN XÁC ĐỂ LƯU VÀO DB
+      state.examData.parts.forEach(part => {
+        // Tương tự, gán pType chống lỗi undefined
+        const pType = part.type || (['part1', 'part2', 'part3', 'part4'].includes(String(part.id).toLowerCase()) ? 'listening' : 'reading');
+        
+        part.questions?.forEach((q, qIdx) => {
+          if (q.type === 'group') {
+            q.subQuestions?.forEach((sq, sIdx) => {
+              if (sq.isExample) return;
+              totalQuestions++;
+              const qKey = generateAnswerKey({ section: pType, part: part.id, question: sIdx }); // subIdx thay vì idx + 1
+              if (String(state.answers[qKey]) === String(sq.correct)) totalCorrect++;
+            });
+          } else {
+            if (q.isExample) return;
+            totalQuestions++;
+            const qKey = generateAnswerKey({ section: pType, part: part.id, question: qIdx });
+            if (String(state.answers[qKey]) === String(q.correct)) totalCorrect++;
+          }
         });
       });
       
@@ -177,6 +203,10 @@ const FullExamMode = ({ onComplete }) => {
       setSubmitRetrying(false); 
     }
   }, [state.examData, state.answers, state.examId, isOnline, currentUser, setMode, saveProgress, submitRetrying]);
+
+  const handleSelectAnswer = useCallback((questionKey, answerValue) => {
+    addAnswer(questionKey, answerValue);
+  }, [addAnswer]);
 
   // 4. TIMERS & SHORTCUTS
   useExamTimer({
@@ -218,7 +248,15 @@ const FullExamMode = ({ onComplete }) => {
   const isLastReadingPart = state.section === EXAM_SECTIONS.READING && state.part === currentSectionParts[currentSectionParts.length - 1]?.id;
   const answersContextValue = useMemo(() => ({ answers: state.answers, addAnswer }), [state.answers, addAnswer]);
 
-  if (state.mode === EXAM_MODES.SETUP) return <ExamSetup onStartExam={handleStartExam} />;
+  // 🚀 MÀN HÌNH CHỜ (THAY THẾ CHO EXAM SETUP CŨ)
+  if (state.mode === EXAM_MODES.SETUP || !state.examData) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#F8FAFC] font-nunito flex-col gap-4">
+        <Loader2 className="animate-spin text-[#1CB0F6]" size={48} strokeWidth={3} />
+        <span className="font-black text-slate-500 uppercase tracking-widest text-[14px]">Đang nạp dữ liệu thi...</span>
+      </div>
+    );
+  }
   
   if (state.mode === EXAM_MODES.RESULTS) return (
     <ResultsScreen 
@@ -234,61 +272,57 @@ const FullExamMode = ({ onComplete }) => {
 
   return (
     <AnswersContext.Provider value={answersContextValue}>
-      <div className="min-h-screen bg-[#F4F7FA] font-nunito selection:bg-[#1CB0F6] selection:text-white">
+      <div className="min-h-screen bg-[#F8FAFC] font-nunito selection:bg-[#1CB0F6] selection:text-white">
         
         {/* Banner Warnings */}
-        <div className="fixed top-0 left-0 right-0 z-[60] pointer-events-none px-4 pt-4">
+        <div className="fixed top-0 left-0 right-0 z-[70] pointer-events-none px-4 pt-4">
           <TimeWarning visible={showWarning} section={state.section} isLastListeningPart={isLastListeningPart} timeLeft={state.timeLeft} />
           <OfflineWarning isOnline={isOnline} />
         </div>
 
-        {/* GAMIFIED HEADER */}
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b-2 border-slate-200">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        {/* 🚀 GAMIFIED HEADER CHUẨN UX (SẠCH, CHỈ CÓ TIMER) */}
+        <header className="fixed top-0 left-0 right-0 z-[60] bg-white/90 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
             
             <div className="flex items-center gap-4 min-w-0">
-              {/* Section Icon 3D */}
-              <div className={`hidden sm:flex w-12 h-12 rounded-2xl items-center justify-center border-2 border-b-[5px] shadow-sm shrink-0 transition-all ${
-                isListening ? 'bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]' : 'bg-[#F0FAE8] text-[#58CC02] border-[#bcf096]'
-              }`}>
-                {isListening ? <Headphones size={24} strokeWidth={2.5} /> : <BookOpen size={24} strokeWidth={2.5} />}
+              <button 
+                onClick={() => setShowSubmitModal(true)}
+                className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-[14px] bg-slate-50 border-2 border-slate-200 border-b-[3px] text-slate-400 hover:text-[#FF4B4B] hover:border-[#ffc1c1] hover:bg-[#FFF0F0] active:translate-y-[2px] active:border-b-[1px] transition-all outline-none shrink-0"
+                title="Tạm dừng / Kết thúc sớm"
+              >
+                <ArrowLeft size={20} strokeWidth={3} />
+              </button>
+
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] flex items-center justify-center border-2 border-b-[3px] shadow-sm shrink-0 transition-all bg-[#EAF6FE] text-[#1CB0F6] border-[#BAE3FB]">
+                {isListening ? <Headphones size={22} strokeWidth={2.5} /> : <BookOpen size={22} strokeWidth={2.5} />}
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 hidden sm:block">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border ${
-                    isListening ? 'bg-blue-50 text-blue-500 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'
-                  }`}>
+                  <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border bg-slate-50 text-slate-500 border-slate-200">
                     {state.section}
                   </span>
                   {unansweredCount > 0 && (
-                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg bg-slate-100 text-slate-500 border border-slate-200">
+                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-[#FFFBEA] text-[#FF9600] border border-[#FFD8A8]">
                       Còn {unansweredCount} câu
                     </span>
                   )}
                 </div>
-                <h2 className="text-[16px] sm:text-[18px] font-black text-slate-800 truncate leading-tight">
-                  {currentPartData?.title || 'Đang chuẩn bị...'}
+                <h2 className="text-[15px] font-black text-slate-800 truncate leading-tight">
+                  {currentPartData?.title || 'Đang nạp dữ liệu...'}
                 </h2>
               </div>
             </div>
 
-            {/* Timer & Controls */}
-            <div className="flex items-center gap-3">
+            {/* Timer đứng 1 mình uy nghiêm ở góc phải */}
+            <div className="flex items-center">
               <Timer timeLeft={state.timeLeft} isWarning={showWarning} />
-              <button 
-                onClick={() => setShowSubmitModal(true)}
-                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-[#58CC02] text-white rounded-2xl font-black uppercase text-[13px] tracking-wider border-b-4 border-[#46A302] active:border-b-0 active:translate-y-1 transition-all"
-              >
-                <CheckCircle size={18} strokeWidth={3} />
-                Nộp bài
-              </button>
             </div>
           </div>
         </header>
 
-        {/* MAIN EXAM AREA */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* 🚀 MAIN EXAM AREA */}
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-8">
           {state.examData && state.part && (
             <Motion.div
               key={`${state.section}-${state.part}`}
@@ -301,10 +335,10 @@ const FullExamMode = ({ onComplete }) => {
                 section={state.section}
                 part={state.part}
                 answers={state.answers}
-                onSelectAnswer={handleSelectAnswer}
+                onSelectAnswer={handleSelectAnswer} 
                 onNavigatePart={handleNavigatePart}
                 onNextSection={handleNextSection}
-                onSubmit={() => setShowSubmitModal(true)}
+                onSubmit={() => setShowSubmitModal(true)} // Nút nộp bài của Bottom Menu gọi hàm này
                 onAudioStart={() => setIsAudioPlaying(true)}
                 onAudioEnd={handleAudioEnd}
                 isLastListeningPart={isLastListeningPart}

@@ -1,7 +1,4 @@
-/* src/components/FullExam/utils/examHelpers.js */
-
-import { EXAM_STRUCTURE } from '../constants/examConfig';
-import { generateAnswerKey } from './answerKey'; // ✅ FIX: import key helper
+import { generateAnswerKey } from './answerKey';
 
 /**
  * Format seconds to MM:SS display
@@ -14,45 +11,30 @@ export const formatTime = (seconds) => {
 };
 
 /**
- * Get configuration for a section
+ * Tính kết quả Động (Dynamic) không phụ thuộc vào thứ tự Part cứng
  */
-export const getExamConfig = (section) => {
-  return EXAM_STRUCTURE[section] || null;
-};
+export const calculateSectionResults = (examData, answers, sectionType) => {
+  if (!examData?.parts) return { correct: 0, points: 0, percentage: 0, totalQuestions: 0 };
 
-/**
- * Calculate results for a section
- *
- * FIX: Trước đây dùng `${section}-part${p}-q${idx+1}` → không match với
- * generateAnswerKey() tạo ra "listening-p1-q1".
- * Giờ dùng generateAnswerKey() làm single source of truth.
- */
-export const calculateSectionResults = (examData, answers, section) => {
-  if (!examData?.parts) {
-    return { correct: 0, points: 0, percentage: 0, totalQuestions: 0 };
-  }
+  const partsArr = Array.isArray(examData.parts) 
+    ? examData.parts 
+    : Object.entries(examData.parts).map(([k, v]) => ({ ...v, id: k }));
 
-  const cfg = EXAM_STRUCTURE[section];
-  if (!cfg) return { correct: 0, points: 0, percentage: 0, totalQuestions: 0 };
-
-  // Reading: absolute part numbers là 5-8, listening: 1-4
-  const startPart = section === 'reading' ? 5 : 1;
-
+  const sectionParts = partsArr.filter(p => p.type === sectionType);
+  
   let correct = 0;
   let totalAnswered = 0;
+  let totalQuestions = 0;
 
-  for (let i = 0; i < cfg.parts; i++) {
-    const absolutePart = startPart + i;       // 1-4 (listening) hoặc 5-8 (reading)
-    const partKey = `part${absolutePart}`;    // key trong examData.parts
-    const part = examData.parts[partKey];
-
-    if (!part?.questions) continue;
+  sectionParts.forEach((part) => {
+    if (!part?.questions) return;
 
     part.questions.forEach((q, idx) => {
-      // ✅ FIX: dùng generateAnswerKey với absolute part number
+      totalQuestions++;
+      // ✅ Sinh key dựa vào đúng ID của Part đó thay vì số thứ tự ảo
       const answerKey = generateAnswerKey({
-        section,
-        part: absolutePart,
+        section: sectionType,
+        part: part.id,
         question: idx + 1,
       });
 
@@ -60,22 +42,21 @@ export const calculateSectionResults = (examData, answers, section) => {
 
       if (userAnswer !== undefined) {
         totalAnswered++;
-        if (userAnswer === q.correct) {
+        // Ép kiểu String để so sánh an toàn
+        if (String(userAnswer) === String(q.correct)) {
           correct++;
         }
       }
     });
-  }
+  });
 
-  const points = correct * cfg.pointsPerQuestion;
-  const percentage = (correct / cfg.totalQuestions) * 100;
+  const percentage = totalQuestions > 0 ? (correct / totalQuestions) * 100 : 0;
 
   return {
     correct,
-    points,
     percentage,
     totalAnswered,
-    totalQuestions: cfg.totalQuestions,
+    totalQuestions,
   };
 };
 
@@ -108,7 +89,7 @@ export const calculateFullResults = (examData, answers) => {
 export const getCEFRLevel = (score) => {
   const numScore = typeof score === 'string' ? parseFloat(score) : score;
 
-  if (numScore >= 75) return { level: 'C1', label: 'Advanced',            color: '#059669', range: '75-100', description: 'Excellent proficiency' };
+  if (numScore >= 75) return { level: 'C1', label: 'Advanced',           color: '#059669', range: '75-100', description: 'Excellent proficiency' };
   if (numScore >= 50) return { level: 'B2', label: 'Upper Intermediate',  color: '#0066CC', range: '50-74',  description: 'Good proficiency' };
   if (numScore >= 25) return { level: 'B1', label: 'Intermediate',        color: '#FF8C42', range: '25-49',  description: 'Basic proficiency' };
   if (numScore >= 15) return { level: 'A2', label: 'Elementary',          color: '#F59E0B', range: '15-24',  description: 'Limited proficiency' };
@@ -116,104 +97,30 @@ export const getCEFRLevel = (score) => {
 };
 
 /**
- * Count unanswered questions in a section
- *
- * FIX: Dùng generateAnswerKey thay vì hardcode format
+ * Đếm số câu chưa làm Động
  */
-export const countUnansweredQuestions = (examData, answers, section) => {
+export const countUnansweredQuestions = (examData, answers, sectionType) => {
   if (!examData?.parts) return 0;
+  
+  const partsArr = Array.isArray(examData.parts) 
+    ? examData.parts 
+    : Object.entries(examData.parts).map(([k, v]) => ({ ...v, id: k }));
 
-  const cfg = EXAM_STRUCTURE[section];
-  if (!cfg) return 0;
-
-  const startPart = section === 'reading' ? 5 : 1;
+  const sectionParts = partsArr.filter(p => p.type === sectionType);
   let unanswered = 0;
 
-  for (let i = 0; i < cfg.parts; i++) {
-    const absolutePart = startPart + i;
-    const partKey = `part${absolutePart}`;
-    const part = examData.parts[partKey];
-
-    if (!part?.questions) continue;
+  sectionParts.forEach((part) => {
+    if (!part?.questions) return;
 
     part.questions.forEach((_, idx) => {
-      // ✅ FIX: dùng generateAnswerKey
       const answerKey = generateAnswerKey({
-        section,
-        part: absolutePart,
+        section: sectionType,
+        part: part.id,
         question: idx + 1,
       });
       if (answers[answerKey] === undefined) unanswered++;
     });
-  }
+  });
 
   return unanswered;
-};
-
-/**
- * Count total unanswered across all sections
- */
-export const countTotalUnansweredQuestions = (examData, answers) => {
-  return (
-    countUnansweredQuestions(examData, answers, 'listening') +
-    countUnansweredQuestions(examData, answers, 'reading')
-  );
-};
-
-/**
- * Get results breakdown by part
- *
- * FIX: Dùng generateAnswerKey thay vì hardcode format
- */
-export const getResultsByPart = (examData, answers) => {
-  const results = {
-    listeningByPart: {},
-    readingByPart: {},
-  };
-
-  // Listening: absolute parts 1-4
-  for (let p = 1; p <= 4; p++) {
-    const part = examData.parts[`part${p}`];
-    let correct = 0;
-    if (part?.questions) {
-      part.questions.forEach((q, idx) => {
-        // ✅ FIX
-        const key = generateAnswerKey({ section: 'listening', part: p, question: idx + 1 });
-        if (answers[key] === q.correct) correct++;
-      });
-    }
-    results.listeningByPart[p] = correct;
-  }
-
-  // Reading: absolute parts 5-8 → relative 1-4
-  for (let p = 5; p <= 8; p++) {
-    const part = examData.parts[`part${p}`];
-    let correct = 0;
-    if (part?.questions) {
-      part.questions.forEach((q, idx) => {
-        // ✅ FIX: absolute part number (5-8)
-        const key = generateAnswerKey({ section: 'reading', part: p, question: idx + 1 });
-        if (answers[key] === q.correct) correct++;
-      });
-    }
-    results.readingByPart[p - 4] = correct; // store as relative 1-4
-  }
-
-  return results;
-};
-
-/**
- * Check if an answer is correct
- */
-export const isAnswerCorrect = (question, selectedAnswerIndex) => {
-  if (!question || selectedAnswerIndex === undefined) return false;
-  return selectedAnswerIndex === question.correct;
-};
-
-/**
- * Calculate percentage safely
- */
-export const calculatePercentage = (correct, total) => {
-  if (!total || total === 0) return 0;
-  return (correct / total) * 100;
 };

@@ -253,8 +253,12 @@ const AuthPage = () => {
               />
 
               {isLogin && (
-                <div className="text-right">
-                  <button type="button" className="text-xs font-black text-[#1CB0F6] hover:text-[#1899D6] uppercase tracking-wider">
+                <div className="text-right mt-1 mb-2">
+                  <button 
+                    type="button" 
+                    onClick={() => navigate('/forgot-password')}
+                    className="text-[12px] font-black text-[#1CB0F6] hover:text-[#1899D6] hover:underline underline-offset-4 uppercase tracking-widest transition-all outline-none"
+                  >
                     Quên mật khẩu?
                   </button>
                 </div>
