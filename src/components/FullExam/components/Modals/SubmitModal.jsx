@@ -113,7 +113,7 @@ const PartReviewGrid = memo(({ statuses }) => {
   );
 });
 
-export const SubmitModal = memo(({ visible, saveError, isOnline, isSubmitting, examData, answers, onConfirm, onCancel }) => {
+export const SubmitModal = memo(({ visible, isSubmitting, examData, answers, onConfirm, onCancel }) => {
   const [step, setStep] = useState('review');
   const firstFocusRef = useRef(null);
   const statuses = useAllPartStatuses(examData, answers);

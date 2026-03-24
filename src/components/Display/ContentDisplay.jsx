@@ -187,8 +187,6 @@ const ContentDisplay = memo(({
   onAudioEnd,
   onSelectPart,
   isLoading = false,
-  // 🚀 FIX: Bỏ selectedPart ra khỏi danh sách props nếu không dùng, hoặc thêm _ để bypass linter
-  _selectedPart, 
 }) => {
 
   if (isLoading) {

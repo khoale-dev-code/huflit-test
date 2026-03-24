@@ -151,6 +151,7 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
                   Tại sao chọn chúng tôi?
                 </p>
                 <div className="flex flex-col gap-4">
+                  {/* eslint-disable-next-line no-unused-vars */}
                   {FEATURES.map(({ Icon, title, desc, theme }, i) => (
                     <div key={i} className={`flex items-start gap-4 p-4 rounded-[24px] border-2 border-b-[4px] ${theme.bg} ${theme.border}`}>
                       <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${theme.iconBg} border-black/10`}>

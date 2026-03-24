@@ -7,7 +7,7 @@ export const useAppNavigation = () => {
 
   return {
     goToTest: useCallback(() => navigate(ROUTES.TEST), [navigate]),
-    goToTest: useCallback(() => navigate(ROUTES.HOME), [navigate]),
+    goToHome: useCallback(() => navigate(ROUTES.HOME), [navigate]),
     goToFullExam: useCallback(() => navigate(ROUTES.FULL_EXAM), [navigate]),
     goToGrammar: useCallback(() => navigate(ROUTES.GRAMMAR), [navigate]),
     goToVocabulary: useCallback(() => navigate(ROUTES.VOCABULARY), [navigate]),

@@ -234,6 +234,7 @@ export default function PreviousResults({
 
 // --- Sub-components (Đã tối ưu bằng React.memo) ---
 
+// eslint-disable-next-line no-unused-vars
 const StatCard = memo(({ icon: Icon, label, value, sub, color, bgIcon }) => (
   <div className="bg-white border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center text-center hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
     <div className={`p-2 rounded-xl ${bgIcon} mb-2.5`}>

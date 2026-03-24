@@ -15,7 +15,7 @@
  */
 
 import { useMemo } from 'react';
-import { useUserProgress, getUnlockedExams, getNextUnlockLevel } from './useUserProgress';
+import { useUserProgress } from './useUserProgress';
 
 // Trích số từ examId: "exam3" → 3
 const parseExamNumber = (examId) => {

@@ -33,6 +33,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 /* ── Stat Card — ĐÃ FIX LỖI UI (Chuyển sang xếp dọc) ── */
+// eslint-disable-next-line no-unused-vars
 const StatCard = ({ icon: Icon, label, value, sub, colorClass, bgLightClass, borderClass }) => (
   <div className="relative bg-white rounded-[20px] md:rounded-[24px] p-5 md:p-6 border-2 border-slate-200 border-b-[4px] shadow-sm flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
     {/* Biểu tượng phụ (Trend/Star) ghim ở góc phải trên cùng */}

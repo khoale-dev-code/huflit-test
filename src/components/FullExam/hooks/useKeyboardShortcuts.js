@@ -1,6 +1,6 @@
 /* src/components/FullExam/hooks/useKeyboardShortcuts.js */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * Keyboard shortcuts for exam
@@ -159,9 +159,9 @@ export const useKeyboardHelp = () => {
  * Hook to detect if user is using keyboard
  */
 export const useKeyboardDetection = () => {
-  const [isUsingKeyboard, setIsUsingKeyboard] = React.useState(false);
+  const [isUsingKeyboard, setIsUsingKeyboard] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = () => {
       setIsUsingKeyboard(true);
     };

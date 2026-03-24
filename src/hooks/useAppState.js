@@ -101,7 +101,7 @@ const reducer = (state, action) => {
 const cancelSpeech = () => {
   try {
     if (window.speechSynthesis) window.speechSynthesis.cancel();
-  } catch (err) { /* ignore */ }
+  } catch { /* ignore */ }
 };
 
 function flattenValidQuestions(partData) {

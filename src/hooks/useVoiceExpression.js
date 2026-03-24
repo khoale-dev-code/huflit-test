@@ -9,27 +9,6 @@ const MODE_CONFIG = {
 const FPT_API_URL = 'https://api.fpt.ai/hmi/tts/v5';
 const FPT_API_KEY = import.meta.env.VITE_FPT_TTS_KEY;
 
-// Thử load Audio, timeout sau maxWait ms
-const tryPlayAudio = (url, maxWait = 4000) =>
-  new Promise((resolve, reject) => {
-    const audio = new Audio(url);
-    let settled = false;
-
-    const done = (err) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      err ? reject(err) : resolve(audio);
-    };
-
-    const timer = setTimeout(() => done(new Error('timeout')), maxWait);
-    audio.onerror   = () => done(new Error('load_error'));
-    audio.oncanplaythrough = () => done(null);
-
-    // Bắt đầu load
-    audio.load();
-  });
-
 const useVoiceExpression = () => {
   const audioRef    = useRef(null);
   const timeoutsRef = useRef([]);
