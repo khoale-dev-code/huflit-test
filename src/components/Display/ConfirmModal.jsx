@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { HelpCircle } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ══════════════════════════════════════════════════════

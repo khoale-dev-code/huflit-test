@@ -89,7 +89,7 @@ const ResetPasswordPage = () => {
       // Đổi mật khẩu trên Firebase
       await confirmPasswordReset(auth, oobCode, newPassword);
       setIsSuccess(true);
-    } catch (err) {
+    } catch {
       setError('Đã có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại.');
     } finally {
       setLoading(false);

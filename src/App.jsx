@@ -17,9 +17,12 @@ import { LoadingSpinner } from './components/common/LoadingSpinner';
 import { ROUTES } from './config/routes';
 
 // --- Icons ---
-import { Trophy, FileText, Zap, BarChart3 } from 'lucide-react';
 import ForgotPasswordPage from './components/Auth/ForgotPasswordPage';
 import ResetPasswordPage from './components/Auth/ResetPasswordPage';
+
+// --- Shared Components ---
+import { StatsGrid } from './components/StatsGrid';
+import { PartTestContent } from './components/PartTestContent';
 
 // --- Lazy Loaded Pages & Components ---
 const AuthPage           = lazy(() => import('./components/Auth/AuthPage'));
@@ -29,6 +32,7 @@ const WelcomeModal       = lazy(() => import('./components/modals/WelcomeModal')
 const HomePage           = lazy(() => import('./pages/HomePage'));
 const GrammarTutor = lazy(() => import('./components/AILab/GrammarTutor'));
 const GrammarProfessor = lazy(() => import('./components/AILab/GrammarProfessor'));
+const WritingGrading = lazy(() => import('./components/AILab/Writing/WritingGrading'));
 const ExamSetup          = lazy(() => import('./components/FullExam/components/ExamSetup/ExamSetup'));
 const PartSelector       = lazy(() => import('./components/Display/PartSelector'));
 const ContentDisplay     = lazy(() => import('./components/Display/ContentDisplay'));
@@ -52,130 +56,6 @@ const LessonManagement   = lazy(() => import('./admin/pages/Lessons/LessonManage
 const LessonForm         = lazy(() => import('./admin/pages/Lessons/LessonForm'));
 const AdminLessonDetails = lazy(() => import('./admin/pages/Lessons/LessonDetails'));
 const MigrateData        = lazy(() => import('./admin/scripts/MigrateFirestoreToSupabase'));
-
-/* ════════════════════════════════════════════════════════════════
-   THÀNH PHẦN HIỂN THỊ KẾT QUẢ
-════════════════════════════════════════════════════════════════ */
-const InfoBadge = memo(({ icon: Icon, label, value, color = 'indigo' }) => {
-  const colorMap = {
-    indigo:  'bg-[#EAF6FE] border-[#BAE3FB] text-[#1CB0F6]',
-    emerald: 'bg-[#F0FAE8] border-[#bcf096] text-[#58CC02]',
-    amber:   'bg-[#FFFBEA] border-[#FFD8A8] text-[#FF9600]',
-    purple:  'bg-[#F8EEFF] border-[#eec9ff] text-[#CE82FF]',
-  };
-
-  if (!Icon) return null;
-
-  return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-[16px] border-2 border-b-[4px] shadow-sm ${colorMap[color] || colorMap.indigo}`}>
-      <Icon className="w-5 h-5 shrink-0" strokeWidth={2.5} />
-      <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-0.5">{label}</p>
-        <p className="text-[16px] font-black truncate leading-tight">{value}</p>
-      </div>
-    </div>
-  );
-});
-InfoBadge.displayName = "InfoBadge";
-
-const StatsGrid = memo(({ scoreResult, isSignedIn }) => {
-  if (!isSignedIn || !scoreResult || scoreResult.total === 0) return null;
-
-  return (
-    <Motion.div 
-      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-[24px] border-2 border-slate-200 border-b-[6px] p-6 sm:p-8 shadow-sm mt-8 font-nunito"
-    >
-      <div className="flex items-center gap-3 mb-5">
-        <div className="p-2.5 rounded-xl bg-[#EAF6FE] border-2 border-[#BAE3FB] border-b-[3px] shadow-sm">
-          <BarChart3 className="w-6 h-6 text-[#1CB0F6]" strokeWidth={2.5} />
-        </div>
-        <h3 className="text-[18px] font-black text-slate-800 uppercase tracking-widest">Hiệu suất làm bài</h3>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <InfoBadge icon={FileText} label="Tổng câu" value={scoreResult.total} color="indigo" />
-        <InfoBadge icon={Trophy}   label="Câu đúng" value={scoreResult.correct} color="emerald" />
-        <InfoBadge icon={FileText} label="Câu sai"  value={scoreResult.total - scoreResult.correct} color="amber" />
-        <InfoBadge icon={Zap}      label="Tỉ lệ"    value={`${scoreResult.percentage.toFixed(0)}%`} color="purple" />
-      </div>
-    </Motion.div>
-  );
-});
-StatsGrid.displayName = "StatsGrid";
-
-/* ════════════════════════════════════════════════════════════════
-   VÙNG LÀM BÀI THI TỪNG PHẦN (PRACTICE)
-════════════════════════════════════════════════════════════════ */
-const PartTestContent = memo((props) => {
-  const {
-    selectedExam, handleExamChange, testType, handleTestTypeChange,
-    selectedPart, handlePartChange, partData, currentExamData,
-    currentQuestionIndex, setCurrentQuestionIndex, answers, handleAnswerSelect,
-    showResults, handleSubmit, handleReset, scoreResult, convertedScore,
-    examCategory, isLoadingExam, isSignedIn
-  } = props;
-
-  useEffect(() => {
-    if (!currentExamData?.parts) return;
-    
-    let availableParts = [];
-    if (Array.isArray(currentExamData.parts)) {
-      availableParts = currentExamData.parts.filter(p => p.type === testType).map(p => String(p.id));
-    } else {
-      availableParts = Object.entries(currentExamData.parts).filter(([, data]) => data.type === testType).map(([key]) => String(key));
-    }
-
-    if (availableParts.length === 0) return;
-    if (!availableParts.includes(String(selectedPart))) {
-      handlePartChange({ target: { value: availableParts[0] } });
-    }
-  }, [testType, currentExamData, selectedPart, handlePartChange]);
-
-  useEffect(() => {
-    if (showResults) window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [showResults]);
-
-  const handleSelectPart = useCallback(() => {
-    const selector = document.querySelector('[role="listbox"]');
-    if (selector) selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, []);
-
-  return (
-    <div className="w-full space-y-8 font-nunito">
-      <PartSelector
-        selectedExam={selectedExam} onExamChange={handleExamChange}
-        testType={testType}         onTestTypeChange={handleTestTypeChange}
-        selectedPart={selectedPart} onPartChange={handlePartChange}
-      />
-
-      <AnimatePresence mode="wait">
-        {showResults ? (
-          <Motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-            <ResultsDisplay
-              scoreResult={scoreResult} convertedScore={convertedScore} examCategory={examCategory}
-              partData={partData} answers={answers} onReset={handleReset}
-            />
-            <StatsGrid scoreResult={scoreResult} isSignedIn={isSignedIn} />
-          </Motion.div>
-        ) : (
-          <Motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-8 min-h-[100vh]">
-            <ContentDisplay
-              partData={partData} selectedPart={selectedPart} currentQuestionIndex={currentQuestionIndex}
-              testType={testType} examId={selectedExam} isLoading={isLoadingExam} onSelectPart={handleSelectPart}
-            />
-            <QuestionDisplay
-              selectedPart={selectedPart} selectedExam={selectedExam} partData={partData}
-              currentQuestionIndex={currentQuestionIndex} onQuestionChange={setCurrentQuestionIndex}
-              answers={answers} onAnswerSelect={handleAnswerSelect} showResults={showResults}
-              onSubmit={handleSubmit} testType={testType}
-            />
-          </Motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-});
-PartTestContent.displayName = "PartTestContent";
 
 /* ════════════════════════════════════════════════════════════════
    TRUNG TÂM ĐIỀU HƯỚNG DÀNH CHO USER (APP CONTENT)
@@ -296,6 +176,7 @@ const AppContent = memo(() => {
               <Route path={ROUTES.TEST}      element={<Navigate to="/exams" replace />} />
               <Route path="/ai-lab/grammar" element={<GrammarTutor />} />
               <Route path="/ai-lab/professor" element={<GrammarProfessor />} />
+              <Route path="/ai-lab/writing" element={<WritingGrading />} />
               <Route path="*"                element={<NotFoundPage />} />  
             </Routes>
           </Suspense>

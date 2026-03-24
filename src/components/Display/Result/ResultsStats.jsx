@@ -16,6 +16,7 @@ import {
 /* ══════════════════════════════════════════════════════════
    StatCard — Gamified 3D Compact (Đã tối ưu UI)
 ══════════════════════════════════════════════════════════ */
+// eslint-disable-next-line no-unused-vars
 const StatCard = memo(({ icon: Icon, label, value, suffix, bg, border, index }) => {
   return (
     <Motion.div
@@ -134,15 +135,15 @@ function buildStatCards(score, convertedScore, category) {
    ResultsStats — Main Entry
 ══════════════════════════════════════════════════════════ */
 const ResultsStats = memo(({ score, convertedScore, examCategory }) => {
-  // Nếu chưa có dữ liệu điểm, không render để tránh lỗi hiển thị
-  if (!score) return null;
-
   const category = useMemo(() => resolveCategory(examCategory), [examCategory]);
 
   const statCards = useMemo(
     () => buildStatCards(score, convertedScore, category),
     [score, convertedScore, category]
   );
+
+  // Nếu chưa có dữ liệu điểm, không render để tránh lỗi hiển thị
+  if (!score) return null;
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 relative z-20 font-nunito">

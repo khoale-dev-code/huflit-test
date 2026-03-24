@@ -46,7 +46,7 @@ const getPalette = (partKey) => {
 
 /* ─── SelectDropdown ───────────────────────────────────────────── */
 function SelectDropdown({ value, options, onChange, label, icon: Icon, disabled,
-  accentColor = C.blue, accentBorder = C.blueBorder, accentBg = C.blueBg }) {
+  accentColor = C.blue, accentBg = C.blueBg }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 

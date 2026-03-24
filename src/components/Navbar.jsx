@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
@@ -44,7 +44,7 @@ const NAVIGATION_CONFIG = [
       { id: 'ai-professor', label: 'Gia sư AI', icon: GraduationCap, path: '/ai-lab/professor', desc: 'Giảng bài & ra bài tập', isMaintenance: false },
       { id: 'ai-grammar', label: 'Trợ giảng Ngữ Pháp', icon: Sparkles, path: '/ai-lab/grammar', desc: 'Phân tích câu khó', isMaintenance: false },
       { id: 'ai-roleplay', label: 'Luyện giao tiếp', icon: MessageCircle, path: '/ai-lab/roleplay', desc: 'Chat thực tế với Bot', isMaintenance: true },
-      { id: 'ai-writing', label: 'Chấm điểm Writing', icon: PenTool, path: '/ai-lab/writing', desc: 'Sửa lỗi & gợi ý từ vựng', isMaintenance: true },
+      { id: 'ai-writing', label: 'Chấm điểm Writing', icon: PenTool, path: '/ai-lab/writing', desc: 'Sửa lỗi & gợi ý từ vựng', isMaintenance: false },
     ]
   },
   { 
@@ -141,6 +141,7 @@ const DesktopNavItem = ({ item, currentPath, onNav }) => {
 /* ════════════════════════════════════════════════════════════════
    3. MOBILE DRAWER & TABS
 ════════════════════════════════════════════════════════════════ */
+// eslint-disable-next-line no-unused-vars
 const BottomTab = ({ icon: Icon, label, isActive, onClick }) => (
   <button onClick={onClick} className="flex-1 flex flex-col items-center justify-center gap-1.5 pt-2 pb-1 bg-transparent border-none cursor-pointer outline-none group">
     <div className={`px-5 py-1.5 rounded-2xl transition-all duration-200 ${isActive ? 'bg-[#EAF6FE] text-[#1CB0F6] scale-110 shadow-sm border-2 border-transparent' : 'bg-transparent text-slate-400 group-hover:bg-slate-50'}`}>

@@ -140,15 +140,15 @@ export function useTranslationProtection() {
 }
 
 // Giải quyết lỗi 'Component' is assigned a value but never used bằng cách dùng trực tiếp Tag
-export const NoTranslate = memo(({ children, as: Tag = 'span', className = '', style }) => (
-  <Tag 
+export const NoTranslate = memo(({ children, className = '', style }) => (
+  <span 
     translate="no" 
     className={`notranslate ${className}`.trim()} 
     style={style} 
     data-nosnippet
   >
     {children}
-  </Tag>
+  </span>
 ));
 
 NoTranslate.displayName = 'NoTranslate';

@@ -2,7 +2,11 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
-import '@testing-library/jest-dom';
+
+// Vitest globals setup - required for ResizeObserver mock
+const { global: globalObj } = globalThis;
+Object.defineProperty(globalObj, 'global', { value: globalObj });
+
 // 1. Tự động dọn dẹp giao diện sau mỗi test case để tránh rò rỉ dữ liệu giữa các bài test
 afterEach(() => {
   cleanup();
@@ -42,8 +46,10 @@ Object.defineProperty(window, 'speechSynthesis', {
 });
 
 // Mock ResizeObserver (Thường dùng cho biểu đồ Recharts hoặc Layout phức tạp)
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+Object.defineProperty(globalObj, 'ResizeObserver', {
+  value: vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
-}));
+  })),
+});
