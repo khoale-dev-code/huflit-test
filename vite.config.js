@@ -55,31 +55,56 @@ export default defineConfig({
     outDir: 'dist',
     target: 'esnext',
     sourcemap: false, // Tắt để bảo mật code và giảm nhẹ file build
-    chunkSizeWarningLimit: 2000, // Tăng giới hạn cảnh báo dung lượng
+    chunkSizeWarningLimit: 1000, // Giảm để phát hiện chunks lớn
+
+    // Tối ưu Brotli/Gzip compression
+    reportCompressedSize: true,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Loại bỏ console.log trong production
+        drop_debugger: true,
+      },
+    },
 
     rollupOptions: {
       output: {
         // CHUNKING: Chia nhỏ các thư viện bên thứ 3 để trình duyệt lưu Cache tốt hơn
         manualChunks(id) {
-          // Tách DB và Backend
-          if (id.includes('node_modules/firebase')) return 'vendor-firebase';
-          if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
+          // Tiptap Editor - Nặng, chỉ dùng trong Admin
+          if (id.includes('node_modules/@tiptap')) {
+            return 'vendor-editor';
+          }
+          
+          // Database & Backend Services
+          if (id.includes('node_modules/firebase') && !id.includes('firebase-admin')) {
+            return 'vendor-firebase';
+          }
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          
+          // AI Libraries - Groq SDK
+          if (id.includes('node_modules/groq-sdk')) {
+            return 'vendor-ai';
+          }
           
           // Tách các thư viện UI (Nặng nhưng ít khi thay đổi)
-          if (
-            id.includes('node_modules/framer-motion') || 
-            id.includes('node_modules/lucide-react') ||
-            id.includes('node_modules/recharts')
-          ) {
-            return 'vendor-ui';
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-animation';
+          }
+          if (id.includes('node_modules/lucide-react') || 
+              id.includes('node_modules/react-icons')) {
+            return 'vendor-icons';
+          }
+          if (id.includes('node_modules/recharts')) {
+            return 'vendor-charts';
           }
           
           // Tách lõi React và Router
-          if (
-            id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
-            id.includes('node_modules/react-router')
-          ) {
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react-router')) {
             return 'vendor-core';
           }
         },
@@ -103,6 +128,12 @@ export default defineConfig({
       'react-dom',
       'framer-motion',
       'lucide-react'
+    ],
+    // Loại trừ các thư viện nặng không cần preload ngay
+    exclude: [
+      'groq-sdk',
+      '@tiptap/react',
+      '@tiptap/starter-kit',
     ],
   }
 });
