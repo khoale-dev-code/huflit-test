@@ -23,6 +23,7 @@ import ResetPasswordPage from './components/Auth/ResetPasswordPage';
 // --- Shared Components ---
 import { StatsGrid } from './components/StatsGrid';
 import { PartTestContent } from './components/PartTestContent';
+import AdminChatLogs from './admin/AdminChatLogs';
 
 // --- Lazy Loaded Pages & Components ---
 const AuthPage           = lazy(() => import('./components/Auth/AuthPage'));
@@ -44,7 +45,7 @@ const FullExamMode       = lazy(() => import('./components/FullExam/FullExamMode
 const HistoryTest        = lazy(() => import('./components/HistoryTest'));
 const LessonList         = lazy(() => import('./components/Lessons/LessonList'));
 const LessonDetailUser   = lazy(() => import('./components/Lessons/LessonDetail'));
-
+const ChatInterface = lazy(() => import('./components/AILab/Chat/ChatInterface'));
 // --- Admin Area ---
 const AdminApp           = lazy(() => import('./admin/AdminApp'));
 const ExamManagement     = lazy(() => import('./admin/pages/Exams/ExamManagement'));
@@ -177,6 +178,7 @@ const AppContent = memo(() => {
               <Route path="/ai-lab/grammar" element={<GrammarTutor />} />
               <Route path="/ai-lab/professor" element={<GrammarProfessor />} />
               <Route path="/ai-lab/writing" element={<WritingGrading />} />
+              <Route path="/ai-lab/roleplay" element={<ChatInterface />} />
               <Route path="*"                element={<NotFoundPage />} />  
             </Routes>
           </Suspense>
@@ -228,7 +230,7 @@ export default function App() {
             <Route path="lessons/edit/:id" element={<LessonForm />} />
             <Route path="lessons/detail/:id" element={<AdminLessonDetails />} />
           </Route>
-          
+          <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
           <Route path="/migrate-data" element={<MigrateData />} />
           
           {/* User Routes (Chứa logic ẩn/hiện Navbar) */}

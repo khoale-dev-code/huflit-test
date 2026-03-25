@@ -19,12 +19,14 @@ const WritingHints = ({ prompt, writingType, level, disabled }) => {
     try {
       const aiResponse = await getAIHints(prompt, writingType, level);
       
-      let parsedData = hintsData;
+      let parsedData = null; 
+      
       if (typeof aiResponse === 'string') {
         try {
           const cleanJson = aiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
           parsedData = JSON.parse(cleanJson);
-        } catch (e) {
+        } catch { // 🚀 FIX CUỐI CÙNG: Xóa luôn phần (_) đi là ESLint hết cãi!
+          // Fallback nếu parse JSON thất bại
           parsedData = { steps: [{ title: 'Guide', content: aiResponse }] };
         }
       } else {

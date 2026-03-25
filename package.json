@@ -42,7 +42,9 @@
     "@tiptap/react": "^3.20.4",
     "@tiptap/starter-kit": "^3.20.4",
     "canvas-confetti": "^1.9.4",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "file-saver": "^2.0.5",
     "firebase": "^12.6.0",
     "framer-motion": "^12.36.0",
@@ -61,7 +63,8 @@
     "recharts": "^3.7.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "socket.io-client": "^4.8.1",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "web-vitals": "^5.1.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
@@ -89,5 +92,17 @@
     "terser": "^5.44.1",
     "vite": "^7.2.6",
     "vitest": "^4.1.0"
+  },
+  "description": "<div align=\"center\">",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khoale-dev-code/huflit-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khoale-dev-code/huflit-test/issues"
   }
 }

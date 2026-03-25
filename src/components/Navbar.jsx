@@ -1,30 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// src/components/Navbar.jsx
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   Headphones, BookOpen, GraduationCap, Sparkles,
   LogOut, User, X, Home, FileText, ChevronDown, Star,
-  Target, Menu, Wrench, Bot, MessageCircle, PenTool
+  Target, Menu, Wrench, Bot, MessageCircle, PenTool, Lock // 🚀 Đã thêm Lock icon
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { ROUTES } from '../config/routes';
 
 /* ════════════════════════════════════════════════════════════════
-   1. DATA CONFIGURATION (TÍCH HỢP AI LAB)
+   1. DATA CONFIGURATION
 ════════════════════════════════════════════════════════════════ */
 const NAVIGATION_CONFIG = [
+  { id: 'home', label: 'Trang chủ', icon: Home, path: ROUTES.HOME, type: 'link' },
   { 
-    id: 'home', 
-    label: 'Trang chủ', 
-    icon: Home, 
-    path: ROUTES.HOME, 
-    type: 'link' 
-  },
-  { 
-    id: 'exams', 
-    label: 'Luyện thi', 
-    icon: Target, 
-    type: 'dropdown',
+    id: 'exams', label: 'Luyện thi', icon: Target, type: 'dropdown',
     children: [
       { id: 'toeic', label: 'Chứng chỉ TOEIC', icon: Headphones, path: '/exams/toeic', desc: 'Đánh giá kỹ năng giao tiếp', isMaintenance: true },
       { id: 'ielts', label: 'Chứng chỉ IELTS', icon: BookOpen, path: '/exams/ielts', desc: 'Học thuật & Tổng quát', isMaintenance: true },
@@ -32,28 +24,16 @@ const NAVIGATION_CONFIG = [
       { id: 'thptqg', label: 'THPT Quốc Gia', icon: FileText, path: '/exams/thptqg', desc: 'Ôn thi Đại học', isMaintenance: true },
     ]
   },
-  // 🚀 TÍCH HỢP PHÒNG TẬP AI VÀO NAVBAR
-  // 🚀 TÍCH HỢP PHÒNG TẬP AI VÀO NAVBAR
   {
-    id: 'ai-lab',
-    label: 'Phòng AI',
-    icon: Bot,
-    type: 'dropdown',
-    isNew: true, // Cờ kích hoạt nhãn "MỚI" lấp lánh
+    id: 'ai-lab', label: 'Phòng AI', icon: Bot, type: 'dropdown', isNew: true,
     children: [
       { id: 'ai-professor', label: 'Gia sư AI', icon: GraduationCap, path: '/ai-lab/professor', desc: 'Giảng bài & ra bài tập', isMaintenance: false },
       { id: 'ai-grammar', label: 'Trợ giảng Ngữ Pháp', icon: Sparkles, path: '/ai-lab/grammar', desc: 'Phân tích câu khó', isMaintenance: false },
-      { id: 'ai-roleplay', label: 'Luyện giao tiếp', icon: MessageCircle, path: '/ai-lab/roleplay', desc: 'Chat thực tế với Bot', isMaintenance: true },
+      { id: 'ai-roleplay', label: 'Luyện giao tiếp', icon: MessageCircle, path: '/ai-lab/roleplay', desc: 'Chat thực tế với Bot', isMaintenance: false },
       { id: 'ai-writing', label: 'Chấm điểm Writing', icon: PenTool, path: '/ai-lab/writing', desc: 'Sửa lỗi & gợi ý từ vựng', isMaintenance: false },
     ]
   },
-  { 
-    id: 'lessons', 
-    label: 'Bài học', 
-    icon: Sparkles, 
-    path: '/learn', 
-    type: 'link' 
-  }, 
+  { id: 'lessons', label: 'Bài học', icon: Sparkles, path: '/learn', type: 'link' }, 
 ];
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -65,9 +45,10 @@ const drawerVariants = {
 };
 
 /* ════════════════════════════════════════════════════════════════
-   2. DESKTOP COMPONENTS
+   2. REUSABLE COMPONENTS
 ════════════════════════════════════════════════════════════════ */
-const DesktopNavItem = ({ item, currentPath, onNav }) => {
+
+const DesktopNavItem = memo(({ item, currentPath, onNav }) => {
   const isActive = item.path === currentPath || (item.children && item.children.some(c => currentPath.startsWith(c.path)));
   const Icon = item.icon;
 
@@ -136,14 +117,11 @@ const DesktopNavItem = ({ item, currentPath, onNav }) => {
       </div>
     </div>
   );
-};
+});
+DesktopNavItem.displayName = 'DesktopNavItem';
 
-/* ════════════════════════════════════════════════════════════════
-   3. MOBILE DRAWER & TABS
-════════════════════════════════════════════════════════════════ */
-// eslint-disable-next-line no-unused-vars
-const BottomTab = ({ icon: Icon, label, isActive, onClick }) => (
-  <button onClick={onClick} className="flex-1 flex flex-col items-center justify-center gap-1.5 pt-2 pb-1 bg-transparent border-none cursor-pointer outline-none group">
+const BottomTab = memo(({ icon: Icon, label, isActive, onClick }) => (
+  <button onClick={onClick} className="flex-1 flex flex-col items-center justify-center gap-1.5 pt-2 pb-1 bg-transparent border-none outline-none group">
     <div className={`px-5 py-1.5 rounded-2xl transition-all duration-200 ${isActive ? 'bg-[#EAF6FE] text-[#1CB0F6] scale-110 shadow-sm border-2 border-transparent' : 'bg-transparent text-slate-400 group-hover:bg-slate-50'}`}>
       <Icon size={24} strokeWidth={isActive ? 3 : 2.5} />
     </div>
@@ -151,14 +129,15 @@ const BottomTab = ({ icon: Icon, label, isActive, onClick }) => (
       {label}
     </span>
   </button>
-);
+));
+BottomTab.displayName = 'BottomTab';
 
-const MobileDrawer = ({ open, onClose, currentPath, onNav, user, isSignedIn, onSignOut }) => (
+const MobileDrawer = memo(({ open, onClose, currentPath, onNav, user, isSignedIn, onSignOut }) => (
   <AnimatePresence>
     {open && (
       <>
-        <Motion.div key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden" />
-        <Motion.div key="drawer" variants={drawerVariants} initial="hidden" animate="visible" exit="exit" className="fixed bottom-0 left-0 right-0 z-[70] bg-slate-50 rounded-t-[32px] shadow-2xl border-t-2 border-slate-200 flex flex-col max-h-[90vh] font-nunito lg:hidden">
+        <Motion.div key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] lg:hidden" />
+        <Motion.div key="drawer" variants={drawerVariants} initial="hidden" animate="visible" exit="exit" className="fixed bottom-0 left-0 right-0 z-[90] bg-slate-50 rounded-t-[32px] shadow-2xl border-t-2 border-slate-200 flex flex-col max-h-[90vh] font-nunito lg:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
           <div className="flex justify-center py-4 bg-white rounded-t-[32px]"><div className="w-16 h-1.5 bg-slate-200 rounded-full" /></div>
           <div className="flex items-center justify-between px-6 pb-4 bg-white border-b-2 border-slate-100">
             <h2 className="font-display font-black text-[20px] text-slate-800 m-0">Danh mục hệ thống</h2>
@@ -212,7 +191,7 @@ const MobileDrawer = ({ open, onClose, currentPath, onNav, user, isSignedIn, onS
                     <img src={user?.photoURL} alt="Avatar" className="w-12 h-12 rounded-xl object-cover bg-slate-100" />
                     <div>
                       <p className="font-display font-black text-[16px] text-slate-800 leading-tight">{user?.displayName}</p>
-                      <p className="font-body font-bold text-[13px] text-slate-500">{user?.email}</p>
+                      <p className="font-body font-bold text-[13px] text-slate-500 truncate w-[200px]">{user?.email}</p>
                     </div>
                   </div>
                   <button onClick={() => { onNav({path: ROUTES.PROFILE}); onClose(); }} className="w-full flex items-center gap-4 p-4 bg-white border-2 border-slate-200 border-b-[4px] rounded-2xl active:translate-y-[2px] active:border-b-2 transition-all font-display font-black text-[15px] text-slate-700"><User size={20} className="text-slate-400" /> Hồ sơ cá nhân</button>
@@ -227,12 +206,32 @@ const MobileDrawer = ({ open, onClose, currentPath, onNav, user, isSignedIn, onS
       </>
     )}
   </AnimatePresence>
-);
+));
+MobileDrawer.displayName = 'MobileDrawer';
+
+const MaintenanceModal = memo(({ isOpen, onClose, featureName }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+        <Motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="bg-white w-full max-w-md rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 relative z-10 shadow-2xl text-center font-nunito">
+          <div className="w-20 h-20 mx-auto bg-[#FFFBEA] rounded-[24px] border-2 border-[#FFD8A8] border-b-[6px] flex items-center justify-center mb-6 shadow-sm">
+            <Wrench className="w-10 h-10 text-[#FF9600]" strokeWidth={2.5} />
+          </div>
+          <h2 className="text-[22px] sm:text-[24px] font-display font-black text-slate-800 mb-2 leading-tight">Hệ thống đang cập nhật!</h2>
+          <p className="text-[15px] font-body font-bold text-slate-500 mb-8 px-4">Tính năng <span className="text-[#1CB0F6] font-black">"{featureName}"</span> hiện đang trong quá trình bảo trì. Quý khách vui lòng quay lại sau nhé!</p>
+          <button onClick={onClose} className="w-full py-4 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[6px] rounded-2xl font-display font-black text-[16px] uppercase tracking-widest hover:brightness-105 active:border-b-2 active:translate-y-[4px] transition-all outline-none">Tôi đã hiểu</button>
+        </Motion.div>
+      </div>
+    )}
+  </AnimatePresence>
+));
+MaintenanceModal.displayName = 'MaintenanceModal';
 
 /* ════════════════════════════════════════════════════════════════
-   4. MAINTENANCE MODAL (POPUP BẢO TRÌ XỊN XÒ)
+   3. 🚀 NEW: MODAL YÊU CẦU ĐĂNG NHẬP 
 ════════════════════════════════════════════════════════════════ */
-const MaintenanceModal = ({ isOpen, onClose, featureName }) => (
+const RequireAuthModal = memo(({ isOpen, onClose, onLogin }) => (
   <AnimatePresence>
     {isOpen && (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -242,34 +241,42 @@ const MaintenanceModal = ({ isOpen, onClose, featureName }) => (
           onClick={onClose} 
         />
         <Motion.div 
-          initial={{ opacity: 0, scale: 0.9, y: 20 }} 
-          animate={{ opacity: 1, scale: 1, y: 0 }} 
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white w-full max-w-md rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 relative z-10 shadow-2xl text-center"
+          initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          className="bg-white w-full max-w-sm rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 relative z-10 shadow-2xl text-center font-nunito"
         >
-          <div className="w-20 h-20 mx-auto bg-[#FFFBEA] rounded-[24px] border-2 border-[#FFD8A8] border-b-[6px] flex items-center justify-center mb-6 shadow-sm">
-            <Wrench className="w-10 h-10 text-[#FF9600]" strokeWidth={2.5} />
+          <div className="w-20 h-20 mx-auto bg-[#EAF6FE] rounded-[24px] border-2 border-[#1CB0F6] border-b-[6px] flex items-center justify-center mb-6 shadow-sm">
+            <Lock className="w-10 h-10 text-[#1CB0F6]" strokeWidth={2.5} />
           </div>
           <h2 className="text-[22px] sm:text-[24px] font-display font-black text-slate-800 mb-2 leading-tight">
-            Hệ thống đang cập nhật!
+            Khoan đã nào!
           </h2>
-          <p className="text-[15px] font-body font-bold text-slate-500 mb-8 px-4">
-            Tính năng <span className="text-[#1CB0F6] font-black">"{featureName}"</span> hiện đang trong quá trình bảo trì và nâng cấp. Quý khách vui lòng quay lại sau nhé!
+          <p className="text-[15px] font-body font-bold text-slate-500 mb-8 px-2">
+            Phòng AI Lab chứa các công cụ rất xịn xò. Vui lòng đăng nhập để lưu trữ tiến trình học tập của bạn nhé! ✨
           </p>
-          <button 
-            onClick={onClose}
-            className="w-full py-4 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[6px] rounded-2xl font-display font-black text-[16px] uppercase tracking-widest hover:brightness-105 active:border-b-2 active:translate-y-[4px] transition-all outline-none"
-          >
-            Tôi đã hiểu
-          </button>
+          
+          <div className="space-y-3">
+            <button 
+              onClick={onLogin}
+              className="w-full py-4 bg-[#58CC02] text-white border-2 border-[#46A302] border-b-[6px] rounded-2xl font-display font-black text-[16px] uppercase tracking-widest hover:brightness-105 active:border-b-2 active:translate-y-[4px] transition-all outline-none"
+            >
+              Đăng nhập ngay
+            </button>
+            <button 
+              onClick={onClose}
+              className="w-full py-4 bg-transparent text-slate-400 font-display font-black text-[15px] uppercase tracking-widest hover:text-slate-600 transition-colors outline-none"
+            >
+              Để sau
+            </button>
+          </div>
         </Motion.div>
       </div>
     )}
   </AnimatePresence>
-);
+));
+RequireAuthModal.displayName = 'RequireAuthModal';
 
 /* ════════════════════════════════════════════════════════════════
-   MAIN COMPONENT NAVBAR
+   4. MAIN NAVBAR COMPONENT
 ════════════════════════════════════════════════════════════════ */
 const Navbar = () => {
   const navigate  = useNavigate();
@@ -279,34 +286,53 @@ const Navbar = () => {
   const [isScrolled,      setIsScrolled]      = useState(false);
   const [drawerOpen,      setDrawerOpen]      = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  
   const [maintenanceTarget, setMaintenanceTarget] = useState(null);
+  const [showAuthModal,   setShowAuthModal]   = useState(false); // 🚀 State cho Popup Đăng nhập
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = drawerOpen || maintenanceTarget ? 'hidden' : '';
+    document.body.style.overflow = (drawerOpen || maintenanceTarget || showAuthModal) ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [drawerOpen, maintenanceTarget]);
+  }, [drawerOpen, maintenanceTarget, showAuthModal]);
 
   const handleNav = useCallback((itemConfig) => {
     if (itemConfig?.isMaintenance) {
       setMaintenanceTarget(itemConfig.label);
       return;
     }
-    
+
     const path = typeof itemConfig === 'string' ? itemConfig : itemConfig.path;
+
+    // 🚀 Bật Popup Đăng nhập nếu vào Phòng AI mà chưa đăng nhập
+    if (path && path.includes('/ai-lab') && !isSignedIn) {
+      setShowAuthModal(true);
+      if (drawerOpen) setDrawerOpen(false); // Đóng menu mobile (nếu có)
+      return;
+    }
+
     navigate(path);
     scrollToTop();
-  }, [navigate]);
+    if (drawerOpen) setDrawerOpen(false); // Đảm bảo tự đóng menu trên mobile khi điều hướng
+  }, [navigate, isSignedIn, drawerOpen]);
 
   return (
     <div className="font-nunito">
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm py-2' : 'bg-white border-b-2 border-slate-100 py-3'}`}>
+      {/* Desktop & General Top Nav */}
+      <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-2 border-slate-200 shadow-sm py-2' : 'bg-white border-b-2 border-slate-100 py-3'}`}>
         <div className="max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between h-[60px]">
           <div className="flex items-center gap-8">
             <button onClick={() => handleNav(ROUTES.HOME)} className="flex items-center gap-3 outline-none group">
@@ -349,21 +375,39 @@ const Navbar = () => {
         </div>
       </nav>
 
+      {/* Tạo khoảng trống bù cho Fixed Navbar phía trên */}
       <div className="h-[84px] lg:h-[88px]" />
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-slate-200 shadow-[0_-10px_30px_rgba(0,0,0,0.08)] pb-safe">
-        <div className="flex items-stretch h-[72px]">
+      {/* 🚀 Mobile Bottom Bar */}
+      <div 
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-[50] bg-white border-t-2 border-slate-200 shadow-[0_-8px_20px_rgba(0,0,0,0.06)]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="flex items-stretch h-[72px] justify-between px-2">
           <BottomTab icon={Home} label="Trang chủ" isActive={location.pathname === ROUTES.HOME} onClick={() => handleNav(ROUTES.HOME)} />
           <BottomTab icon={Target} label="Đề thi" isActive={location.pathname.includes('/exams')} onClick={() => setDrawerOpen(true)} />
           <BottomTab icon={Bot} label="AI Lab" isActive={location.pathname.includes('/ai-lab')} onClick={() => handleNav('/ai-lab/grammar')} />
           <BottomTab icon={Menu} label="Menu" isActive={false} onClick={() => setDrawerOpen(true)} />
         </div>
       </div>
-      <div className="lg:hidden h-[72px] pb-safe" />
+      
+      {/* Tạo khoảng trống bù cho Bottom Bar trên mobile */}
+      <div className="lg:hidden h-[72px]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
 
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} currentPath={location.pathname} onNav={handleNav} user={user} isSignedIn={isSignedIn} onSignOut={signOut} />
       
       <MaintenanceModal isOpen={!!maintenanceTarget} onClose={() => setMaintenanceTarget(null)} featureName={maintenanceTarget} />
+
+      {/* 🚀 Render Modal Đăng nhập */}
+      <RequireAuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onLogin={() => {
+          setShowAuthModal(false);
+          navigate('/login');
+          scrollToTop();
+        }} 
+      />
     </div>
   );
 };
