@@ -1,6 +1,6 @@
 // src/admin/components/AdminNavbar.jsx
 import React from 'react';
-import { Search, Bell, Menu, Plus, Zap } from 'lucide-react';
+import { Search, Bell, Menu, Zap } from 'lucide-react'; // 🚀 Đã xóa 'Plus' thừa
 
 const AdminNavbar = ({ toggleSidebar, onQuickAction }) => {
   return (

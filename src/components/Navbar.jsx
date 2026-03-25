@@ -1,10 +1,11 @@
+// src/components/Navbar.jsx
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   Headphones, BookOpen, GraduationCap, Sparkles,
   LogOut, User, X, Home, FileText, ChevronDown, Star,
-  Target, Menu, Wrench, Bot, MessageCircle, PenTool
+  Target, Menu, Wrench, Bot, MessageCircle, PenTool, Lock // 🚀 Đã thêm Lock icon
 } from 'lucide-react';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { ROUTES } from '../config/routes';
@@ -44,7 +45,7 @@ const drawerVariants = {
 };
 
 /* ════════════════════════════════════════════════════════════════
-   2. REUSABLE COMPONENTS (Đã bọc React.memo chống giật)
+   2. REUSABLE COMPONENTS
 ════════════════════════════════════════════════════════════════ */
 
 const DesktopNavItem = memo(({ item, currentPath, onNav }) => {
@@ -212,28 +213,14 @@ const MaintenanceModal = memo(({ isOpen, onClose, featureName }) => (
   <AnimatePresence>
     {isOpen && (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <Motion.div 
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
-          className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
-          onClick={onClose} 
-        />
-        <Motion.div 
-          initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white w-full max-w-md rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 relative z-10 shadow-2xl text-center font-nunito"
-        >
+        <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+        <Motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="bg-white w-full max-w-md rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 relative z-10 shadow-2xl text-center font-nunito">
           <div className="w-20 h-20 mx-auto bg-[#FFFBEA] rounded-[24px] border-2 border-[#FFD8A8] border-b-[6px] flex items-center justify-center mb-6 shadow-sm">
             <Wrench className="w-10 h-10 text-[#FF9600]" strokeWidth={2.5} />
           </div>
           <h2 className="text-[22px] sm:text-[24px] font-display font-black text-slate-800 mb-2 leading-tight">Hệ thống đang cập nhật!</h2>
-          <p className="text-[15px] font-body font-bold text-slate-500 mb-8 px-4">
-            Tính năng <span className="text-[#1CB0F6] font-black">"{featureName}"</span> hiện đang trong quá trình bảo trì. Quý khách vui lòng quay lại sau nhé!
-          </p>
-          <button 
-            onClick={onClose}
-            className="w-full py-4 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[6px] rounded-2xl font-display font-black text-[16px] uppercase tracking-widest hover:brightness-105 active:border-b-2 active:translate-y-[4px] transition-all outline-none"
-          >
-            Tôi đã hiểu
-          </button>
+          <p className="text-[15px] font-body font-bold text-slate-500 mb-8 px-4">Tính năng <span className="text-[#1CB0F6] font-black">"{featureName}"</span> hiện đang trong quá trình bảo trì. Quý khách vui lòng quay lại sau nhé!</p>
+          <button onClick={onClose} className="w-full py-4 bg-[#1CB0F6] text-white border-2 border-[#1899D6] border-b-[6px] rounded-2xl font-display font-black text-[16px] uppercase tracking-widest hover:brightness-105 active:border-b-2 active:translate-y-[4px] transition-all outline-none">Tôi đã hiểu</button>
         </Motion.div>
       </div>
     )}
@@ -242,7 +229,54 @@ const MaintenanceModal = memo(({ isOpen, onClose, featureName }) => (
 MaintenanceModal.displayName = 'MaintenanceModal';
 
 /* ════════════════════════════════════════════════════════════════
-   3. MAIN NAVBAR COMPONENT
+   3. 🚀 NEW: MODAL YÊU CẦU ĐĂNG NHẬP 
+════════════════════════════════════════════════════════════════ */
+const RequireAuthModal = memo(({ isOpen, onClose, onLogin }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <Motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+          className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+          onClick={onClose} 
+        />
+        <Motion.div 
+          initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          className="bg-white w-full max-w-sm rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 relative z-10 shadow-2xl text-center font-nunito"
+        >
+          <div className="w-20 h-20 mx-auto bg-[#EAF6FE] rounded-[24px] border-2 border-[#1CB0F6] border-b-[6px] flex items-center justify-center mb-6 shadow-sm">
+            <Lock className="w-10 h-10 text-[#1CB0F6]" strokeWidth={2.5} />
+          </div>
+          <h2 className="text-[22px] sm:text-[24px] font-display font-black text-slate-800 mb-2 leading-tight">
+            Khoan đã nào!
+          </h2>
+          <p className="text-[15px] font-body font-bold text-slate-500 mb-8 px-2">
+            Phòng AI Lab chứa các công cụ rất xịn xò. Vui lòng đăng nhập để lưu trữ tiến trình học tập của bạn nhé! ✨
+          </p>
+          
+          <div className="space-y-3">
+            <button 
+              onClick={onLogin}
+              className="w-full py-4 bg-[#58CC02] text-white border-2 border-[#46A302] border-b-[6px] rounded-2xl font-display font-black text-[16px] uppercase tracking-widest hover:brightness-105 active:border-b-2 active:translate-y-[4px] transition-all outline-none"
+            >
+              Đăng nhập ngay
+            </button>
+            <button 
+              onClick={onClose}
+              className="w-full py-4 bg-transparent text-slate-400 font-display font-black text-[15px] uppercase tracking-widest hover:text-slate-600 transition-colors outline-none"
+            >
+              Để sau
+            </button>
+          </div>
+        </Motion.div>
+      </div>
+    )}
+  </AnimatePresence>
+));
+RequireAuthModal.displayName = 'RequireAuthModal';
+
+/* ════════════════════════════════════════════════════════════════
+   4. MAIN NAVBAR COMPONENT
 ════════════════════════════════════════════════════════════════ */
 const Navbar = () => {
   const navigate  = useNavigate();
@@ -253,8 +287,8 @@ const Navbar = () => {
   const [drawerOpen,      setDrawerOpen]      = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [maintenanceTarget, setMaintenanceTarget] = useState(null);
+  const [showAuthModal,   setShowAuthModal]   = useState(false); // 🚀 State cho Popup Đăng nhập
 
-  // Tối ưu hóa Scroll Event bằng requestAnimationFrame
   useEffect(() => {
     let ticking = false;
     const onScroll = () => {
@@ -271,19 +305,29 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = drawerOpen || maintenanceTarget ? 'hidden' : '';
+    document.body.style.overflow = (drawerOpen || maintenanceTarget || showAuthModal) ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [drawerOpen, maintenanceTarget]);
+  }, [drawerOpen, maintenanceTarget, showAuthModal]);
 
   const handleNav = useCallback((itemConfig) => {
     if (itemConfig?.isMaintenance) {
       setMaintenanceTarget(itemConfig.label);
       return;
     }
+
     const path = typeof itemConfig === 'string' ? itemConfig : itemConfig.path;
+
+    // 🚀 Bật Popup Đăng nhập nếu vào Phòng AI mà chưa đăng nhập
+    if (path && path.includes('/ai-lab') && !isSignedIn) {
+      setShowAuthModal(true);
+      if (drawerOpen) setDrawerOpen(false); // Đóng menu mobile (nếu có)
+      return;
+    }
+
     navigate(path);
     scrollToTop();
-  }, [navigate]);
+    if (drawerOpen) setDrawerOpen(false); // Đảm bảo tự đóng menu trên mobile khi điều hướng
+  }, [navigate, isSignedIn, drawerOpen]);
 
   return (
     <div className="font-nunito">
@@ -334,7 +378,7 @@ const Navbar = () => {
       {/* Tạo khoảng trống bù cho Fixed Navbar phía trên */}
       <div className="h-[84px] lg:h-[88px]" />
 
-      {/* 🚀 Mobile Bottom Bar Đã Fix Triệt Để */}
+      {/* 🚀 Mobile Bottom Bar */}
       <div 
         className="lg:hidden fixed bottom-0 left-0 right-0 z-[50] bg-white border-t-2 border-slate-200 shadow-[0_-8px_20px_rgba(0,0,0,0.06)]"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -353,6 +397,17 @@ const Navbar = () => {
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} currentPath={location.pathname} onNav={handleNav} user={user} isSignedIn={isSignedIn} onSignOut={signOut} />
       
       <MaintenanceModal isOpen={!!maintenanceTarget} onClose={() => setMaintenanceTarget(null)} featureName={maintenanceTarget} />
+
+      {/* 🚀 Render Modal Đăng nhập */}
+      <RequireAuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onLogin={() => {
+          setShowAuthModal(false);
+          navigate('/login');
+          scrollToTop();
+        }} 
+      />
     </div>
   );
 };

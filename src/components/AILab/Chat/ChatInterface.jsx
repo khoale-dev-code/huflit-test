@@ -1,9 +1,14 @@
 // src/components/AILab/Chat/ChatInterface.jsx
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Send, Sparkles, Loader2, RefreshCcw, BookOpen, ChevronDown, ArrowLeft, MessageCircle, Users, Bot, Construction } from 'lucide-react';
+import { Send, Sparkles, Loader2, RefreshCcw, BookOpen, ArrowLeft, MessageCircle, Users, Bot, Construction } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { CHAT_PERSONAS, sendChatMessage } from '../../../services/chatService';
-// Đã xóa import socket thừa
+import { useFirebaseAuth } from '../../../hooks/useFirebaseAuth';
+
+// 🚀 HÀM HELPER TẠO KEY TUYỆT ĐỐI DUY NHẤT
+const generateSafeId = (prefix = 'id') => {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+};
 
 // ==========================================
 // 1. COMPONENT: BONG BÓNG CHAT
@@ -35,21 +40,35 @@ const MessageBubble = memo(({ msg, persona, chatType }) => {
       {chatType === 'ai' && !isUser && (
         <AnimatePresence>
           {correction && (
-            <Motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="ml-14 mt-2 max-w-[85%] bg-[#FFFBEA] border-2 border-[#FFD8A8] text-[#D97706] px-4 py-3 rounded-[20px] rounded-tl-sm text-[13px] font-bold flex items-start gap-2 shadow-sm overflow-hidden">
+            <Motion.div 
+              key="correction-box" // Key tĩnh cho phần sửa lỗi
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: 'auto' }} 
+              className="ml-14 mt-2 max-w-[85%] bg-[#FFFBEA] border-2 border-[#FFD8A8] text-[#D97706] px-4 py-3 rounded-[20px] rounded-tl-sm text-[13px] font-bold flex items-start gap-2 shadow-sm overflow-hidden"
+            >
               <Sparkles size={18} className="shrink-0 mt-0.5" />
               <span>{correction}</span>
             </Motion.div>
           )}
 
-          {slang_notes?.length > 0 && (
-            <Motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="ml-14 mt-2 max-w-[85%] bg-[#F0FAE8] border-2 border-[#B2E58B] px-4 py-3 rounded-[20px] rounded-tl-sm text-[13px] flex flex-col gap-1.5 shadow-sm overflow-hidden">
+          {Array.isArray(slang_notes) && slang_notes.length > 0 && (
+            <Motion.div 
+              key="slang-box" // Key tĩnh cho nguyên khối từ vựng
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: 'auto' }} 
+              className="ml-14 mt-2 max-w-[85%] bg-[#F0FAE8] border-2 border-[#B2E58B] px-4 py-3 rounded-[20px] rounded-tl-sm text-[13px] flex flex-col gap-1.5 shadow-sm overflow-hidden"
+            >
               <div className="font-black flex items-center gap-1.5 text-[#58CC02]"><BookOpen size={16} /> Từ vựng xịn:</div>
-              {slang_notes.map((slang, i) => (
-                <div key={i} className="flex items-start gap-2 leading-snug">
-                  <span className="font-black text-[#58CC02]">"{slang.term ?? slang.word}":</span>
-                  <span className="font-bold text-[#46A302]">{slang.meaning}</span>
-                </div>
-              ))}
+              {slang_notes.map((slang, i) => {
+                // 🚀 FIX TRIỆT ĐỂ: Dùng Random String cho chắc cốp
+                const uniqueKey = `slang-${i}-${Math.random().toString(36).substr(2, 6)}`;
+                return (
+                  <div key={uniqueKey} className="flex items-start gap-2 leading-snug">
+                    <span className="font-black text-[#58CC02]">"{slang?.term || slang?.word || 'Word'}":</span>
+                    <span className="font-bold text-[#46A302]">{slang?.meaning || 'Meaning'}</span>
+                  </div>
+                );
+              })}
             </Motion.div>
           )}
         </AnimatePresence>
@@ -60,7 +79,7 @@ const MessageBubble = memo(({ msg, persona, chatType }) => {
 MessageBubble.displayName = 'MessageBubble';
 
 // ==========================================
-// 2. COMPONENT: KHUNG NHẬP LIỆU
+// 2. COMPONENT: KHUNG NHẬP LIỆU (Giữ nguyên)
 // ==========================================
 const ChatInputBox = memo(({ onSendMessage, isTyping, disabled, placeholder }) => {
   const [text, setText] = useState('');
@@ -118,7 +137,7 @@ const ChatInputBox = memo(({ onSendMessage, isTyping, disabled, placeholder }) =
 ChatInputBox.displayName = 'ChatInputBox';
 
 // ==========================================
-// 3. COMPONENT: POPUP BẢO TRÌ
+// 3. COMPONENT: POPUP BẢO TRÌ (Giữ nguyên)
 // ==========================================
 const ComingSoonModal = memo(({ isOpen, onClose }) => (
   <AnimatePresence>
@@ -157,18 +176,17 @@ ComingSoonModal.displayName = 'ComingSoonModal';
 // 4. MAIN INTERFACE
 // ==========================================
 const ChatInterface = () => {
-  const [currentScreen, setCurrentScreen] = useState('home'); // home | ai_lobby | chat
-  const [chatType, setChatType] = useState(null); // ai | stranger
+  const { user } = useFirebaseAuth();
+  const [currentScreen, setCurrentScreen] = useState('home'); 
+  const [chatType, setChatType] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [activePersona, setActivePersona] = useState(CHAT_PERSONAS.bestie.id);
-  // Đã xóa state isDropdownOpen thừa
   const [showDevPopup, setShowDevPopup] = useState(false);
 
   const scrollContainerRef = useRef(null);
   const persona = chatType === 'stranger' ? { id: 'stranger', name: 'Người lạ', avatar: '👤', color: 'bg-slate-800' } : CHAT_PERSONAS[activePersona];
 
-  // Cuộn xuống cuối tin nhắn
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
       if (scrollContainerRef.current) {
@@ -181,10 +199,16 @@ const ChatInterface = () => {
     if (currentScreen === 'chat') scrollToBottom();
   }, [messages, isTyping, currentScreen, scrollToBottom]);
 
-  // Điều hướng
   const handleStartAIChat = useCallback(() => {
     setChatType('ai');
-    setMessages([{ role: 'assistant', content: `Hey! I'm ${CHAT_PERSONAS[activePersona].name.split(' ')[0]}. Let's talk! ✨`, correction: '', slang_notes: [] }]);
+    // 🚀 FIX: Dùng generateSafeId khi tạo tin nhắn mồi
+    setMessages([{ 
+      id: generateSafeId('ai-init'),
+      role: 'assistant', 
+      content: `Hey! I'm ${CHAT_PERSONAS[activePersona].name.split(' ')[0]}. Let's talk! ✨`, 
+      correction: '', 
+      slang_notes: [] 
+    }]);
     setCurrentScreen('chat');
   }, [activePersona]);
 
@@ -193,30 +217,40 @@ const ChatInterface = () => {
     setChatType(null);
   }, []);
 
-  // Xử lý gửi tin nhắn AI
   const handleSendAI = useCallback(async (userText) => {
-    setMessages(prev => [...prev, { role: 'user', content: userText }]);
+    // 🚀 FIX: Dùng generateSafeId cho tin nhắn của User
+    const userMsgId = generateSafeId('user-msg');
+    setMessages(prev => [...prev, { id: userMsgId, role: 'user', content: userText }]);
     setIsTyping(true);
 
     try {
       const currentMsgs = await new Promise(res => setMessages(prev => { res(prev); return prev; }));
-      const aiResponse = await sendChatMessage(currentMsgs, activePersona);
+      const currentUserId = user?.email || 'anonymous';
+      const aiResponse = await sendChatMessage(currentMsgs, activePersona, currentUserId);
+      
+      // 🚀 FIX: Dùng generateSafeId cho phản hồi của AI
       setMessages(prev => [...prev, { 
+        id: generateSafeId('ai-reply'),
         role: 'assistant', 
         content: aiResponse.reply, 
         correction: aiResponse.correction, 
         slang_notes: aiResponse.slang_notes 
       }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'AI đang bận một chút, thử lại nhé! 😭', isSystem: true }]);
+      setMessages(prev => [...prev, { 
+        id: generateSafeId('err'),
+        role: 'assistant', 
+        content: 'AI đang bận một chút, thử lại nhé! 😭', 
+        isSystem: true 
+      }]);
     } finally {
       setIsTyping(false);
     }
-  }, [activePersona]);
+  }, [activePersona, user]);
 
-  // Render Màn hình chính
   const renderHome = () => (
     <Motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col items-center justify-center p-6 text-center relative h-full">
+      {/* ... (Các phần UI giữ nguyên) ... */}
       <div className="w-20 h-20 bg-white rounded-[24px] shadow-lg border-b-[6px] border-slate-200 flex items-center justify-center mb-6">
         <MessageCircle size={36} className="text-[#1CB0F6]" strokeWidth={2.5} />
       </div>
@@ -237,15 +271,13 @@ const ChatInterface = () => {
           <p className="text-xs text-slate-300 font-bold mt-1">Giao tiếp thực tế P2P</p>
         </button>
       </div>
-      
       <ComingSoonModal isOpen={showDevPopup} onClose={() => setShowDevPopup(false)} />
     </Motion.div>
   );
 
-  // Render Sảnh chờ AI
   const renderAILobby = () => (
     <Motion.div key="ai_lobby" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-1 flex flex-col items-center pt-10 px-6 h-full overflow-y-auto custom-scrollbar pb-10">
-      <button onClick={() => setCurrentScreen('home')} className="self-start p-3 bg-white rounded-xl border-2 border-slate-200 mb-6 hover:border-[#1CB0F6] hover:text-[#1CB0F6] transition-colors outline-none"><ArrowLeft size={20} /></button>
+      <button onClick={handleBackToHome} className="self-start p-3 bg-white rounded-xl border-2 border-slate-200 mb-6 hover:border-[#1CB0F6] hover:text-[#1CB0F6] transition-colors outline-none"><ArrowLeft size={20} /></button>
       <div className="w-20 h-20 bg-[#EAF6FE] text-[#1CB0F6] rounded-3xl flex items-center justify-center mb-4"><Bot size={40} /></div>
       <h2 className="text-xl font-black text-slate-800 mb-6">Chọn Bạn Đồng Hành AI</h2>
       
@@ -260,12 +292,10 @@ const ChatInterface = () => {
           </button>
         ))}
       </div>
-      
       <button onClick={handleStartAIChat} className={`w-full max-w-sm mt-8 py-4 ${persona.color} text-white font-black rounded-2xl border-b-4 border-black/20 uppercase tracking-widest active:translate-y-1 active:border-0 transition-all shadow-md outline-none`}>Bắt đầu trò chuyện</button>
     </Motion.div>
   );
 
-  // Render Khung Chat
   const renderChat = () => (
     <Motion.div key="chat" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} className="flex-1 flex flex-col min-h-0 h-full bg-[#F8FAFC]">
       <div className="shrink-0 bg-white px-4 py-3 border-b-2 border-slate-200 flex items-center justify-between shadow-sm z-30">
@@ -278,24 +308,26 @@ const ChatInterface = () => {
             <span className="w-2 h-2 bg-[#58CC02] rounded-full animate-pulse" /> Online
           </span>
         </div>
-        <button onClick={() => setMessages([{ role: 'assistant', content: `Hey! I'm ${persona.name.split(' ')[0]}. Let's talk! ✨` }])} className="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-xl border-2 border-slate-200 text-slate-400 hover:text-[#1CB0F6] hover:border-[#1CB0F6] transition-all outline-none"><RefreshCcw size={18} /></button>
+        <button onClick={() => setMessages([{ id: generateSafeId('reset'), role: 'assistant', content: `Hey! I'm ${persona.name.split(' ')[0]}. Let's talk! ✨` }])} className="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-xl border-2 border-slate-200 text-slate-400 hover:text-[#1CB0F6] hover:border-[#1CB0F6] transition-all outline-none"><RefreshCcw size={18} /></button>
       </div>
 
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 custom-scrollbar">
-        {messages.map((msg, idx) => <MessageBubble key={idx} msg={msg} persona={persona} chatType={chatType} />)}
+        {/* 🚀 ĐẢM BẢO CHẮC CHẮN MỖI MESSAGE CÓ KEY */}
+        {messages.map((msg) => {
+          // Fallback key nếu lỡ msg.id bị rớt
+          const msgKey = msg.id || generateSafeId('fallback-msg');
+          return <MessageBubble key={msgKey} msg={msg} persona={persona} chatType={chatType} />;
+        })}
+        
         {isTyping && (
-          <Motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-end gap-3">
+          <Motion.div key="typing-indicator" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-end gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl border-2 border-white shadow-sm ${persona.color}`}>{persona.avatar}</div>
             <div className="bg-white border-2 border-slate-100 px-4 py-3 rounded-2xl flex gap-1 shadow-sm italic text-slate-400 font-bold text-xs animate-pulse">Đang suy nghĩ...</div>
           </Motion.div>
         )}
       </div>
 
-      <ChatInputBox 
-        onSendMessage={handleSendAI} 
-        isTyping={isTyping} 
-        placeholder={`Nhắn cho ${persona.name.split(' ')[0]}...`} 
-      />
+      <ChatInputBox onSendMessage={handleSendAI} isTyping={isTyping} placeholder={`Nhắn cho ${persona.name.split(' ')[0]}...`} />
     </Motion.div>
   );
 

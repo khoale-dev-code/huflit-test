@@ -21,13 +21,13 @@
 
   body {
     @apply text-gray-800 box-border;
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+    background: linear-gradient(135deg, #e6e6e6 0%, #00eafff8 50%, #00bfffea 80%);
     min-height: 100vh;
     margin: 0;
     padding: 0;
     width: 100%;
     overflow-x: hidden;
-    position: relative;
+    position: relative; 
   }
 
   body::before {

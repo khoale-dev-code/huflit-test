@@ -23,6 +23,7 @@ import ResetPasswordPage from './components/Auth/ResetPasswordPage';
 // --- Shared Components ---
 import { StatsGrid } from './components/StatsGrid';
 import { PartTestContent } from './components/PartTestContent';
+import AdminChatLogs from './admin/AdminChatLogs';
 
 // --- Lazy Loaded Pages & Components ---
 const AuthPage           = lazy(() => import('./components/Auth/AuthPage'));
@@ -229,7 +230,7 @@ export default function App() {
             <Route path="lessons/edit/:id" element={<LessonForm />} />
             <Route path="lessons/detail/:id" element={<AdminLessonDetails />} />
           </Route>
-          
+          <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
           <Route path="/migrate-data" element={<MigrateData />} />
           
           {/* User Routes (Chứa logic ẩn/hiện Navbar) */}
