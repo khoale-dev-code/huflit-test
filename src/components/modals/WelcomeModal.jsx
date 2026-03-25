@@ -3,7 +3,7 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Sparkles, ArrowRight, ShieldCheck, Globe, ChevronDown, Rocket } from 'lucide-react';
 
 // ─────────────────────────────────────────────
-// FEATURES DATA (Gamified Themes)
+// FEATURES DATA
 // ─────────────────────────────────────────────
 const FEATURES = [
   {
@@ -26,31 +26,63 @@ const FEATURES = [
   },
 ];
 
+// Tối ưu 1: Đẩy style ra ngoài component để tránh inject lại mỗi lần render
+const GlobalScrollStyle = () => (
+  <style>{`
+    .wm-scroll::-webkit-scrollbar { width: 6px; }
+    .wm-scroll::-webkit-scrollbar-track { background: transparent; }
+    .wm-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .wm-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  `}</style>
+);
+
 // ─────────────────────────────────────────────
-// COMPONENT
+// COMPONENT CHÍNH
 // ─────────────────────────────────────────────
 export default function WelcomeModal({ isOpen = false, onClose }) {
   const [canClose, setCanClose] = useState(false);
   const scrollRef = useRef(null);
+  const canCloseRef = useRef(false); // Ref để track trạng thái bypass scroll event
 
-  // Lock body scroll
+  // Cập nhật ref mỗi khi state thay đổi
+  useEffect(() => {
+    canCloseRef.current = canClose;
+  }, [canClose]);
+
+  // Khóa cuộn trang nền
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Reset on reopen
+  // Reset trạng thái khi mở lại Modal
   useEffect(() => {
     if (isOpen) {
       setCanClose(false);
-      setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' }), 50);
+      canCloseRef.current = false;
+      // Dùng requestAnimationFrame thay cho setTimeout để mượt hơn
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = 0;
+        }
+      });
     }
   }, [isOpen]);
 
+  // Tối ưu 2: Xử lý Scroll cực mượt với requestAnimationFrame và Early Return
   const handleScroll = useCallback((e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    // Trừ hao 50px để dễ trigger trên Mobile
-    if (scrollHeight - scrollTop <= clientHeight + 50) setCanClose(true);
+    // NẾU ĐÃ CHẠM ĐÁY RỒI -> KHÔNG TÍNH TOÁN NỮA -> TIẾT KIỆM 90% CPU
+    if (canCloseRef.current) return;
+
+    const target = e.currentTarget;
+    
+    // Gộp các batch update vào frame render tiếp theo của màn hình
+    requestAnimationFrame(() => {
+      const { scrollTop, scrollHeight, clientHeight } = target;
+      if (scrollHeight - scrollTop <= clientHeight + 50) {
+        setCanClose(true);
+      }
+    });
   }, []);
 
   return (
@@ -58,13 +90,7 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6 font-sans selection:bg-blue-200" style={{ fontFamily: '"Nunito", "Quicksand", sans-serif' }}>
           
-          {/* Inject Scrollbar Style */}
-          <style>{`
-            .wm-scroll::-webkit-scrollbar { width: 6px; }
-            .wm-scroll::-webkit-scrollbar-track { background: transparent; }
-            .wm-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-            .wm-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-          `}</style>
+          <GlobalScrollStyle />
 
           {/* Backdrop */}
           <Motion.div
@@ -73,7 +99,7 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           />
 
-          {/* Gamified Sheet / Modal */}
+          {/* Modal Content */}
           <Motion.div
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -112,16 +138,15 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className="flex-1 overflow-y-auto wm-scroll"
+              className="flex-1 overflow-y-auto wm-scroll relative z-0"
             >
-              {/* Hero Banner (Gamified Vibrant) */}
+              {/* Hero Banner (Đã giảm blur để tối ưu GPU Mobile) */}
               <div className="relative bg-[#1CB0F6] px-6 py-10 text-center overflow-hidden border-b-[6px] border-[#1899D6]">
-                {/* Decorative Blobs */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl" />
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-900/20 rounded-full blur-2xl" />
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-900/10 rounded-full blur-xl" />
 
                 <Motion.div 
-                  animate={{ y: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                  animate={{ y: [-4, 4, -4] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
                   className="inline-flex p-4 rounded-[20px] bg-white shadow-lg border-b-[4px] border-slate-200 mb-6 relative z-10"
                 >
                   <Sparkles size={36} className="text-[#FFC800] fill-[#FFC800]" strokeWidth={1.5} />
@@ -134,7 +159,6 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
                   Khám phá kho tài liệu học tập được cá nhân hóa — hoàn toàn miễn phí.
                 </p>
 
-                {/* Stats Pills */}
                 <div className="flex justify-center gap-3 mt-6 flex-wrap relative z-10">
                   {[['1000+', 'Đề thi'], ['50K+', 'Học viên'], ['100%', 'Miễn phí']].map(([val, label]) => (
                     <div key={label} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2 shadow-sm">
@@ -147,11 +171,8 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
 
               {/* Features List */}
               <div className="p-6">
-                <p className="font-quick font-black text-[12px] text-slate-400 uppercase tracking-widest mb-4 pl-1">
-                  Tại sao chọn chúng tôi?
-                </p>
+                <p className="font-quick font-black text-[12px] text-slate-400 uppercase tracking-widest mb-4 pl-1">Tại sao chọn chúng tôi?</p>
                 <div className="flex flex-col gap-4">
-                  {/* eslint-disable-next-line no-unused-vars */}
                   {FEATURES.map(({ Icon, title, desc, theme }, i) => (
                     <div key={i} className={`flex items-start gap-4 p-4 rounded-[24px] border-2 border-b-[4px] ${theme.bg} ${theme.border}`}>
                       <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${theme.iconBg} border-black/10`}>
@@ -166,29 +187,24 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
                 </div>
               </div>
 
-              {/* Donate Box (Bonus Quest) */}
+              {/* Donate Box */}
               <div className="mx-6 mb-8 p-5 rounded-[24px] bg-[#FFC800]/10 border-2 border-[#FFC800]/40 border-b-[4px] flex gap-5 items-center">
                 <div className="bg-white p-2 rounded-[16px] border-2 border-slate-200 border-b-[4px] shrink-0 shadow-sm hover:scale-105 transition-transform">
-                  <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SupportHubStudy"
-                    alt="Donate QR"
-                    className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl"
-                  />
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SupportHubStudy" alt="Donate QR" className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl" />
                 </div>
                 <div>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFC800] text-white font-quick font-black text-[10px] uppercase tracking-widest rounded-xl mb-2 border-b-2 border-[#E5B400]">
                     <Rocket size={12} strokeWidth={3} /> Ủng hộ dự án
                   </span>
                   <p className="font-nunito font-bold text-[13px] md:text-[14px] text-amber-900/80 leading-snug">
-                    Sự ủng hộ của bạn giúp duy trì máy chủ và phát triển thêm các tính năng học tập mới.
+                    Sự ủng hộ của bạn giúp duy trì máy chủ và phát triển thêm các tính năng mới.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Footer Action Area */}
-            <div className="p-5 md:p-6 bg-white border-t-2 border-slate-100 shrink-0">
-              
+            <div className="p-5 md:p-6 bg-white border-t-2 border-slate-100 shrink-0 relative z-10">
               <AnimatePresence mode="wait">
                 {!canClose ? (
                   <Motion.div 
@@ -208,24 +224,16 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
               <button
                 onClick={canClose ? onClose : undefined}
                 disabled={!canClose}
-                className={`
-                  w-full py-4 rounded-[20px] font-quick font-black text-[18px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all outline-none border-2
-                  ${canClose 
-                    ? 'bg-[#58CC02] text-white border-[#46A302] border-b-[6px] active:border-b-0 active:translate-y-[6px] shadow-sm' 
-                    : 'bg-slate-100 text-slate-400 border-slate-200 border-b-[6px] cursor-not-allowed'
-                  }
-                `}
+                className={`w-full py-4 rounded-[20px] font-quick font-black text-[18px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all outline-none border-2 ${canClose ? 'bg-[#58CC02] text-white border-[#46A302] border-b-[6px] active:border-b-0 active:translate-y-[6px] shadow-sm cursor-pointer' : 'bg-slate-100 text-slate-400 border-slate-200 border-b-[6px] cursor-not-allowed'}`}
               >
                 Bắt đầu học ngay
                 <ArrowRight size={22} strokeWidth={3} />
               </button>
 
               <p className="text-center font-nunito font-bold text-[12px] text-slate-400 mt-4 mb-1">
-                Bằng cách tiếp tục, bạn đồng ý với{' '}
-                <span className="text-[#1CB0F6] underline cursor-pointer hover:text-blue-700">điều khoản sử dụng</span>
+                Bằng cách tiếp tục, bạn đồng ý với <span className="text-[#1CB0F6] underline cursor-pointer hover:text-blue-700">điều khoản sử dụng</span>
               </p>
             </div>
-
           </Motion.div>
         </div>
       )}

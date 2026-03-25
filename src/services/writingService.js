@@ -1,5 +1,5 @@
 // src/services/writingService.js
-// AI Writing Services - Tách riêng để tối ưu performance
+
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
@@ -135,13 +135,13 @@ JSON format:
 
 // Grade Writing
 export const gradeWriting = async (text, prompt, type, level) => {
-  const systemPrompt = `Bạn là giáo viên IELTS Writing chấm bài theo tiêu chí IELTS:
+  const systemPrompt = `Bạn là giám khảo IELTS Writing chấm bài theo 4 tiêu chí:
 1. Task Achievement (25%)
 2. Coherence and Cohesion (25%)  
 3. Lexical Resource (25%)
 4. Grammatical Range and Accuracy (25%)
 
-JSON format:
+LUÔN trả về định dạng JSON:
 {
   "overall_score": 6.5,
   "task_achievement": { "score": 6, "comment": "..." },
@@ -154,7 +154,15 @@ JSON format:
   "sample_improved": "Bài viết được cải thiện..."
 }`;
 
-  const userPrompt = `Đề bài: ${prompt}\n\nBài viết của học sinh:\n${text}\n\nHãy chấm điểm chi tiết theo tiêu chí IELTS.`;
+  // 🚀 FIX: Tích hợp biến type và level vào userPrompt để AI chấm chính xác hơn
+  const userPrompt = `Loại bài: ${type || 'Essay'}
+Trình độ mục tiêu: ${level || 'IELTS 6.0'}
+Đề bài: ${prompt}
+
+Bài viết của học sinh:
+${text}
+
+Hãy chấm điểm chi tiết và khắt khe theo tiêu chí IELTS để giúp học sinh đạt được mục tiêu ${level || 'IELTS 6.0'}.`;
 
   return await callGroqAPI(systemPrompt, userPrompt, 0.2);
 };

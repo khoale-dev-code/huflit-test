@@ -2,11 +2,11 @@
   "name": "huflit-chat-backend",
   "version": "1.0.0",
   "description": "HUFLIT Chat Server - Socket.IO Backend",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon",
-    "start": "node index.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "build": "echo 'No build needed'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,13 +22,15 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.100.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "firebase-admin": "^13.7.0",
     "groq-sdk": "^0.37.0",
     "mongodb": "^7.1.0",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

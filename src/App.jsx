@@ -44,7 +44,7 @@ const FullExamMode       = lazy(() => import('./components/FullExam/FullExamMode
 const HistoryTest        = lazy(() => import('./components/HistoryTest'));
 const LessonList         = lazy(() => import('./components/Lessons/LessonList'));
 const LessonDetailUser   = lazy(() => import('./components/Lessons/LessonDetail'));
-
+const ChatInterface = lazy(() => import('./components/AILab/Chat/ChatInterface'));
 // --- Admin Area ---
 const AdminApp           = lazy(() => import('./admin/AdminApp'));
 const ExamManagement     = lazy(() => import('./admin/pages/Exams/ExamManagement'));
@@ -177,6 +177,7 @@ const AppContent = memo(() => {
               <Route path="/ai-lab/grammar" element={<GrammarTutor />} />
               <Route path="/ai-lab/professor" element={<GrammarProfessor />} />
               <Route path="/ai-lab/writing" element={<WritingGrading />} />
+              <Route path="/ai-lab/roleplay" element={<ChatInterface />} />
               <Route path="*"                element={<NotFoundPage />} />  
             </Routes>
           </Suspense>
