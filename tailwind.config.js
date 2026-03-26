@@ -13,6 +13,7 @@ export default {
         sans: ['"Nunito"', 'sans-serif'], 
         body: ['"Nunito"', 'sans-serif'], 
         display: ['"Baloo 2"', 'cursive'], 
+        nunito: ['"Nunito"', 'sans-serif'],
         inter: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
 

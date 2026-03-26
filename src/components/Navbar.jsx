@@ -120,17 +120,19 @@ const DesktopNavItem = memo(({ item, currentPath, onNav }) => {
 });
 DesktopNavItem.displayName = 'DesktopNavItem';
 
-const BottomTab = memo(({ icon: Icon, label, isActive, onClick }) => (
-  <button onClick={onClick} className="flex-1 flex flex-col items-center justify-center gap-1.5 pt-2 pb-1 bg-transparent border-none outline-none group">
-    <div className={`px-5 py-1.5 rounded-2xl transition-all duration-200 ${isActive ? 'bg-[#EAF6FE] text-[#1CB0F6] scale-110 shadow-sm border-2 border-transparent' : 'bg-transparent text-slate-400 group-hover:bg-slate-50'}`}>
-      <Icon size={24} strokeWidth={isActive ? 3 : 2.5} />
-    </div>
-    <span className={`font-display font-black text-[10px] uppercase tracking-widest transition-colors ${isActive ? 'text-[#1CB0F6]' : 'text-slate-400'}`}>
-      {label}
-    </span>
-  </button>
-));
-BottomTab.displayName = 'BottomTab';
+const BottomTab = memo(({ icon: IconProps, label, isActive, onClick }) => {
+  const Icon = IconProps;
+  return (
+    <button onClick={onClick} className="flex-1 flex flex-col items-center justify-center gap-1.5 pt-2 pb-1 bg-transparent border-none outline-none group">
+      <div className={`px-5 py-1.5 rounded-2xl transition-all duration-200 ${isActive ? 'bg-[#EAF6FE] text-[#1CB0F6] scale-110 shadow-sm border-2 border-transparent' : 'bg-transparent text-slate-400 group-hover:bg-slate-50'}`}>
+        <Icon size={24} strokeWidth={isActive ? 3 : 2.5} />
+      </div>
+      <span className={`font-display font-black text-[10px] uppercase tracking-widest transition-colors ${isActive ? 'text-[#1CB0F6]' : 'text-slate-400'}`}>
+        {label}
+      </span>
+    </button>
+  );
+});
 
 const MobileDrawer = memo(({ open, onClose, currentPath, onNav, user, isSignedIn, onSignOut }) => (
   <AnimatePresence>

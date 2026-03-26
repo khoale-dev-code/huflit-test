@@ -1,7 +1,7 @@
 /* ======================================================= */
 /* 1. IMPORTS BẮT BUỘC PHẢI Ở DÒNG ĐẦU TIÊN */
 /* ======================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Baloo+2:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -275,7 +275,11 @@
   }
   
   .font-body {
-    font-family: 'Be Vietnam Pro', sans-serif;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .font-nunito {
+    font-family: 'Nunito', sans-serif;
   }
 
   .tracking-tighter { letter-spacing: -0.8px; }

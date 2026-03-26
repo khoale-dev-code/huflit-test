@@ -173,14 +173,14 @@ export default function WelcomeModal({ isOpen = false, onClose }) {
               <div className="p-6">
                 <p className="font-quick font-black text-[12px] text-slate-400 uppercase tracking-widest mb-4 pl-1">Tại sao chọn chúng tôi?</p>
                 <div className="flex flex-col gap-4">
-                  {FEATURES.map(({ Icon, title, desc, theme }, i) => (
-                    <div key={i} className={`flex items-start gap-4 p-4 rounded-[24px] border-2 border-b-[4px] ${theme.bg} ${theme.border}`}>
-                      <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${theme.iconBg} border-black/10`}>
-                        <Icon size={24} className={theme.iconColor} strokeWidth={2.5} />
+                  {FEATURES.map((feature, i) => (
+                    <div key={i} className={`flex items-start gap-4 p-4 rounded-[24px] border-2 border-b-[4px] ${feature.theme.bg} ${feature.theme.border}`}>
+                      <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 border-b-[3px] shadow-sm ${feature.theme.iconBg} border-black/10`}>
+                        <feature.Icon size={24} className={feature.theme.iconColor} strokeWidth={2.5} />
                       </div>
                       <div>
-                        <span className={`block font-quick font-black text-[16px] mb-1 ${theme.text}`}>{title}</span>
-                        <p className="font-nunito font-bold text-[14px] text-slate-600 leading-snug">{desc}</p>
+                        <span className={`block font-quick font-black text-[16px] mb-1 ${feature.theme.text}`}>{feature.title}</span>
+                        <p className="font-nunito font-bold text-[14px] text-slate-600 leading-snug">{feature.desc}</p>
                       </div>
                     </div>
                   ))}

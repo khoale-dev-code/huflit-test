@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { 
   Trash2, Layers, Check, Edit2, Music, Plus, Zap, 
-  Volume2, BookOpen, ChevronUp, ChevronDown 
+  Volume2, BookOpen, ChevronUp, ChevronDown, GripVertical 
 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { QuestionItem } from './QuestionItem';
@@ -11,43 +11,74 @@ import { QuestionImageUploader, QuestionAudioUploader } from './Uploaders';
 export const QuestionGroupItem = ({ 
   group, 
   groupIndex, 
-  totalGroups,
-  onRemoveGroup, 
-  onUpdateGroup,
-  onMoveUp,    // Hàm di chuyển nhóm lên (truyền từ cha)
-  onMoveDown   // Hàm di chuyển nhóm xuống (truyền từ cha)
+  totalGroups = 1,
+  onRemoveGroup = () => {}, 
+  onUpdateGroup = () => {}, 
+  onUpdate = () => {}, 
+  onRemove = () => {}, 
+  onMoveUp = () => {}, 
+  onMoveDown = () => {},
+  onReorder = () => {}
 }) => {
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [showAddSubQ, setShowAddSubQ] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartY, setDragStartY] = useState(null);
 
-  const subQuestionsCount = group.subQuestions?.length || 0;
+  const subQs = group?.subQuestions || [];
+  const subQuestionsCount = subQs.length;
+
+  const handleDragStart = (e) => {
+    setDragStartY(e.clientY);
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = (e) => {
+    if (dragStartY !== null && onReorder) {
+      const deltaY = e.clientY - dragStartY;
+      const threshold = 50;
+      if (deltaY < -threshold && groupIndex > 0) {
+        onReorder(groupIndex, groupIndex - 1);
+      } else if (deltaY > threshold && groupIndex < totalGroups - 1) {
+        onReorder(groupIndex, groupIndex + 1);
+      }
+    }
+    setIsDragging(false);
+    setDragStartY(null);
+  };
+
+  // HÀM GỌI CHUNG ĐỂ UPDATE (Tự động nhận diện onUpdate hay onUpdateGroup)
+  const safeUpdateGroup = (updates) => {
+    onUpdateGroup(updates);
+    onUpdate(updates);
+  };
 
   // ─── LOGIC DI CHUYỂN CÂU HỎI CON (NỘI BỘ NHÓM) ───
   const moveSubQuestion = useCallback((index, direction) => {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= subQuestionsCount) return;
 
-    const newSubQuestions = [...group.subQuestions];
+    const newSubQuestions = [...subQs];
     [newSubQuestions[index], newSubQuestions[newIndex]] = [newSubQuestions[newIndex], newSubQuestions[index]];
     
-    onUpdateGroup({ subQuestions: newSubQuestions });
-  }, [group.subQuestions, subQuestionsCount, onUpdateGroup]);
+    safeUpdateGroup({ subQuestions: newSubQuestions });
+  }, [subQs, subQuestionsCount]); // Bỏ safeUpdateGroup ra khỏi dependency để tránh render loop
 
   // ─── CÁC HÀM XỬ LÝ CÂU HỎI CON ───
   const handleUpdateSubQuestion = (qId, updates) => {
-    const updatedSubQuestions = group.subQuestions.map(q => q.id === qId ? { ...q, ...updates } : q);
-    onUpdateGroup({ subQuestions: updatedSubQuestions });
+    const updatedSubQuestions = subQs.map(q => q.id === qId ? { ...q, ...updates } : q);
+    safeUpdateGroup({ subQuestions: updatedSubQuestions });
   };
 
   const handleRemoveSubQuestion = (qId) => {
-    const updatedSubQuestions = group.subQuestions.filter(q => q.id !== qId);
-    onUpdateGroup({ subQuestions: updatedSubQuestions });
+    const updatedSubQuestions = subQs.filter(q => q.id !== qId);
+    safeUpdateGroup({ subQuestions: updatedSubQuestions });
   };
 
   const handleAddSubQuestion = (newQ) => {
-    const updatedSubQuestions = [...(group.subQuestions || []), { ...newQ, id: `sq_${Date.now()}` }];
-    onUpdateGroup({ subQuestions: updatedSubQuestions });
+    const updatedSubQuestions = [...subQs, { ...newQ, id: `sq_${Date.now()}` }];
+    safeUpdateGroup({ subQuestions: updatedSubQuestions });
     setShowAddSubQ(false);
     setIsExpanded(true);
   };
@@ -61,11 +92,20 @@ export const QuestionGroupItem = ({
       explanation: '',
       isExample: false
     }));
-    onUpdateGroup({ subQuestions: [...(group.subQuestions || []), ...newSubQs] });
+    safeUpdateGroup({ subQuestions: [...subQs, ...newSubQs] });
+  };
+
+  // Hàm xóa nhóm an toàn
+  const handleDeleteGroup = (e) => {
+    e.stopPropagation();
+    if (window.confirm('Xóa nhóm này sẽ mất tất cả câu hỏi nhỏ bên trong?')) {
+      onRemoveGroup(group.id);
+      onRemove(group.id);
+    }
   };
 
   return (
-    <div className="bg-[#F8EEFF] border-2 border-[#eec9ff] border-b-[6px] rounded-[32px] overflow-hidden shadow-sm relative group font-nunito selection:bg-[#CE82FF] selection:text-white">
+    <div className={`bg-[#F8EEFF] border-2 border-[#eec9ff] border-b-[6px] rounded-[32px] overflow-hidden shadow-sm relative group font-nunito selection:bg-[#CE82FF] selection:text-white ${isDragging ? 'opacity-50 scale-[0.98]' : ''}`}>
       
       {/* ── HEADER ── */}
       <div
@@ -73,6 +113,27 @@ export const QuestionGroupItem = ({
         className={`p-5 sm:p-6 bg-white flex items-center justify-between cursor-pointer transition-all ${isExpanded ? 'border-b-2 border-[#eec9ff]' : 'hover:bg-slate-50'}`}
       >
         <div className="flex items-center gap-4">
+          {/* Drag Handle */}
+          <div 
+            className="w-10 h-10 rounded-xl bg-slate-100 border-2 border-slate-200 flex items-center justify-center text-slate-400 cursor-grab active:cursor-grabbing hover:bg-[#EAF6FE] hover:border-[#BAE3FB] hover:text-[#1CB0F6] shrink-0 transition-colors"
+            title="Kéo để di chuyển"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              handleDragStart(e);
+            }}
+            onMouseUp={(e) => {
+              e.stopPropagation();
+              handleDragEnd(e);
+            }}
+            onMouseLeave={(e) => {
+              if (isDragging) {
+                handleDragEnd(e);
+              }
+            }}
+          >
+            <GripVertical size={20} strokeWidth={3} />
+          </div>
+          
           <div className="w-12 h-12 rounded-2xl bg-[#CE82FF] border-b-[4px] border-[#B975E5] text-white flex items-center justify-center shadow-sm shrink-0">
             <Layers size={24} strokeWidth={3} />
           </div>
@@ -113,10 +174,7 @@ export const QuestionGroupItem = ({
 
           {/* Nút Xóa Nhóm */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (window.confirm('Xóa nhóm này sẽ mất tất cả câu hỏi nhỏ bên trong?')) onRemoveGroup(group.id);
-            }}
+            onClick={handleDeleteGroup}
             className="w-11 h-11 bg-[#fff0f0] text-[#FF4B4B] border-2 border-[#ffc1c1] border-b-[4px] flex items-center justify-center rounded-xl shadow-sm hover:bg-[#FF4B4B] hover:text-white transition-all outline-none active:translate-y-[2px] active:border-b-2"
             title="Xóa nhóm"
           >
@@ -139,8 +197,8 @@ export const QuestionGroupItem = ({
               {isEditingContent ? (
                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <QuestionImageUploader imageUrl={group.imageUrl} imageStoragePath={group.imageStoragePath} onUpdate={(updates) => onUpdateGroup(updates)} />
-                    <QuestionAudioUploader audioUrl={group.audioUrl} audioStoragePath={group.audioStoragePath} onUpdate={(updates) => onUpdateGroup(updates)} />
+                    <QuestionImageUploader imageUrl={group.imageUrl} imageStoragePath={group.imageStoragePath} onUpdate={(updates) => safeUpdateGroup(updates)} />
+                    <QuestionAudioUploader audioUrl={group.audioUrl} audioStoragePath={group.audioStoragePath} onUpdate={(updates) => safeUpdateGroup(updates)} />
                   </div>
 
                   <div className="space-y-5">
@@ -149,7 +207,7 @@ export const QuestionGroupItem = ({
                         <BookOpen size={16} strokeWidth={3} /> Nội dung bài đọc (Part 6, 7)
                       </label>
                       <textarea
-                        value={group.content || ''} onChange={(e) => onUpdateGroup({ content: e.target.value })} rows={4}
+                        value={group.content || ''} onChange={(e) => safeUpdateGroup({ content: e.target.value })} rows={4}
                         className="w-full border-2 border-[#eec9ff] rounded-2xl px-5 py-4 text-[15px] font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:ring-4 focus:ring-purple-500/10 bg-slate-50 transition-all"
                         placeholder="Nhập đoạn văn tại đây..."
                       />
@@ -159,7 +217,7 @@ export const QuestionGroupItem = ({
                         <Volume2 size={16} strokeWidth={3} /> Transcript hội thoại (Part 3, 4)
                       </label>
                       <textarea
-                        value={group.script || ''} onChange={(e) => onUpdateGroup({ script: e.target.value })} rows={3}
+                        value={group.script || ''} onChange={(e) => safeUpdateGroup({ script: e.target.value })} rows={3}
                         className="w-full border-2 border-[#BAE3FB] rounded-2xl px-5 py-4 text-[15px] font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-500/10 bg-[#EAF6FE]/30 transition-all"
                         placeholder="Nhập lời thoại (ẩn khi làm bài)..."
                       />
@@ -225,8 +283,8 @@ export const QuestionGroupItem = ({
               </div>
 
               <div className="space-y-6">
-                {group.subQuestions?.map((sq, sIdx) => (
-                  <Motion.div layout key={sq.id}>
+                {subQs.map((sq, sIdx) => (
+                  <Motion.div layout key={sq.id || sIdx}>
                     <QuestionItem
                       question={sq}
                       index={sIdx}
@@ -235,7 +293,7 @@ export const QuestionGroupItem = ({
                       onUpdate={(updates) => handleUpdateSubQuestion(sq.id, updates)}
                       onMoveUp={() => moveSubQuestion(sIdx, -1)}
                       onMoveDown={() => moveSubQuestion(sIdx, 1)}
-                      hideMedia={true} // Ẩn uploader lẻ trong nhóm để tránh rối UI
+                      hideMedia={true} 
                     />
                   </Motion.div>
                 ))}
