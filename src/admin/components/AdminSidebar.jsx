@@ -3,20 +3,21 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, BookOpen, FileText, 
-  LogOut, X, ChevronRight, ShieldAlert // 🚀 Đã thêm icon ShieldAlert
+  LogOut, X, ChevronRight, ShieldAlert, Shield
 } from 'lucide-react';
 
 const AdminSidebar = ({ isOpen, setIsOpen, admin, onSignOut }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🚀 Đã thêm mục Quản lý Chat AI vào danh sách menu
+  // 🚀 Đã thêm mục Quản lý Chat AI và Bảo trì vào danh sách menu
   const menuItems = [
     { icon: LayoutDashboard, label: 'Bảng điều khiển', path: '/admin/dashboard' },
     { icon: Users, label: 'Người dùng', path: '/admin/users' },
     { icon: BookOpen, label: 'Bộ đề thi', path: '/admin/exams' },
     { icon: FileText, label: 'Bài học', path: '/admin/lessons' },
     { icon: ShieldAlert, label: 'Quản lý Chat AI', path: '/admin/chat-logs' }, 
+    { icon: Shield, label: 'Bảo trì hệ thống', path: '/admin/maintenance' }, 
   ];
 
   return (

@@ -29,7 +29,7 @@ export const QuestionImageUploader = ({ imageUrl, imageStoragePath, onUpdate }) 
 
   return (
     <div className="flex-1">
-      <label className="text-[11px] font-display font-black text-slate-400 uppercase tracking-widest block mb-2">Hình ảnh minh họa</label>
+      <label className="text-[11px] font-nunito font-black text-slate-400 uppercase tracking-widest block mb-2">Hình ảnh minh họa</label>
       {imageUrl ? (
         <div className="relative inline-block border-2 border-slate-200 border-b-[4px] rounded-[16px] overflow-hidden group max-w-full bg-slate-50 shadow-sm p-1">
           <img src={imageUrl} alt="Question" className="w-full h-auto max-h-32 object-contain rounded-[10px]" />
@@ -38,7 +38,7 @@ export const QuestionImageUploader = ({ imageUrl, imageStoragePath, onUpdate }) 
           </button>
         </div>
       ) : (
-        <button onClick={() => !uploading && fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-200 border-b-[4px] text-slate-500 rounded-[16px] text-[12px] font-display font-bold uppercase tracking-wider hover:bg-slate-50 active:border-b-2 active:translate-y-[2px] transition-all outline-none shadow-sm">
+        <button onClick={() => !uploading && fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-200 border-b-[4px] text-slate-500 rounded-[16px] text-[12px] font-nunito font-bold uppercase tracking-wider hover:bg-slate-50 active:border-b-2 active:translate-y-[2px] transition-all outline-none shadow-sm">
           {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5 text-[#1CB0F6]" strokeWidth={2.5} />}
           {uploading ? 'Đang tải...' : 'Thêm ảnh'}
         </button>
@@ -75,7 +75,7 @@ export const QuestionAudioUploader = ({ audioUrl, audioStoragePath, onUpdate }) 
 
   return (
     <div className="flex-1">
-      <label className="text-[11px] font-display font-black text-slate-400 uppercase tracking-widest block mb-2">Âm thanh (Audio)</label>
+      <label className="text-[11px] font-nunito font-black text-slate-400 uppercase tracking-widest block mb-2">Âm thanh (Audio)</label>
       {audioUrl ? (
         <div className="border-2 border-[#BAE3FB] border-b-[4px] rounded-[16px] p-3 bg-[#EAF6FE] flex items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2 overflow-hidden">
@@ -89,7 +89,7 @@ export const QuestionAudioUploader = ({ audioUrl, audioStoragePath, onUpdate }) 
           </button>
         </div>
       ) : (
-        <button onClick={() => !uploading && fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-200 border-b-[4px] text-slate-500 rounded-[16px] text-[12px] font-display font-bold uppercase tracking-wider hover:bg-slate-50 active:border-b-2 active:translate-y-[2px] transition-all outline-none shadow-sm">
+        <button onClick={() => !uploading && fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-200 border-b-[4px] text-slate-500 rounded-[16px] text-[12px] font-nunito font-bold uppercase tracking-wider hover:bg-slate-50 active:border-b-2 active:translate-y-[2px] transition-all outline-none shadow-sm">
           {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Volume2 className="w-5 h-5 text-[#CE82FF]" strokeWidth={2.5} />}
           {uploading ? 'Đang tải...' : 'Thêm Audio'}
         </button>

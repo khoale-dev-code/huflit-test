@@ -65,7 +65,8 @@ const WritingSettings = ({
     setOpenDropdown(openDropdown === id ? null : id);
   };
 
- const CustomDropdown = ({ id, label, icon: Icon, valueLabel, children, colorClass = 'bg-[#1CB0F6]' }) => {
+  const CustomDropdown = ({ id, label, icon: IconProps, valueLabel, children, colorClass = 'bg-[#1CB0F6]' }) => {
+    const Icon = IconProps;
     const isOpen = openDropdown === id;
     
     return (

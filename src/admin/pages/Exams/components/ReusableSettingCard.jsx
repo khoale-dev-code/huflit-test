@@ -65,16 +65,16 @@ const ReusableSettingCard = ({
         {/* ── Text Content ── */}
         <div className="pt-0.5 flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
-            <h3 className={`text-[16px] sm:text-[17px] font-display font-black leading-none m-0 transition-colors ${value ? styles.titleActive : 'text-slate-800'}`}>
+            <h3 className={`text-[16px] sm:text-[17px] font-nunito font-black leading-none m-0 transition-colors ${value ? styles.titleActive : 'text-slate-800'}`}>
               {title}
             </h3>
             {badge && (
-              <span className={`px-2 py-0.5 rounded-[8px] text-[10px] font-display font-black uppercase tracking-widest border-b-[2px] shadow-sm ${value ? styles.badge : 'bg-slate-200 text-slate-500 border-slate-300'}`}>
+              <span className={`px-2 py-0.5 rounded-[8px] text-[10px] font-nunito font-black uppercase tracking-widest border-b-[2px] shadow-sm ${value ? styles.badge : 'bg-slate-200 text-slate-500 border-slate-300'}`}>
                 {badge}
               </span>
             )}
           </div>
-          <p className="text-[13px] font-body font-bold text-slate-500 leading-snug m-0">
+          <p className="text-[13px] font-nunito font-bold text-slate-500 leading-snug m-0">
             {description}
           </p>
         </div>
@@ -109,7 +109,7 @@ const ReusableSettingCard = ({
         </div>
         
         {/* Label ON/OFF cho Mobile (chỉ hiện khi màn hình siêu nhỏ nếu cần) */}
-        <span className={`ml-3 sm:hidden text-[13px] font-display font-black uppercase tracking-wider ${value ? styles.titleActive : 'text-slate-400'}`}>
+        <span className={`ml-3 sm:hidden text-[13px] font-nunito font-black uppercase tracking-wider ${value ? styles.titleActive : 'text-slate-400'}`}>
           {value ? 'BẬT' : 'TẮT'}
         </span>
       </div>

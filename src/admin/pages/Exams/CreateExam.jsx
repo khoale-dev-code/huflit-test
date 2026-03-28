@@ -136,6 +136,22 @@ const CreateExam = () => {
     }));
   };
 
+  const reorderGroup = (partId, fromIndex, toIndex) => {
+    if (fromIndex === toIndex) return;
+    setForm(p => ({
+      ...p,
+      parts: p.parts.map(pt => {
+        if (pt.id === partId) {
+          const newQuestions = [...(pt.questions || [])];
+          const [moved] = newQuestions.splice(fromIndex, 1);
+          newQuestions.splice(toIndex, 0, moved);
+          return { ...pt, questions: newQuestions };
+        }
+        return pt;
+      })
+    }));
+  };
+
   const handleAudioUpload = async (partId, file) => {
     setUploadProgress(p => ({ ...p, [partId]: 0 }));
     try {
@@ -208,7 +224,7 @@ const CreateExam = () => {
               <ArrowLeft size={22} strokeWidth={3} />
             </button>
             <div className="min-w-0 flex-1">
-              <h2 className="text-[18px] sm:text-[20px] font-display font-black text-slate-800 tracking-tight truncate">
+              <h2 className="text-[18px] sm:text-[20px] font-nunito font-black text-slate-800 tracking-tight truncate">
                 Tạo Đề Thi Mới
               </h2>
             </div>
@@ -216,15 +232,15 @@ const CreateExam = () => {
 
           <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-white rounded-[12px] border-2 border-slate-200 shadow-sm">
-              <span className="text-[11px] font-display font-black text-slate-400 uppercase">Tổng:</span>
-              <span className="text-[13px] font-display font-black text-[#1CB0F6]">{form.parts.length} Parts</span>
+              <span className="text-[11px] font-nunito font-black text-slate-400 uppercase">Tổng:</span>
+              <span className="text-[13px] font-nunito font-black text-[#1CB0F6]">{form.parts.length} Parts</span>
               <span className="text-slate-300">|</span>
-              <span className="text-[13px] font-display font-black text-[#58CC02]">{totalQ} Câu</span>
+              <span className="text-[13px] font-nunito font-black text-[#58CC02]">{totalQ} Câu</span>
             </div>
 
             <button 
               onClick={handleSave} disabled={saving} 
-              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-5 py-2 bg-[#58CC02] hover:bg-[#46A302] text-white rounded-[14px] border-2 border-[#46A302] border-b-[4px] active:border-b-[2px] active:translate-y-[2px] active:scale-95 text-[14px] font-display font-black shadow-sm disabled:opacity-60 transition-all outline-none uppercase tracking-wider"
+              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-5 py-2 bg-[#58CC02] hover:bg-[#46A302] text-white rounded-[14px] border-2 border-[#46A302] border-b-[4px] active:border-b-[2px] active:translate-y-[2px] active:scale-95 text-[14px] font-nunito font-black shadow-sm disabled:opacity-60 transition-all outline-none uppercase tracking-wider"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={18} strokeWidth={2.5} />}
               Lưu bộ đề
@@ -240,7 +256,7 @@ const CreateExam = () => {
               {error && (
                 <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-5 flex items-start gap-2.5 p-3.5 bg-[#fff0f0] border-2 border-[#ffc1c1] border-b-[3px] rounded-[16px] text-[#FF4B4B] shadow-sm">
                   <AlertTriangle size={18} strokeWidth={3} className="shrink-0 mt-0.5" />
-                  <span className="font-body font-bold text-[14px] leading-snug">{error}</span>
+                  <span className="font-nunito font-bold text-[14px] leading-snug">{error}</span>
                 </Motion.div>
               )}
             </AnimatePresence>
@@ -249,7 +265,7 @@ const CreateExam = () => {
             <div className="flex p-1 bg-slate-200/60 rounded-[14px] w-full max-w-[360px] mx-auto mb-6 border-2 border-slate-200/50">
               <button
                 onClick={() => setActiveTab('info')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-display font-bold transition-all outline-none border-2 ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-nunito font-bold transition-all outline-none border-2 ${
                   activeTab === 'info' ? 'bg-white text-[#1CB0F6] border-slate-200 border-b-[3px] shadow-sm translate-y-[-1px]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-300/50'
                 }`}
               >
@@ -257,7 +273,7 @@ const CreateExam = () => {
               </button>
               <button
                 onClick={() => setActiveTab('builder')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-display font-bold transition-all outline-none border-2 ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-nunito font-bold transition-all outline-none border-2 ${
                   activeTab === 'builder' ? 'bg-white text-[#58CC02] border-slate-200 border-b-[3px] shadow-sm translate-y-[-1px]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-300/50'
                 }`}
               >
@@ -269,7 +285,7 @@ const CreateExam = () => {
             {activeTab === 'info' && (
               <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
                 <div className="bg-white p-5 sm:p-6 rounded-[24px] border-2 border-slate-200 border-b-[4px] shadow-sm">
-                  <h3 className="text-[17px] sm:text-[18px] font-display font-black text-slate-800 mb-5 flex items-center gap-2.5">
+                  <h3 className="text-[17px] sm:text-[18px] font-nunito font-black text-slate-800 mb-5 flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-[10px] bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] flex items-center justify-center shadow-sm">
                       <Info size={16} strokeWidth={3} />
                     </div>
@@ -278,19 +294,19 @@ const CreateExam = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="md:col-span-2">
-                      <label className="text-[11px] font-display font-black text-slate-500 uppercase tracking-widest block mb-2">Tiêu đề bộ đề <span className="text-[#FF4B4B]">*</span></label>
+                      <label className="text-[11px] font-nunito font-black text-slate-500 uppercase tracking-widest block mb-2">Tiêu đề bộ đề <span className="text-[#FF4B4B]">*</span></label>
                       <input 
                         type="text" value={form.title} onChange={e => updateForm('title', e.target.value)} 
-                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] px-4 py-3 text-[14px] sm:text-[15px] font-body font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all placeholder:font-medium placeholder:text-slate-400" 
+                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] px-4 py-3 text-[14px] sm:text-[15px] font-nunito font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all placeholder:font-medium placeholder:text-slate-400" 
                         placeholder="VD: Đề thi thử TOEIC Format 2024 - Test 1" 
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-display font-black text-slate-500 uppercase tracking-widest block mb-2">Danh mục <span className="text-[#FF4B4B]">*</span></label>
+                      <label className="text-[11px] font-nunito font-black text-slate-500 uppercase tracking-widest block mb-2">Danh mục <span className="text-[#FF4B4B]">*</span></label>
                       <div className="relative">
                         <select
                           value={form.category} onChange={e => updateForm('category', e.target.value)}
-                          className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] px-4 py-3 text-[14px] sm:text-[15px] font-body font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all appearance-none cursor-pointer"
+                          className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] px-4 py-3 text-[14px] sm:text-[15px] font-nunito font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all appearance-none cursor-pointer"
                         >
                           {EXAM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                         </select>
@@ -300,20 +316,20 @@ const CreateExam = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[11px] font-display font-black text-slate-500 uppercase tracking-widest block mb-2">Thời gian làm bài (Phút)</label>
+                      <label className="text-[11px] font-nunito font-black text-slate-500 uppercase tracking-widest block mb-2">Thời gian làm bài (Phút)</label>
                       <div className="relative">
                         <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={2.5} />
                         <input 
                           type="number" value={form.duration} onChange={e => updateForm('duration', parseInt(e.target.value))} 
-                          className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] pl-10 pr-4 py-3 text-[14px] sm:text-[15px] font-body font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all" 
+                          className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] pl-10 pr-4 py-3 text-[14px] sm:text-[15px] font-nunito font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all" 
                         />
                       </div>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="text-[11px] font-display font-black text-slate-500 uppercase tracking-widest block mb-2">Mô tả chi tiết</label>
+                      <label className="text-[11px] font-nunito font-black text-slate-500 uppercase tracking-widest block mb-2">Mô tả chi tiết</label>
                       <textarea 
                         rows={3} value={form.description} onChange={e => updateForm('description', e.target.value)} 
-                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] px-4 py-3 text-[14px] font-body font-medium text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white resize-y transition-all placeholder:text-slate-400" 
+                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-[16px] px-4 py-3 text-[14px] font-nunito font-medium text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white resize-y transition-all placeholder:text-slate-400" 
                         placeholder="Nhập mô tả, mục tiêu hoặc đối tượng của đề thi này..." 
                       />
                     </div>
@@ -321,7 +337,7 @@ const CreateExam = () => {
                 </div>
 
                 <div className="bg-white p-5 sm:p-6 rounded-[24px] border-2 border-slate-200 border-b-[4px] shadow-sm">
-                  <h3 className="text-[17px] sm:text-[18px] font-display font-black text-slate-800 mb-5 flex items-center gap-2.5">
+                  <h3 className="text-[17px] sm:text-[18px] font-nunito font-black text-slate-800 mb-5 flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-[10px] bg-emerald-50 text-[#58CC02] border-2 border-emerald-200 border-b-[3px] flex items-center justify-center shadow-sm">
                       <Eye size={16} strokeWidth={3} />
                     </div>
@@ -330,7 +346,7 @@ const CreateExam = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label className={`relative flex flex-col justify-between cursor-pointer p-4 rounded-[20px] border-2 transition-all ${form.is_public ? 'bg-[#fff8e6] border-[#FFC800]' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}>
                       <div className="flex justify-between items-start mb-2">
-                        <p className={`font-display font-extrabold text-[15px] leading-tight ${form.is_public ? 'text-[#e5b400]' : 'text-slate-800'}`}>
+                        <p className={`font-nunito font-extrabold text-[15px] leading-tight ${form.is_public ? 'text-[#e5b400]' : 'text-slate-800'}`}>
                           {form.is_public ? 'Đã xuất bản (Public)' : 'Bản nháp (Đang ẩn)'}
                         </p>
                         <div className={`shrink-0 w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 border-2 ${form.is_public ? 'bg-[#FFC800] border-[#E5B400]' : 'bg-slate-200 border-slate-300'}`}>
@@ -338,7 +354,7 @@ const CreateExam = () => {
                           <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-300 ${form.is_public ? 'translate-x-5' : 'translate-x-0'}`}></div>
                         </div>
                       </div>
-                      <p className="text-[12px] font-body font-medium text-slate-500">
+                      <p className="text-[12px] font-nunito font-medium text-slate-500">
                         {form.is_public 
                           ? 'Đề thi sẽ hiện trên app học viên ngay khi lưu.' 
                           : 'Đề thi bị ẩn. Chỉ Admin mới thấy để kiểm tra lại.'}
@@ -347,7 +363,7 @@ const CreateExam = () => {
 
                     <label className={`relative flex flex-col justify-between cursor-pointer p-4 rounded-[20px] border-2 transition-all ${form.showResults ? 'bg-[#f1faeb] border-[#58CC02]' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}>
                       <div className="flex justify-between items-start mb-2">
-                        <p className={`font-display font-extrabold text-[15px] leading-tight ${form.showResults ? 'text-green-800' : 'text-slate-800'}`}>
+                        <p className={`font-nunito font-extrabold text-[15px] leading-tight ${form.showResults ? 'text-green-800' : 'text-slate-800'}`}>
                           Hiển thị kết quả ngay
                         </p>
                         <div className={`shrink-0 w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 border-2 ${form.showResults ? 'bg-[#58CC02] border-[#46A302]' : 'bg-slate-200 border-slate-300'}`}>
@@ -355,7 +371,7 @@ const CreateExam = () => {
                           <div className={`bg-white w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-300 ${form.showResults ? 'translate-x-5' : 'translate-x-0'}`}></div>
                         </div>
                       </div>
-                      <p className="text-[12px] font-body font-medium text-slate-500">
+                      <p className="text-[12px] font-nunito font-medium text-slate-500">
                         Cho phép học viên xem điểm và đáp án chi tiết sau khi nộp bài.
                       </p>
                     </label>
@@ -373,11 +389,11 @@ const CreateExam = () => {
                       <div className="w-10 h-10 rounded-[12px] bg-[#1CB0F6] flex items-center justify-center text-white border-b-[3px] border-[#1899D6] shrink-0">
                         <Plus size={20} strokeWidth={3} />
                       </div>
-                      <h3 className="text-[15px] font-display font-black text-slate-800 uppercase tracking-wider">Thêm Phần Thi</h3>
+                      <h3 className="text-[15px] font-nunito font-black text-slate-800 uppercase tracking-wider">Thêm Phần Thi</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {PART_TYPES.map(pt => (
-                        <button key={pt.type} onClick={() => addNewPart(pt.type)} className={`flex items-center gap-1.5 px-3 py-2 rounded-[12px] text-[12px] font-display font-bold uppercase border-2 border-b-[3px] active:translate-y-[2px] active:border-b-[1px] transition-all ${pt.color}`}>
+                        <button key={pt.type} onClick={() => addNewPart(pt.type)} className={`flex items-center gap-1.5 px-3 py-2 rounded-[12px] text-[12px] font-nunito font-bold uppercase border-2 border-b-[3px] active:translate-y-[2px] active:border-b-[1px] transition-all ${pt.color}`}>
                           <pt.icon size={16} /> {pt.label}
                         </button>
                       ))}
@@ -391,8 +407,8 @@ const CreateExam = () => {
                       <div className="w-16 h-16 bg-slate-100 rounded-[16px] border-b-[3px] border-slate-200 flex items-center justify-center mx-auto mb-4">
                         <LayoutTemplate className="w-8 h-8 text-slate-400" strokeWidth={2.5} />
                       </div>
-                      <h3 className="text-[18px] font-display font-black text-slate-700 mb-2">Đề thi chưa có nội dung</h3>
-                      <p className="text-slate-500 font-body text-[14px] max-w-sm mx-auto">
+                      <h3 className="text-[18px] font-nunito font-black text-slate-700 mb-2">Đề thi chưa có nội dung</h3>
+                      <p className="text-slate-500 font-nunito text-[14px] max-w-sm mx-auto">
                         Sử dụng thanh công cụ bên trên để bắt đầu thêm các phần thi (Listening, Reading,...) vào đề.
                       </p>
                     </div>
@@ -408,14 +424,14 @@ const CreateExam = () => {
                             
                             <div className="flex items-center gap-3">
                               <div className="flex items-center justify-center w-10 h-10 bg-slate-800 text-white rounded-[12px] border-b-[3px] border-slate-900 shadow-sm shrink-0">
-                                <span className="font-display font-black text-[16px]">{index + 1}</span>
+                                <span className="font-nunito font-black text-[16px]">{index + 1}</span>
                               </div>
                               <div>
-                                <h4 className="font-display font-black text-[16px] text-slate-800 uppercase flex items-center gap-2">
+                                <h4 className="font-nunito font-black text-[16px] text-slate-800 uppercase flex items-center gap-2">
                                   <PartIcon size={16} className="text-slate-400" />
                                   {part.title || `Phần ${index + 1}`}
                                 </h4>
-                                <span className="text-[12px] font-body font-bold text-slate-500 uppercase tracking-widest">{part.type}</span>
+                                <span className="text-[12px] font-nunito font-bold text-slate-500 uppercase tracking-widest">{part.type}</span>
                               </div>
                             </div>
 
@@ -425,10 +441,10 @@ const CreateExam = () => {
                                 <button onClick={() => movePart(index, 'down')} disabled={index === form.parts.length - 1} className="p-1.5 text-slate-400 hover:text-[#1CB0F6] disabled:opacity-30 transition-colors outline-none"><ChevronDown size={18} strokeWidth={3}/></button>
                               </div>
                               
-                              <button onClick={() => setEditingPartId(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[10px] hover:bg-[#1CB0F6] hover:text-white hover:border-[#1899D6] active:translate-y-[1px] active:border-b-[2px] transition-all font-display font-bold text-[12px] uppercase outline-none shadow-sm">
+                              <button onClick={() => setEditingPartId(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[10px] hover:bg-[#1CB0F6] hover:text-white hover:border-[#1899D6] active:translate-y-[1px] active:border-b-[2px] transition-all font-nunito font-bold text-[12px] uppercase outline-none shadow-sm">
                                 <Settings size={14} strokeWidth={3} /> Cài đặt
                               </button>
-                              <button onClick={() => removePart(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fff0f0] text-[#FF4B4B] border-2 border-[#ffc1c1] border-b-[3px] rounded-[10px] hover:bg-[#FF4B4B] hover:text-white hover:border-[#E54343] active:translate-y-[1px] active:border-b-[2px] transition-all font-display font-bold text-[12px] uppercase outline-none shadow-sm">
+                              <button onClick={() => removePart(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fff0f0] text-[#FF4B4B] border-2 border-[#ffc1c1] border-b-[3px] rounded-[10px] hover:bg-[#FF4B4B] hover:text-white hover:border-[#E54343] active:translate-y-[1px] active:border-b-[2px] transition-all font-nunito font-bold text-[12px] uppercase outline-none shadow-sm">
                                 <Trash2 size={14} strokeWidth={3} /> Xóa
                               </button>
                             </div>
@@ -478,6 +494,7 @@ const CreateExam = () => {
                               onToggle={() => setExpandedPart(p => p === part.id ? null : part.id)}
                               onUpdatePart={updatePart} onAddQuestion={addQuestion} onRemoveQuestion={removeQuestion}
                               onUpdateQuestion={updateQuestion} onAudioUpload={handleAudioUpload} onAudioDelete={handleAudioDelete}
+                              onMoveUp={reorderGroup} onMoveDown={reorderGroup} onReorder={reorderGroup}
                               uploadProgress={uploadProgress}
                             />
                           </div>

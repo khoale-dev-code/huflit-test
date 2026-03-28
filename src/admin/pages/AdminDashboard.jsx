@@ -11,6 +11,7 @@ import { useAdminAuth } from '../hooks/useAdminAuth';
 import { supabase } from '../../config/supabaseClient';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminNavbar from '../components/AdminNavbar';
+import MaintenanceBanner from '../components/MaintenanceBanner';
 // 🚀 FIX 1: Đảm bảo Alias Motion đã sẵn sàng
 import { motion as Motion } from 'framer-motion';
 
@@ -368,6 +369,7 @@ const AdminDashboard = () => {
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} admin={admin} onSignOut={signOut} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onQuickAction={() => navigate('/admin/exams/create')} />
+        <MaintenanceBanner />
 
         <main className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">

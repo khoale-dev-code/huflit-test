@@ -10,6 +10,7 @@ import { useExamResult } from './hooks/useExamResult';
 import { useSplashScreen } from './hooks/useSplashScreen';
 import { useWelcomeModal } from './hooks/useWelcomeModal';
 import { useTranslationProtection } from './hooks/useTranslationProtection';
+import { useMaintenance } from './hooks/useMaintenance';
 
 // --- Core Components ---
 import MainLayout from './components/layout/MainLayout';
@@ -41,6 +42,7 @@ const QuestionDisplay    = lazy(() => import('./components/Display/QuestionDispl
 const ResultsDisplay     = lazy(() => import('./components/Display/Result/ResultsDisplay'));
 const ExamAnswersPage    = lazy(() => import('./components/pages/ExamAnswersPage'));
 const NotFoundPage       = lazy(() => import('./components/pages/NotFoundPage'));
+const MaintenancePage    = lazy(() => import('./components/pages/MaintenancePage'));
 const FullExamMode       = lazy(() => import('./components/FullExam/FullExamMode'));
 const HistoryTest        = lazy(() => import('./components/HistoryTest'));
 const LessonList         = lazy(() => import('./components/Lessons/LessonList'));
@@ -57,6 +59,37 @@ const LessonManagement   = lazy(() => import('./admin/pages/Lessons/LessonManage
 const LessonForm         = lazy(() => import('./admin/pages/Lessons/LessonForm'));
 const AdminLessonDetails = lazy(() => import('./admin/pages/Lessons/LessonDetails'));
 const MigrateData        = lazy(() => import('./admin/scripts/MigrateFirestoreToSupabase'));
+
+/* ════════════════════════════════════════════════════════════════
+   MAINTENANCE GUARD — Chặn truy cập khi hệ thống đang bảo trì
+════════════════════════════════════════════════════════════════ */
+const MaintenanceGuard = memo(({ children }) => {
+  const location = useLocation();
+  const { shouldBlockAccess, loading } = useMaintenance();
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isMaintenanceRoute = location.pathname === ROUTES.MAINTENANCE;
+  const isLoginRoute = location.pathname === '/login';
+
+  console.log('🛡️ [Guard]', 'path:', location.pathname, '| shouldBlock:', shouldBlockAccess, '| loading:', loading);
+
+  if (loading) {
+    return <div className="h-screen flex items-center justify-center bg-[#F4F7FA]"><LoadingSpinner message="Đang kiểm tra hệ thống..." /></div>;
+  }
+
+  if (shouldBlockAccess && !isAdminRoute && !isMaintenanceRoute && !isLoginRoute) {
+    console.log('🛡️ [Guard] >>> BLOCKING - showing maintenance page');
+    return (
+      <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#0a0a1a]"><LoadingSpinner message="Đang tải..." /></div>}>
+        <MaintenancePage />
+      </Suspense>
+    );
+  }
+
+  console.log('🛡️ [Guard] PASSING through');
+  return children;
+});
+MaintenanceGuard.displayName = 'MaintenanceGuard';
 
 /* ════════════════════════════════════════════════════════════════
    TRUNG TÂM ĐIỀU HƯỚNG DÀNH CHO USER (APP CONTENT)
@@ -211,32 +244,35 @@ export default function App() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F4F7FA]"><LoadingSpinner message="Đang kết nối hệ thống..." /></div>}>
-        <Routes>
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          
-          <Route path="/admin">
-            <Route index               element={<AdminApp />} />
-            <Route path="*"            element={<AdminApp />} />
-            <Route path="exams"        element={<ExamManagement />} />
-            <Route path="exams/create" element={<CreateExam />} />
-            <Route path="exams/detail/:id" element={<DetailsExam />} />
-            <Route path="exams/edit/:id"   element={<EditExam />} />
-            <Route path="users"        element={<UserManagement />} />
-            <Route path="lessons"      element={<LessonManagement />} />
-            <Route path="lessons/create" element={<LessonForm />} />
-            <Route path="lessons/edit/:id" element={<LessonForm />} />
-            <Route path="lessons/detail/:id" element={<AdminLessonDetails />} />
-          </Route>
-          <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
-          <Route path="/migrate-data" element={<MigrateData />} />
-          
-          {/* User Routes (Chứa logic ẩn/hiện Navbar) */}
-          <Route path="/*" element={<AppContent />} />
-        </Routes>
-      </Suspense>
+      <MaintenanceGuard>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#F4F7FA]"><LoadingSpinner message="Đang kết nối hệ thống..." /></div>}>
+          <Routes>
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path={ROUTES.MAINTENANCE} element={<MaintenancePage />} />
+            
+            <Route path="/admin">
+              <Route index               element={<AdminApp />} />
+              <Route path="*"            element={<AdminApp />} />
+              <Route path="exams"        element={<ExamManagement />} />
+              <Route path="exams/create" element={<CreateExam />} />
+              <Route path="exams/detail/:id" element={<DetailsExam />} />
+              <Route path="exams/edit/:id"   element={<EditExam />} />
+              <Route path="users"        element={<UserManagement />} />
+              <Route path="lessons"      element={<LessonManagement />} />
+              <Route path="lessons/create" element={<LessonForm />} />
+              <Route path="lessons/edit/:id" element={<LessonForm />} />
+              <Route path="lessons/detail/:id" element={<AdminLessonDetails />} />
+            </Route>
+            <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+            <Route path="/migrate-data" element={<MigrateData />} />
+            
+            {/* User Routes (Chứa logic ẩn/hiện Navbar) */}
+            <Route path="/*" element={<AppContent />} />
+          </Routes>
+        </Suspense>
+      </MaintenanceGuard>
     </Router>
   );
 }

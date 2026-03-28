@@ -1,8 +1,23 @@
 {
   "rewrites": [
     {
-      "source": "/((?!audio|assets|favicon.ico|robots.txt|manifest.json).*)",
+      "source": "/api/maintenance",
+      "destination": "/api/maintenance"
+    },
+    {
+      "source": "/((?!audio|assets|favicon.ico|robots.txt|manifest.json|api).*)",
       "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/maintenance",
+      "headers": [
+        {
+          "key": "Retry-After",
+          "value": "3600"
+        }
+      ]
     }
   ]
 }
