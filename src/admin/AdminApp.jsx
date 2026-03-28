@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAdminAuth } from './hooks/useAdminAuth';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import MaintenanceSettings from './pages/MaintenanceSettings';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
 const ProtectedRoute = ({ children }) => {
@@ -21,9 +22,6 @@ const AdminApp = () => {
     <Routes>
       <Route path="/login" element={<AdminLogin />} />
       
-      {/* ⚠️ ROUTE TẠM - XÓA SAU KHI TẠO ADMIN
-      <Route path="/setup" element={<AdminSetup />} /> */}
-      
       <Route 
         path="/dashboard" 
         element={
@@ -33,7 +31,16 @@ const AdminApp = () => {
         } 
       />
       
-      <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route 
+        path="/maintenance" 
+        element={
+          <ProtectedRoute>
+            <MaintenanceSettings />
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route path="/*" element={<Navigate to="/admin/dashboard" replace />} />
     </Routes>
   );
 };

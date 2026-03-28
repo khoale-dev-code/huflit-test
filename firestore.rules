@@ -1,56 +1,115 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // ============================================
-    // PUBLIC DATA - Everyone can read
+    // HELPER FUNCTIONS
     // ============================================
-    
-    // Exam Data - public read
+
+    // Kiểm tra user có phải admin đang active không
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admin_accounts/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admin_accounts/$(request.auth.uid)).data.status == 'active';
+    }
+
+    // Kiểm tra user đã đăng nhập chưa
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ============================================
+    // 1. QUẢN TRỊ VIÊN (ADMIN ACCOUNTS)
+    // ============================================
+
+    match /admin_accounts/{adminId} {
+      // Admin chỉ đọc được document của chính mình (để checkAdminRole hoạt động)
+      allow read: if isAuthenticated() && request.auth.uid == adminId;
+
+      // ⚠️ SAU KHI TẠO XONG ADMIN ĐẦU TIÊN, ĐỔI 'true' → 'false'
+      allow write: if true;
+    }
+
+    // ============================================
+    // 2. BỘ ĐỀ THI - EXAMS (ADMIN CRUD)
+    // ============================================
+
+    match /exams/{examId} {
+      // Public có thể đọc (học sinh xem đề thi)
+      allow read: if true;
+
+      // Chỉ admin mới được tạo / sửa / xóa
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Sub-collections của exam (questions, sections nếu cần)
+    match /exams/{examId}/{subcollection=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ============================================
+    // 3. DỮ LIỆU CÔNG KHAI (PUBLIC DATA)
+    // ============================================
+
     match /examData/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
-    
-    // Vocabulary Data - public read
+
     match /vocabularyData/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
-    
-    // Grammar Data - public read
+
     match /grammarData/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
-    
-    // Metadata - public read
+
     match /metadata/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
-    
+
     // ============================================
-    // PRIVATE DATA - User Progress
+    // 4. DỮ LIỆU NGƯỜI DÙNG (USER DATA)
     // ============================================
-    
-    // Users collection (Clerk webhook creates these)
+
     match /users/{userId} {
-      allow read: if true;  // Allow read for now
-      allow write: if false; // Only webhook can write
+      // User chỉ đọc/sửa data của chính mình; admin đọc được tất cả
+      allow read:   if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
-    
-    // User Progress - OPEN FOR DEVELOPMENT
-    // TODO: Add proper security after Clerk-Firebase integration
+
     match /userProgress/{docId} {
-      // TEMPORARY: Allow all authenticated reads/writes
-      allow read, write, create, update, delete: if true;
+      // User đọc/ghi progress của chính mình; admin đọc được tất cả
+      allow read:   if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
-    
+
     // ============================================
-    // FALLBACK - Deny everything else
+    // 5. CÀI ĐẶT HỆ THỐNG (MAINTENANCE MODE)
     // ============================================
+
+    match /settings/siteConfig {
+      // Mọi người đều đọc được (để kiểm tra chế độ bảo trì)
+      allow read: if true;
+      // Đã đăng nhập Firebase Auth thì được sửa
+      // Admin check đã xử lý ở client: ProtectedRoute + Supabase role
+      allow write: if isAuthenticated();
+    }
+
+    // ============================================
+    // 6. FALLBACK - Chặn mọi thứ còn lại
+    // ============================================
+
     match /{document=**} {
       allow read, write: if false;
     }

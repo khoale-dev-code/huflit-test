@@ -7,6 +7,7 @@ export const ROUTES = {
   ANSWERS: '/answers',
   HOME: '/',
   NOT_FOUND: '/not-found',
+  MAINTENANCE: '/maintenance',
   // ADMIN: '/admin',
 };
 
@@ -21,6 +22,6 @@ export const getVocabularyRoute = () => ROUTES.VOCABULARY;
 export const getProfileRoute = () => ROUTES.PROFILE;
 export const getAnswersRoute = () => ROUTES.ANSWERS;
 export const getNotFoundRoute = () => ROUTES.NOT_FOUND;
-
+export const getMaintenanceRoute = () => ROUTES.MAINTENANCE;
 
 // export const getAdminRoute = () => ROUTES.ADMIN;
