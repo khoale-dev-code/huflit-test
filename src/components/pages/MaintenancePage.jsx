@@ -1,106 +1,86 @@
 /**
- * MaintenancePage — Trang bảo trì hệ thống
- * Connected to Firestore for dynamic config, countdown, notification signup
+ * MaintenancePage — Trang bảo trì hệ thống (Gamification 3D Style)
+ * Clean Code: 100% Tailwind CSS, No inline styles, Componentized
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Wrench, Mail, Phone, MessageCircle, Zap, Shield, Sparkles, Clock, Bell, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Wrench, Mail, Phone, MessageCircle, Zap, Shield, Sparkles, Clock, Bell, CheckCircle, AlertTriangle } from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { maintenanceService } from '../../services/maintenanceService';
 
-/* ─── Floating Orb ──────────────────────────────────────────── */
-function FloatOrb({ cx, cy, size, color, duration, delay }) {
-  return (
-    <div
-      className="absolute rounded-full pointer-events-none blur-[80px]"
-      style={{
-        left: `${cx}%`, top: `${cy}%`, width: size, height: size,
-        background: color, opacity: 0.15, transform: 'translate(-50%,-50%)',
-        animation: `orbFloat ${duration}s ease-in-out ${delay}s infinite`,
-      }}
-    />
-  );
-}
+/* ─── 1. SUB-COMPONENTS (Tách nhỏ để Clean Code) ─────────────────────── */
 
-/* ─── Particle ──────────────────────────────────────────────── */
-function Particle({ x, y, size, color, duration, delay }) {
-  return (
-    <div
-      className="absolute rounded-full pointer-events-none"
-      style={{
-        left: `${x}%`, top: `${y}%`, width: size, height: size,
-        background: color, opacity: 0.3,
-        animation: `particleFloat ${duration}s ease-in-out ${delay}s infinite`,
-      }}
-    />
-  );
-}
+const CloudBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute top-[10%] left-[10%] w-24 sm:w-32 h-12 sm:h-16 bg-white/60 rounded-full blur-[2px] animate-[float_8s_ease-in-out_infinite]" />
+    <div className="absolute top-[30%] right-[10%] w-32 sm:w-48 h-16 sm:h-24 bg-white/50 rounded-full blur-[3px] animate-[float_12s_ease-in-out_infinite_reverse]" />
+    <div className="absolute bottom-[20%] left-[20%] w-28 sm:w-40 h-14 sm:h-20 bg-white/60 rounded-full blur-[2px] animate-[float_10s_ease-in-out_infinite]" />
+    <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-48 sm:w-64 h-24 sm:h-32 bg-blue-100/40 rounded-full blur-[30px] sm:blur-[40px] animate-[pulseBg_6s_ease-in-out_infinite]" />
+  </div>
+);
 
-/* ─── Gear SVGs ─────────────────────────────────────────────── */
-function GearLarge() {
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full" style={{ animation: 'rotateGear 8s linear infinite' }}>
-      <defs>
-        <linearGradient id="gearGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a78bfa" /><stop offset="100%" stopColor="#60a5fa" />
-        </linearGradient>
-      </defs>
-      <g fill="none" stroke="url(#gearGrad1)" strokeWidth="2" strokeLinecap="round">
-        <path d="M50 10 L54 2 L58 10 M50 90 L54 98 L58 90 M10 50 L2 54 L10 58 M90 50 L98 54 L90 58 M22 22 L16 16 L28 16 M78 22 L84 16 L72 16 M22 78 L16 84 L28 84 M78 78 L84 84 L72 84" />
-        <circle cx="50" cy="50" r="35" /><circle cx="50" cy="50" r="22" /><circle cx="50" cy="50" r="8" />
-      </g>
-    </svg>
-  );
-}
+const CountdownBox = ({ value, label, color, bg, border }) => (
+  <div className={`flex flex-1 max-w-[80px] sm:max-w-[100px] flex-col items-center justify-center py-3 sm:py-5 rounded-[16px] sm:rounded-[20px] border-2 border-b-[4px] sm:border-b-[6px] ${bg} ${border}`}>
+    <span className={`text-2xl sm:text-3xl md:text-4xl font-black ${color} tabular-nums leading-none`}>
+      {value}
+    </span>
+    <span className="text-[10px] sm:text-[12px] font-bold text-slate-500 uppercase mt-1.5 sm:mt-2">
+      {label}
+    </span>
+  </div>
+);
 
-function GearSmall() {
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full" style={{ animation: 'rotateGearReverse 6s linear infinite' }}>
-      <defs>
-        <linearGradient id="gearGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#34d399" />
-        </linearGradient>
-      </defs>
-      <g fill="none" stroke="url(#gearGrad2)" strokeWidth="2" strokeLinecap="round">
-        <path d="M50 5 L53 0 L56 5 M50 95 L53 100 L56 95 M5 50 L0 53 L5 56 M95 50 L100 53 L95 56" />
-        <circle cx="50" cy="50" r="32" /><circle cx="50" cy="50" r="20" /><circle cx="50" cy="50" r="7" />
-      </g>
-    </svg>
-  );
-}
+const FeatureCard = ({ icon: Icon, color, bg, title, desc }) => (
+  <div className="flex sm:flex-col items-center text-left sm:text-center p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] bg-slate-50 border-2 border-slate-100 hover:border-slate-200 transition-colors">
+    <div className={`w-10 h-10 sm:mb-3 shrink-0 rounded-[12px] ${bg} ${color} flex items-center justify-center mr-3 sm:mr-0`}>
+      <Icon size={20} strokeWidth={3} />
+    </div>
+    <div>
+      <h4 className="text-[14px] font-black text-slate-700 sm:mb-0.5">{title}</h4>
+      <p className="text-[12px] font-bold text-slate-500 hidden sm:block">{desc}</p>
+    </div>
+  </div>
+);
+
+const ContactButton = ({ href, icon: Icon, colorClass, textMobile, textDesktop }) => (
+  <a 
+    href={href} 
+    target={href.startsWith('http') ? '_blank' : '_self'}
+    rel="noopener noreferrer"
+    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 bg-white border-2 border-slate-200 border-b-[3px] rounded-[12px] text-slate-500 ${colorClass} active:translate-y-[1px] active:border-b-[2px] transition-all font-bold text-[12px] sm:text-[13px] min-h-[44px]`}
+  >
+    <Icon size={16} strokeWidth={2.5} /> 
+    <span className="hidden sm:inline">{textDesktop}</span>
+    <span className="sm:hidden">{textMobile}</span>
+  </a>
+);
 
 /* ════════════════════════════════════════════════════════════════
-   MAIN
+   2. MAIN COMPONENT
 ════════════════════════════════════════════════════════════════ */
 export default function MaintenancePage() {
   const [config, setConfig] = useState(null);
   const [email, setEmail] = useState('');
   const [notifyStatus, setNotifyStatus] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [remaining, setRemaining] = useState(0);
 
+  // Fetch Config
   useEffect(() => {
     const unsub = maintenanceService.subscribeToConfig(setConfig);
     return () => unsub();
   }, []);
 
-  /* ── Particles ── */
-  const particles = useMemo(
-    () => Array.from({ length: 25 }, (_, i) => ({
-      id: i, x: Math.random() * 100, y: Math.random() * 100,
-      size: `${Math.random() * 4 + 2}px`,
-      color: ['rgba(167,139,250,0.4)', 'rgba(96,165,250,0.4)', 'rgba(52,211,153,0.3)', 'rgba(245,87,108,0.3)'][i % 4],
-      duration: Math.random() * 10 + 10, delay: Math.random() * 10,
-    })), []
-  );
-
-  /* ── Countdown ── */
-  const [remaining, setRemaining] = useState(0);
+  // Countdown Logic
   useEffect(() => {
     if (!config?.estimatedEndTime) return;
     const end = new Date(config.estimatedEndTime).getTime();
+    
     const updateRemaining = () => {
       const diff = Math.max(0, Math.floor((end - Date.now()) / 1000));
       setRemaining(diff);
     };
+    
     updateRemaining();
     const id = setInterval(updateRemaining, 1000);
     return () => clearInterval(id);
@@ -111,198 +91,154 @@ export default function MaintenancePage() {
   const seconds = String(remaining % 60).padStart(2, '0');
   const showCountdown = remaining > 0;
 
-  /* ── Notify handler ── */
+  // Handle Form Submit
   const handleNotify = useCallback(async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
+    
     setSubmitting(true);
-    const result = await maintenanceService.subscribeToNotifications(email.trim());
-    setNotifyStatus(result);
-    setSubmitting(false);
-    if (result.success) setEmail('');
+    setNotifyStatus(null);
+    try {
+      const result = await maintenanceService.subscribeToNotifications(email.trim());
+      setNotifyStatus(result);
+      if (result.success) setEmail('');
+    } catch (err) {
+      setNotifyStatus({ success: false, message: 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
+    } finally {
+      setSubmitting(false);
+    }
   }, [email]);
 
-  const message = config?.message || 'Hệ thống đang được bảo trì. Vui lòng quay lại sau!';
-  const contactEmail = config?.contactEmail || 'support@example.com';
-  const contactPhone = config?.contactPhone || '';
+  const message = config?.message || 'Chúng tôi đang nâng cấp hệ thống để mang lại trải nghiệm học tập tuyệt vời hơn cho bạn!';
+  const contactEmail = config?.contactEmail || 'support@hubstudy.edu.vn';
+  const contactPhone = config?.contactPhone || '0123 456 789';
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative" style={{ fontFamily: '"Nunito", sans-serif', background: '#0a0a1a' }}>
-      {/* ── Ambient orbs ── */}
-      <FloatOrb cx={10} cy={15} size={400} color="linear-gradient(135deg, #667eea, #764ba2)" duration={20} delay={0} />
-      <FloatOrb cx={90} cy={85} size={350} color="linear-gradient(135deg, #f093fb, #f5576c)" duration={20} delay={-5} />
-      <FloatOrb cx={50} cy={50} size={300} color="linear-gradient(135deg, #4facfe, #00f2fe)" duration={20} delay={-10} />
-      <FloatOrb cx={80} cy={20} size={250} color="linear-gradient(135deg, #43e97b, #38f9d7)" duration={20} delay={-15} />
+    <div className="min-h-[100dvh] w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#F4F7FA] relative font-['Nunito','Quicksand',sans-serif] selection:bg-blue-200 text-slate-800 overflow-hidden">
+      
+      <CloudBackground />
 
-      <div className="fixed inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom, #1a1a3e 0%, #0a0a1a 70%)' }} />
-      <div className="fixed inset-0 pointer-events-none z-[1]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-      <div className="fixed inset-0 pointer-events-none z-[2]">
-        {particles.map((p) => <Particle key={p.id} {...p} />)}
-      </div>
+      <Motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }} 
+        animate={{ opacity: 1, y: 0, scale: 1 }} 
+        transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
+        className="relative z-10 w-full max-w-[640px] bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-slate-200 border-b-[6px] sm:border-b-[8px] max-h-[90dvh] overflow-y-auto custom-scrollbar"
+      >
+        
+        {/* Header: Icon & Status */}
+        <div className="flex flex-col items-center mb-6 sm:mb-8 mt-2">
+          <Motion.div 
+            animate={{ rotate: 360 }} 
+            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            className="w-20 h-20 sm:w-24 sm:h-24 mb-5 bg-[#EAF6FE] rounded-full border-4 border-[#BAE3FB] flex items-center justify-center shadow-inner shrink-0"
+          >
+            <Wrench className="w-8 h-8 sm:w-10 sm:h-10 text-[#1CB0F6]" strokeWidth={2.5} />
+          </Motion.div>
 
-      {/* ── Main Card ── */}
-      <div className="relative z-10 w-full max-w-2xl" style={{ animation: 'cardAppear 1s ease-out' }}>
-        <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 text-center" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)', animation: 'shimmer 3s ease-in-out infinite' }} />
-
-          {/* ── Gear Animation ── */}
-          <div className="relative w-28 h-28 mx-auto mb-6">
-            <div className="absolute inset-0 flex items-center justify-center"><div className="w-[90px] h-[90px]"><GearLarge /></div></div>
-            <div className="absolute top-2 right-0 w-14 h-14"><GearSmall /></div>
-            <div className="absolute bottom-0 right-0" style={{ animation: 'wrenchBounce 2s ease-in-out infinite' }}>
-              <Wrench className="w-6 h-6 text-emerald-400" strokeWidth={2.5} />
-            </div>
-          </div>
-
-          {/* ── Status Badge ── */}
-          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-6" style={{ background: 'rgba(255,193,7,0.15)', border: '1px solid rgba(255,193,7,0.3)', animation: 'badgePulse 2s ease-in-out infinite' }}>
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" style={{ animation: 'dotPulse 1.5s ease-in-out infinite' }} />
-            <span className="text-yellow-400 text-xs font-bold uppercase tracking-widest">Đang bảo trì</span>
-          </div>
-
-          {/* ── Title ── */}
-          <h1 className="text-3xl sm:text-[42px] font-extrabold leading-tight mb-3" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #a78bfa 50%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            Hệ thống đang được bảo trì
-          </h1>
-
-          {/* ── Message ── */}
-          <p className="text-base text-white/60 leading-relaxed mb-10 max-w-lg mx-auto">
-            {message}
-            <span className="inline-flex gap-1 ml-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-white/50" style={{ animation: 'loadDot 1.4s ease-in-out infinite' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-white/50" style={{ animation: 'loadDot 1.4s ease-in-out 0.2s infinite' }} />
-              <span className="w-1.5 h-1.5 rounded-full bg-white/50" style={{ animation: 'loadDot 1.4s ease-in-out 0.4s infinite' }} />
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 bg-[#FFC800]/10 border-2 border-[#FFC800]/30 rounded-full">
+            <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FFC800] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-[#FFC800]"></span>
             </span>
-          </p>
-
-          {/* ── Countdown ── */}
-          {showCountdown && (
-            <div className="mb-10">
-              <div className="flex items-center justify-center gap-2 text-xs text-white/50 font-semibold uppercase tracking-widest mb-5">
-                <Clock className="w-4 h-4" /> Thời gian dự kiến hoàn thành
-              </div>
-              <div className="flex justify-center gap-3 sm:gap-4">
-                {[
-                  { value: hours, label: 'Giờ' },
-                  { value: minutes, label: 'Phút' },
-                  { value: seconds, label: 'Giây' },
-                ].map((item, i) => (
-                  <div key={i} className="relative rounded-2xl px-4 py-5 min-w-[80px] sm:min-w-[90px]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: 'linear-gradient(90deg, #667eea, #a78bfa)' }} />
-                    <div className="text-3xl sm:text-4xl font-extrabold text-white leading-none mb-1" style={{ fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
-                    <div className="text-[11px] text-white/40 uppercase tracking-widest font-semibold">{item.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── Features ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-            {[
-              { icon: <Zap className="w-7 h-7 text-yellow-400" />, title: 'Tốc độ tốt hơn', desc: 'Tối ưu hiệu suất hệ thống' },
-              { icon: <Shield className="w-7 h-7 text-blue-400" />, title: 'Bảo mật nâng cao', desc: 'Cập nhật bảo mật mới nhất' },
-              { icon: <Sparkles className="w-7 h-7 text-purple-400" />, title: 'Tính năng mới', desc: 'Thêm nhiều cải tiến hấp dẫn' },
-            ].map((feat, i) => (
-              <div key={i} className="rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 cursor-default" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
-              >
-                <div className="mb-3">{feat.icon}</div>
-                <h4 className="text-sm font-semibold text-white/85 mb-1">{feat.title}</h4>
-                <p className="text-xs text-white/40">{feat.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Notification Signup ── */}
-          <div className="mb-10 p-6 rounded-2xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="flex items-center justify-center gap-2 text-xs text-white/50 font-semibold uppercase tracking-widest mb-4">
-              <Bell className="w-4 h-4" /> Nhận thông báo khi hệ thống hoạt động lại
-            </div>
-            <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setNotifyStatus(null); }}
-                placeholder="Nhập email của bạn..."
-                required
-                className="flex-1 px-4 py-3 rounded-xl text-sm text-white placeholder-white/30 outline-none transition-all focus:ring-2 focus:ring-purple-500/50"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
-              />
-              <button type="submit" disabled={submitting}
-                className="px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: 'linear-gradient(135deg, #667eea, #a78bfa)', border: '1px solid rgba(167,139,250,0.3)' }}
-              >
-                {submitting ? 'Đang gửi...' : 'Thông báo cho tôi'}
-              </button>
-            </form>
-            {notifyStatus && (
-              <div className={`flex items-center justify-center gap-2 mt-3 text-sm font-medium ${notifyStatus.success ? 'text-emerald-400' : 'text-yellow-400'}`}>
-                {notifyStatus.success ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                {notifyStatus.message}
-              </div>
-            )}
-          </div>
-
-          {/* ── Contact ── */}
-          <div className="pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="flex items-center justify-center gap-2 text-xs text-white/50 font-semibold uppercase tracking-widest mb-5">
-              <Phone className="w-4 h-4" /> Liên hệ hỗ trợ
-            </div>
-            <div className="flex flex-wrap justify-center gap-3">
-              <a href={`mailto:${contactEmail}`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
-                style={{ background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(96,165,250,0.2)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(96,165,250,0.15)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(96,165,250,0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
-              >
-                <Mail className="w-4 h-4" /> Email Hỗ Trợ
-              </a>
-              {contactPhone && (
-                <a href={`tel:${contactPhone}`}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
-                  style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', color: '#34d399' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(52,211,153,0.2)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(52,211,153,0.15)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(52,211,153,0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
-                >
-                  <Phone className="w-4 h-4" /> Hotline
-                </a>
-              )}
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5"
-                style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(167,139,250,0.2)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(167,139,250,0.15)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(167,139,250,0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
-              >
-                <MessageCircle className="w-4 h-4" /> Fanpage
-              </a>
-            </div>
-          </div>
-
-          {/* ── Footer ── */}
-          <div className="mt-6 text-xs text-white/25">
-            Được tạo với <span className="inline-block text-red-400" style={{ animation: 'heartbeat 1.5s ease-in-out infinite' }}>❤</span> bởi <strong className="text-white/40">HubStudy</strong> &copy; 2025
+            <span className="text-[#E5B400] text-[11px] sm:text-[13px] font-black uppercase tracking-wider">Đang bảo trì</span>
           </div>
         </div>
-      </div>
 
-      {/* ── Keyframes ── */}
-      <style>{`
-        @keyframes orbFloat { 0%,100%{transform:translate(-50%,-50%) scale(1)} 25%{transform:translate(calc(-50% + 50px),calc(-50% - 50px)) scale(1.1)} 50%{transform:translate(calc(-50% - 30px),calc(-50% + 30px)) scale(0.9)} 75%{transform:translate(calc(-50% + 40px),calc(-50% + 20px)) scale(1.05)} }
-        @keyframes particleFloat { 0%,100%{transform:translate(0,0)} 33%{transform:translate(30px,-40px)} 66%{transform:translate(-20px,30px)} }
-        @keyframes rotateGear { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes rotateGearReverse { from{transform:rotate(0deg)} to{transform:rotate(-360deg)} }
-        @keyframes wrenchBounce { 0%,100%{transform:rotate(-15deg) translateY(0)} 50%{transform:rotate(15deg) translateY(-5px)} }
-        @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-        @keyframes cardAppear { from{opacity:0;transform:translateY(40px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes badgePulse { 0%,100%{background:rgba(255,193,7,0.15)} 50%{background:rgba(255,193,7,0.25)} }
-        @keyframes dotPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,193,7,0.5)} 50%{box-shadow:0 0 0 8px rgba(255,193,7,0)} }
-        @keyframes progressGradient { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-        @keyframes progressShine { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-        @keyframes loadDot { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
-        @keyframes heartbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-      `}</style>
+        {/* Title & Message */}
+        <div className="text-center mb-8 sm:mb-10">
+          <h1 className="text-[22px] sm:text-[28px] md:text-[32px] font-black text-slate-800 mb-3 sm:mb-4 leading-tight">
+            Chúng tôi đang <span className="text-[#1CB0F6]">nâng cấp</span>!
+          </h1>
+          <p className="text-[14px] sm:text-[16px] font-bold text-slate-500 max-w-md mx-auto leading-relaxed px-2">
+            {message}
+          </p>
+        </div>
+
+        {/* Countdown Timer */}
+        {showCountdown && (
+          <div className="mb-8 sm:mb-10">
+            <div className="flex items-center justify-center gap-2 text-[11px] sm:text-[12px] text-slate-400 font-black uppercase tracking-widest mb-3 sm:mb-4">
+              <Clock size={16} strokeWidth={3} /> Dự kiến hoàn thành
+            </div>
+            <div className="flex justify-center gap-2 sm:gap-4 md:gap-5">
+              <CountdownBox value={hours} label="Giờ" color="text-[#1CB0F6]" bg="bg-[#EAF6FE]" border="border-[#BAE3FB]" />
+              <CountdownBox value={minutes} label="Phút" color="text-[#58CC02]" bg="bg-emerald-50" border="border-emerald-200" />
+              <CountdownBox value={seconds} label="Giây" color="text-[#FF9600]" bg="bg-[#FFC800]/10" border="border-[#FFC800]/40" />
+            </div>
+          </div>
+        )}
+
+        {/* Features List */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
+          <FeatureCard icon={Zap} color="text-[#FF9600]" bg="bg-[#FFC800]/10" title="Siêu tốc độ" desc="Tối ưu hiệu năng" />
+          <FeatureCard icon={Shield} color="text-[#1CB0F6]" bg="bg-[#EAF6FE]" title="Bảo mật cao" desc="An toàn dữ liệu" />
+          <FeatureCard icon={Sparkles} color="text-[#58CC02]" bg="bg-emerald-50" title="Tính năng mới" desc="Trải nghiệm thú vị" />
+        </div>
+
+        {/* Notification Form */}
+        <div className="bg-slate-50 p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border-2 border-slate-200 mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] text-slate-600 font-black uppercase tracking-wider mb-3 sm:mb-4 text-center">
+            <Bell size={16} strokeWidth={3} className="text-[#FF9600] shrink-0" /> Nhận thông báo khi hoàn tất
+          </div>
+          <form onSubmit={handleNotify} className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setNotifyStatus(null); }}
+              placeholder="Nhập email của bạn..."
+              required
+              className="flex-1 w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-white border-2 border-slate-200 rounded-[14px] sm:rounded-[16px] text-[16px] sm:text-[15px] font-bold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-50 transition-all min-h-[48px]"
+            />
+            <button 
+              type="submit" 
+              disabled={submitting}
+              className="w-full sm:w-auto px-6 py-3 sm:py-3.5 bg-[#1CB0F6] hover:bg-[#1899D6] text-white text-[14px] sm:text-[15px] font-black uppercase tracking-wider rounded-[14px] sm:rounded-[16px] border-2 border-[#1899D6] border-b-[4px] active:border-b-[2px] active:translate-y-[2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0 min-h-[48px] flex items-center justify-center"
+            >
+              {submitting ? 'Đang gửi...' : 'Đăng ký'}
+            </button>
+          </form>
+          
+          <AnimatePresence>
+            {notifyStatus && (
+              <Motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                exit={{ opacity: 0, height: 0 }}
+                className={`flex items-center justify-center gap-2 mt-3 sm:mt-4 text-[13px] sm:text-[14px] font-bold text-center ${notifyStatus.success ? 'text-[#58CC02]' : 'text-[#FF4B4B]'}`}
+              >
+                {notifyStatus.success ? <CheckCircle size={18} strokeWidth={3} className="shrink-0" /> : <AlertTriangle size={18} strokeWidth={3} className="shrink-0" />}
+                <span>{notifyStatus.message}</span>
+              </Motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Contact Footer */}
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+          <ContactButton href={`mailto:${contactEmail}`} icon={Mail} colorClass="hover:text-[#1CB0F6] hover:border-blue-200" textMobile="Email" textDesktop="Email hỗ trợ" />
+          {contactPhone && (
+            <ContactButton href={`tel:${contactPhone}`} icon={Phone} colorClass="hover:text-[#58CC02] hover:border-emerald-200" textMobile="Gọi" textDesktop="Hotline" />
+          )}
+          <ContactButton href="https://facebook.com" icon={MessageCircle} colorClass="hover:text-[#FF9600] hover:border-[#FFC800]/50" textMobile="Fanpage" textDesktop="Fanpage" />
+        </div>
+
+      </Motion.div>
+
+      {/* ── MẢNG CSS DUY NHẤT (Cho Keyframes & Scrollbar Webkit) ── */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes float {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-20px) scale(1.05); }
+        }
+        @keyframes pulseBg {
+          0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+          50% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      `}} />
     </div>
   );
 }

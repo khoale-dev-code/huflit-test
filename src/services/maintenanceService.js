@@ -1,5 +1,5 @@
 // src/services/maintenanceService.js
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, arrayUnion } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { supabase } from '../config/supabaseClient';
 
@@ -11,41 +11,57 @@ const DEFAULT_CONFIG = {
   message: 'Hệ thống đang được bảo trì. Chúng tôi sẽ quay lại sớm!',
   estimatedEndTime: null,
   startTime: null,
-  contactEmail: 'support@example.com',
+  contactEmail: 'support@hubstudy.edu.vn',
   contactPhone: '',
   backgroundUrl: '',
 };
 
+/**
+ * Hàm Helper: Ghi log admin an toàn
+ * (Tách riêng để Clean Code và không làm crash app nếu Supabase lỗi)
+ */
+const logToSupabase = async (adminId, adminEmail, actionType, targetName) => {
+  try {
+    const { error } = await supabase.from('admin_logs').insert([{
+      admin_id: adminId,
+      admin_name: adminEmail || 'System Admin',
+      action_type: actionType,
+      target_name: targetName,
+    }]);
+    if (error) console.error('Supabase Log Error:', error.message);
+  } catch (err) {
+    console.error('Failed to log admin action:', err);
+  }
+};
+
 export const maintenanceService = {
+  // Lấy config 1 lần (Dùng cho SSR hoặc init load)
   getConfig: async () => {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, SITE_CONFIG_DOC);
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return { ...DEFAULT_CONFIG, ...docSnap.data() };
-      }
-      // Document chưa tồn tại → trả về defaults (không tự tạo, admin sẽ tạo qua trang cài đặt)
-      return DEFAULT_CONFIG;
+      return docSnap.exists() ? { ...DEFAULT_CONFIG, ...docSnap.data() } : DEFAULT_CONFIG;
     } catch (error) {
       console.error('Error getting maintenance config:', error);
       return DEFAULT_CONFIG;
     }
   },
 
+  // Lắng nghe realtime config (Dùng cho App để văng ra trang bảo trì ngay lập tức)
   subscribeToConfig: (callback) => {
     const docRef = doc(db, SETTINGS_COLLECTION, SITE_CONFIG_DOC);
-    return onSnapshot(docRef, (snapshot) => {
-      if (snapshot.exists()) {
-        callback({ ...DEFAULT_CONFIG, ...snapshot.data() });
-      } else {
+    return onSnapshot(docRef, 
+      (snapshot) => {
+        callback(snapshot.exists() ? { ...DEFAULT_CONFIG, ...snapshot.data() } : DEFAULT_CONFIG);
+      }, 
+      (error) => {
+        console.error('Error subscribing to maintenance config:', error);
         callback(DEFAULT_CONFIG);
       }
-    }, (error) => {
-      console.error('Error subscribing to maintenance config:', error);
-      callback(DEFAULT_CONFIG);
-    });
+    );
   },
 
+  // Bật / Tắt bảo trì
   toggleMaintenance: async (isActive, adminId, adminEmail) => {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, SITE_CONFIG_DOC);
@@ -59,12 +75,13 @@ export const maintenanceService = {
 
       await setDoc(docRef, updateData, { merge: true });
 
-      await supabase.from('admin_logs').insert([{
-        admin_id: adminId,
-        admin_name: adminEmail || 'Admin',
-        action_type: isActive ? 'MAINTENANCE_ON' : 'MAINTENANCE_OFF',
-        target_name: isActive ? 'Bật chế độ bảo trì' : 'Tắt chế độ bảo trì',
-      }]);
+      // Ghi log (Chạy bất đồng bộ, không dùng await block để tăng tốc UI)
+      logToSupabase(
+        adminId, 
+        adminEmail, 
+        isActive ? 'MAINTENANCE_ON' : 'MAINTENANCE_OFF', 
+        isActive ? 'Bật chế độ bảo trì' : 'Tắt chế độ bảo trì'
+      );
 
       return true;
     } catch (error) {
@@ -73,23 +90,20 @@ export const maintenanceService = {
     }
   },
 
+  // Cập nhật nội dung bảo trì (Lời nhắn, thời gian...)
   updateSettings: async (settings, adminId, adminEmail) => {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, SITE_CONFIG_DOC);
       const now = new Date().toISOString();
 
+      // Lọc bỏ các giá trị undefined để tránh lỗi Firebase
       const cleanSettings = Object.fromEntries(
         Object.entries(settings).filter(([, v]) => v !== undefined)
       );
 
       await setDoc(docRef, { ...cleanSettings, updatedAt: now }, { merge: true });
 
-      await supabase.from('admin_logs').insert([{
-        admin_id: adminId,
-        admin_name: adminEmail || 'Admin',
-        action_type: 'UPDATE_MAINTENANCE_SETTINGS',
-        target_name: 'Cập nhật cài đặt bảo trì',
-      }]);
+      logToSupabase(adminId, adminEmail, 'UPDATE_MAINTENANCE_SETTINGS', 'Cập nhật cài đặt bảo trì');
 
       return true;
     } catch (error) {
@@ -98,19 +112,20 @@ export const maintenanceService = {
     }
   },
 
+  // Học viên đăng ký nhận email (Tối ưu chống Race Condition)
   subscribeToNotifications: async (email) => {
     try {
       const docRef = doc(db, SETTINGS_COLLECTION, SITE_CONFIG_DOC);
+      
+      // Kiểm tra sơ bộ xem có trùng không (để trả về UI message đẹp)
       const docSnap = await getDoc(docRef);
-      const current = docSnap.exists() ? docSnap.data() : {};
-      const subscribers = current.notificationSubscribers || [];
-
-      if (subscribers.includes(email)) {
-        return { success: false, message: 'Email này đã đăng ký nhận thông báo.' };
+      if (docSnap.exists() && docSnap.data().notificationSubscribers?.includes(email)) {
+        return { success: false, message: 'Email này đã được đăng ký trước đó!' };
       }
 
+      // Dùng arrayUnion để đảm bảo an toàn dữ liệu 100% khi có nhiều người click cùng lúc
       await setDoc(docRef, {
-        notificationSubscribers: [...subscribers, email],
+        notificationSubscribers: arrayUnion(email)
       }, { merge: true });
 
       return { success: true, message: 'Đăng ký nhận thông báo thành công!' };
@@ -120,6 +135,7 @@ export const maintenanceService = {
     }
   },
 
+  // Lấy lịch sử Admin Logs
   getMaintenanceLogs: async () => {
     try {
       const { data, error } = await supabase
