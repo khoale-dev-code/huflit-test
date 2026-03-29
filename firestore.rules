@@ -89,7 +89,7 @@ service cloud.firestore {
     match /userProgress/{docId} {
       // User đọc/ghi progress của chính mình; admin đọc được tất cả
       allow read:   if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.firebaseUid;
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
     }

@@ -23,7 +23,8 @@ import {
   AddQuestionForm, 
   QuestionGroupItem, 
   AddQuestionGroupForm,
-  SortableGroup 
+  SortableGroup,
+  SortableQuestion
 } from './QuestionBlocks';
 import QuestionStatistics from './QuestionStatistics';
 
@@ -84,7 +85,15 @@ const PartPanel = ({
   
   // Lọc câu hỏi theo search
   const allQuestions = part?.questions || [];
+  const singleQuestions = allQuestions.filter(q => q.type !== 'group');
   const groupQuestions = allQuestions.filter(q => q.type === 'group');
+
+  const filteredSingles = searchQuery
+    ? singleQuestions.filter(q =>
+        (q.question || q.text || '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : singleQuestions;
+
   const filteredGroups = searchQuery 
     ? groupQuestions.filter(g => 
         (g.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -119,8 +128,8 @@ const PartPanel = ({
 
     if (!over) return;
 
-    const oldIndex = groupQuestions.findIndex(q => q.id === active.id);
-    const newIndex = groupQuestions.findIndex(q => q.id === over.id);
+    const oldIndex = allQuestions.findIndex(q => q.id === active.id);
+    const newIndex = allQuestions.findIndex(q => q.id === over.id);
 
     if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
       onReorder(partId, oldIndex, newIndex);
@@ -246,10 +255,25 @@ const PartPanel = ({
               onDragCancel={handleDragCancel}
             >
               <SortableContext
-                items={filteredGroups.map(g => g.id)}
+                items={allQuestions.map(q => q.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-4">
+                  {/* CÂU HỎI ĐƠN */}
+                  {filteredSingles.map((q) => {
+                    const qIdx = allQuestions.findIndex(aq => aq.id === q.id);
+                    return (
+                      <SortableQuestion
+                        key={q.id}
+                        question={q}
+                        index={qIdx}
+                        onRemove={() => onRemoveQuestion(partId, q.id)}
+                        onUpdate={(updates) => onUpdateQuestion(partId, q.id, updates)}
+                      />
+                    );
+                  })}
+
+                  {/* NHÓM CÂU HỎI */}
                   {filteredGroups.map((q) => {
                     const groupCount = filteredGroups.length;
                     const groupIdx = filteredGroups.findIndex(gq => gq.id === q.id);
@@ -270,24 +294,39 @@ const PartPanel = ({
                       />
                     );
                   })}
+
+                  {/* Empty state */}
+                  {filteredSingles.length === 0 && filteredGroups.length === 0 && (
+                    <div className="text-center py-10 text-slate-400 font-nunito font-bold text-[14px]">
+                      {searchQuery ? 'Không tìm thấy câu hỏi phù hợp' : 'Chưa có câu hỏi nào'}
+                    </div>
+                  )}
                 </div>
               </SortableContext>
 
               <DragOverlay adjustScale={false} zIndex={100}>
                 {activeId ? (
                   <div className="opacity-90">
-                    <QuestionGroupItem
-                      group={getActiveGroup()}
-                      groupIndex={0}
-                      totalGroups={1}
-                      onMoveUp={() => {}}
-                      onMoveDown={() => {}}
-                      onReorder={() => {}}
-                      onRemove={() => {}}
-                      onUpdate={() => {}}
-                      onRemoveGroup={() => {}}
-                      onUpdateGroup={() => {}}
-                    />
+                    {getActiveGroup()?.type === 'group' ? (
+                      <QuestionGroupItem
+                        group={getActiveGroup()}
+                        groupIndex={0}
+                        totalGroups={1}
+                        onMoveUp={() => {}}
+                        onMoveDown={() => {}}
+                        onReorder={() => {}}
+                        onRemove={() => {}}
+                        onUpdate={() => {}}
+                        onRemoveGroup={() => {}}
+                        onUpdateGroup={() => {}}
+                      />
+                    ) : (
+                      <SortableQuestion
+                        question={getActiveGroup()}
+                        index={-1}
+                        isDragOverlay
+                      />
+                    )}
                   </div>
                 ) : null}
               </DragOverlay>

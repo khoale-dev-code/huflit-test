@@ -3,6 +3,7 @@
 // Used by crawlers, uptime monitors, and SEO tools
 
 export default async function handler(req, res) {
+  // eslint-disable-next-line no-undef
   const projectId = process.env.VITE_FIREBASE_PROJECT_ID || 'huflit-test';
   const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/settings/siteConfig`;
 

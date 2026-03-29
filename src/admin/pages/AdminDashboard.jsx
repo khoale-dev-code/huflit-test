@@ -300,7 +300,7 @@ const AdminDashboard = () => {
     adminLogs:     [],
   });
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchDashboardData = async () => {
       if (!admin) return;
       setDataLoading(true);
@@ -311,24 +311,44 @@ const AdminDashboard = () => {
         const adminsCount = users?.filter(u => u.role === 'admin').length || 0;
         const studentsCount = (users?.length || 0) - adminsCount;
 
+        // 🚀 TỐI ƯU TÍNH TOÁN NGÀY GIỜ
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 6);
         startDate.setHours(0, 0, 0, 0);
 
-        const { data: results } = await supabase.from('exam_results').select('created_at, user_id').gte('created_at', startDate.toISOString());
+        // 🚀 BẮT LỖI KHI GỌI BẢNG exam_results
+        const { data: results, error: resultsError } = await supabase
+          .from('exam_results')
+          .select('created_at, user_id')
+          .gte('created_at', startDate.toISOString());
+
+        // Nếu có lỗi do RLS, in ra màn hình
+        if (resultsError) {
+          console.error("❌ Lỗi lấy lượt thi (exam_results):", resultsError.message);
+        } else {
+          console.log("✅ Dữ liệu lượt thi thô lấy được:", results?.length, results);
+        }
 
         const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
         const last7Days = [];
+        
         for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const targetDateStr = d.toLocaleDateString('en-CA');
-          const count = results?.filter(r => new Date(r.created_at).toLocaleDateString('en-CA') === targetDateStr).length || 0;
-          last7Days.push({ label: days[d.getDay()], count });
+          const day = new Date();
+          day.setDate(day.getDate() - i);
+          
+          // Dùng toLocaleDateString để so sánh ngày chính xác theo giờ địa phương (Tránh lỗi timezone)
+          const targetDateStr = day.toLocaleDateString('en-CA'); // Trả về dạng YYYY-MM-DD
+
+          const count = results?.filter(r => {
+            const resultDateStr = new Date(r.created_at).toLocaleDateString('en-CA');
+            return resultDateStr === targetDateStr;
+          }).length || 0;
+
+          last7Days.push({ label: days[day.getDay()], count });
         }
 
         let activeRateVal = 0;
-        if (users && users.length > 0 && results) {
+        if (users && users.length > 0 && results && results.length > 0) {
           const uniqueActiveUsers = new Set(results.filter(r => r.user_id).map(r => r.user_id)).size;
           activeRateVal = ((uniqueActiveUsers / users.length) * 100).toFixed(1);
         }
@@ -347,7 +367,7 @@ const AdminDashboard = () => {
         });
 
       } catch (err) {
-        console.error('Lỗi Dashboard:', err.message);
+        console.error('❌ Lỗi Dashboard:', err.message);
       } finally {
         setDataLoading(false);
       }
