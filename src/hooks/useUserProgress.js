@@ -346,12 +346,12 @@ export const useUserProgress = () => {
 
       // -- 2. THÊM ĐOẠN NÀY ĐỂ LƯU VÀO SUPABASE (Cho Admin) --
       const supabasePayload = {
-        // Tạm thời mình map các trường cơ bản, bạn có thể thêm/bớt tùy theo 
-        // các cột thực tế trong bảng exam_results trên Supabase của bạn nhé
-        user_id: firebaseUser.uid, // Cần khớp với kiểu dữ liệu bên Supabase (text hoặc uuid)
+        user_id: firebaseUser.uid,
         exam_id: testData.exam,
         score: numericScore,
-        // created_at: Supabase thường tự động sinh ra nên không cần truyền
+        correct_answers: testData.score?.correct ?? testData.correct ?? 0,
+        total_questions: testData.score?.total ?? testData.total ?? 0,
+        created_at: new Date().toISOString(),
       };
 
       const { error: supaError } = await supabase

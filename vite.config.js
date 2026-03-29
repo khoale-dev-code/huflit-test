@@ -10,108 +10,75 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  // 1. Plugins: Sử dụng bản chuẩn, ổn định nhất cho React
+  // 1. Plugins
   plugins: [react()],
 
-  // 2. Testing: Cấu hình Vitest chuyên sâu cho React UI
+  // 2. Testing: Cấu hình Vitest
   test: {
-    globals: true,             // Sử dụng 'describe', 'it', 'expect' mà không cần import
-    environment: 'jsdom',      // Giả lập môi trường trình duyệt (cần thiết để test giao diện)
-    setupFiles: './src/setupTests.js', // File cấu hình global cho các bài test
-    css: true,                 // Cho phép Vitest hiểu các class Tailwind
-    include: ['src/**/*.{test,spec}.{js,jsx}'], // Chỉ tìm file test trong thư mục src
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+    css: true,
+    include: ['src/**/*.{test,spec}.{js,jsx}'],
     coverage: {
-      provider: 'v8',          // Bộ đo độ phủ code
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
     },
   },
 
-  // 3. Resolve: Đường dẫn tắt và Sửa lỗi Singleton cho React
+  // 3. Resolve: Đường dẫn tắt và Sửa lỗi Singleton
   resolve: {
     alias: {
-      // Giúp import gọn: import ... from '@/components/MyComponent'
       '@': path.resolve(__dirname, './src'),
-      
-      // FIX LỖI CONTEXT: Ép mọi thư viện (Framer Motion, v.v.) dùng chung 1 bản React duy nhất
       'react': path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
 
-  // 4. Server: Tối ưu cho lập trình viên
+  // 4. Server: Cấu hình Header cho Firebase Auth
   server: {
     port: 5173,
-    open: true, // Tự động mở trình duyệt khi chạy npm run dev
+    open: true,
     cors: true,
     headers: {
-      // Giúp Popup Google Auth của Firebase hoạt động mượt mà trên localhost
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
       "Cross-Origin-Embedder-Policy": "unsafe-none"
     },
   },
 
-  // 5. Build: Tối ưu dung lượng và tốc độ cho môi trường thực tế (Production)
+  // 5. Esbuild: Xóa console.log siêu tốc (Thay thế cho Terser)
+  esbuild: {
+    // Chỉ xóa console và debugger khi build ra production
+    // eslint-disable-next-line no-undef
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+  },
+
+  // 6. Build: Tối ưu dung lượng (Production)
   build: {
     outDir: 'dist',
     target: 'esnext',
-    sourcemap: false, // Tắt để bảo mật code và giảm nhẹ file build
-    chunkSizeWarningLimit: 1000, // Giảm để phát hiện chunks lớn
-
-    // Tối ưu Brotli/Gzip compression
-    reportCompressedSize: true,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Loại bỏ console.log trong production
-        drop_debugger: true,
-      },
-    },
+    sourcemap: false, 
+    chunkSizeWarningLimit: 1200, // Nới lỏng một chút để tránh cảnh báo ảo
+    reportCompressedSize: false, // Tắt cái này giúp tăng tốc độ build đáng kể
 
     rollupOptions: {
       output: {
-        // CHUNKING: Chia nhỏ các thư viện bên thứ 3 để trình duyệt lưu Cache tốt hơn
         manualChunks(id) {
-          // Firebase - vẫn bundle vì cần thiết cho app
-          if (id.includes('node_modules/firebase') && !id.includes('firebase-admin')) {
-            return 'vendor-firebase';
-          }
-          
-          // Tiptap Editor - Nặng, chỉ dùng trong Admin
-          if (id.includes('node_modules/@tiptap')) {
-            return 'vendor-editor';
-          }
-          
-          // Database & Backend Services
-          if (id.includes('node_modules/@supabase')) {
-            return 'vendor-supabase';
-          }
-          
-          // AI Libraries - Groq SDK
-          if (id.includes('node_modules/groq-sdk')) {
-            return 'vendor-ai';
-          }
-          
-          // Tách các thư viện UI (Nặng nhưng ít khi thay đổi)
-          if (id.includes('node_modules/framer-motion')) {
-            return 'vendor-animation';
-          }
-          if (id.includes('node_modules/lucide-react') || 
-              id.includes('node_modules/react-icons')) {
-            return 'vendor-icons';
-          }
-          if (id.includes('node_modules/recharts')) {
-            return 'vendor-charts';
-          }
-          
-          // Tách lõi React và Router
-          if (id.includes('node_modules/react/') ||
-              id.includes('node_modules/react-dom/') ||
-              id.includes('node_modules/react-router')) {
+          if (id.includes('node_modules')) {
+            // Tách các thư viện lớn, riêng biệt ra để tối ưu caching
+            if (id.includes('@supabase')) return 'vendor-supabase';
+            if (id.includes('firebase')) return 'vendor-firebase';
+            if (id.includes('@tiptap') || id.includes('prosemirror')) return 'vendor-editor';
+            if (id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('recharts')) return 'vendor-charts';
+            
+            // GOM React và các thư viện nhỏ còn lại vào một chunk 'core'
+            // để tránh lỗi phụ thuộc vòng tròn.
             return 'vendor-core';
           }
         },
-        
-        // Đặt tên file có Hash để tránh trình duyệt người dùng load cache cũ khi bạn update web
+        // Mã hóa tên file để trình duyệt luôn cập nhật bản mới nhất
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
@@ -119,23 +86,18 @@ export default defineConfig({
     },
   },
 
-  // 6. Tối ưu hóa việc nạp thư viện khi khởi động
+  // 7. Cứu tinh của Tiptap & Vite (Tối ưu hóa nạp thư viện)
   optimizeDeps: {
     include: [
-      'firebase/app', 
-      'firebase/auth', 
-      'firebase/firestore', 
-      '@supabase/supabase-js',
       'react',
       'react-dom',
       'framer-motion',
-      'lucide-react'
+      'lucide-react',
+      '@supabase/supabase-js',
+      // 🚀 FIX LỖI TIPTAP: Bắt Vite phải dịch gói này sang ESM
+      'use-sync-external-store/shim/index.js' 
     ],
-    // Loại trừ các thư viện nặng không cần preload ngay
-    exclude: [
-      'groq-sdk',
-      '@tiptap/react',
-      '@tiptap/starter-kit',
-    ],
+    // Xóa Tiptap khỏi mảng exclude để Vite tự động xử lý các dependencies của nó
+    exclude: ['groq-sdk'], 
   }
 });

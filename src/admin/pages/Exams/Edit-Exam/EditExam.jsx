@@ -95,7 +95,7 @@ const EditExam = () => {
             ...part,
             content: normalizedContent || '',
             script: normalizedScript || '',
-            text: normalizedContent || normalizedScript || part.text || '' 
+            text: normalizedContent || normalizedScript || part.text || '',
           };
         });
 
@@ -280,9 +280,9 @@ const EditExam = () => {
           <div className="flex items-center gap-3 min-w-0 w-full md:w-auto">
             <button 
               onClick={() => navigate('/admin/exams')}
-              className="w-12 h-12 bg-white rounded-[14px] border-2 border-slate-200 border-b-[4px] flex items-center justify-center text-slate-500 hover:text-[#1CB0F6] hover:border-blue-200 hover:bg-blue-50 active:border-b-[2px] active:translate-y-[2px] active:scale-95 transition-all outline-none shrink-0 shadow-md"
+              className="w-14 h-14 bg-white rounded-[16px] border-2 border-slate-200 border-b-[4px] flex items-center justify-center text-slate-500 hover:text-[#1CB0F6] hover:border-blue-200 hover:bg-blue-50 active:border-b-[2px] active:translate-y-[2px] active:scale-95 transition-all outline-none shrink-0 shadow-md"
             >
-              <ArrowLeft size={22} strokeWidth={3} />
+              <ArrowLeft size={24} strokeWidth={3} />
             </button>
             <div className="min-w-0 flex-1">
               <h2 className="text-[18px] sm:text-[20px] font-nunito font-black text-slate-800 tracking-tight truncate">
@@ -291,24 +291,24 @@ const EditExam = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-white rounded-[12px] border-2 border-slate-200 shadow-sm">
-              <span className="text-[11px] font-nunito font-black text-slate-400 uppercase">Tổng:</span>
-              <span className="text-[13px] font-nunito font-black text-[#1CB0F6]">{form.parts.length} Parts</span>
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white rounded-[14px] border-2 border-slate-200 shadow-sm">
+              <span className="text-[12px] font-nunito font-black text-slate-400 uppercase">Tổng:</span>
+              <span className="text-[15px] font-nunito font-black text-[#1CB0F6]">{form.parts.length} Parts</span>
               <span className="text-slate-300">|</span>
-              <span className="text-[13px] font-nunito font-black text-[#58CC02]">{totalQ} Câu</span>
+              <span className="text-[15px] font-nunito font-black text-[#58CC02]">{totalQ} Câu</span>
             </div>
 
-            <button onClick={() => navigate(`/admin/exams/detail/${id}`)} className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-white border-2 border-slate-200 border-b-[3px] rounded-[14px] text-[13px] font-nunito font-bold text-slate-600 hover:bg-slate-50 hover:text-[#1CB0F6] active:border-b-2 active:translate-y-[1px] transition-all outline-none">
-              <Eye size={16} strokeWidth={2.5} />
+            <button onClick={() => navigate(`/admin/exams/detail/${id}`)} className="hidden sm:flex items-center gap-2 px-5 py-3 bg-white border-2 border-slate-200 border-b-[4px] rounded-[14px] text-[14px] font-nunito font-bold text-slate-600 hover:bg-slate-50 hover:text-[#1CB0F6] active:border-b-2 active:translate-y-[1px] transition-all outline-none shadow-sm">
+              <Eye size={20} strokeWidth={2.5} />
               Xem chi tiết
             </button>
 
             <button 
               onClick={handleSave} disabled={saving} 
-              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-5 py-2 bg-[#58CC02] hover:bg-[#46A302] text-white rounded-[14px] border-2 border-[#46A302] border-b-[4px] active:border-b-0 active:translate-y-[4px] active:scale-95 text-[14px] font-nunito font-black shadow-sm disabled:opacity-60 transition-all outline-none uppercase tracking-wider"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-7 py-3.5 bg-[#58CC02] hover:bg-[#46A302] text-white rounded-[16px] border-2 border-[#46A302] border-b-[5px] active:border-b-0 active:translate-y-[5px] active:scale-95 text-[15px] font-nunito font-black shadow-md disabled:opacity-60 transition-all outline-none uppercase tracking-wider"
             >
-              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={18} strokeWidth={2.5} />}
+              {saving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save size={22} strokeWidth={2.5} />}
               Lưu thay đổi
             </button>
           </div>
@@ -328,22 +328,22 @@ const EditExam = () => {
             </AnimatePresence>
 
             {/* Custom Tabs */}
-            <div className="flex p-1 bg-slate-200/60 rounded-[14px] w-full max-w-[360px] mx-auto mb-6 border-2 border-slate-200/50">
+            <div className="flex p-1.5 bg-slate-200/60 rounded-[16px] w-full max-w-[400px] mx-auto mb-6 border-2 border-slate-200/50">
               <button
                 onClick={() => setActiveTab('info')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-nunito font-bold transition-all outline-none border-2 ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[12px] text-[14px] font-nunito font-bold transition-all outline-none border-2 ${
                   activeTab === 'info' ? 'bg-white text-[#1CB0F6] border-slate-200 border-b-[3px] shadow-sm translate-y-[-1px]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-300/50'
                 }`}
               >
-                <Settings size={16} strokeWidth={2.5} /> Cài đặt chung
+                <Settings size={18} strokeWidth={2.5} /> Cài đặt chung
               </button>
               <button
                 onClick={() => setActiveTab('builder')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[10px] text-[13px] font-nunito font-bold transition-all outline-none border-2 ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[12px] text-[14px] font-nunito font-bold transition-all outline-none border-2 ${
                   activeTab === 'builder' ? 'bg-white text-[#58CC02] border-slate-200 border-b-[3px] shadow-sm translate-y-[-1px]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-300/50'
                 }`}
               >
-                <LayoutTemplate size={16} strokeWidth={2.5} /> Cấu trúc đề thi
+                <LayoutTemplate size={18} strokeWidth={2.5} /> Cấu trúc đề thi
               </button>
             </div>
 
@@ -456,10 +456,10 @@ const EditExam = () => {
                       </div>
                       <h3 className="text-[15px] font-nunito font-black text-slate-800 uppercase tracking-wider">Thêm Phần Thi</h3>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2.5">
                       {PART_TYPES.map(pt => (
-                        <button key={pt.type} onClick={() => addNewPart(pt.type)} className={`flex items-center gap-1.5 px-3 py-2 rounded-[12px] text-[12px] font-nunito font-bold uppercase border-2 border-b-[3px] active:translate-y-[2px] active:border-b-[1px] transition-all ${pt.color}`}>
-                          <pt.icon size={16} /> {pt.label}
+                        <button key={pt.type} onClick={() => addNewPart(pt.type)} className={`flex items-center gap-2 px-5 py-3 rounded-[14px] text-[13px] font-nunito font-bold uppercase border-2 border-b-[4px] active:translate-y-[2px] active:border-b-[2px] transition-all shadow-sm ${pt.color}`}>
+                          <pt.icon size={18} /> {pt.label}
                         </button>
                       ))}
                     </div>
@@ -500,17 +500,17 @@ const EditExam = () => {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 w-full sm:w-auto">
-                              <div className="flex items-center bg-white border-2 border-slate-200 rounded-[10px] shadow-sm mr-auto sm:mr-2 shrink-0">
-                                <button onClick={() => movePart(index, 'up')} disabled={index === 0} className="p-1.5 text-slate-400 hover:text-[#1CB0F6] disabled:opacity-30 transition-colors border-r-2 border-slate-200 outline-none"><ChevronUp size={18} strokeWidth={3}/></button>
-                                <button onClick={() => movePart(index, 'down')} disabled={index === form.parts.length - 1} className="p-1.5 text-slate-400 hover:text-[#1CB0F6] disabled:opacity-30 transition-colors outline-none"><ChevronDown size={18} strokeWidth={3}/></button>
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                              <div className="flex items-center bg-white border-2 border-slate-200 rounded-[12px] shadow-sm mr-auto sm:mr-2 shrink-0">
+                                <button onClick={() => movePart(index, 'up')} disabled={index === 0} className="p-2.5 text-slate-400 hover:text-[#1CB0F6] disabled:opacity-30 transition-colors border-r-2 border-slate-200 outline-none"><ChevronUp size={20} strokeWidth={3}/></button>
+                                <button onClick={() => movePart(index, 'down')} disabled={index === form.parts.length - 1} className="p-2.5 text-slate-400 hover:text-[#1CB0F6] disabled:opacity-30 transition-colors outline-none"><ChevronDown size={20} strokeWidth={3}/></button>
                               </div>
                               
-                              <button onClick={() => setEditingPartId(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[10px] hover:bg-[#1CB0F6] hover:text-white hover:border-[#1899D6] active:translate-y-[1px] active:border-b-[2px] transition-all font-nunito font-bold text-[12px] uppercase outline-none shadow-sm">
-                                <Settings size={14} strokeWidth={3} /> Cài đặt
+                              <button onClick={() => setEditingPartId(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-[#EAF6FE] text-[#1CB0F6] border-2 border-[#BAE3FB] border-b-[3px] rounded-[12px] hover:bg-[#1CB0F6] hover:text-white hover:border-[#1899D6] active:translate-y-[1px] active:border-b-[2px] transition-all font-nunito font-bold text-[13px] uppercase outline-none shadow-sm">
+                                <Settings size={16} strokeWidth={3} /> Cài đặt
                               </button>
-                              <button onClick={() => removePart(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-[#fff0f0] text-[#FF4B4B] border-2 border-[#ffc1c1] border-b-[3px] rounded-[10px] hover:bg-[#FF4B4B] hover:text-white hover:border-[#E54343] active:translate-y-[1px] active:border-b-[2px] transition-all font-nunito font-bold text-[12px] uppercase outline-none shadow-sm">
-                                <Trash2 size={14} strokeWidth={3} /> Xóa
+                              <button onClick={() => removePart(part.id)} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-[#fff0f0] text-[#FF4B4B] border-2 border-[#ffc1c1] border-b-[3px] rounded-[12px] hover:bg-[#FF4B4B] hover:text-white hover:border-[#E54343] active:translate-y-[1px] active:border-b-[2px] transition-all font-nunito font-bold text-[13px] uppercase outline-none shadow-sm">
+                                <Trash2 size={16} strokeWidth={3} /> Xóa
                               </button>
                             </div>
                           </div>

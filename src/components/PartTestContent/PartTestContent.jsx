@@ -1,11 +1,21 @@
 // src/components/PartTestContent/PartTestContent.jsx
-import { memo, useEffect, useCallback } from 'react';
+import { memo, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
-import PartSelector from '../Display/PartSelector';
-import ContentDisplay from '../Display/ContentDisplay';
-import QuestionDisplay from '../Display/QuestionDisplay';
-import ResultsDisplay from '../Display/Result/ResultsDisplay';
 import { StatsGrid } from '../StatsGrid';
+
+// --- Dynamic Imports for Code Splitting ---
+const PartSelector = lazy(() => import('../Display/PartSelector'));
+const ContentDisplay = lazy(() => import('../Display/ContentDisplay'));
+const QuestionDisplay = lazy(() => import('../Display/QuestionDisplay'));
+const ResultsDisplay = lazy(() => import('../Display/Result/ResultsDisplay'));
+
+// --- Fallback Component for Suspense ---
+const Loader = () => (
+  <div className="w-full min-h-[50vh] flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+  </div>
+);
+
 
 /**
  * PartTestContent - Practice mode exam content area
@@ -48,63 +58,65 @@ const PartTestContent = memo((props) => {
   }, []);
 
   return (
-    <div className="w-full space-y-8 font-nunito">
-      <PartSelector
-        selectedExam={selectedExam} onExamChange={handleExamChange}
-        testType={testType}         onTestTypeChange={handleTestTypeChange}
-        selectedPart={selectedPart} onPartChange={handlePartChange}
-      />
+    <Suspense fallback={<Loader />}>
+      <div className="w-full space-y-8 font-nunito">
+        <PartSelector
+          selectedExam={selectedExam} onExamChange={handleExamChange}
+          testType={testType}         onTestTypeChange={handleTestTypeChange}
+          selectedPart={selectedPart} onPartChange={handlePartChange}
+        />
 
-      <AnimatePresence mode="wait">
-        {showResults ? (
-          <Motion.div 
-            key="results" 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            exit={{ opacity: 0, y: -20 }}
-          >
-            <ResultsDisplay
-              scoreResult={scoreResult} 
-              convertedScore={convertedScore} 
-              examCategory={examCategory}
-              partData={partData} 
-              answers={answers} 
-              onReset={handleReset}
-            />
-            <StatsGrid scoreResult={scoreResult} isSignedIn={isSignedIn} />
-          </Motion.div>
-        ) : (
-          <Motion.div 
-            key="content" 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            className="w-full space-y-8 min-h-[100vh]"
-          >
-            <ContentDisplay
-              partData={partData} 
-              selectedPart={selectedPart} 
-              currentQuestionIndex={currentQuestionIndex}
-              testType={testType} 
-              examId={selectedExam} 
-              isLoading={isLoadingExam} 
-              onSelectPart={handleSelectPart}
-            />
-            <QuestionDisplay
-              selectedPart={selectedPart} 
-              selectedExam={selectedExam} 
-              partData={partData}
-              currentQuestionIndex={currentQuestionIndex} 
-              onQuestionChange={setCurrentQuestionIndex}
-              answers={answers} 
-              onAnswerSelect={handleAnswerSelect} 
-              showResults={showResults}
-              onSubmit={handleSubmit} 
-              testType={testType}
-            />
-          </Motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        <AnimatePresence mode="wait">
+          {showResults ? (
+            <Motion.div 
+              key="results" 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <ResultsDisplay
+                scoreResult={scoreResult} 
+                convertedScore={convertedScore} 
+                examCategory={examCategory}
+                partData={partData} 
+                answers={answers} 
+                onReset={handleReset}
+              />
+              <StatsGrid scoreResult={scoreResult} isSignedIn={isSignedIn} />
+            </Motion.div>
+          ) : (
+            <Motion.div 
+              key="content" 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="w-full space-y-8 min-h-[100vh]"
+            >
+              <ContentDisplay
+                partData={partData} 
+                selectedPart={selectedPart} 
+                currentQuestionIndex={currentQuestionIndex}
+                testType={testType} 
+                examId={selectedExam} 
+                isLoading={isLoadingExam} 
+                onSelectPart={handleSelectPart}
+              />
+              <QuestionDisplay
+                selectedPart={selectedPart} 
+                selectedExam={selectedExam} 
+                partData={partData}
+                currentQuestionIndex={currentQuestionIndex} 
+                onQuestionChange={setCurrentQuestionIndex}
+                answers={answers} 
+                onAnswerSelect={handleAnswerSelect} 
+                showResults={showResults}
+                onSubmit={handleSubmit} 
+                testType={testType}
+              />
+            </Motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </Suspense>
   );
 });
 

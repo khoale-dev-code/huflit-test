@@ -5,7 +5,9 @@ export const EXAM3_DATA = {
   metadata: {
     exam: "exam3",
     hasAudio: true,
-    listeningAudioUrl: "/public/data/audio/exam3/listening/full.mp3",
+    hasScript: true,
+    hasExplanation: true,
+    
   },
 
   parts: {

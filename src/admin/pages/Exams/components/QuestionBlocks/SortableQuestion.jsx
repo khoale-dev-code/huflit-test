@@ -3,9 +3,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
   Trash2, Check, Edit2, Copy, ChevronUp, ChevronDown,
-  FileText, AlertCircle, CheckCircle2, GripVertical
+  FileText, AlertCircle, CheckCircle2, GripVertical, Image as ImageIcon, Music
 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
+import { QuestionImageUploader, QuestionAudioUploader } from './Uploaders';
 
 const QUESTION_TYPES = [
   { value: 'multiple_choice', label: 'Trắc nghiệm', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -155,6 +156,36 @@ export const SortableQuestion = ({
           >
             {isEditing ? (
               <div className="p-4 space-y-4">
+                {/* Image / Audio Uploaders */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <QuestionImageUploader
+                    imageUrl={localQuestion.imageUrl}
+                    imageStoragePath={localQuestion.imageStoragePath}
+                    onUpdate={(data) => setLocalQuestion({ ...localQuestion, ...data })}
+                  />
+                  <QuestionAudioUploader
+                    audioUrl={localQuestion.audioUrl}
+                    audioStoragePath={localQuestion.audioStoragePath}
+                    onUpdate={(data) => setLocalQuestion({ ...localQuestion, ...data })}
+                  />
+                </div>
+
+                {/* Transcript (chỉ hiện khi có audio) */}
+                {localQuestion.audioUrl && (
+                  <div>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">
+                      Transcript của Audio
+                    </label>
+                    <textarea
+                      value={localQuestion.transcript || ''}
+                      onChange={(e) => setLocalQuestion({ ...localQuestion, transcript: e.target.value })}
+                      rows={3}
+                      className="w-full border-2 border-slate-200 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-800 focus:outline-none focus:border-[#1CB0F6] bg-slate-50 resize-y"
+                      placeholder="Nhập transcript lời nghe..."
+                    />
+                  </div>
+                )}
+
                 {/* Question Input */}
                 <div>
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">
@@ -234,6 +265,45 @@ export const SortableQuestion = ({
               </div>
             ) : (
               <div className="p-4 space-y-3">
+                {/* Image / Audio Preview */}
+                {(question.imageUrl || question.audioUrl) && (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {question.imageUrl && (
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <ImageIcon size={14} strokeWidth={3} className="text-[#1CB0F6]" />
+                          <span className="text-[10px] font-black text-[#1CB0F6] uppercase tracking-widest">Hình ảnh</span>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-1 inline-block">
+                          <img src={question.imageUrl} alt="Question" className="max-h-32 object-contain rounded" />
+                        </div>
+                      </div>
+                    )}
+                    {question.audioUrl && (
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Music size={14} strokeWidth={3} className="text-[#CE82FF]" />
+                          <span className="text-[10px] font-black text-[#CE82FF] uppercase tracking-widest">Audio</span>
+                        </div>
+                        <audio src={question.audioUrl} controls className="h-9 w-full max-w-[280px]" />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Transcript Preview (hiện khi có audio + transcript) */}
+                {question.audioUrl && question.transcript && (
+                  <div className="p-3 bg-[#F8EEFF] border border-purple-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <FileText size={14} strokeWidth={3} className="text-[#CE82FF]" />
+                      <span className="text-[10px] font-black text-[#CE82FF] uppercase tracking-widest">Transcript</span>
+                    </div>
+                    <p className="text-[13px] font-medium text-purple-800 leading-relaxed pl-6 italic">
+                      {question.transcript}
+                    </p>
+                  </div>
+                )}
+
                 {/* Question Content */}
                 <div>
                   <div className="flex items-center gap-2 mb-2">

@@ -30,30 +30,36 @@ const CountdownBox = ({ value, label, color, bg, border }) => (
   </div>
 );
 
-const FeatureCard = ({ icon: Icon, color, bg, title, desc }) => (
-  <div className="flex sm:flex-col items-center text-left sm:text-center p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] bg-slate-50 border-2 border-slate-100 hover:border-slate-200 transition-colors">
-    <div className={`w-10 h-10 sm:mb-3 shrink-0 rounded-[12px] ${bg} ${color} flex items-center justify-center mr-3 sm:mr-0`}>
-      <Icon size={20} strokeWidth={3} />
+const FeatureCard = ({ icon, color, bg, title, desc }) => {
+  const Icon = icon;
+  return (
+    <div className="flex sm:flex-col items-center text-left sm:text-center p-3 sm:p-4 rounded-[16px] sm:rounded-[20px] bg-slate-50 border-2 border-slate-100 hover:border-slate-200 transition-colors">
+      <div className={`w-10 h-10 sm:mb-3 shrink-0 rounded-[12px] ${bg} ${color} flex items-center justify-center mr-3 sm:mr-0`}>
+        <Icon size={20} strokeWidth={3} />
+      </div>
+      <div>
+        <h4 className="text-[14px] font-black text-slate-700 sm:mb-0.5">{title}</h4>
+        <p className="text-[12px] font-bold text-slate-500 hidden sm:block">{desc}</p>
+      </div>
     </div>
-    <div>
-      <h4 className="text-[14px] font-black text-slate-700 sm:mb-0.5">{title}</h4>
-      <p className="text-[12px] font-bold text-slate-500 hidden sm:block">{desc}</p>
-    </div>
-  </div>
-);
+  );
+};
 
-const ContactButton = ({ href, icon: Icon, colorClass, textMobile, textDesktop }) => (
-  <a 
-    href={href} 
-    target={href.startsWith('http') ? '_blank' : '_self'}
-    rel="noopener noreferrer"
-    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 bg-white border-2 border-slate-200 border-b-[3px] rounded-[12px] text-slate-500 ${colorClass} active:translate-y-[1px] active:border-b-[2px] transition-all font-bold text-[12px] sm:text-[13px] min-h-[44px]`}
-  >
-    <Icon size={16} strokeWidth={2.5} /> 
-    <span className="hidden sm:inline">{textDesktop}</span>
-    <span className="sm:hidden">{textMobile}</span>
-  </a>
-);
+const ContactButton = ({ href, icon, colorClass, textMobile, textDesktop }) => {
+  const Icon = icon;
+  return (
+    <a 
+      href={href} 
+      target={href.startsWith('http') ? '_blank' : '_self'}
+      rel="noopener noreferrer"
+      className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-2 bg-white border-2 border-slate-200 border-b-[3px] rounded-[12px] text-slate-500 ${colorClass} active:translate-y-[1px] active:border-b-[2px] transition-all font-bold text-[12px] sm:text-[13px] min-h-[44px]`}
+    >
+      <Icon size={16} strokeWidth={2.5} /> 
+      <span className="hidden sm:inline">{textDesktop}</span>
+      <span className="sm:hidden">{textMobile}</span>
+    </a>
+  );
+};
 
 /* ════════════════════════════════════════════════════════════════
    2. MAIN COMPONENT
@@ -102,7 +108,7 @@ export default function MaintenancePage() {
       const result = await maintenanceService.subscribeToNotifications(email.trim());
       setNotifyStatus(result);
       if (result.success) setEmail('');
-    } catch (err) {
+    } catch {
       setNotifyStatus({ success: false, message: 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
     } finally {
       setSubmitting(false);

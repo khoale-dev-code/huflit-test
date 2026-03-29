@@ -12,24 +12,27 @@ import AdminNavbar from '../components/AdminNavbar';
 
 /* ─── 1. SUB-COMPONENTS (Clean Code) ────────────────────────────── */
 
-const FormInput = ({ icon: Icon, label, type = 'text', value, onChange, placeholder, isTextArea }) => (
-  <div>
-    <label className="flex items-center gap-2 text-[13px] font-black text-slate-500 mb-2 uppercase tracking-wider">
-      <Icon className="w-4 h-4 text-slate-400" strokeWidth={3} /> {label}
-    </label>
-    {isTextArea ? (
-      <textarea
-        value={value} onChange={onChange} rows={3} placeholder={placeholder}
-        className="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-[16px] text-[15px] font-bold text-slate-700 focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-50 outline-none transition-all resize-none placeholder:text-slate-400 placeholder:font-medium"
-      />
-    ) : (
-      <input
-        type={type} value={value} onChange={onChange} placeholder={placeholder}
-        className="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-[16px] text-[15px] font-bold text-slate-700 focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-slate-400 placeholder:font-medium"
-      />
-    )}
-  </div>
-);
+const FormInput = ({ icon, label, type = 'text', value, onChange, placeholder, isTextArea }) => {
+  const InputIcon = icon;
+  return (
+    <div>
+      <label className="flex items-center gap-2 text-[13px] font-black text-slate-500 mb-2 uppercase tracking-wider">
+        <InputIcon className="w-4 h-4 text-slate-400" strokeWidth={3} /> {label}
+      </label>
+      {isTextArea ? (
+        <textarea
+          value={value} onChange={onChange} rows={3} placeholder={placeholder}
+          className="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-[16px] text-[15px] font-bold text-slate-700 focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-50 outline-none transition-all resize-none placeholder:text-slate-400 placeholder:font-medium"
+        />
+      ) : (
+        <input
+          type={type} value={value} onChange={onChange} placeholder={placeholder}
+          className="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-[16px] text-[15px] font-bold text-slate-700 focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-slate-400 placeholder:font-medium"
+        />
+      )}
+    </div>
+  );
+};
 
 const LogItem = ({ log }) => {
   const isTurnOn = log.action_type === 'MAINTENANCE_ON';
@@ -41,12 +44,12 @@ const LogItem = ({ log }) => {
       ? { bg: 'bg-[#EAF6FE]', text: 'text-[#1CB0F6]', border: 'border-[#BAE3FB]', icon: Edit3 }
       : { bg: 'bg-emerald-50', text: 'text-[#58CC02]', border: 'border-emerald-200', icon: CheckCircle2 };
 
-  const Icon = styles.icon;
+  const LogIcon = styles.icon;
 
   return (
     <div className="flex items-start gap-3 p-3 rounded-[16px] bg-slate-50 border-2 border-transparent hover:border-slate-200 transition-colors">
       <div className={`w-10 h-10 shrink-0 rounded-[12px] flex items-center justify-center border-2 border-b-[4px] shadow-sm ${styles.bg} ${styles.text} ${styles.border}`}>
-        <Icon size={18} strokeWidth={3} />
+        <LogIcon size={18} strokeWidth={3} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[14px] font-black text-slate-700 truncate">{log.target_name || 'Hành động hệ thống'}</p>
