@@ -288,18 +288,21 @@ export const ExamScreen = memo(({
             <span className="hidden md:inline">Trước đó</span>
           </button>
 
-          {/* ── Progress Bar ── */}
-          <div className="hidden sm:flex flex-1 flex-col items-center px-4 max-w-[250px] mx-auto">
-            <div className="w-full flex justify-between items-end mb-1.5 px-1">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiến độ thi</span>
-              <span className="text-[11px] font-black text-[#1CB0F6]">{Math.round(((currentIdx + 1) / siblingParts.length) * 100)}%</span>
+         {/* ── Progress Bar (Neo-Brutalism Style) ── */}
+          <div className="hidden sm:flex flex-1 flex-col items-center px-4 max-w-[300px] mx-auto">
+            <div className="w-full flex justify-between items-end mb-2 px-1">
+              <span className="text-[12px] font-black text-slate-800 uppercase tracking-widest">Tiến độ</span>
+              <span className="text-[13px] font-black text-slate-900 bg-[#FFC800] px-2 py-0.5 rounded-md border-2 border-slate-800 shadow-[2px_2px_0px_0px_#1E293B]">
+                {Math.round(((currentIdx + 1) / siblingParts.length) * 100)}%
+              </span>
             </div>
-            <div className="w-full h-3.5 bg-slate-100 rounded-full border-2 border-slate-200 p-0.5 overflow-hidden shadow-inner">
+            {/* Vỏ thanh cuộn: Viền đen dày, đổ bóng cứng */}
+            <div className="w-full h-5 bg-white rounded-full border-4 border-slate-800 p-0 overflow-hidden shadow-[4px_4px_0px_0px_#1E293B]">
               <Motion.div 
-                className="h-full bg-gradient-to-r from-[#1CB0F6] to-[#58CC02] rounded-full"
+                className="h-full bg-[#1CB0F6] border-r-4 border-slate-800"
                 initial={{ width: 0 }}
                 animate={{ width: `${((currentIdx + 1) / siblingParts.length) * 100}%` }}
-                transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+                transition={{ type: 'spring', stiffness: 60, damping: 15 }}
               />
             </div>
           </div>
