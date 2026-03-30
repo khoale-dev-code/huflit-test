@@ -1,113 +1,129 @@
 import React, { useState, memo, useMemo, useCallback, useRef, useEffect, useId } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  Search, ChevronRight, Check, FileText, Clock, 
-  Target, Headphones, BookOpen, Sparkles, Lock, LayoutGrid, Info, ShieldAlert,
-  X, Zap, Timer, Loader2
+  Search, ChevronRight, FileText, Clock, 
+  Target, Headphones, BookOpen, Sparkles,
+  Zap, Timer, Loader2, Star, Trophy, ArrowLeft
 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
-// ─── SERVICES & CONTEXT ───
-// 🚀 FIX: Dùng đúng đường dẫn hook auth của hệ thống
+// Giả định import API & Hook của bạn
 import { getAllExamMetadataAsync } from '../../../../data/examData'; 
 import { useFirebaseAuth } from '../../../../hooks/useFirebaseAuth';
 
-/* ─── CẤU HÌNH ĐỘ KHÓ ────────────────── */
+/* ══════════════════════════════════════════════════════
+   1. CẤU HÌNH GIAO DIỆN (FLAT & SOLID COLORS)
+══════════════════════════════════════════════════════ */
 const DIFFICULTY_CONFIG = {
-  beginner:     { label: 'Cơ bản',    bg: 'bg-[#F0FAE8]', text: 'text-[#58CC02]', border: 'border-[#bcf096]' },
-  intermediate: { label: 'Trung cấp', bg: 'bg-[#FFFBEA]', text: 'text-[#FF9600]', border: 'border-[#FFD8A8]' },
-  advanced:     { label: 'Nâng cao',  bg: 'bg-[#FFF0F0]', text: 'text-[#FF4B4B]', border: 'border-[#ffc1c1]' },
+  beginner:     { label: 'Cơ bản',    icon: Star, color: 'text-green-500', bg: 'bg-green-50' },
+  intermediate: { label: 'Trung cấp', icon: Star, color: 'text-amber-500', bg: 'bg-amber-50' },
+  advanced:     { label: 'Nâng cao',  icon: Star, color: 'text-red-500',   bg: 'bg-red-50' },
 };
 
-/* ─── COMPONENT: SKELETON (LOADING) ────────────────── */
-const SkeletonList = memo(() => (
-  <div className="flex flex-col gap-3 p-2">
-    {[1, 2, 3, 4].map(i => (
-      <div key={i} className="h-[96px] bg-slate-50 border-2 border-slate-100 rounded-[20px] p-4 flex items-center gap-4 animate-pulse">
-        <div className="w-12 h-12 rounded-xl bg-slate-200 shrink-0" />
-        <div className="flex-1 space-y-3">
-          <div className="h-4 w-3/4 bg-slate-200 rounded-full" />
-          <div className="h-3 w-1/3 bg-slate-200 rounded-full" />
-        </div>
-      </div>
-    ))}
-  </div>
-));
-SkeletonList.displayName = 'SkeletonList';
+const CATEGORY_ICONS = {
+  default: Sparkles,
+  toeic: Headphones,
+  ielts: BookOpen,
+  huflit: Target,
+};
 
-/* ─── COMPONENT: EMPTY STATE ────────────────── */
-const EmptyState = memo(({ searchQuery, onClear }) => (
-  <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-    <div className="w-20 h-20 rounded-[24px] bg-slate-50 border-2 border-slate-200 flex items-center justify-center mb-6 shadow-sm">
-      <Search className="w-10 h-10 text-slate-300" strokeWidth={3} />
+/* ══════════════════════════════════════════════════════
+   2. CSS NỀN KẺ Ô LY & THANH CUỘN NEO-BRUTALISM
+══════════════════════════════════════════════════════ */
+const CustomStyles = () => (
+  <style dangerouslySetInnerHTML={{__html: `
+    .bg-notebook-grid {
+      background-color: #F8FAFC;
+      background-image: 
+        linear-gradient(#E2E8F0 1.5px, transparent 1.5px), 
+        linear-gradient(90deg, #E2E8F0 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      background-position: -1px -1px;
+    }
+    
+    /* Bóng cứng đặc trưng */
+    .solid-shadow {
+      box-shadow: 4px 4px 0px 0px #1E293B;
+    }
+    .solid-shadow:active {
+      box-shadow: 0px 0px 0px 0px #1E293B;
+      transform: translate(4px, 4px);
+    }
+    .solid-shadow-sm {
+      box-shadow: 2px 2px 0px 0px #1E293B;
+    }
+    .solid-shadow-sm:active {
+      box-shadow: 0px 0px 0px 0px #1E293B;
+      transform: translate(2px, 2px);
+    }
+
+    /* 🚀 THANH CUỘN CHUẨN NEO-BRUTALISM */
+    .neo-scrollbar::-webkit-scrollbar {
+      width: 12px;
+    }
+    .neo-scrollbar::-webkit-scrollbar-track {
+      background: #F1F5F9;
+      border-radius: 12px;
+      border: 2px solid #1E293B;
+    }
+    .neo-scrollbar::-webkit-scrollbar-thumb {
+      background: #1CB0F6;
+      border: 2px solid #1E293B;
+      border-radius: 12px;
+    }
+    .neo-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #FFC800;
+    }
+  `}} />
+);
+
+/* ══════════════════════════════════════════════════════
+   3. SUB-COMPONENTS
+══════════════════════════════════════════════════════ */
+
+const EmptyState = memo(({ onClear }) => (
+  <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white border-2 border-slate-800 rounded-2xl border-dashed">
+    <div className="w-16 h-16 rounded-xl border-2 border-slate-800 bg-slate-100 flex items-center justify-center mb-6 solid-shadow-sm">
+      <Search className="w-8 h-8 text-slate-500" strokeWidth={3} />
     </div>
-    <h3 className="text-[18px] font-black text-slate-700 mb-2">Không tìm thấy đề thi</h3>
-    <p className="text-[14px] font-bold text-slate-500 mb-6 max-w-sm">
-      {searchQuery ? <>Không có kết quả cho từ khóa "<strong>{searchQuery}</strong>"</> : 'Hệ thống đang cập nhật đề thi mới.'}
+    <h3 className="text-xl font-black text-slate-800 mb-2 uppercase tracking-wide">Không tìm thấy</h3>
+    <p className="text-[15px] font-bold text-slate-500 mb-6 max-w-sm">
+      Thử một từ khóa khác xem sao nhé.
     </p>
-    {searchQuery && (
-      <button 
-        onClick={onClear} 
-        className="px-6 py-3 bg-[#EAF6FE] text-[#1CB0F6] rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-[#BAE3FB] active:scale-95 transition-all outline-none"
-      >
-        Xóa tìm kiếm
-      </button>
-    )}
+    <button 
+      onClick={onClear} 
+      className="px-6 py-3 bg-[#FFC800] text-slate-900 rounded-xl text-[15px] font-black border-2 border-slate-800 solid-shadow transition-all outline-none uppercase tracking-widest"
+    >
+      Xóa bộ lọc
+    </button>
   </div>
 ));
 EmptyState.displayName = 'EmptyState';
 
-/* ─── COMPONENT: EXAM LIST ITEM ────────────────── */
-const ExamListItem = memo(({ exam, isSelected, onSelect, id, itemHeight, isTrial }) => {
-  const itemRef = useRef(null);
-  
-  useEffect(() => { 
-    if (isSelected) itemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); 
-  }, [isSelected]);
-
+const ExamListItem = memo(({ exam, isSelected, onSelect }) => {
   const diff = DIFFICULTY_CONFIG[exam.difficulty] || DIFFICULTY_CONFIG.beginner;
+  const CategoryIcon = CATEGORY_ICONS[exam.category] || CATEGORY_ICONS.default;
 
   return (
-    <div style={{ height: itemHeight, padding: '0 4px 12px 4px' }}>
-      <div
-        id={id} ref={itemRef} role="option" aria-selected={isSelected} tabIndex={isSelected ? 0 : -1}
-        onClick={onSelect} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
-        className={`h-full w-full relative flex items-center gap-4 px-5 py-4 cursor-pointer outline-none transition-all rounded-[24px] border-2 ${
-          isSelected 
-            ? 'bg-[#EAF6FE] border-[#1CB0F6] border-b-[4px] shadow-sm -translate-y-[2px]' 
-            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm active:translate-y-[2px] active:border-b-2'
-        }`}
-      >
-        <div className={`w-12 h-12 rounded-[14px] shrink-0 flex items-center justify-center transition-all border-b-[3px] ${
-          isSelected ? 'bg-[#1CB0F6] text-white border-[#1899D6] shadow-sm' : 'bg-slate-100 text-slate-400 border-slate-200'
-        }`}>
-          {isSelected ? <Check className="w-6 h-6" strokeWidth={3} /> : <FileText className="w-6 h-6" strokeWidth={2.5} />}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1.5">
-            <h3 className={`text-[16px] font-black truncate ${isSelected ? 'text-[#1CB0F6]' : 'text-slate-800'}`}>
-              {exam.title || `Đề thi ${exam.id}`}
-            </h3>
-            {isTrial && (
-              <span className="px-2.5 py-1 bg-[#FFFBEA] text-[#FF9600] border border-[#FFD8A8] rounded-lg text-[9px] font-black uppercase tracking-widest shrink-0 shadow-sm">
-                Dùng thử
-              </span>
-            )}
-            {!isTrial && exam.isNew && (
-              <span className="px-2.5 py-1 bg-[#FFF0F0] text-[#FF4B4B] border border-[#ffc1c1] rounded-lg text-[9px] font-black uppercase tracking-widest shrink-0 shadow-sm">
-                Mới
-              </span>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 text-[12px] font-bold text-slate-500">
-            <span className="flex items-center gap-1.5"><FileText size={14} className="text-slate-400" /> {exam.questions || 60} câu</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-            <span className="flex items-center gap-1.5"><Clock size={14} className="text-slate-400" /> {exam.duration || 90} phút</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-            <span className={`${diff.text} font-black uppercase tracking-wider`}>{diff.label}</span>
-          </div>
+    <div
+      onClick={onSelect}
+      className={`p-4 w-full cursor-pointer outline-none transition-all duration-200 rounded-2xl border-2 flex items-center gap-4 group ${
+        isSelected 
+          ? 'bg-[#1CB0F6] border-slate-800 shadow-[4px_4px_0px_0px_#1E293B] -translate-y-1 -translate-x-1' 
+          : 'bg-white border-slate-800 hover:bg-slate-50 hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_0px_#1E293B]'
+      }`}
+    >
+      <div className={`w-14 h-14 rounded-xl border-2 border-slate-800 flex items-center justify-center shrink-0 bg-white`}>
+        <CategoryIcon size={28} className={isSelected ? 'text-[#1CB0F6]' : 'text-slate-800'} strokeWidth={2.5}/>
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <h3 className={`text-[16px] font-black truncate mb-1 ${isSelected ? 'text-white' : 'text-slate-800'}`}>
+          {exam.title || `Đề thi ${exam.id}`}
+        </h3>
+        <div className={`flex flex-wrap items-center gap-x-3 text-[13px] font-bold ${isSelected ? 'text-white/90' : 'text-slate-500'}`}>
+          <span className="flex items-center gap-1.5"><FileText size={14} strokeWidth={3} /> {exam.questions || 60} câu</span>
+          <span className="flex items-center gap-1.5"><Clock size={14} strokeWidth={3} /> {exam.duration || 90} phút</span>
         </div>
       </div>
     </div>
@@ -115,81 +131,23 @@ const ExamListItem = memo(({ exam, isSelected, onSelect, id, itemHeight, isTrial
 });
 ExamListItem.displayName = 'ExamListItem';
 
-/* ─── COMPONENT: EXAM LIST BOX (VIRTUAL LIST) ────────────────── */
-const ITEM_H  = 104; 
-const VISIBLE = 5;
-const BUFFER  = 2;
-
-const ExamListBox = memo(({ exams, selectedExam, onSelectExam, listboxId }) => {
-  const [scrollTop, setScrollTop] = useState(0);
-  const containerRef = useRef(null);
-  const activeIdx = useMemo(() => exams.findIndex(e => e.id === selectedExam), [exams, selectedExam]);
-
-  const handleKeyDown = useCallback((e) => {
-    const len = exams.length;
-    if (!len) return;
-    let next = activeIdx;
-    if      (e.key === 'ArrowDown') { e.preventDefault(); next = Math.min(activeIdx + 1, len - 1); }
-    else if (e.key === 'ArrowUp')   { e.preventDefault(); next = Math.max(activeIdx - 1, 0); }
-    else if (e.key === 'Home')      { e.preventDefault(); next = 0; }
-    else if (e.key === 'End')       { e.preventDefault(); next = len - 1; }
-    else return;
-
-    onSelectExam(exams[next].id);
-    const top = next * ITEM_H;
-    const el  = containerRef.current;
-    if (!el) return;
-    if (top < el.scrollTop) el.scrollTop = top;
-    else if (top + ITEM_H > el.scrollTop + el.clientHeight) el.scrollTop = top + ITEM_H - el.clientHeight;
-  }, [exams, activeIdx, onSelectExam]);
-
-  const startIdx = Math.max(0, Math.floor(scrollTop / ITEM_H) - BUFFER);
-  const endIdx   = Math.min(exams.length, Math.ceil((scrollTop + VISIBLE * ITEM_H) / ITEM_H) + BUFFER);
-
-  return (
-    <div
-      id={listboxId} ref={containerRef} role="listbox" tabIndex={0}
-      onScroll={e => setScrollTop(e.currentTarget.scrollTop)} onKeyDown={handleKeyDown}
-      className="outline-none custom-scrollbar p-2"
-      style={{ maxHeight: VISIBLE * ITEM_H, overflowY: 'auto' }}
-    >
-      <div style={{ height: exams.length * ITEM_H, position: 'relative' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, transform: `translateY(${startIdx * ITEM_H}px)` }}>
-          {exams.slice(startIdx, endIdx).map(exam => (
-            <ExamListItem
-              key={exam.id} id={`exam-opt-${exam.id}`} exam={exam} itemHeight={ITEM_H}
-              isSelected={selectedExam === exam.id} onSelect={() => onSelectExam(exam.id)}
-              isTrial={exam.isTrial}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-});
-ExamListBox.displayName = 'ExamListBox';
-
-/* ─── COMPONENT: CATEGORY TABS ──────────────────── */
 const CategoryTabs = memo(({ categories, activeCategory, onChange }) => (
-  <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+  <div className="flex flex-wrap gap-3">
     {categories.map(cat => {
       const active = activeCategory === cat.id;
-      const Icon = cat.id === 'toeic' ? Headphones : cat.id === 'ielts' ? BookOpen : Sparkles;
-      
       return (
         <button 
           key={cat.id} onClick={() => onChange(cat.id)}
           className={`
-            shrink-0 px-5 py-3 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all outline-none flex items-center gap-2.5 border-2 border-b-[4px]
+            px-4 py-2.5 rounded-xl text-[14px] font-black outline-none flex items-center gap-2 border-2 border-slate-800 transition-all uppercase tracking-widest
             ${active 
-              ? 'bg-[#CE82FF] text-white border-[#B975E5] shadow-md -translate-y-[2px]' 
-              : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700 active:translate-y-[2px] active:border-b-2'}
+              ? 'bg-[#FFC800] text-slate-900 solid-shadow-sm' 
+              : 'bg-white text-slate-600 hover:bg-slate-100 solid-shadow-sm'}
           `}
         >
-          <Icon size={18} strokeWidth={3} />
           {cat.label}
           {cat.count > 0 && (
-            <span className={`ml-1 px-2 py-0.5 rounded-lg text-[11px] ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'}`}>
+            <span className={`ml-1 px-1.5 py-0.5 rounded-md text-[12px] font-black border-2 border-slate-800 ${active ? 'bg-white text-slate-900' : 'bg-slate-200 text-slate-600'}`}>
               {cat.count}
             </span>
           )}
@@ -200,339 +158,245 @@ const CategoryTabs = memo(({ categories, activeCategory, onChange }) => (
 ));
 CategoryTabs.displayName = 'CategoryTabs';
 
+const ModeSelectionModal = memo(({ exam, onConfirm, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
+    
+    <Motion.div 
+      initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+      className="relative w-full max-w-md bg-white border-4 border-slate-800 rounded-3xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_#1E293B] z-10"
+    >
+      <div className="w-16 h-16 bg-[#1CB0F6] border-4 border-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[4px_4px_0px_0px_#1E293B]">
+        <Trophy size={32} className="text-white" strokeWidth={3} />
+      </div>
+      <h2 className="text-[24px] font-black text-center text-slate-800 mb-2 uppercase tracking-wide">Bạn đã sẵn sàng?</h2>
+      <p className="text-[15px] font-bold text-slate-500 text-center mb-8">Hãy chọn cách làm bài cho <br/><span className="text-[#1CB0F6] font-black">"{exam.title}"</span></p>
+      
+      <div className="flex flex-col gap-4">
+        <button onClick={() => onConfirm('full')} className="group p-4 bg-white border-2 border-slate-800 rounded-2xl hover:bg-[#FFC800] solid-shadow transition-all text-left w-full outline-none flex items-center gap-4">
+          <div className="w-12 h-12 bg-white border-2 border-slate-800 rounded-xl flex items-center justify-center shrink-0">
+            <Timer size={24} className="text-slate-800" strokeWidth={3} />
+          </div>
+          <div>
+            <h4 className="text-[16px] font-black text-slate-800 uppercase tracking-wide">Thi Full (Tính giờ)</h4>
+            <p className="text-[13px] font-bold text-slate-600">Làm bài với áp lực {exam.duration} phút.</p>
+          </div>
+        </button>
+
+        <button onClick={() => onConfirm('practice')} className="group p-4 bg-white border-2 border-slate-800 rounded-2xl hover:bg-[#1CB0F6] solid-shadow transition-all text-left w-full outline-none flex items-center gap-4">
+          <div className="w-12 h-12 bg-white border-2 border-slate-800 rounded-xl flex items-center justify-center shrink-0">
+            <Zap size={24} className="text-slate-800" strokeWidth={3} />
+          </div>
+          <div>
+            <h4 className="text-[16px] font-black text-slate-800 group-hover:text-white uppercase tracking-wide">Luyện tập tự do</h4>
+            <p className="text-[13px] font-bold text-slate-600 group-hover:text-white/90">Không đếm ngược, thoải mái tra cứu.</p>
+          </div>
+        </button>
+      </div>
+
+      <button onClick={onClose} className="mt-6 w-full py-4 text-slate-500 font-black text-[15px] uppercase tracking-widest hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors outline-none border-2 border-transparent hover:border-slate-800">
+        Để sau nhé
+      </button>
+    </Motion.div>
+  </div>
+));
+ModeSelectionModal.displayName = 'ModeSelectionModal';
+
 /* ══════════════════════════════════════════════════════
-   MAIN COMPONENT: ExamSetup
+   4. MAIN COMPONENT: ExamSetup
 ══════════════════════════════════════════════════════ */
 export const ExamSetup = memo(({ onStartExam }) => {
-  const listboxId = useId();
   const navigate = useNavigate();
   const { category } = useParams();
-  
-  // 🚀 FIX: Dùng useFirebaseAuth để lấy chuẩn xác trạng thái đăng nhập
   const { isSignedIn } = useFirebaseAuth(); 
 
   const [examList, setExamList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedExam, setSelectedExam] = useState('');
+  const [selectedExamId, setSelectedExamId] = useState(null);
   const [isStarting, setIsStarting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState(category || 'all');
   const [showModeModal, setShowModeModal] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-    getAllExamMetadataAsync()
-      .then(data => {
-        if (!mounted) return;
-        setExamList(data || []);
-      })
-      .finally(() => { if (mounted) setIsLoading(false); });
-    return () => { mounted = false; };
+    getAllExamMetadataAsync().then(data => setExamList(data || [])).finally(() => setIsLoading(false));
   }, []);
 
-  useEffect(() => {
-    setActiveCategory(category || 'all');
-    setSearchQuery('');
-  }, [category]);
+  useEffect(() => { setActiveCategory(category || 'all'); }, [category]);
 
   const handleCategoryChange = useCallback((catId) => {
-    setActiveCategory(catId);
-    setSearchQuery('');
     navigate(catId === 'all' ? '/exams' : `/exams/${catId}`, { replace: true });
   }, [navigate]);
 
-  const categories = useMemo(() => {
-    const countMap = {};
-    examList.forEach(e => {
+  const { categories } = useMemo(() => {
+    const countMap = examList.reduce((acc, e) => {
       const cat = (e.category || 'other').toLowerCase();
-      countMap[cat] = (countMap[cat] || 0) + 1;
-    });
-
-    const dynamic = Object.entries(countMap)
-      .sort((a, b) => b[1] - a[1])
-      .map(([id, count]) => ({
-        id,
-        label: id === 'toeic' ? 'TOEIC' : id === 'ielts' ? 'IELTS' : id === 'huflit' ? 'HUFLIT' : id.toUpperCase(),
-        // 🚀 Bỏ giới hạn đếm cho guest (tuỳ chọn) hoặc giữ nguyên
-        count: isSignedIn ? count : 1, 
-      }));
-
-    return [{ id: 'all', label: 'TẤT CẢ', count: isSignedIn ? examList.length : dynamic.length }, ...dynamic];
-  }, [examList, isSignedIn]);
+      acc[cat] = (acc[cat] || 0) + 1;
+      return acc;
+    }, {});
+    const dynamic = Object.keys(countMap).map(id => ({ id, label: id, count: countMap[id] })).sort((a, b) => b.count - a.count);
+    return { categories: [{ id: 'all', label: 'TẤT CẢ', count: examList.length }, ...dynamic] };
+  }, [examList]);
 
   const filteredExams = useMemo(() => {
-    let baseList = [...examList].sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-
-    if (activeCategory !== 'all') {
-      baseList = baseList.filter(e => (e.category || 'other').toLowerCase() === activeCategory);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      baseList = baseList.filter(e => e.title?.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q));
-    }
-
-    // 🚀 LỌC CHẾ ĐỘ DÙNG THỬ (GUEST TRIAL)
-    if (!isSignedIn) {
-      const trialList = [];
-      const usedCategories = new Set();
-      baseList.forEach(exam => {
-        const cat = (exam.category || 'other').toLowerCase();
-        if (!usedCategories.has(cat)) {
-          trialList.push({ ...exam, isTrial: true });
-          usedCategories.add(cat);
-        }
-      });
-      return trialList;
-    }
-
-    return baseList;
-  }, [examList, activeCategory, searchQuery, isSignedIn]);
+    let baseList = [...examList];
+    if (activeCategory !== 'all') baseList = baseList.filter(e => (e.category || 'other').toLowerCase() === activeCategory);
+    if (searchQuery.trim()) baseList = baseList.filter(e => e.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+    return baseList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [examList, activeCategory, searchQuery]);
 
   useEffect(() => {
-    if (filteredExams.length > 0 && !filteredExams.find(e => e.id === selectedExam)) {
-      setSelectedExam(filteredExams[0].id);
+    if (filteredExams.length > 0 && !filteredExams.find(e => e.id === selectedExamId)) {
+      setSelectedExamId(filteredExams[0].id);
+    } else if (filteredExams.length === 0) {
+      setSelectedExamId(null);
     }
-  }, [filteredExams, selectedExam]);
+  }, [filteredExams, selectedExamId]);
 
-  const selectedExamData = useMemo(() => examList.find(e => e.id === selectedExam), [examList, selectedExam]);
-
-  const handleStartClick = useCallback(() => {
-    if (!selectedExam) return;
-    setShowModeModal(true);
-  }, [selectedExam]);
+  const selectedExamData = useMemo(() => examList.find(e => e.id === selectedExamId), [examList, selectedExamId]);
 
   const confirmStart = useCallback(async (mode) => {
+    if (!selectedExamId) return;
     setShowModeModal(false);
     setIsStarting(true);
-    try { 
-      await onStartExam?.(selectedExam, mode); 
-    } finally { 
-      setIsStarting(false); 
-    }
-  }, [selectedExam, onStartExam]);
+    try { await onStartExam?.(selectedExamId, mode); } 
+    finally { setIsStarting(false); }
+  }, [selectedExamId, onStartExam]);
 
   return (
-    <div className="bg-[#F4F7FA] font-nunito selection:bg-[#1CB0F6] selection:text-white pb-32">
-      <div className="bg-white border-b-2 border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-[#1CB0F6] rounded-[20px] flex items-center justify-center border-b-[4px] border-[#1899D6] shadow-sm shrink-0">
-               <Target className="text-white" size={32} strokeWidth={3} />
-            </div>
-            <div>
-              <h1 className="text-[28px] md:text-[36px] font-black text-slate-800 leading-none mb-2">
-                Phòng Thi <span className="text-[#1CB0F6]">Trực Tuyến</span>
-              </h1>
-              <p className="text-[14px] md:text-[15px] font-bold text-slate-500">
-                {!isSignedIn ? 'Trải nghiệm miễn phí các đề thi mẫu chuẩn quốc tế.' : 'Sẵn sàng đánh giá năng lực của bạn ngay hôm nay.'}
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-notebook-grid font-nunito text-slate-800 pb-24 relative selection:bg-[#1CB0F6] selection:text-white">
+      <CustomStyles />
 
-          {!isSignedIn && (
-            <button 
-              onClick={() => navigate('/login')} 
-              className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FFFBEA] text-[#FF9600] border-2 border-[#FFD8A8] border-b-[4px] rounded-2xl font-black uppercase text-[13px] tracking-widest hover:bg-[#FF9600] hover:text-white hover:border-[#E58700] active:border-b-2 active:translate-y-[2px] transition-all outline-none shadow-sm"
-            >
-              <Lock size={18} strokeWidth={3} /> Mở khóa toàn bộ đề
+      {/* HEADER ĐƠN GIẢN */}
+      <header className="bg-white border-b-4 border-slate-800 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate(-1)} className="w-12 h-12 bg-white border-2 border-slate-800 rounded-xl flex items-center justify-center solid-shadow-sm outline-none">
+              <ArrowLeft className="text-slate-800" size={24} strokeWidth={3} />
             </button>
-          )}
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            <div className="bg-white p-5 rounded-[28px] border-2 border-slate-200 shadow-sm">
-              <div className="relative mb-5">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={22} strokeWidth={3} />
-                <input
-                  type="text" placeholder="Tìm tên đề, mã đề..."
-                  value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-14 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-[16px] font-bold text-slate-700 outline-none focus:bg-white focus:border-[#1CB0F6] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
-                />
-              </div>
-              <CategoryTabs categories={categories} activeCategory={activeCategory} onChange={handleCategoryChange} />
-            </div>
-
-            <div className="bg-white rounded-[28px] border-2 border-slate-200 shadow-sm flex flex-col relative overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b-2 border-slate-100 flex justify-between items-center">
-                <span className="text-[13px] font-black text-slate-500 uppercase tracking-widest">Danh sách ({filteredExams.length})</span>
-                <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                  <LayoutGrid size={14} strokeWidth={3} /> Điều hướng bằng mũi tên
-                </div>
-              </div>
-              
-              <div className="flex-1 min-h-[450px] p-3 bg-slate-50/30">
-                {isLoading ? <SkeletonList /> : filteredExams.length > 0 ? (
-                  <ExamListBox exams={filteredExams} selectedExam={selectedExam} onSelectExam={setSelectedExam} listboxId={listboxId} />
-                ) : <EmptyState searchQuery={searchQuery} onClear={() => setSearchQuery('')} />}
-              </div>
-
-              {!isSignedIn && !isLoading && (
-                <div className="bg-gradient-to-r from-[#1CB0F6] to-[#1899D6] p-6 flex flex-col sm:flex-row items-center justify-between gap-5 text-white">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/30">
-                      <Lock size={28} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <h4 className="text-[16px] font-black leading-tight mb-1">Giới hạn tài khoản khách</h4>
-                      <p className="text-[13px] font-medium text-blue-100">Đăng nhập để làm toàn bộ kho đề thi.</p>
-                    </div>
-                  </div>
-                  <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-6 py-3 bg-white text-[#1CB0F6] rounded-xl text-[13px] font-black uppercase tracking-widest shadow-sm hover:scale-105 active:scale-95 transition-transform outline-none whitespace-nowrap">
-                    Đăng nhập
-                  </button>
-                </div>
-              )}
+            <div>
+              <h1 className="text-[22px] font-black text-slate-800 uppercase tracking-widest leading-none">Thư viện Đề thi</h1>
             </div>
           </div>
+        </div>
+      </header>
 
-          <aside className="lg:col-span-5 lg:sticky lg:top-[100px]"> 
-            <div className="bg-white border-2 border-slate-200 rounded-[32px] p-6 sm:p-8 shadow-sm flex flex-col gap-8">
-              <div className="flex items-center gap-2 text-slate-400 border-b-2 border-slate-100 pb-4">
-                <Info size={20} strokeWidth={3} className="text-[#1CB0F6]" />
-                <h3 className="text-[14px] font-black uppercase tracking-widest m-0 text-slate-600">Thông tin chi tiết</h3>
-              </div>
-              
-              <AnimatePresence mode="wait">
-                {selectedExamData ? (
-                  <Motion.div 
-                    key={selectedExamData.id}
-                    initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }}
-                    className="flex flex-col gap-6"
-                  >
-                    <div>
-                      <span className="inline-block px-3 py-1 bg-[#EAF6FE] text-[#1CB0F6] rounded-xl text-[11px] font-black uppercase tracking-widest mb-4 border border-[#BAE3FB]">
-                        {selectedExamData.category?.toUpperCase() || 'GENERAL'}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          
+          {/* CỘT TRÁI: SHOWCASE ĐỀ THI (Sticky) */}
+          <div className="w-full lg:w-[45%] lg:sticky lg:top-[120px] z-10 shrink-0 order-1 lg:order-1">
+            <AnimatePresence mode="wait">
+              {selectedExamData ? (
+                <Motion.div 
+                  key={selectedExamData.id}
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                  className="bg-white border-4 border-slate-800 rounded-3xl p-6 sm:p-8 shadow-[8px_8px_0px_0px_#1E293B] relative"
+                >
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-8 bg-[#FFC800] border-2 border-slate-800 rotate-2 opacity-80" />
+
+                  <div className="pt-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <span className="bg-[#1CB0F6] text-white border-2 border-slate-800 px-4 py-1.5 rounded-lg text-[12px] font-black uppercase tracking-widest solid-shadow-sm">
+                        {selectedExamData.category}
                       </span>
-                      <h2 className="text-[24px] font-black text-slate-800 leading-snug">
-                        {selectedExamData.title}
-                      </h2>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2">
-                        <Clock size={28} className="text-[#FF9600]" strokeWidth={2.5} />
-                        <div>
-                          <p className="text-[18px] font-black text-slate-800">{selectedExamData.duration || 120} Phút</p>
-                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Thời gian thi</p>
+                    <h2 className="text-[32px] sm:text-[40px] font-black text-slate-800 leading-[1.1] mb-8">
+                      {selectedExamData.title}
+                    </h2>
+
+                    <div className="space-y-4 mb-8">
+                      <div className="bg-slate-50 border-2 border-slate-800 p-4 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Clock className="text-[#1CB0F6]" size={24} strokeWidth={3} />
+                          <span className="font-bold text-slate-600 uppercase tracking-widest text-[13px]">Thời gian</span>
                         </div>
+                        <span className="font-black text-[20px] text-slate-800">{selectedExamData.duration || 120} Phút</span>
                       </div>
-                      
-                      <div className="bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2">
-                        <FileText size={28} className="text-[#1CB0F6]" strokeWidth={2.5} />
-                        <div>
-                          <p className="text-[18px] font-black text-slate-800">{selectedExamData.questions || 60} Câu</p>
-                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Tổng số lượng</p>
+
+                      <div className="bg-slate-50 border-2 border-slate-800 p-4 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText className="text-[#FFC800]" size={24} strokeWidth={3} />
+                          <span className="font-bold text-slate-600 uppercase tracking-widest text-[13px]">Số lượng</span>
                         </div>
+                        <span className="font-black text-[20px] text-slate-800">{selectedExamData.questions || 60} Câu</span>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => setShowModeModal(true)} disabled={isStarting}
+                      className="w-full py-5 bg-[#FFC800] text-slate-900 border-4 border-slate-800 rounded-2xl font-black text-[18px] uppercase tracking-widest solid-shadow flex items-center justify-center gap-3 outline-none"
+                    >
+                      {isStarting ? <Loader2 className="animate-spin text-slate-900" size={24} strokeWidth={3} /> : <Zap size={24} strokeWidth={3} />}
+                      Bắt Đầu Chinh Phục
+                    </button>
+                  </div>
+                </Motion.div>
+              ) : (
+                <div className="h-[400px] border-4 border-dashed border-slate-400 rounded-3xl flex flex-col items-center justify-center text-slate-400 bg-white/50 backdrop-blur-sm">
+                   <Target size={48} strokeWidth={2} className="mb-4" />
+                   <p className="font-black text-[16px] uppercase tracking-widest">Hãy chọn 1 đề thi</p>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* CỘT PHẢI: TÌM KIẾM, FILTER & DANH SÁCH CÓ THANH CUỘN */}
+          <div className="flex-1 flex flex-col gap-6 order-2 lg:order-2">
+            
+            {/* Thanh Tìm Kiếm */}
+            <div className="relative w-full z-10">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={24} strokeWidth={3} />
+              <input 
+                type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm đề thi theo tên..." 
+                className="w-full bg-white border-4 border-slate-800 rounded-2xl py-4 pl-14 pr-5 font-black text-[16px] text-slate-800 placeholder:text-slate-400 solid-shadow focus:outline-none transition-all" 
+              />
+            </div>
+
+            {/* Các nút Filter */}
+            <CategoryTabs categories={categories} activeCategory={activeCategory} onChange={handleCategoryChange} />
+
+            {/* 🚀 KHU VỰC DANH SÁCH CÓ THANH CUỘN NEO-BRUTALISM */}
+            <div className="mt-4 neo-scrollbar overflow-y-auto max-h-[600px] lg:max-h-[calc(100vh-280px)] pr-4 pb-4">
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                   <Motion.div key="loader" exit={{ opacity: 0 }} className="space-y-4">
+                      {[1, 2, 3, 4].map(i => <div key={i} className="h-20 bg-white border-2 border-slate-300 rounded-2xl animate-pulse" />)}
+                   </Motion.div>
+                ) : filteredExams.length > 0 ? (
+                  <Motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+                    {filteredExams.map(exam => (
+                      <ExamListItem
+                        key={exam.id} exam={exam}
+                        isSelected={selectedExamId === exam.id}
+                        onSelect={() => {
+                          setSelectedExamId(exam.id);
+                          if (window.innerWidth < 1024) window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      />
+                    ))}
                   </Motion.div>
                 ) : (
-                  <div className="h-[250px] bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-3">
-                    <Target size={40} strokeWidth={2} />
-                    <p className="font-bold text-[15px]">Vui lòng chọn một đề thi bên trái</p>
-                  </div>
+                  <Motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <EmptyState onClear={() => { handleCategoryChange('all'); setSearchQuery(''); }} />
+                  </Motion.div>
                 )}
               </AnimatePresence>
-
-              <div>
-                <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-4">Lưu ý khi làm bài</h4>
-                <div className="flex flex-wrap gap-3">
-                  {['Yên tĩnh', 'Mạng ổn định', 'Tự lưu kết quả'].map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 px-4 py-2 bg-slate-50 border-2 border-slate-100 rounded-xl text-[13px] font-bold text-slate-600">
-                      <ShieldAlert size={14} className="text-[#58CC02]" strokeWidth={3} />
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  onClick={handleStartClick} disabled={isStarting || !selectedExam || isLoading}
-                  className="w-full py-5 bg-[#58CC02] border-[#46A302] border-b-[6px] rounded-2xl font-black text-[18px] uppercase tracking-widest text-white shadow-md hover:brightness-105 active:border-b-0 active:translate-y-[6px] transition-all disabled:opacity-50 disabled:bg-slate-200 disabled:border-slate-300 disabled:text-slate-400 flex items-center justify-center gap-2 outline-none"
-                >
-                  {isStarting ? <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={20} /> Đang chuẩn bị...</span> : <>Vào thi ngay <ChevronRight size={24} strokeWidth={4} /></>}
-                </button>
-              </div>
             </div>
-          </aside>
+
+          </div>
         </div>
       </main>
 
-      {/* ── MODAL CHỌN CHẾ ĐỘ THI ── */}
+      {/* MODAL */}
       <AnimatePresence>
-        {showModeModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-            <Motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              onClick={() => setShowModeModal(false)}
-            />
-            
-            <Motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-[32px] border-2 border-slate-200 border-b-[8px] p-6 sm:p-8 shadow-2xl z-10"
-            >
-              <button 
-                onClick={() => setShowModeModal(false)}
-                className="absolute top-4 right-4 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 active:scale-95 transition-all outline-none"
-              >
-                <X size={20} strokeWidth={3} />
-              </button>
-
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-[#EAF6FE] rounded-2xl flex items-center justify-center border-2 border-[#BAE3FB] border-b-[4px] shadow-sm mx-auto mb-4">
-                  <Target className="text-[#1CB0F6]" size={32} strokeWidth={2.5} />
-                </div>
-                <h2 className="text-[22px] font-black text-slate-800 leading-tight mb-2">Chọn chế độ làm bài</h2>
-                <p className="text-[14px] font-bold text-slate-500">Bạn muốn làm đề này theo hình thức nào?</p>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <button 
-                  onClick={() => confirmStart('full')}
-                  className="group flex items-center gap-4 p-4 bg-white border-2 border-slate-200 border-b-[6px] rounded-2xl hover:border-[#1CB0F6] hover:bg-[#EAF6FE] active:border-b-2 active:translate-y-[4px] transition-all text-left outline-none w-full"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-[#F0F9FF] flex items-center justify-center border-2 border-[#BAE3FB] group-hover:bg-[#1CB0F6] group-hover:border-[#1899D6] transition-colors shrink-0">
-                    <Timer size={24} className="text-[#1CB0F6] group-hover:text-white" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4 className="text-[16px] font-black text-slate-800 group-hover:text-[#1CB0F6]">Thi Full (Tính giờ)</h4>
-                    <p className="text-[13px] font-bold text-slate-500">Giả lập thi thật với thời gian {selectedExamData?.duration || 120} phút.</p>
-                  </div>
-                </button>
-
-                <button 
-                  onClick={() => confirmStart('practice')}
-                  className="group flex items-center gap-4 p-4 bg-white border-2 border-slate-200 border-b-[6px] rounded-2xl hover:border-[#58CC02] hover:bg-[#F0FAE8] active:border-b-2 active:translate-y-[4px] transition-all text-left outline-none w-full"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-[#F0FAE8] flex items-center justify-center border-2 border-[#bcf096] group-hover:bg-[#58CC02] group-hover:border-[#46A302] transition-colors shrink-0">
-                    <Zap size={24} className="text-[#58CC02] group-hover:text-white" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4 className="text-[16px] font-black text-slate-800 group-hover:text-[#58CC02]">Luyện tập tự do</h4>
-                    <p className="text-[13px] font-bold text-slate-500">Ôn luyện từng kỹ năng, không áp lực thời gian.</p>
-                  </div>
-                </button>
-              </div>
-            </Motion.div>
-          </div>
+        {showModeModal && selectedExamData && (
+          <ModeSelectionModal exam={selectedExamData} onConfirm={confirmStart} onClose={() => setShowModeModal(false)} />
         )}
       </AnimatePresence>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t-2 border-slate-200 p-4 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-        <button
-          onClick={handleStartClick} disabled={isStarting || !selectedExam || isLoading}
-          className="w-full py-4 bg-[#58CC02] border-[#46A302] border-b-[5px] rounded-xl font-black text-[15px] uppercase tracking-widest text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:bg-slate-200 disabled:border-slate-300 transition-all outline-none"
-        >
-          {isStarting ? 'Đang chuẩn bị...' : 'Vào thi ngay'}
-        </button>
-      </div>
     </div>
   );
 });
